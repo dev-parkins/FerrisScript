@@ -1,0 +1,3 @@
+fn _ready() {
+    print("Hello from RustyScript!");
+}

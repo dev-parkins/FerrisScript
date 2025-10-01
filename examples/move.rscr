@@ -1,0 +1,3 @@
+fn _process(delta: f32) {
+    self.position.x += 50.0 * delta;
+}

@@ -1,0 +1,12 @@
+let mut dir: f32 = 1.0;
+
+fn _process(delta: f32) {
+    self.position.x += dir * 100.0 * delta;
+
+    if self.position.x > 10.0 {
+        dir = -1.0;
+    }
+    if self.position.x < -10.0 {
+        dir = 1.0;
+    }
+}
