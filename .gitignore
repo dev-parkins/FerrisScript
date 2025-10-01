@@ -1,0 +1,38 @@
+# Rust/Cargo
+/target/
+**/*.rs.bk
+*.pdb
+Cargo.lock
+
+# Godot 4.x
+.godot/
+*.import
+*.translation
+.mono/
+data_*/
+mono_crash.*.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+.DS_Store
+*.log
+
+# Build artifacts
+*.dll
+*.so
+*.dylib
+*.a
+
+# Debug
+*.dSYM/
+
+# Documentation builds
+/target/doc/
