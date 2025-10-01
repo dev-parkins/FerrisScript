@@ -1,37 +1,36 @@
-use gdnative::prelude::*;
+use godot::prelude::*;
 use rustyscript_runtime::Env;
 
-#[derive(NativeClass)]
-#[inherit(Node)]
+struct RustyScriptExtension;
+
+#[gdextension]
+unsafe impl ExtensionLibrary for RustyScriptExtension {}
+
+#[derive(GodotClass)]
+#[class(base=Node)]
 pub struct RustyScriptNode {
+    base: Base<Node>,
     env: Env,
 }
 
-#[methods]
-impl RustyScriptNode {
-    fn new(_owner: &Node) -> Self {
+#[godot_api]
+impl INode for RustyScriptNode {
+    fn init(base: Base<Node>) -> Self {
         RustyScriptNode {
+            base,
             env: Env::new(),
         }
     }
 
-    #[export]
-    fn _ready(&mut self, _owner: &Node) {
+    fn ready(&mut self) {
         godot_print!("RustyScript _ready hook - placeholder");
         // TODO: Load and compile .rscr file in Phase 6
     }
 
-    #[export]
-    fn _process(&mut self, _owner: &Node, _delta: f64) {
+    fn process(&mut self, _delta: f64) {
         // TODO: Execute _process function from script in Phase 7
     }
 }
-
-fn init(handle: InitHandle) {
-    handle.add_class::<RustyScriptNode>();
-}
-
-godot_init!(init);
 
 #[cfg(test)]
 mod tests {

@@ -4,8 +4,8 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-# Note: gdnative is for Godot 3.x - this will be updated to gdext for Godot 4.x in next step
-gdnative = "0.11"
+# gdext is the Godot 4.x Rust binding (formerly gdextension)
+godot = { git = "https://github.com/godot-rust/gdext", branch = "master" }
 rustyscript_compiler = { path = "../compiler" }
 rustyscript_runtime = { path = "../runtime" }
 
