@@ -1,0 +1,14 @@
+// functions.rscr – test function definitions and return types
+
+fn add(a: i32, b: i32) -> i32 {
+    return a + b;
+}
+
+fn greet(name: String) {
+    print(name);
+}
+
+fn _ready() {
+    let sum: i32 = add(2, 3);
+    greet("RustyScript");
+}

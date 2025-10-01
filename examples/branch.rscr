@@ -1,0 +1,11 @@
+// branch.rscr – test if/else branching
+
+let x: i32 = 5;
+
+fn _ready() {
+    if x > 3 {
+        print("big");
+    } else {
+        print("small");
+    }
+}

@@ -1,0 +1,10 @@
+// loop.rscr – test while loops
+// Note: for loops not yet implemented
+
+let mut i: i32 = 0;
+
+fn _ready() {
+    while i < 3 {
+        i = i + 1;
+    }
+}

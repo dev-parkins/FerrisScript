@@ -1,0 +1,11 @@
+// match.rscr – test enums and pattern matching
+// Note: Enums and match expressions not yet implemented
+// This shows desired future functionality
+
+// This is for future implementation:
+// enum Dir { Left, Right, Up, Down }
+// let d: Dir = Dir.Left;
+// match d {
+//     Dir.Left => print("going left"),
+//     Dir.Right => print("going right"),
+// }

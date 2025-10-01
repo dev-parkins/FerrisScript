@@ -1,0 +1,9 @@
+// collections.rscr – test arrays and iteration
+// Note: Arrays and for loops not yet implemented
+// This shows desired future functionality
+
+// This is for future implementation:
+// let nums: Array<i32> = [1, 2, 3];
+// for n in nums {
+//     print("num");
+// }
