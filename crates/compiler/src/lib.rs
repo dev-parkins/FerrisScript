@@ -13,8 +13,6 @@ pub fn compile(source: &str) -> Result<ast::Program, String> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_compile_placeholder() {
         // Placeholder test - will be implemented as features are added

@@ -1,6 +1,6 @@
 use crate::ast::Program;
 
-pub fn check(program: &Program) -> Result<(), String> {
+pub fn check(_program: &Program) -> Result<(), String> {
     // Placeholder: type-check AST
     // TODO: Implement proper type checker in Phase 4
     Ok(())
@@ -13,7 +13,7 @@ mod tests {
 
     #[test]
     fn test_check_empty() {
-        let program = Program { functions: vec![] };
+        let program = Program::new();
         assert!(check(&program).is_ok());
     }
 }
