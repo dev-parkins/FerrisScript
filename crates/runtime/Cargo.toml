@@ -1,0 +1,7 @@
+[package]
+name = "rustyscript_runtime"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+rustyscript_compiler = { path = "../compiler" }

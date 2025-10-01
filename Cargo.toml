@@ -1,0 +1,12 @@
+[workspace]
+members = [
+    "crates/compiler",
+    "crates/runtime",
+    "crates/godot_bind",
+]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2021"
+authors = ["RustyScript Contributors"]
+license = "MIT"

@@ -1,0 +1,13 @@
+[package]
+name = "rustyscript_godot_bind"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+# Note: gdnative is for Godot 3.x - this will be updated to gdext for Godot 4.x in next step
+gdnative = "0.11"
+rustyscript_compiler = { path = "../compiler" }
+rustyscript_runtime = { path = "../runtime" }
+
+[lib]
+crate-type = ["cdylib"]
