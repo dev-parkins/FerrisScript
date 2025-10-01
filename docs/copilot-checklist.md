@@ -126,26 +126,40 @@
 
 ---
 
-### 🔍 Phase 4: Type Checker Stub (1-2 commits)
+### ✅ Phase 4: Type Checker Stub (1-2 commits)
 
-- [ ] **4.1** Implement basic type environment
-  - Commit: `feat(compiler): implement basic type checking infrastructure`
-  - Symbol table for variables and functions
-  - Built-in type definitions (i32, f32, bool, String)
-  - Godot type stubs (Vector2, Node, etc.)
+- [x] **4.1** Implement basic type environment
+  - Commit: `feat(compiler): implement type checker with basic type system` ✅
+  - Symbol table for variables and functions ✅
+  - Built-in type definitions (i32, f32, bool, String) ✅
+  - Godot type stubs (Vector2, Node) ✅
+  - Scoped symbol tables with push/pop ✅
+  - Function signature tracking ✅
 
-- [ ] **4.2** Implement expression type checking
-  - Commit: `feat(compiler): implement expression type checking`
-  - Type inference for literals
-  - Type checking for binary operations
-  - Type checking for function calls
-  - Basic error reporting for type mismatches
+- [x] **4.2** Implement expression type checking
+  - Commit: Combined into complete type checker implementation ✅
+  - Type inference for literals ✅
+  - Type checking for binary operations (arithmetic, comparison, logical) ✅
+  - Type checking for unary operations (-, !) ✅
+  - Type checking for function calls with arity checking ✅
+  - Type checking for field access (Vector2.x/y, Node.position) ✅
+  - Type coercion support (i32 to f32) ✅
+  - Basic error reporting for type mismatches with spans ✅
 
-- [ ] **4.3** Add type checker unit tests
-  - Commit: `test(compiler): add type checker unit tests`
-  - Test valid programs pass
-  - Test type mismatches are caught
-  - Test undefined variable detection
+- [x] **4.3** Add type checker unit tests
+  - Commit: Combined into complete type checker implementation ✅
+  - Test valid programs pass ✅
+  - Test type mismatches are caught ✅
+  - Test undefined variable detection ✅
+  - Test undefined function detection ✅
+  - Test binary operation type checking ✅
+  - Test unary operation type checking ✅
+  - Test function call type checking ✅
+  - Test field access type checking ✅
+  - Test `hello.rscr` type-checks correctly ✅
+  - Test `move.rscr` type-checks correctly ✅
+  - Test `bounce.rscr` type-checks correctly ✅
+  - All 61 tests passing (44 parser + 17 type checker) ✅
 
 ---
 
@@ -303,22 +317,40 @@
 
 ## 📝 Notes
 
-### Key Technical Decisions to Make:
-1. **Error Handling Strategy**: Return `Result` vs panic for different error types
-2. **Memory Model**: How to handle Godot object lifetimes in Rust
-3. **Type System Scope**: Which Godot types to support initially
-4. **String Interning**: Use string interning for identifiers?
-5. **Performance**: Interpreted vs bytecode compilation for 0.0.1
+### Key Technical Decisions Made:
+1. **Error Handling Strategy**: Using `Result<T, String>` for all compiler phases with span-based error messages ✅
+2. **Type System Scope**: Implemented i32, f32, bool, String + Vector2, Node for Godot integration ✅
+3. **Type Coercion**: Supporting i32 → f32 implicit coercion for ergonomics ✅
+4. **Operator Precedence**: Using Pratt parser for clean, extensible expression parsing ✅
+5. **Compound Assignment Desugaring**: `+=` and `-=` desugar to regular assignments at parse time ✅
+6. **Field Access**: Chained field access (e.g., `self.position.x`) properly parsed and type-checked ✅
+7. **Global Variables**: Supported at program level for persistent state (needed for bounce.rscr) ✅
+
+### Key Technical Decisions to Make (for future phases):
+1. **Memory Model**: How to handle Godot object lifetimes in Rust
+2. **String Interning**: Use string interring for identifiers?
+3. **Performance**: Interpreted vs bytecode compilation for 0.0.1
+4. **Runtime Value Representation**: How to bridge Rust values with Godot types efficiently
+
+### Implementation Learnings (Phases 1-4):
+- **Lexer**: Line comments support added early was helpful for testing
+- **Parser**: Pratt parser handles precedence elegantly, easy to extend
+- **AST**: Adding Span early made error reporting much better
+- **Type Checker**: Scoped symbol tables prevent accidental variable shadowing issues
+- **Testing**: Comprehensive unit tests (61 tests) gave confidence in each phase
+- **Example Files**: Testing with real examples (hello.rscr, move.rscr, bounce.rscr) validated design decisions
 
 ### Known Limitations for 0.0.1:
 - No struct definitions
 - No signals
 - No inheritance/composition
 - No generics
-- Limited Godot type support
+- Limited Godot type support (only Vector2, Node)
 - No hot reload
 - No debugging support
 - No editor integration
+- No method calls (only function calls)
+- No array/collection types
 
 ### Future Enhancements (post-0.0.1):
 - Language server protocol (LSP) for IDE support
