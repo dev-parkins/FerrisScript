@@ -215,7 +215,7 @@ After understanding this example:
 
 1. **[Move Example](../move/README.md)**: Learn about `_process()` and animation
 2. **[Bounce Example](../bounce/README.md)**: Explore conditionals and state
-3. **[LANGUAGE_REFERENCE.md](../../docs/LANGUAGE_REFERENCE.md)**: Complete syntax guide
+3. **[ARCHITECTURE.md](../../docs/ARCHITECTURE.md)**: System design and language details
 
 ## Questions?
 
