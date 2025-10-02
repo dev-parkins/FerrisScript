@@ -35,7 +35,7 @@ FerrisScript (named after [Ferris 🦀](https://rustacean.net/), the Rust mascot
 ```bash
 # Clone the repository
 git clone https://github.com/dev-parkins/FerrisScript.git
-cd ferrisscript
+cd FerrisScript
 
 # Build the project
 cargo build --workspace
