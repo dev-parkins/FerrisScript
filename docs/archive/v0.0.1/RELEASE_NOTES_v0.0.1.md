@@ -1,12 +1,6 @@
 # FerrisScript 🦀 Release Notes
 
-> **Note**: This file contains the release notes for the current/latest release.  
-> For historical release notes, see `docs/archive/vX.Y.Z/RELEASE_NOTES_vX.Y.Z.md`  
-> For a complete changelog across all versions, see [CHANGELOG.md](CHANGELOG.md)
-
----
-
-## v0.0.1 - Initial Release (October 2, 2025)
+## v0.0.1 - Initial Release (January 2025)
 
 **Status**: ✅ Complete  
 **Tag**: `v0.0.1`  
