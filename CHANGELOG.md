@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `.github/ISSUE_TEMPLATE/bug_report.md` - Bug report template with environment details
   - `.github/ISSUE_TEMPLATE/feature_request.md` - Feature request template with use cases
   - `.github/ISSUE_TEMPLATE/documentation.md` - Documentation improvement template
+  - `.github/ISSUE_TEMPLATE/config.yml` - Issue template configuration with links to Discussions and guides
+  - `.github/PULL_REQUEST_TEMPLATE.md` - PR template with checklist and type indicators
 - **FAQ and Troubleshooting (Phase 3)**
   - `docs/FAQ.md` - Comprehensive FAQ covering 31 questions across installation, language features, Godot integration, performance, and project roadmap
   - `docs/TROUBLESHOOTING.md` - Platform-specific troubleshooting for Windows (MSVC), macOS (Xcode), Linux (libclang), common build errors, Godot integration, and runtime issues
@@ -37,8 +39,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `.github/ISSUE_TEMPLATE/config.yml` - Updated Discussions link description to clarify available categories (Q&A, Ideas, Show and Tell)
-  - `.github/ISSUE_TEMPLATE/config.yml` - Issue template configuration with links to Discussions and guides
-  - `.github/PULL_REQUEST_TEMPLATE.md` - PR template with checklist and type indicators
 
 ### Fixed
 - Installation instructions: corrected `cd` command to match actual repository directory name (`FerrisScript` instead of `ferrisscript`) for case-sensitive file systems (Linux/macOS)
