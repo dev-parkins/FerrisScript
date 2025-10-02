@@ -13,6 +13,7 @@ fn godot_print_builtin(args: &[Value]) -> Result<Value, String> {
             Value::String(s) => s.clone(),
             Value::Vector2 { x, y } => format!("Vector2({}, {})", x, y),
             Value::Nil => "nil".to_string(),
+            Value::SelfObject => "self".to_string(),
         })
         .collect::<Vec<_>>()
         .join(" ");
@@ -27,9 +28,9 @@ struct RustyScriptExtension;
 unsafe impl ExtensionLibrary for RustyScriptExtension {}
 
 #[derive(GodotClass)]
-#[class(base=Node)]
+#[class(base=Node2D)]  // Changed from Node to Node2D for position property
 pub struct RustyScriptNode {
-    base: Base<Node>,
+    base: Base<Node2D>,
     
     /// Path to the .rscr script file (e.g., "res://scripts/hello.rscr")
     #[export(file = "*.rscr")]
@@ -42,8 +43,8 @@ pub struct RustyScriptNode {
 }
 
 #[godot_api]
-impl INode for RustyScriptNode {
-    fn init(base: Base<Node>) -> Self {
+impl INode2D for RustyScriptNode {
+    fn init(base: Base<Node2D>) -> Self {
         RustyScriptNode {
             base,
             script_path: GString::new(),
@@ -70,7 +71,7 @@ impl INode for RustyScriptNode {
         if self.script_loaded {
             // Convert delta to Float (f32 for RustyScript)
             let delta_value = Value::Float(delta as f32);
-            self.call_script_function("_process", &[delta_value]);
+            self.call_script_function_with_self("_process", &[delta_value]);
         }
     }
 }
@@ -121,7 +122,37 @@ impl RustyScriptNode {
         godot_print!("Successfully loaded RustyScript: {}", path);
     }
     
-    /// Call a function in the loaded script
+    /// Call a function in the loaded script with self binding
+    fn call_script_function_with_self(&mut self, function_name: &str, args: &[Value]) -> Option<Value> {
+        if !self.script_loaded {
+            godot_warn!("Cannot call function '{}': no script loaded", function_name);
+            return None;
+        }
+        
+        let env = self.env.as_mut()?;
+        
+        // Set up 'self' variable in environment
+        env.push_scope();
+        env.set("self".to_string(), Value::SelfObject);
+        
+        //NOTE: Property getter/setter callbacks not yet fully implemented
+        // For Phase 7 MVP, self exists but property access needs more work
+        // This will be completed in a follow-up commit
+        
+        let result = match call_function(function_name, args, env) {
+            Ok(value) => Some(value),
+            Err(e) => {
+                godot_error!("Error calling function '{}': {}", function_name, e);
+                None
+            }
+        };
+        
+        env.pop_scope();
+        
+        result
+    }
+    
+    /// Call a function in the loaded script (without self binding)
     fn call_script_function(&mut self, function_name: &str, args: &[Value]) -> Option<Value> {
         if !self.script_loaded {
             godot_warn!("Cannot call function '{}': no script loaded", function_name);

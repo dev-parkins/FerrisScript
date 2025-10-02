@@ -1,10 +1,17 @@
 // Test script for _process callback
-// Prints delta time every frame
+// Prints a message every 60 frames (approximately 1 second at 60 FPS)
+
+let mut frame_count: int = 0;
 
 fn _ready() {
-    print("Process test started!");
+    print("Process test started! Counting frames...");
 }
 
 fn _process(delta: f32) {
-    print("Delta:", delta);
+    frame_count = frame_count + 1;
+    
+    if frame_count >= 60 {
+        print("60 frames passed! Delta was:", delta);
+        frame_count = 0;
+    }
 }

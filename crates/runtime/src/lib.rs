@@ -9,6 +9,8 @@ pub enum Value {
     String(String),
     Vector2 { x: f32, y: f32 },
     Nil,
+    /// Special value representing the Godot node (self)
+    SelfObject,
 }
 
 impl Value {
@@ -33,10 +35,19 @@ impl Value {
     }
 }
 
+/// Callback for getting a property from the Godot node
+pub type PropertyGetter = fn(&str) -> Result<Value, String>;
+/// Callback for setting a property on the Godot node
+pub type PropertySetter = fn(&str, Value) -> Result<(), String>;
+
 pub struct Env {
     scopes: Vec<HashMap<String, Value>>,
     functions: HashMap<String, ast::Function>,
     builtin_fns: HashMap<String, fn(&[Value]) -> Result<Value, String>>,
+    /// Callback to get properties from the Godot node (when accessing self.property)
+    property_getter: Option<PropertyGetter>,
+    /// Callback to set properties on the Godot node (when assigning to self.property)
+    property_setter: Option<PropertySetter>,
 }
 
 impl Env {
@@ -45,12 +56,24 @@ impl Env {
             scopes: vec![HashMap::new()],
             functions: HashMap::new(),
             builtin_fns: HashMap::new(),
+            property_getter: None,
+            property_setter: None,
         };
         
         // Register built-in functions
         env.builtin_fns.insert("print".to_string(), builtin_print);
         
         env
+    }
+
+    /// Set the property getter callback for self binding
+    pub fn set_property_getter(&mut self, getter: PropertyGetter) {
+        self.property_getter = Some(getter);
+    }
+
+    /// Set the property setter callback for self binding
+    pub fn set_property_setter(&mut self, setter: PropertySetter) {
+        self.property_setter = Some(setter);
     }
 
     pub fn push_scope(&mut self) {
@@ -123,6 +146,7 @@ fn builtin_print(args: &[Value]) -> Result<Value, String> {
             Value::String(s) => s.clone(),
             Value::Vector2 { x, y } => format!("Vector2({}, {})", x, y),
             Value::Nil => "nil".to_string(),
+            Value::SelfObject => "self".to_string(),
         })
         .collect::<Vec<_>>()
         .join(" ");
@@ -239,6 +263,19 @@ fn execute_stmt(stmt: &ast::Stmt, env: &mut Env) -> Result<FlowControl, String> 
 fn assign_field(object: &ast::Expr, field: &str, value: Value, env: &mut Env) -> Result<(), String> {
     match object {
         ast::Expr::Variable(name, _) => {
+            // Check if this is 'self'
+            if let Some(var) = env.get(name) {
+                if matches!(var, Value::SelfObject) {
+                    // Assigning to self.property - use property setter callback
+                    if let Some(setter) = env.property_setter {
+                        return setter(field, value);
+                    } else {
+                        return Err("Cannot set self properties: no property setter registered".to_string());
+                    }
+                }
+            }
+            
+            // Regular variable field assignment
             if let Some(var) = env.get_mut(name) {
                 match var {
                     Value::Vector2 { x, y } => {
@@ -271,22 +308,54 @@ fn assign_field(object: &ast::Expr, field: &str, value: Value, env: &mut Env) ->
         ast::Expr::FieldAccess(object, parent_field, _) => {
             // Handle nested field access (e.g., self.position.x)
             if let ast::Expr::Variable(name, _) = &**object {
+                // Check if this is self.property.field
+                if let Some(var) = env.get(name) {
+                    if matches!(var, Value::SelfObject) {
+                        // Get the property from Godot (e.g., position)
+                        if let Some(getter) = env.property_getter {
+                            let mut prop_value = getter(parent_field)?;
+                            
+                            // Modify the field (e.g., x or y)
+                            match &mut prop_value {
+                                Value::Vector2 { x, y } => {
+                                    match field {
+                                        "x" => {
+                                            if let Some(f) = value.to_float() {
+                                                *x = f;
+                                            } else {
+                                                return Err(format!("Cannot assign {:?} to Vector2.x", value));
+                                            }
+                                        }
+                                        "y" => {
+                                            if let Some(f) = value.to_float() {
+                                                *y = f;
+                                            } else {
+                                                return Err(format!("Cannot assign {:?} to Vector2.y", value));
+                                            }
+                                        }
+                                        _ => return Err(format!("Vector2 has no field '{}'", field)),
+                                    }
+                                }
+                                _ => return Err(format!("Property '{}' is not a Vector2", parent_field)),
+                            }
+                            
+                            // Set the property back to Godot
+                            if let Some(setter) = env.property_setter {
+                                return setter(parent_field, prop_value);
+                            } else {
+                                return Err("Cannot set self properties: no property setter registered".to_string());
+                            }
+                        } else {
+                            return Err("Cannot get self properties: no property getter registered".to_string());
+                        }
+                    }
+                }
+                
+                // Regular variable nested field assignment (not implemented yet)
                 if let Some(var) = env.get_mut(name) {
                     match var {
                         Value::Vector2 { .. } => {
-                            // Access nested field
-                            if parent_field == "position" || parent_field == "velocity" {
-                                // For now, treat these as Vector2 fields
-                                match field {
-                                    "x" | "y" => {
-                                        if let Some(_f) = value.to_float() {
-                                            // Simplified: in real impl, would need nested structure
-                                            return Err("Nested field assignment not fully implemented".to_string());
-                                        }
-                                    }
-                                    _ => {}
-                                }
-                            }
+                            return Err("Nested field assignment on regular variables not yet implemented".to_string());
                         }
                         _ => {}
                     }
@@ -513,6 +582,14 @@ fn evaluate_expr(expr: &ast::Expr, env: &mut Env) -> Result<Value, String> {
                         "x" => Ok(Value::Float(x)),
                         "y" => Ok(Value::Float(y)),
                         _ => Err(format!("Vector2 has no field '{}'", field)),
+                    }
+                }
+                Value::SelfObject => {
+                    // Use property getter callback to get field from Godot node
+                    if let Some(getter) = env.property_getter {
+                        getter(field)
+                    } else {
+                        Err("Cannot access self properties: no property getter registered".to_string())
                     }
                 }
                 _ => Err(format!("Cannot access field '{}' on {:?}", field, obj_val)),
