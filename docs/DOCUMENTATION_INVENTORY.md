@@ -31,6 +31,7 @@
 ### Archived Documentation (5 files)
 
 Located in `docs/archive/v0.0.1/`:
+
 - `v0.0.1-checklist.md` - Original phase checklist
 - `PHASE6_SUMMARY.md` - Phase 6 summary
 - `PHASE6_TESTING.md` - Phase 6 tests
@@ -92,6 +93,7 @@ Located in `docs/archive/v0.0.1/`:
 ## 📋 Current Feature Set (v0.0.1)
 
 ### Language Features ✅
+
 - Variables (let/mut)
 - Basic types (i32, f32, bool, String)
 - Operators (arithmetic, comparison, logical)
@@ -101,21 +103,25 @@ Located in `docs/archive/v0.0.1/`:
 - Field access (chained)
 
 ### Godot Integration ✅
+
 - GDExtension support
 - FerrisScriptNode
 - Script loading
-- _ready() and _process()
+- _ready() and_process()
 - self binding
 - print() builtin
 
 ### Developer Tools ✅
+
 - 96 automated tests
 - CI/CD (GitHub Actions)
 - Cross-platform builds
 - Example scripts
 
 ### Known Limitations ⚠️
+
 From RELEASE_NOTES.md roadmap:
+
 - No structs/enums
 - No arrays/dictionaries
 - No for loops
@@ -131,18 +137,21 @@ From RELEASE_NOTES.md roadmap:
 ## 🎯 Documentation Priority Matrix
 
 ### High Priority (v0.0.2 - Patch)
+
 1. **CONTRIBUTING.md** - Enable community contributions
 2. **Troubleshooting Guide** - Help users solve common issues
 3. **FAQ** - Answer common questions
 4. **Consolidate DEVELOPMENT.md** - Remove duplicate
 
 ### Medium Priority (v0.1.0 - Minor)
+
 1. **Tutorial Series** - Step-by-step learning path
 2. **API Reference** - Auto-generated from code
 3. **Migration Guide Template** - For future versions
 4. **Performance Guide** - Optimization tips
 
 ### Low Priority (Future)
+
 1. **Video tutorials**
 2. **Interactive playground**
 3. **Community showcase**
@@ -153,18 +162,21 @@ From RELEASE_NOTES.md roadmap:
 ## 🛠️ Technical Documentation Needs
 
 ### Code Documentation
+
 - [ ] Rustdoc comments for all public APIs
 - [ ] Examples in doc comments
 - [ ] Module-level documentation
 - [ ] Architecture decision records (ADRs)
 
 ### Testing Documentation
+
 - [ ] Test coverage report
 - [ ] Benchmark results
 - [ ] Performance comparison vs GDScript
 - [ ] Memory usage analysis
 
 ### Integration Documentation
+
 - [ ] Godot plugin installation guide
 - [ ] Common integration patterns
 - [ ] Best practices for game dev
@@ -175,6 +187,7 @@ From RELEASE_NOTES.md roadmap:
 ## 📈 Metrics & Tracking
 
 ### Current Stats (v0.0.1)
+
 - **Total Tests**: 96 (100% passing)
 - **Documentation Files**: 15 (including archived)
 - **Example Scripts**: 11
@@ -183,6 +196,7 @@ From RELEASE_NOTES.md roadmap:
 - **Test Coverage**: Unknown (need to add coverage reporting)
 
 ### Quality Metrics to Add
+
 - [ ] Documentation coverage (% of public APIs documented)
 - [ ] Code coverage (% of code tested)
 - [ ] Performance benchmarks
@@ -194,6 +208,7 @@ From RELEASE_NOTES.md roadmap:
 ## 🔄 Next Steps
 
 ### Immediate (v0.0.2)
+
 1. Create CONTRIBUTING.md
 2. Add issue/PR templates
 3. Create FAQ.md
@@ -201,12 +216,14 @@ From RELEASE_NOTES.md roadmap:
 5. Consolidate DEVELOPMENT.md duplicates
 
 ### Short-term (v0.1.0)
+
 1. Generate API docs with rustdoc
 2. Create tutorial series
 3. Add performance benchmarks
 4. Create migration guide template
 
 ### Long-term (v0.2.0+)
+
 1. Build documentation website
 2. Add interactive examples
 3. Create video tutorials
@@ -217,6 +234,7 @@ From RELEASE_NOTES.md roadmap:
 ## 📝 Documentation Standards
 
 ### Style Guide (Proposed for v0.0.2)
+
 - Use Markdown for all documentation
 - Follow [GitHub Flavored Markdown](https://github.github.com/gfm/)
 - Include emojis for visual scanning
@@ -226,12 +244,14 @@ From RELEASE_NOTES.md roadmap:
 - Include table of contents for long docs
 
 ### File Naming
+
 - Use UPPERCASE for root-level docs (README.md, CONTRIBUTING.md)
 - Use lowercase for subdirectory docs (api.md, tutorial.md)
 - Use hyphens for multi-word names (release-notes.md)
 - Version-specific docs in `docs/archive/vX.Y.Z/`
 
 ### Content Guidelines
+
 - Start with purpose statement
 - Include last updated date
 - Use clear section headings
@@ -244,6 +264,7 @@ From RELEASE_NOTES.md roadmap:
 ## 🎓 Learning Resources
 
 ### For Users
+
 - [ ] Getting Started Guide
 - [ ] Language Reference
 - [ ] Godot Integration Guide
@@ -251,6 +272,7 @@ From RELEASE_NOTES.md roadmap:
 - [ ] Video Tutorials
 
 ### For Contributors
+
 - [ ] Architecture Overview ✅
 - [ ] Development Workflow ✅
 - [ ] Testing Guidelines
@@ -258,6 +280,7 @@ From RELEASE_NOTES.md roadmap:
 - [ ] Release Process ✅
 
 ### For Maintainers
+
 - [ ] Release Checklist ✅
 - [ ] CI/CD Documentation
 - [ ] Community Management

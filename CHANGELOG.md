@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Comprehensive version planning documentation
   - `docs/VERSION_PLANNING.md` - Version strategy overview
   - `docs/v0.0.2-CHECKLIST.md` - Patch release planning
@@ -49,9 +50,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `README.md` - Added dedicated Examples section with links to detailed example tutorials
 
 ### Changed
+
 - `.github/ISSUE_TEMPLATE/config.yml` - Updated Discussions link description to clarify available categories (Q&A, Ideas, Show and Tell)
 
 ### Fixed
+
 - Installation instructions: corrected `cd` command to match actual repository directory name (`FerrisScript` instead of `ferrisscript`) for case-sensitive file systems (Linux/macOS)
 - README.md: removed 255 lines of corrupted duplicate source code that was appended after closing message
 
@@ -64,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Language Features
+
 - Variables with `let` (immutable) and `let mut` (mutable)
 - Basic types: `i32`, `f32`, `bool`, `String`, `Vector2`, `Node`
 - Automatic type coercion (`i32` → `f32`)
@@ -78,6 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Chained field access (e.g., `self.position.x`)
 
 #### Godot Integration
+
 - Full Godot 4.x integration via GDExtension
 - `FerrisScriptNode` custom node type (extends `Node2D`)
 - Script loading from `.ferris` files
@@ -87,6 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Compilation and runtime error reporting to Godot console
 
 #### Developer Tools
+
 - 96 automated tests (69 compiler, 26 runtime, 1 godot_bind)
 - 11 example scripts demonstrating all features
 - Complete documentation suite
@@ -103,11 +109,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License
 
 #### Branding & Assets
+
 - Official FerrisScript logo (crab with scroll)
 - Brand guidelines and color palette
 - GitHub social preview image
 
 ### Documentation
+
 - Project README with features, examples, and installation
 - Architecture documentation explaining design decisions
 - Development guide for contributors
@@ -116,11 +124,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Godot integration test project with README
 
 ### Fixed
+
 - All clippy warnings resolved
 - Error messages improved for better debugging
 - GitHub Actions upgraded to latest versions
 
 ### Performance
+
 - Interpreted execution (baseline for future optimizations)
 - All tests complete in < 3 seconds
 
@@ -135,6 +145,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Legend
 
 Types of changes:
+
 - **Added** - New features
 - **Changed** - Changes to existing functionality
 - **Deprecated** - Soon-to-be removed features

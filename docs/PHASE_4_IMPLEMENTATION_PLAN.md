@@ -12,6 +12,7 @@
 Phase 4 shifts from user-facing documentation (Phase 2-3) to developer-facing advanced topics and tooling automation. This phase adds technical depth for contributors and automates quality checks.
 
 **Key Objectives:**
+
 1. Add architecture and design decision documentation
 2. Expand example projects with detailed explanations
 3. Implement documentation quality automation (linting, link checking)
@@ -25,12 +26,14 @@ Phase 4 shifts from user-facing documentation (Phase 2-3) to developer-facing ad
 ### Primary Deliverables (Must-Have)
 
 #### 1. SECURITY.md
+
 - **Purpose:** Vulnerability reporting policy
 - **Location:** Root directory (`/SECURITY.md`)
 - **Time Estimate:** 1 hour
 - **Priority:** HIGH (GitHub community standard)
 
 **Content Requirements:**
+
 - Supported versions table (currently v0.0.1)
 - How to report vulnerabilities (email: dev-parkins@users.noreply.github.com or private Security Advisory)
 - Expected response time (48 hours)
@@ -38,6 +41,7 @@ Phase 4 shifts from user-facing documentation (Phase 2-3) to developer-facing ad
 - Public disclosure timeline
 
 **Template:**
+
 ```markdown
 # Security Policy
 
@@ -82,12 +86,14 @@ Thank you for keeping FerrisScript secure! 🔒
 ---
 
 #### 2. Documentation Linting CI
+
 - **Purpose:** Automated quality checks for documentation
 - **Location:** `.github/workflows/docs-lint.yml`
 - **Time Estimate:** 1-1.5 hours
 - **Priority:** HIGH (prevents broken links, enforces consistency)
 
 **Workflow Content:**
+
 ```yaml
 name: Documentation Linting
 
@@ -129,6 +135,7 @@ jobs:
 **Configuration Files:**
 
 `.markdownlint.json`:
+
 ```json
 {
   "default": true,
@@ -139,6 +146,7 @@ jobs:
 ```
 
 `.markdown-link-check.json`:
+
 ```json
 {
   "ignorePatterns": [
@@ -155,6 +163,7 @@ jobs:
 ---
 
 #### 3. ARCHITECTURE.md (Technical Design Documentation)
+
 - **Purpose:** Explain system design for contributors
 - **Location:** `/docs/ARCHITECTURE.md`
 - **Time Estimate:** 2-3 hours
@@ -197,12 +206,14 @@ jobs:
 ---
 
 #### 4. Expand examples/ with Detailed READMEs
+
 - **Purpose:** Teach language features through practical examples
 - **Location:** `examples/` directory
 - **Time Estimate:** 1.5-2 hours
 - **Priority:** MEDIUM (helps new users and contributors)
 
 **Current Examples:**
+
 - `hello.ferris` - Basic print statement
 - `move.ferris` - Simple node movement
 - `bounce.ferris` - Bounce physics
@@ -210,6 +221,7 @@ jobs:
 **Enhancements:**
 
 Each example gets a companion README explaining:
+
 - What the example demonstrates
 - Line-by-line explanation
 - Common gotchas
@@ -217,6 +229,7 @@ Each example gets a companion README explaining:
 - Variations to try
 
 **Example: `examples/move/README.md`**
+
 ```markdown
 # move.ferris - Node Movement Example
 
@@ -248,12 +261,14 @@ fn _process(delta: f32) {
 ## Running This Example
 
 ### Option 1: Cargo (No Godot)
+
 ```bash
 cargo run --example move
 # Prints compilation output and runtime trace
 ```
 
 ### Option 2: In Godot
+
 1. Create a Node2D in Godot scene
 2. Attach FerrisScript custom script
 3. Set script content to `move.ferris`
@@ -271,6 +286,7 @@ cargo run --example move
 - Move diagonally: Modify both x and y
 - Add velocity variable: Make speed configurable
 - Add boundary checking: Stop at screen edge
+
 ```
 
 ---

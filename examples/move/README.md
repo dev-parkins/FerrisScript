@@ -6,6 +6,7 @@
 ## What This Demonstrates
 
 This example shows a basic animation in Godot. It demonstrates:
+
 - Using the `_process(delta)` lifecycle hook
 - Accessing node properties (`self.position.x`)
 - Performing arithmetic with delta time
@@ -33,6 +34,7 @@ fn _process(delta: f32) {
   - Typically `delta` ≈ 0.016 seconds (1/60 for 60 FPS)
 
 **Why `_process` instead of `_physics_process`?**
+
 - `_process(delta)`: Runs every visual frame (60 FPS or monitor refresh rate)
 - `_physics_process(delta)`: Runs every physics frame (fixed 60 FPS by default)
 
@@ -73,6 +75,7 @@ This is the core of the animation. Let's break it down into parts:
 - Result: **pixels to move this frame**
 
 **Example calculation:**
+
 - Speed: 50 pixels/second
 - Delta: 0.016 seconds (one frame at 60 FPS)
 - Movement: 50 × 0.016 = **0.8 pixels per frame**
@@ -80,10 +83,12 @@ This is the core of the animation. Let's break it down into parts:
 
 **Why multiply by delta?**  
 Without `delta`, movement would be **framerate-dependent**:
+
 - 60 FPS: moves 50 pixels per frame = 3000 pixels/second
 - 30 FPS: moves 50 pixels per frame = 1500 pixels/second
 
 With `delta`, movement is **framerate-independent**:
+
 - 60 FPS: moves 0.8 pixels per frame = 50 pixels/second
 - 30 FPS: moves 1.6 pixels per frame = 50 pixels/second
 
@@ -133,6 +138,7 @@ After ~20 seconds, the node will have moved ~1000 pixels off-screen (typical scr
 **Problem**: Movement doesn't feel right.
 
 **Solution**: Adjust the speed constant:
+
 ```ferris
 // Slower (10 pixels/second)
 self.position.x += 10.0 * delta;
@@ -148,6 +154,7 @@ Try values between `10.0` and `500.0` to find what feels good.
 **Problem**: No visible movement.
 
 **Solutions**:
+
 - Ensure the node is a `Node2D` or subclass (has a `position` property)
 - Check that the node is **visible** (not hidden or off-screen)
 - Add a `print(self.position.x)` to verify position is changing
@@ -158,11 +165,13 @@ Try values between `10.0` and `500.0` to find what feels good.
 **Problem**: Node moves up/down instead of left/right.
 
 **Solution**: You modified `y` instead of `x`. Use:
+
 ```ferris
 self.position.y += 50.0 * delta;  // Vertical (down is positive)
 ```
 
 **Godot's coordinate system:**
+
 - `+X`: Right
 - `-X`: Left
 - `+Y`: Down (not up!)
@@ -173,6 +182,7 @@ self.position.y += 50.0 * delta;  // Vertical (down is positive)
 **Problem**: Animation isn't smooth.
 
 **Solutions**:
+
 - Check framerate (Godot shows FPS in the top-right during play)
 - Ensure V-Sync is enabled (Project Settings → Display → Window → V-Sync Mode → Enabled)
 - Use `_process` (not `_physics_process`) for visual animations
@@ -260,13 +270,15 @@ This prints the X position approximately once per second.
 
 ## Physics vs Visual Movement
 
-### Use `_process` when:
+### Use `_process` when
+
 - Animating sprites (position, rotation, scale)
 - UI animations (fading, sliding)
 - Non-gameplay effects (particles, shaders)
 - Following the mouse cursor
 
-### Use `_physics_process` when:
+### Use `_physics_process` when
+
 - Applying forces/velocity
 - Handling collisions
 - Character controllers
@@ -274,12 +286,14 @@ This prints the X position approximately once per second.
 - Anything that interacts with physics
 
 This example uses `_process` because:
+
 - No physics interactions (no collisions, no velocity)
 - Simple visual movement (like a scrolling background)
 
 ## Performance Considerations
 
 This example is **very efficient**:
+
 - Only two arithmetic operations per frame (`*` and `+=`)
 - No memory allocation
 - No function calls (besides `_process` itself)
@@ -288,6 +302,7 @@ Even with 1000+ nodes running this script, performance would be excellent.
 
 **Comparison to GDScript:**  
 This FerrisScript version is roughly **equivalent** in performance to:
+
 ```gdscript
 func _process(delta):
     position.x += 50.0 * delta

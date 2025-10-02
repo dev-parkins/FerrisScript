@@ -231,6 +231,7 @@ pub fn compile(source: &str) -> Result<Program, String> {
 ### What is a Rust Edition?
 
 Rust uses an **edition system** (2015, 2018, 2021) to introduce backwards-incompatible changes without breaking existing code. Think of it like:
+
 - **Python 2 vs Python 3** (but less painful)
 - **C++11, C++14, C++17** standards
 
@@ -242,6 +243,7 @@ edition = "2021"  # In all Cargo.toml files
 ```
 
 **Benefits of 2021 Edition**:
+
 - **Disjoint capture in closures**: Closures only borrow fields they use
 - **Panic message consistency**: Better error messages
 - **IntoIterator for arrays**: Can iterate `[1, 2, 3]` directly
@@ -351,6 +353,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 
 **Types**:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation only
@@ -361,6 +364,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 - `ci`: CI/CD changes
 
 **Examples**:
+
 ```bash
 feat(compiler): add array type support
 fix(runtime): handle division by zero
@@ -372,6 +376,7 @@ chore: update gdext to 0.2.0
 ### Code Review Checklist
 
 Before submitting a PR:
+
 - [ ] All tests pass (`cargo test --workspace`)
 - [ ] Code is formatted (`cargo fmt --all`)
 - [ ] No clippy warnings (`cargo clippy --workspace`)
@@ -384,21 +389,25 @@ Before submitting a PR:
 ## 📚 Resources
 
 ### FerrisScript Docs
+
 - [ARCHITECTURE.md](../ARCHITECTURE.md) - Technical design and decisions
 - [RELEASE_NOTES.md](../RELEASE_NOTES.md) - Release information
 - [docs/archive/](archive/) - Version-specific development docs
 
 ### Rust Learning
+
 - [The Rust Book](https://doc.rust-lang.org/book/)
 - [Rust by Example](https://doc.rust-lang.org/rust-by-example/)
 - [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/)
 
 ### Compiler/Interpreter Resources
+
 - [Crafting Interpreters](https://craftinginterpreters.com/) - Excellent book
 - [Pratt Parsing](https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html)
 - [Rust Compiler Development Guide](https://rustc-dev-guide.rust-lang.org/)
 
 ### Godot + Rust
+
 - [Godot 4.x Documentation](https://docs.godotengine.org/en/stable/)
 - [gdext Book](https://godot-rust.github.io/book/)
 - [GDExtension Documentation](https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/)
@@ -410,4 +419,3 @@ Before submitting a PR:
 FerrisScript is licensed under the [MIT License](../LICENSE)
 
 MIT (to be added)
-

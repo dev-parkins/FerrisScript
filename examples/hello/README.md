@@ -6,6 +6,7 @@
 ## What This Demonstrates
 
 This is the simplest FerrisScript example. It demonstrates:
+
 - Defining a function
 - Using the `_ready()` lifecycle hook
 - Calling the `print()` builtin function
@@ -32,6 +33,7 @@ fn _ready() {
 
 **Why `_ready` is special:**
 Godot has a lifecycle system where nodes receive callbacks at specific times:
+
 - `_ready()`: Called when node is added to scene (initialization)
 - `_process(delta)`: Called every frame (animation/movement)
 - `_physics_process(delta)`: Called every physics frame
@@ -45,6 +47,7 @@ FerrisScript recognizes these function names and connects them to Godot automati
 - `;`: Semicolon ends the statement
 
 **Where does the output go?**
+
 - In Godot editor: **Output** panel at the bottom (View → Output)
 - In exported game: Console output (varies by platform)
 
@@ -69,12 +72,14 @@ cargo test --package ferrisscript_compiler
 **Note**: This verifies the script compiles correctly but **does not execute** `print()` (requires Godot runtime).
 
 **Why not `cargo run --example hello`?** The `.ferris` files are scripts for the FerrisScript language, not Rust examples. To run them, you need either:
+
 - The Godot runtime (Method 2 below), or
 - A standalone FerrisScript CLI (planned for v0.1.0)
 
 ### Method 2: In Godot (Recommended)
 
 1. **Build the GDExtension**:
+
    ```powershell
    cargo build --release
    ```
@@ -115,6 +120,7 @@ This message will appear **once** when the scene starts (because `_ready()` is c
 **Problem**: You don't see any output.
 
 **Solutions**:
+
 - Check the **Output** tab in Godot (View → Output if hidden)
 - Verify the `FerrisScriptNode` has the correct `script_path`
 - Ensure the `.ferris` file path is relative to `res://` (Godot's resource root)
@@ -125,6 +131,7 @@ This message will appear **once** when the scene starts (because `_ready()` is c
 **Problem**: Godot can't find the `.ferris` file.
 
 **Solutions**:
+
 - Double-check the file path in the Inspector
 - Use Godot's file browser (📁 button next to Script Path) to select the file
 - Ensure the file is in your Godot project directory (under `res://`)
@@ -134,6 +141,7 @@ This message will appear **once** when the scene starts (because `_ready()` is c
 **Problem**: FerrisScript doesn't recognize `print`.
 
 **Solutions**:
+
 - This should not happen (bug in runtime)
 - Verify you're using the latest build: `cargo build --release`
 - Report an issue on GitHub if this persists
@@ -143,6 +151,7 @@ This message will appear **once** when the scene starts (because `_ready()` is c
 **Problem**: Godot doesn't recognize `FerrisScriptNode`.
 
 **Solutions**:
+
 - Ensure you have a `.gdextension` file in your Godot project
 - Check the file paths in the `.gdextension` file match your compiled library
 - Restart Godot after building the extension

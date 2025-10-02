@@ -24,6 +24,7 @@ Example: v0.1.2
 ### Pre-1.0 Versioning
 
 During v0.X.Y (pre-stable):
+
 - **v0.0.X**: Initial development, frequent breaking changes allowed
 - **v0.X.0**: Feature releases, breaking changes minimized
 - **v1.0.0**: First stable release, strict SemVer from here
@@ -39,18 +40,21 @@ During v0.X.Y (pre-stable):
 **Focus**: Proof of concept
 
 **Highlights**:
+
 - Core language features (variables, functions, control flow)
 - Basic Godot integration (GDExtension, callbacks)
 - 96 tests, full CI/CD
 - Complete documentation
 
 **Deliverables**:
+
 - [x] Working compiler, runtime, Godot binding
 - [x] README, ARCHITECTURE, RELEASE_NOTES
 - [x] Example scripts and test project
 - [x] GitHub release with binaries
 
 **Stats**:
+
 - Tests: 96
 - Example scripts: 11
 - Documentation files: 15
@@ -65,6 +69,7 @@ During v0.X.Y (pre-stable):
 **Focus**: Bug fixes, documentation, community infrastructure
 
 **Goals**:
+
 1. Fix bugs discovered in v0.0.1
 2. Add community contribution infrastructure
 3. Improve documentation and error messages
@@ -72,6 +77,7 @@ During v0.X.Y (pre-stable):
 5. **NO new language features**
 
 **Key Deliverables**:
+
 - [ ] CONTRIBUTING.md, CODE_OF_CONDUCT.md
 - [ ] Issue/PR templates
 - [ ] FAQ and troubleshooting guides
@@ -81,6 +87,7 @@ During v0.X.Y (pre-stable):
 - [ ] Performance benchmarks
 
 **Success Criteria**:
+
 - All tests passing (110+ tests)
 - Test coverage ≥ 80%
 - Zero clippy warnings
@@ -99,6 +106,7 @@ During v0.X.Y (pre-stable):
 **Focus**: New language features, enhanced Godot integration
 
 **Goals**:
+
 1. Make FerrisScript usable for real 2D games
 2. Add essential language features (arrays, loops, match)
 3. Improve developer experience (LSP, better errors)
@@ -107,6 +115,7 @@ During v0.X.Y (pre-stable):
 **Key Features**:
 
 **Language**:
+
 - [ ] Arrays/lists (`[i32]`, indexing, push/pop)
 - [ ] For loops (`for i in 0..10`)
 - [ ] Match expressions (pattern matching)
@@ -115,19 +124,22 @@ During v0.X.Y (pre-stable):
 - [ ] Structs (custom data types)
 
 **Godot Integration**:
+
 - [ ] More types (Color, Rect2, Transform2D)
 - [ ] Signal support (emit, connect)
-- [ ] Additional callbacks (_input, _physics_process)
+- [ ] Additional callbacks (_input,_physics_process)
 - [ ] Custom properties (@export)
 - [ ] Node query functions (get_node, get_children)
 
 **Tooling**:
+
 - [ ] Language Server Protocol (LSP)
 - [ ] VS Code extension (autocomplete, errors)
 - [ ] Hot reload
 - [ ] Much better error messages
 
 **Success Criteria**:
+
 - Can build a complete 2D game (Pong/Breakout)
 - 200+ tests passing
 - LSP provides good developer experience
@@ -146,6 +158,7 @@ During v0.X.Y (pre-stable):
 **Focus**: Advanced features, 3D support, optimization
 
 **Potential Features**:
+
 - 3D game support (Camera3D, MeshInstance3D)
 - Advanced tooling (debugger, profiler)
 - Performance (bytecode, JIT compilation)
@@ -160,7 +173,7 @@ During v0.X.Y (pre-stable):
 
 | Feature | v0.0.1 | v0.0.2 | v0.1.0 | v0.2.0+ |
 |---------|--------|--------|--------|---------|
-| **Language** |
+| **Language** | | | | |
 | Variables (let/mut) | ✅ | ✅ | ✅ | ✅ |
 | Basic types (i32, f32, bool, String) | ✅ | ✅ | ✅ | ✅ |
 | Functions | ✅ | ✅ | ✅ | ✅ |
@@ -172,16 +185,16 @@ During v0.X.Y (pre-stable):
 | Enums | ❌ | ❌ | ✅ | ✅ |
 | Structs | ❌ | ❌ | ✅ | ✅ |
 | Traits | ❌ | ❌ | ❌ | 🤔 |
-| **Godot** |
+| **Godot** | | | | |
 | GDExtension | ✅ | ✅ | ✅ | ✅ |
 | Vector2, Node | ✅ | ✅ | ✅ | ✅ |
-| _ready, _process | ✅ | ✅ | ✅ | ✅ |
+| _ready,_process | ✅ | ✅ | ✅ | ✅ |
 | Self binding | ✅ | ✅ | ✅ | ✅ |
 | More types (Color, etc.) | ❌ | ❌ | ✅ | ✅ |
 | Signals | ❌ | ❌ | ✅ | ✅ |
 | Custom properties | ❌ | ❌ | ✅ | ✅ |
 | 3D support | ❌ | ❌ | ❌ | 🤔 |
-| **Tooling** |
+| **Tooling** | | | | |
 | Tests | ✅ | ✅ | ✅ | ✅ |
 | CI/CD | ✅ | ✅ | ✅ | ✅ |
 | Syntax highlighting | ❌ | ✅ | ✅ | ✅ |
@@ -198,22 +211,26 @@ During v0.X.Y (pre-stable):
 ## 🎯 Development Philosophy
 
 ### Incremental Progress
+
 - Small, frequent releases (v0.0.1, v0.0.2, v0.0.3...)
 - Each patch builds confidence for next minor
 - Multiple patches between minors (v0.0.X → v0.1.0)
 
 ### User-Driven Priorities
+
 - Monitor GitHub Issues for pain points
 - Community feedback shapes roadmap
 - Real-world use cases guide features
 
 ### Quality Over Speed
+
 - Every feature well-tested
 - Documentation written with feature
 - Performance validated
 - Breaking changes minimized
 
 ### Sustainable Development
+
 - Avoid burnout with realistic timelines
 - Accept contributions to scale work
 - Focus on maintainable code
@@ -235,12 +252,14 @@ During v0.X.Y (pre-stable):
 ## 🚦 Current Status & Next Steps
 
 ### ✅ Just Completed
+
 - v0.0.1 released successfully
 - Logo and branding integrated
 - CI/CD working perfectly
 - All documentation up to date
 
 ### 🎯 Immediate Next Steps
+
 1. **Community Engagement**
    - Announce v0.0.1 on Reddit, Twitter, Godot forums
    - Monitor for feedback and bug reports

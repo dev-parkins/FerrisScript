@@ -1,11 +1,11 @@
 <div align="center">
   <img src="assets/ferrisscript-logo.png" alt="FerrisScript Logo" width="300"/>
   
-  # FerrisScript 🦀
-  
-  **A Rust-inspired scripting language for Godot 4.x**
-  
-  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+# FerrisScript 🦀
+
+A Rust-inspired scripting language for Godot 4.x
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
   [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
   [![Godot](https://img.shields.io/badge/godot-4.2%2B-blue.svg)](https://godotengine.org/)
   
@@ -47,6 +47,7 @@ cargo test --workspace
 ### Using in Godot
 
 1. **Build the GDExtension:**
+
    ```bash
    cargo build --package ferrisscript_godot_bind
    ```
@@ -56,6 +57,7 @@ cargo test --workspace
    - Import project from `godot_test/project.godot`
 
 3. **Create your first script:**
+
    ```rust
    // my_script.ferris
    fn _ready() {
@@ -227,6 +229,7 @@ cargo build --package ferrisscript_godot_bind
 ```
 
 This creates:
+
 - **Windows**: `target/debug/ferrisscript_godot_bind.dll`
 - **Linux**: `target/debug/libferrisscript_godot_bind.so`
 - **macOS**: `target/debug/libferrisscript_godot_bind.dylib`
@@ -360,6 +363,7 @@ See the [`examples/`](examples/) directory for all available scripts.
 ### Self Binding
 
 Access node properties via `self`:
+
 - `self.position` - Node's position (Vector2)
 - `self.position.x` - X coordinate (f32)
 - `self.position.y` - Y coordinate (f32)
@@ -466,4 +470,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with 🦀 and ❤️ for the Godot community**
+Made with 🦀 and ❤️ for the Godot community

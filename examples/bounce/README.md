@@ -6,6 +6,7 @@
 ## What This Demonstrates
 
 This example shows a bouncing animation with boundary checks. It demonstrates:
+
 - Global variables (`let mut dir`)
 - Conditional statements (`if`)
 - State management (tracking direction)
@@ -45,6 +46,7 @@ This is a **global variable** declaration.
 - Makes the variable **mutable** (can be changed after initialization)
 - Without `mut`, the variable would be **immutable** (constant)
 - Compare:
+
   ```ferris
   let x = 5;      // Immutable: x cannot be changed
   let mut y = 5;  // Mutable: y can be reassigned
@@ -83,6 +85,7 @@ Cannot assign to immutable variable 'dir'
   - Used for temporary calculations
 
 **Example of local (WRONG for this use case):**
+
 ```ferris
 fn _process(delta: f32) {
     let mut dir = 1.0;  // WRONG: Resets to 1.0 every frame!
@@ -96,6 +99,7 @@ This would **always move right** because `dir` is reset to `1.0` every frame.
 ### `fn _process(delta: f32) {`
 
 Same as the [move example](../move/README.md):
+
 - Called every frame
 - `delta`: Time since last frame (seconds)
 
@@ -113,13 +117,15 @@ Similar to the move example, but with a **direction multiplier**.
 
 - Speed in pixels per second (faster than the move example's `50.0`)
 
-#### Complete movement calculation:
+#### Complete movement calculation
 
 **Moving right (`dir = 1.0`):**
+
 - `1.0 * 100.0 * 0.016` = `1.6 pixels per frame` (at 60 FPS)
 - **100 pixels per second** to the right
 
 **Moving left (`dir = -1.0`):**
+
 - `-1.0 * 100.0 * 0.016` = `-1.6 pixels per frame`
 - **100 pixels per second** to the left
 
@@ -140,6 +146,7 @@ First boundary check: **right edge**
 
 **Why 10.0?**  
 This is an arbitrary boundary. In a real game:
+
 - Use the screen width (e.g., `screen_width / 2` for center-based coordinates)
 - Use the node's size (e.g., `sprite.width / 2` to account for the node's own width)
 - Use world boundaries (e.g., tilemap edges)
@@ -167,6 +174,7 @@ Second boundary check: **left edge**
 - `-10.0`: Negative boundary (left side)
 
 **Coordinate system reminder:**
+
 - `x = 0`: Center
 - `x > 0`: Right of center
 - `x < 0`: Left of center
@@ -185,6 +193,7 @@ Closes the `_process` function.
 Let's trace the execution over several frames:
 
 ### Frame 1 (Initial State)
+
 - `dir = 1.0` (moving right)
 - `self.position.x = 0.0` (center)
 - Movement: `0.0 + (1.0 * 100.0 * 0.016)` = `1.6`
@@ -193,31 +202,37 @@ Let's trace the execution over several frames:
 - Direction unchanged
 
 ### Frames 2-6
+
 - Continues moving right
 - Position: `3.2`, `4.8`, `6.4`, `8.0`, `9.6`
 - No boundary hit yet
 
 ### Frame 7
+
 - `self.position.x = 9.6 + 1.6` = `11.2`
 - **Boundary hit!** `11.2 > 10.0` is `true`
 - `dir` changes to `-1.0` (reverse)
 
 ### Frame 8
+
 - `dir = -1.0` (moving left now)
 - Movement: `11.2 + (-1.0 * 100.0 * 0.016)` = `11.2 - 1.6` = `9.6`
 - New position: `9.6`
 - No boundary hit (not < -10.0, and now not > 10.0)
 
 ### Frames 9-20
+
 - Continues moving left
 - Position: `8.0`, `6.4`, ... `-8.0`, `-9.6`
 
 ### Frame 21
+
 - `self.position.x = -9.6 - 1.6` = `-11.2`
 - **Boundary hit!** `-11.2 < -10.0` is `true`
 - `dir` changes to `1.0` (reverse)
 
 ### Frame 22+
+
 - Starts moving right again
 - Cycle repeats forever
 
@@ -228,6 +243,7 @@ Let's trace the execution over several frames:
 ### Setup
 
 Same as the [move example](../move/README.md):
+
 1. Build GDExtension: `cargo build --release`
 2. Add `FerrisScriptNode` to scene
 3. Set `script_path` to `res://path/to/examples/bounce.ferris`
@@ -251,12 +267,14 @@ Same as the [move example](../move/README.md):
 **Problem**: Node moves past the boundaries.
 
 **Solutions**:
+
 - Check that `dir` is declared **global** (before `fn _process`)
 - Verify `mut` keyword is present (`let mut dir`)
 - Add `print(dir)` to debug: see if `dir` changes
 - Add `print(self.position.x)` to see current position
 
 **Example debugging:**
+
 ```ferris
 fn _process(delta: f32) {
     print("Position:", self.position.x, "Direction:", dir);
@@ -269,6 +287,7 @@ fn _process(delta: f32) {
 **Problem**: Boundaries don't match expectations.
 
 **Solution**: Adjust the boundary values:
+
 ```ferris
 if self.position.x > 500.0 {  // Right edge of 1000px-wide screen
     dir = -1.0;
@@ -279,6 +298,7 @@ if self.position.x < -500.0 {  // Left edge
 ```
 
 **Common screen widths:**
+
 - 1920 (Full HD): Use ±960 for center-based coordinates
 - 1280 (HD): Use ±640
 - 800 (small window): Use ±400
@@ -290,6 +310,7 @@ if self.position.x < -500.0 {  // Left edge
 **Cause**: The boundary check happens **after** movement, so the node can overshoot.
 
 **Example at 60 FPS:**
+
 - Frame N: `position.x = 9.6`, moves to `11.2` (overshoots 10.0)
 - Boundary hit, `dir = -1.0`
 - Frame N+1: `position.x = 11.2`, moves to `9.6`
@@ -298,6 +319,7 @@ if self.position.x < -500.0 {  // Left edge
 - Boundary hit again...
 
 **Solution** (if needed): Check boundary **before** applying movement:
+
 ```ferris
 if self.position.x + dir * 100.0 * delta > 10.0 {
     dir = -1.0;
@@ -312,6 +334,7 @@ However, for most use cases, the current code works fine (overshooting by 1-2 pi
 **Expected!** This example has instant direction changes (no easing or acceleration).
 
 **Improvements** (future variations):
+
 - Add acceleration/deceleration
 - Use easing functions (smoothstep, sine wave)
 - Add rotation to match direction
@@ -321,6 +344,7 @@ However, for most use cases, the current code works fine (overshooting by 1-2 pi
 **Problem**: Compilation fails.
 
 **Solution**: Add `mut` to the variable declaration:
+
 ```ferris
 let mut dir: f32 = 1.0;  // ✅ Correct (mutable)
 let dir: f32 = 1.0;      // ❌ Wrong (immutable)
@@ -470,12 +494,14 @@ This pattern (boundary checks + direction reversal) is useful for:
 ## Performance Considerations
 
 This example is still **very efficient**:
+
 - 4 arithmetic operations per frame (`+`, `*`, two comparisons)
 - 2 conditional branches (CPU branch prediction handles these well)
 - No memory allocation
 
 **Comparison to GDScript:**  
 Roughly equivalent performance to:
+
 ```gdscript
 var dir = 1.0
 

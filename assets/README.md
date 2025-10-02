@@ -5,9 +5,11 @@ This directory contains branding assets for the FerrisScript project.
 ## Logo Files
 
 ### `ferrisscript-logo.png`
+
 The official FerrisScript logo featuring a friendly crab (Ferris) holding a scroll.
 
 **Usage:**
+
 - README.md header
 - Documentation pages
 - GitHub social preview
@@ -15,6 +17,7 @@ The official FerrisScript logo featuring a friendly crab (Ferris) holding a scro
 - Conference slides
 
 **Design:**
+
 - Colors: Rust orange (#CE422B), Ferris blue (#194D7F), cream background
 - Style: Friendly, approachable, technical
 - Represents: Rust heritage (crab) + scripting (scroll)
@@ -22,6 +25,7 @@ The official FerrisScript logo featuring a friendly crab (Ferris) holding a scro
 ## Usage Guidelines
 
 ### ✅ Encouraged Uses
+
 - Project documentation and README files
 - GitHub repository social preview image
 - Blog posts and articles about FerrisScript
@@ -59,7 +63,7 @@ If you need to create additional logo variants:
 
 ## Attribution
 
-Logo created for the FerrisScript project. 
+Logo created for the FerrisScript project.
 Ferris the crab is an unofficial mascot for the Rust programming language community.
 
 ## License

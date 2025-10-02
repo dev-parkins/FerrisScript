@@ -48,6 +48,7 @@ cargo test --workspace
 ```
 
 You only need Godot if you want to:
+
 - Use FerrisScript scripts in Godot projects
 - Test Godot integration (GDExtension)
 - Run the example Godot project in `godot_test/`
@@ -76,6 +77,7 @@ See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for platform-specific solutions.
 **Not in v0.0.1** - Currently FerrisScript is designed for Godot integration.
 
 **Coming in v0.2.0** - Standalone mode will allow:
+
 - Running `.ferris` scripts independently
 - Command-line REPL
 - Non-game applications
@@ -87,6 +89,7 @@ See [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) for planned features.
 **The correct extension is `.ferris`** ✅
 
 All FerrisScript files use `.ferris`:
+
 ```
 examples/hello.ferris
 examples/bounce.ferris
@@ -118,6 +121,7 @@ examples/move.ferris
 **Not directly** - FerrisScript is not a Rust compiler and doesn't have access to cargo/crates.io.
 
 **However:**
+
 - The FerrisScript **runtime** is written in Rust and uses Rust crates internally
 - You can extend FerrisScript by adding Rust code to the runtime (`crates/runtime/`)
 - Future versions may support a plugin system for Rust interop
@@ -133,6 +137,7 @@ FerrisScript and GDScript can coexist in the same Godot project:
 - **Communication** → Both can call each other through Godot's scripting API
 
 **Example:**
+
 ```ferris
 // my_script.ferris
 pub fn process_input(input: Input) -> Vector2 {
@@ -154,11 +159,13 @@ func _ready():
 ### What Godot types does FerrisScript support?
 
 **v0.0.1 Supported Types:**
+
 - `Vector2` - 2D vectors
 - `Node` - Base Godot node type
 - Basic types: `i32`, `f32`, `bool`, `String`
 
 **Coming in v0.1.0:**
+
 - `Vector3` (3D vectors)
 - `Color` (RGBA colors)
 - `Transform` (3D transforms)
@@ -172,11 +179,13 @@ See [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) for complete type roadmap.
 **Not yet** - REPL (Read-Eval-Print Loop) is planned for v0.2.0.
 
 **Current workflow:**
+
 1. Write `.ferris` files
 2. Build with `cargo build`
 3. Run in Godot or via runtime
 
 **Alternatives:**
+
 - Use Godot's output console for debugging
 - Run tests with `cargo test` for quick feedback
 
@@ -229,6 +238,7 @@ my_game/
 ```
 
 **Best practices:**
+
 - Use FerrisScript for CPU-intensive tasks (physics, AI, large calculations)
 - Use GDScript for prototyping, UI, and game logic
 - Keep scripts organized by purpose, not language
@@ -236,11 +246,13 @@ my_game/
 ### What's the performance overhead of FerrisScript?
 
 **Current status (v0.0.1):**
+
 - **Not optimized yet** - Focus is on correctness, not speed
 - Early benchmarks show **2-5x faster than GDScript** for computation-heavy tasks
 - Overhead from runtime interpretation (not JIT compiled)
 
 **Optimization plans (v0.1.0+):**
+
 - JIT compilation
 - Better memory management
 - Inline optimizations
@@ -251,11 +263,13 @@ See [v0.1.0-ROADMAP.md - Performance Roadmap](v0.1.0-ROADMAP.md) for details.
 ### Can I use FerrisScript for 3D games?
 
 **Yes, but limited in v0.0.1:**
+
 - `Vector2` support only (2D focus)
 - `Vector3` coming in v0.1.0
 - 3D node types coming in v0.1.0
 
 **Current 3D workaround:**
+
 - Write game logic in FerrisScript
 - Use GDScript for 3D-specific code
 - Wait for v0.1.0 (planned December 2025)
@@ -328,12 +342,14 @@ See [CONTRIBUTING.md - Pull Request Process](../CONTRIBUTING.md#pull-request-pro
 **Short answer:** Yes, for computation-heavy tasks, but not optimized yet.
 
 **Benchmarks (v0.0.1, preliminary):**
+
 - Simple math loops: **2-3x faster**
 - Complex algorithms: **3-5x faster**
 - String operations: **1.5-2x faster**
 - Godot API calls: **Similar** (bottleneck is Godot, not FerrisScript)
 
 **Optimization status:**
+
 - ❌ No JIT compilation
 - ❌ No inlining
 - ❌ No dead code elimination
@@ -344,18 +360,21 @@ See [CONTRIBUTING.md - Pull Request Process](../CONTRIBUTING.md#pull-request-pro
 ### When should I use FerrisScript vs. GDScript?
 
 **Use FerrisScript for:**
+
 - Performance-critical loops
 - Complex algorithms (pathfinding, physics)
 - Large data processing
 - Type safety (catch errors early)
 
 **Use GDScript for:**
+
 - Rapid prototyping
 - UI and game logic
 - Godot-specific features
 - When performance doesn't matter
 
 **Hybrid approach** (recommended):
+
 - Prototype in GDScript
 - Optimize bottlenecks with FerrisScript
 
@@ -364,11 +383,13 @@ See [CONTRIBUTING.md - Pull Request Process](../CONTRIBUTING.md#pull-request-pro
 **v0.0.1:** No built-in profiler yet.
 
 **Workarounds:**
+
 - Use Godot's profiler for high-level metrics
 - Add manual timing with `println!` in runtime
 - Use Rust profilers (e.g., `cargo flamegraph`) on runtime
 
 **Coming in v0.2.0:**
+
 - Built-in profiler
 - Hot reload
 - Performance metrics
@@ -384,12 +405,14 @@ See [CONTRIBUTING.md - Pull Request Process](../CONTRIBUTING.md#pull-request-pro
 - **Production ready:** Not yet - expect breaking changes
 
 **v0.0.1 Features:**
+
 - Basic compiler (lexer, parser, type checker)
 - Runtime execution
 - Godot 4.x GDExtension support
 - Variables, functions, basic types
 
 **What's NOT ready:**
+
 - Match expressions, enums, structs
 - Full Rust ownership model
 - Standard library
@@ -406,6 +429,7 @@ See [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) for detailed roadmap.
 ### Can I use FerrisScript in production?
 
 **Not recommended for v0.0.1:**
+
 - Breaking changes expected
 - Limited features
 - Not performance-optimized
@@ -414,6 +438,7 @@ See [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) for detailed roadmap.
 **Wait for v0.2.0 (March 2026)** for stable production use.
 
 **However:**
+
 - ✅ Great for prototyping
 - ✅ Learning Rust concepts
 - ✅ Game jams (experimental)
@@ -430,11 +455,13 @@ See [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) for detailed roadmap.
 **Not yet** - Currently using GitHub Discussions for community interaction.
 
 **Community channels (planned for v0.1.0):**
+
 - Discord server
 - Reddit community
 - Twitter updates
 
 **For now:** Use [GitHub Discussions](https://github.com/dev-parkins/FerrisScript/discussions) for:
+
 - Questions (Q&A category)
 - Feature ideas (Ideas category)
 - Show your projects (Show and Tell)
@@ -451,4 +478,4 @@ See [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) for detailed roadmap.
 
 ---
 
-**Made with 🦀 and ❤️ for the Godot community**
+Made with 🦀 and ❤️ for the Godot community
