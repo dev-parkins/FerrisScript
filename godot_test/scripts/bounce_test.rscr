@@ -1,0 +1,27 @@
+// Bounce Test - Tests mutable state persistence and control flow
+// This script demonstrates:
+// - Mutable global variables that persist between frames
+// - Control flow with if statements
+// - Self property modification (self.position.x)
+
+let mut dir: f32 = 1.0;
+let speed: f32 = 100.0;
+let boundary: f32 = 200.0;
+
+fn _ready() {
+    print("Bounce test started");
+    print("Node will bounce between x = -200 and x = 200");
+}
+
+fn _process(delta: f32) {
+    // Update position based on direction and speed
+    self.position.x += dir * speed * delta;
+
+    // Reverse direction at boundaries
+    if self.position.x > boundary {
+        dir = -1.0;
+    }
+    if self.position.x < -boundary {
+        dir = 1.0;
+    }
+}

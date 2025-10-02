@@ -1,6 +1,13 @@
-[gd_scene format=3 uid="uid://3sg627kurl3v"]
+[gd_scene load_steps=2 format=3 uid="uid://3sg627kurl3v"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_6adnx"]
 
 [node name="TestScene" type="Node"]
 
 [node name="RustyScriptTest" type="RustyScriptNode" parent="."]
-script_path = "res://scripts/process_test.rscr"
+script_path = "res://scripts/bounce_test.rscr"
+
+[node name="Sprite2D" type="Sprite2D" parent="RustyScriptTest"]
+position = Vector2(220.5, 73)
+scale = Vector2(87, 64)
+texture = SubResource("CanvasTexture_6adnx")

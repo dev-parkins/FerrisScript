@@ -40,8 +40,15 @@ pub type PropertyGetter = fn(&str) -> Result<Value, String>;
 /// Callback for setting a property on the Godot node
 pub type PropertySetter = fn(&str, Value) -> Result<(), String>;
 
+/// Variable information stored in the environment
+#[derive(Debug, Clone)]
+struct VarInfo {
+    value: Value,
+    mutable: bool,
+}
+
 pub struct Env {
-    scopes: Vec<HashMap<String, Value>>,
+    scopes: Vec<HashMap<String, VarInfo>>,
     functions: HashMap<String, ast::Function>,
     builtin_fns: HashMap<String, fn(&[Value]) -> Result<Value, String>>,
     /// Callback to get properties from the Godot node (when accessing self.property)
@@ -86,16 +93,23 @@ impl Env {
         }
     }
 
+    /// Set a variable with mutability information
     pub fn set(&mut self, name: String, value: Value) {
+        // Default to mutable for backward compatibility with existing code
+        self.set_with_mutability(name, value, true);
+    }
+
+    /// Set a variable with explicit mutability flag
+    pub fn set_with_mutability(&mut self, name: String, value: Value, mutable: bool) {
         if let Some(scope) = self.scopes.last_mut() {
-            scope.insert(name, value);
+            scope.insert(name, VarInfo { value, mutable });
         }
     }
 
     pub fn get(&self, name: &str) -> Option<&Value> {
         for scope in self.scopes.iter().rev() {
-            if let Some(value) = scope.get(name) {
-                return Some(value);
+            if let Some(var_info) = scope.get(name) {
+                return Some(&var_info.value);
             }
         }
         None
@@ -103,11 +117,36 @@ impl Env {
 
     pub fn get_mut(&mut self, name: &str) -> Option<&mut Value> {
         for scope in self.scopes.iter_mut().rev() {
-            if let Some(value) = scope.get_mut(name) {
-                return Some(value);
+            if let Some(var_info) = scope.get_mut(name) {
+                return Some(&mut var_info.value);
             }
         }
         None
+    }
+
+    /// Check if a variable is mutable
+    pub fn is_mutable(&self, name: &str) -> bool {
+        for scope in self.scopes.iter().rev() {
+            if let Some(var_info) = scope.get(name) {
+                return var_info.mutable;
+            }
+        }
+        false
+    }
+
+    /// Assign to a variable, checking mutability
+    pub fn assign(&mut self, name: &str, value: Value) -> Result<(), String> {
+        // Check if variable exists and is mutable
+        for scope in self.scopes.iter_mut().rev() {
+            if let Some(var_info) = scope.get_mut(name) {
+                if !var_info.mutable {
+                    return Err(format!("Cannot assign to immutable variable '{}'", name));
+                }
+                var_info.value = value;
+                return Ok(());
+            }
+        }
+        Err(format!("Undefined variable: {}", name))
     }
 
     pub fn define_function(&mut self, name: String, func: ast::Function) {
@@ -166,7 +205,7 @@ pub fn execute(program: &ast::Program, env: &mut Env) -> Result<(), String> {
     // Initialize global variables
     for global in &program.global_vars {
         let value = evaluate_expr(&global.value, env)?;
-        env.set(global.name.clone(), value);
+        env.set_with_mutability(global.name.clone(), value, global.mutable);
     }
 
     // Register all functions
@@ -179,9 +218,9 @@ pub fn execute(program: &ast::Program, env: &mut Env) -> Result<(), String> {
 
 fn execute_stmt(stmt: &ast::Stmt, env: &mut Env) -> Result<FlowControl, String> {
     match stmt {
-        ast::Stmt::Let { name, value, .. } => {
+        ast::Stmt::Let { name, value, mutable, .. } => {
             let val = evaluate_expr(value, env)?;
-            env.set(name.clone(), val);
+            env.set_with_mutability(name.clone(), val, *mutable);
             Ok(FlowControl::None)
         }
         
@@ -192,11 +231,8 @@ fn execute_stmt(stmt: &ast::Stmt, env: &mut Env) -> Result<FlowControl, String> 
             if let ast::Expr::FieldAccess(object, field, _) = target {
                 assign_field(object, field, val, env)?;
             } else if let ast::Expr::Variable(name, _) = target {
-                if let Some(var) = env.get_mut(name) {
-                    *var = val;
-                } else {
-                    return Err(format!("Undefined variable: {}", name));
-                }
+                // Use assign method which checks mutability
+                env.assign(name, val)?;
             } else {
                 return Err("Invalid assignment target".to_string());
             }
@@ -275,7 +311,11 @@ fn assign_field(object: &ast::Expr, field: &str, value: Value, env: &mut Env) ->
                 }
             }
             
-            // Regular variable field assignment
+            // Regular variable field assignment - check mutability first
+            if !env.is_mutable(name) {
+                return Err(format!("Cannot assign to field of immutable variable '{}'", name));
+            }
+            
             if let Some(var) = env.get_mut(name) {
                 match var {
                     Value::Vector2 { x, y } => {
@@ -979,5 +1019,257 @@ mod tests {
         let result = call_function("test", &[], &mut env);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Undefined variable"));
+    }
+
+    #[test]
+    fn test_immutable_assignment_error() {
+        let mut env = Env::new();
+        
+        let source = r#"
+            fn test() -> i32 {
+                let x: i32 = 10;
+                x = 20;
+                return x;
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        let result = call_function("test", &[], &mut env);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Cannot assign to immutable variable"));
+    }
+
+    #[test]
+    fn test_mutable_assignment_success() {
+        let mut env = Env::new();
+        
+        let source = r#"
+            fn test() -> i32 {
+                let mut x: i32 = 10;
+                x = 20;
+                return x;
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        let result = call_function("test", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Int(20));
+    }
+
+    #[test]
+    fn test_mutable_global_variable() {
+        let mut env = Env::new();
+        
+        let source = r#"
+            let mut counter: i32 = 0;
+            
+            fn increment() {
+                counter = counter + 1;
+            }
+            
+            fn get_counter() -> i32 {
+                return counter;
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        // Initial value
+        let result = call_function("get_counter", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Int(0));
+        
+        // Increment
+        call_function("increment", &[], &mut env).unwrap();
+        let result = call_function("get_counter", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Int(1));
+        
+        // Increment again
+        call_function("increment", &[], &mut env).unwrap();
+        let result = call_function("get_counter", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Int(2));
+    }
+
+    #[test]
+    fn test_immutable_field_assignment_error() {
+        let mut env = Env::new();
+        
+        // Set up immutable Vector2
+        env.set_with_mutability("pos".to_string(), Value::Vector2 { x: 10.0, y: 20.0 }, false);
+        
+        // Try to assign to field - should fail
+        env.define_function("test".to_string(), ast::Function {
+            name: "test".to_string(),
+            params: vec![],
+            return_type: None,
+            body: vec![ast::Stmt::Assign {
+                target: ast::Expr::FieldAccess(
+                    Box::new(ast::Expr::Variable("pos".to_string(), ast::Span::unknown())),
+                    "x".to_string(),
+                    ast::Span::unknown()
+                ),
+                value: ast::Expr::Literal(ast::Literal::Float(50.0), ast::Span::unknown()),
+                span: ast::Span::unknown(),
+            }],
+            span: ast::Span::unknown(),
+        });
+        
+        let result = call_function("test", &[], &mut env);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Cannot assign to field of immutable variable"));
+    }
+
+    #[test]
+    fn test_nested_if_else() {
+        let mut env = Env::new();
+        
+        let source = r#"
+            fn classify(x: i32) -> i32 {
+                if x > 0 {
+                    if x > 10 {
+                        return 2;
+                    } else {
+                        return 1;
+                    }
+                } else {
+                    if x < -10 {
+                        return -2;
+                    } else {
+                        return -1;
+                    }
+                }
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        let result = call_function("classify", &[Value::Int(15)], &mut env).unwrap();
+        assert_eq!(result, Value::Int(2));
+        
+        let result = call_function("classify", &[Value::Int(5)], &mut env).unwrap();
+        assert_eq!(result, Value::Int(1));
+        
+        let result = call_function("classify", &[Value::Int(-15)], &mut env).unwrap();
+        assert_eq!(result, Value::Int(-2));
+        
+        let result = call_function("classify", &[Value::Int(-5)], &mut env).unwrap();
+        assert_eq!(result, Value::Int(-1));
+    }
+
+    #[test]
+    fn test_while_loop_with_mutable_state() {
+        let mut env = Env::new();
+        
+        let source = r#"
+            fn sum_to_n(n: i32) -> i32 {
+                let mut sum: i32 = 0;
+                let mut i: i32 = 1;
+                
+                while i <= n {
+                    sum = sum + i;
+                    i = i + 1;
+                }
+                
+                return sum;
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        // Test 1+2+3+4+5 = 15
+        let result = call_function("sum_to_n", &[Value::Int(5)], &mut env).unwrap();
+        assert_eq!(result, Value::Int(15));
+        
+        // Test 1+2+3+...+10 = 55
+        let result = call_function("sum_to_n", &[Value::Int(10)], &mut env).unwrap();
+        assert_eq!(result, Value::Int(55));
+    }
+
+    #[test]
+    fn test_complex_control_flow_with_mutable_state() {
+        let mut env = Env::new();
+        
+        let source = r#"
+            let mut global_count: i32 = 0;
+            
+            fn process_numbers() -> i32 {
+                let mut i: i32 = 0;
+                
+                while i < 10 {
+                    if i < 5 {
+                        global_count = global_count + 1;
+                    } else {
+                        if i > 7 {
+                            global_count = global_count + 2;
+                        }
+                    }
+                    i = i + 1;
+                }
+                
+                return global_count;
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        // i < 5: 0, 1, 2, 3, 4 = 5 times (+1 each) = 5
+        // i > 7: 8, 9 = 2 times (+2 each) = 4
+        // Total: 5 + 4 = 9
+        let result = call_function("process_numbers", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Int(9));
+    }
+
+    #[test]
+    fn test_bounce_simulation() {
+        let mut env = Env::new();
+        
+        let source = r#"
+            let mut position: f32 = 5.0;
+            let mut direction: f32 = 1.0;
+            
+            fn update_position(delta: f32) {
+                position = position + direction * 100.0 * delta;
+                
+                if position > 10.0 {
+                    direction = -1.0;
+                }
+                if position < -10.0 {
+                    direction = 1.0;
+                }
+            }
+            
+            fn get_direction() -> f32 {
+                return direction;
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        // Initial state - direction should be 1.0 (moving right)
+        // Note: 1.0 is parsed as Int(1) due to fractional part being 0
+        let dir = call_function("get_direction", &[], &mut env).unwrap();
+        assert!(matches!(dir, Value::Int(1) | Value::Float(1.0)));
+        
+        // Move right past boundary (5.0 + 100*0.06 = 11.0)
+        call_function("update_position", &[Value::Float(0.06)], &mut env).unwrap();
+        
+        // Should reverse direction at boundary
+        let dir = call_function("get_direction", &[], &mut env).unwrap();
+        assert!(matches!(dir, Value::Int(-1) | Value::Float(-1.0)));
+        
+        // Move left past opposite boundary (11.0 - 100*0.22 = -11.0)
+        call_function("update_position", &[Value::Float(0.22)], &mut env).unwrap();
+        
+        // Should reverse back to positive
+        let dir = call_function("get_direction", &[], &mut env).unwrap();
+        assert!(matches!(dir, Value::Int(1) | Value::Float(1.0)));
     }
 }

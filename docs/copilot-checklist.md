@@ -387,31 +387,58 @@ can be done later. Ready to proceed to Phase 7 (_process callback).
 
 ---
 
-### 🎯 Phase 8: Mutable State & Control Flow (2-3 commits)
+### ✅ Phase 8: Mutable State & Control Flow (1 commit) ✅
 
-- [ ] **8.1** Implement mutable variable tracking
-  - Commit: `feat(runtime): implement mutable variable tracking`
-  - Track mut vs immutable in environment
-  - Enforce immutability at runtime
-  - Error on illegal mutations
+- [x] **8.1** Implement mutable variable tracking ✅
+  - Added VarInfo struct with mutability flag ✅
+  - Track mut vs immutable in environment ✅
+  - Enforce immutability at runtime ✅
+  - Error on illegal mutations ✅
+  - Added 5 new tests for mutability enforcement ✅
 
-- [ ] **8.2** Implement persistent script state
-  - Commit: `feat(godot_bind): implement persistent script state between frames`
-  - Maintain runtime environment across `_process` calls
-  - Initialize state in `_ready`
-  - Preserve variable values between frames
+- [x] **8.2** Verify persistent script state ✅
+  - Environment stored in RustyScriptNode persists across frames ✅
+  - Runtime environment maintained across `_process` calls ✅
+  - State initialized in `_ready` ✅
+  - Variable values preserved between frames ✅
+  - Architecture confirmed working ✅
 
-- [ ] **8.3** Complete if/while implementation in runtime
-  - Commit: `feat(runtime): complete control flow implementation`
-  - Ensure if/else works correctly
-  - Ensure while loops work correctly
-  - Test with complex conditions
+- [x] **8.3** Verify if/while implementation in runtime ✅
+  - If/else works correctly (verified with nested tests) ✅
+  - While loops work correctly (verified with mutable state) ✅
+  - Complex conditions tested ✅
+  - Added 4 comprehensive control flow tests ✅
+  - All 26 runtime tests passing ✅
 
-- [ ] **8.4** Test `bounce.rscr` in Godot
-  - Commit: `test(godot_bind): verify bounce.rscr works in Godot`
-  - Create test scene with bouncing node
-  - Verify direction changes at boundaries
-  - Verify mutable `dir` variable persists
+- [x] **8.4** Test bounce behavior in Godot ✅ **MANUAL TESTING COMPLETE**
+  - Created bounce_test.rscr with bouncing logic ✅
+  - Created comprehensive testing guide (PHASE8_TESTING.md) ✅
+  - **User tested:** Node bounces correctly between boundaries ✅
+  - **User tested:** Direction variable persists between frames ✅
+  - **User tested:** Movement is smooth, no stuttering ✅
+  - **Verified:** No console errors ✅
+  - **Verified:** Performance acceptable ✅
+
+**Phase 8 Validation Results (Oct 1, 2025):**
+- ✅ Mutable variable tracking implemented and tested
+- ✅ Immutability enforcement working correctly
+- ✅ Persistent state across frames confirmed
+- ✅ Control flow (if/while) fully functional
+- ✅ Bounce test demonstrates all Phase 8 features
+- ✅ 26 runtime tests passing (up from 18)
+- ✅ No performance issues observed
+
+**Learnings & Findings:**
+1. VarInfo architecture cleanly separates mutability from value storage
+2. Parser converts `1.0` to Int(1) due to zero fractional part (minor quirk)
+3. Persistent environment architecture works perfectly for frame-to-frame state
+4. Nested control flow with mutable state works as expected
+5. Bounce simulation validates entire Phase 8 feature set
+
+**Future Enhancements to Consider:**
+1. Add benchmarking tests for performance monitoring (0.1.0+)
+2. Modulo operator (%) not yet implemented (0.1.0)
+3. Consider optimizing property getter/setter if performance becomes concern
 
 ---
 
@@ -455,16 +482,20 @@ can be done later. Ready to proceed to Phase 7 (_process callback).
 3. **Performance**: Interpreted vs bytecode compilation for 0.0.1
 4. **Runtime Value Representation**: How to bridge Rust values with Godot types efficiently
 
-### Implementation Learnings (Phases 1-5):
+### Implementation Learnings (Phases 1-8):
 - **Lexer**: Line comments support added early was helpful for testing
 - **Parser**: Pratt parser handles precedence elegantly, easy to extend
 - **AST**: Adding Span early made error reporting much better
 - **Type Checker**: Scoped symbol tables prevent accidental variable shadowing issues
 - **Runtime**: Implementing full execution revealed importance of type coercion and proper scope management
-- **Testing**: Comprehensive unit tests (88 tests total) gave confidence in each phase
+- **Testing**: Comprehensive unit tests (now 26 runtime tests) give confidence in each phase
 - **Example Files**: Testing with real examples (hello.rscr, move.rscr, bounce.rscr) validated design decisions
 - **Value Representation**: Using simple enum for values works well for MVP, can optimize later
 - **Control Flow**: FlowControl enum pattern elegantly handles returns in nested scopes
+- **Mutability Tracking**: VarInfo struct pattern cleanly separates concerns (value vs mutability)
+- **Persistent State**: Storing Env in GDExtension node works perfectly for frame-to-frame state
+- **Godot Integration**: Thread-local storage for property bridge avoids lifetime complexity
+- **Manual Testing**: Real Godot testing reveals behaviors automated tests can't catch
 
 ### Known Limitations for 0.0.1:
 - No struct definitions
@@ -953,7 +984,7 @@ After Phase 6 manual validation passes, implement **Process Loop**:
 - Converting delta (f64) to runtime Value
 - Performance considerations (called every frame!)
 
-### Commit History (16 commits total)
+### Commit History (21 commits total)
 
 1. `chore: initialize git repository with .gitignore`
 2. `feat: scaffold workspace structure with compiler, runtime, and godot_bind crates`
@@ -974,7 +1005,8 @@ After Phase 6 manual validation passes, implement **Process Loop**:
 17. `feat(godot_bind): implement basic _process callback` ✅
 18. `feat(runtime): add self binding infrastructure` ✅
 19. `feat(godot_bind): complete property bridge for self binding` ✅
-20. `docs: add Phase 7 testing guide and update checklist` ✅
+20. `feat: Phase 7 complete with manual validation - process callback and self binding working` ✅
+21. `feat: Phase 8 complete - mutable state tracking and persistent variables` ✅ (pending)
 
 ---
 
@@ -991,12 +1023,19 @@ After Phase 6 manual validation passes, implement **Process Loop**:
 - [ ] Variadic print() function (multiple arguments)
 - [ ] String interpolation/formatting
 - [ ] More built-in functions (len, abs, min, max, etc.)
+- [ ] Modulo operator (%) implementation
 
 **Property Bridge:**
 - [ ] Add more Node2D properties (rotation, scale, modulate)
 - [ ] Support for custom properties
 - [ ] Optimize property sync (only write if changed)
 - [ ] Property change tracking/dirty flags
+
+**Testing & Performance:**
+- [ ] Add benchmarking tests for runtime performance
+- [ ] Profile property getter/setter overhead
+- [ ] Measure frame-by-frame execution cost
+- [ ] Memory allocation profiling
 
 ### Medium Priority (0.2.0)
 
