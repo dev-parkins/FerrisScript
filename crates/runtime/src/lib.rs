@@ -47,14 +47,23 @@ struct VarInfo {
     mutable: bool,
 }
 
+// Type alias to simplify the complex builtin function type
+type BuiltinFn = fn(&[Value]) -> Result<Value, String>;
+
 pub struct Env {
     scopes: Vec<HashMap<String, VarInfo>>,
     functions: HashMap<String, ast::Function>,
-    builtin_fns: HashMap<String, fn(&[Value]) -> Result<Value, String>>,
+    builtin_fns: HashMap<String, BuiltinFn>,
     /// Callback to get properties from the Godot node (when accessing self.property)
     property_getter: Option<PropertyGetter>,
     /// Callback to set properties on the Godot node (when assigning to self.property)
     property_setter: Option<PropertySetter>,
+}
+
+impl Default for Env {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Env {
@@ -393,11 +402,8 @@ fn assign_field(object: &ast::Expr, field: &str, value: Value, env: &mut Env) ->
                 
                 // Regular variable nested field assignment (not implemented yet)
                 if let Some(var) = env.get_mut(name) {
-                    match var {
-                        Value::Vector2 { .. } => {
-                            return Err("Nested field assignment on regular variables not yet implemented".to_string());
-                        }
-                        _ => {}
+                    if let Value::Vector2 { .. } = var {
+                        return Err("Nested field assignment on regular variables not yet implemented".to_string());
                     }
                 }
             }

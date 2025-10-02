@@ -165,20 +165,18 @@ impl Parser {
 
         let return_type = if matches!(self.current(), Token::Minus) {
             self.advance();
-            if matches!(self.current(), Token::Greater) {
-                self.advance();
-                match self.advance() {
-                    Token::Ident(t) => Some(t),
-                    t => return Err(format!("Expected return type, found {}", t.name())),
-                }
-            } else {
-                return Err(format!("Expected '>' after '-' in return type"));
+        if matches!(self.current(), Token::Greater) {
+            self.advance();
+            match self.advance() {
+                Token::Ident(t) => Some(t),
+                t => return Err(format!("Expected return type, found {}", t.name())),
             }
         } else {
-            None
-        };
-
-        self.expect(Token::LBrace)?;
+            return Err("Expected '>' after '-' in return type".to_string());
+        }
+    } else {
+        None
+    };        self.expect(Token::LBrace)?;
 
         let mut body = Vec::new();
         while !matches!(self.current(), Token::RBrace) {

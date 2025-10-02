@@ -6,7 +6,7 @@ use std::cell::RefCell;
 
 // Thread-local storage for node properties during script execution
 thread_local! {
-    static NODE_POSITION: RefCell<Option<Vector2>> = RefCell::new(None);
+    static NODE_POSITION: RefCell<Option<Vector2>> = const { RefCell::new(None) };
 }
 
 /// Property getter for self binding (called from runtime)
