@@ -401,10 +401,8 @@ fn assign_field(object: &ast::Expr, field: &str, value: Value, env: &mut Env) ->
                 }
                 
                 // Regular variable nested field assignment (not implemented yet)
-                if let Some(var) = env.get_mut(name) {
-                    if let Value::Vector2 { .. } = var {
-                        return Err("Nested field assignment on regular variables not yet implemented".to_string());
-                    }
+                if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
+                    return Err("Nested field assignment on regular variables not yet implemented".to_string());
                 }
             }
             Err("Complex field assignment not yet implemented".to_string())
