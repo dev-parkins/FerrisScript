@@ -519,18 +519,18 @@ pub enum Op {
 
 ```toml
 [package]
-name = "rustyscript_runtime"
+name = "ferrisscript_runtime"
 version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-rustyscript_compiler = { path = "../compiler" }
+ferrisscript_compiler = { path = "../compiler" }
 ```
 
 ### src/lib.rs
 
 ```rust
-use rustyscript_compiler::ast;
+use ferrisscript_compiler::ast;
 
 pub struct Env {
     // placeholder: variable environment
@@ -550,42 +550,45 @@ pub fn execute(program: &ast::Program, env: &mut Env) -> Result<(), String> {
 
 ```toml
 [package]
-name = "rustyscript_godot_bind"
+name = "ferrisscript_godot_bind"
 version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-gdnative = "0.10" # adjust to latest Godot 4.x Rust binding
-rustyscript_runtime = { path = "../runtime" }
+godot = "0.1" # Godot 4.x Rust binding (gdext)
+ferrisscript_runtime = { path = "../runtime" }
 ```
 
 ### src/lib.rs
 
 ```rust
-use gdnative::prelude::*;
-use rustyscript_runtime::Env;
+use godot::prelude::*;
+use ferrisscript_runtime::Env;
 
-#[derive(NativeClass)]
-#[inherit(Node)]
-pub struct RustyScriptNode {
+#[derive(GodotClass)]
+#[class(base=Node2D)]
+pub struct FerrisScriptNode {
     env: Env,
+    #[base]
+    base: Base<Node2D>,
 }
 
-#[methods]
-impl RustyScriptNode {
-    fn new(_owner: &Node) -> Self {
-        RustyScriptNode {
-            env: Env {},
+#[godot_api]
+impl FerrisScriptNode {
+    fn new(base: Base<Node2D>) -> Self {
+        FerrisScriptNode {
+            env: Env::new(),
+            base,
         }
     }
 
-    #[export]
-    fn _ready(&mut self, _owner: &Node) {
-        godot_print!("RustyScript _ready hook");
+    #[func]
+    fn _ready(&mut self) {
+        godot_print!("FerrisScript _ready hook");
     }
 
-    #[export]
-    fn _process(&mut self, _owner: &Node, delta: f64) {
+    #[func]
+    fn _process(&mut self, delta: f64) {
         // placeholder: call runtime execution here
     }
 }
@@ -595,15 +598,15 @@ impl RustyScriptNode {
 
 ## Examples
 
-### `examples/hello.rscr`
+### `examples/hello.ferris`
 
 ```rust
 fn _ready() {
-    print("Hello from RustyScript!");
+    print("Hello from FerrisScript!");
 }
 ```
 
-### `examples/move.rscr`
+### `examples/move.ferris`
 
 ```rust
 fn _process(delta: f32) {

@@ -1,0 +1,183 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        rust: [stable]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ matrix.rust }}
+        components: rustfmt, clippy
+
+    - name: Cache cargo registry
+      uses: actions/cache@v3
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Cache cargo index
+      uses: actions/cache@v3
+      with:
+        path: ~/.cargo/git
+        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Cache cargo build
+      uses: actions/cache@v3
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Run tests
+      run: cargo test --workspace --verbose
+
+    - name: Run clippy
+      run: cargo clippy --workspace -- -D warnings
+
+    - name: Check formatting
+      run: cargo fmt --all -- --check
+
+  build:
+    name: Build Release
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: libferrisscript_godot_bind.so
+            asset_name: ferrisscript-linux-x86_64.so
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: ferrisscript_godot_bind.dll
+            asset_name: ferrisscript-windows-x86_64.dll
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: libferrisscript_godot_bind.dylib
+            asset_name: ferrisscript-macos-x86_64.dylib
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        target: ${{ matrix.target }}
+
+    - name: Build release
+      run: cargo build --workspace --release --target ${{ matrix.target }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.asset_name }}
+        path: target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+
+  release:
+    name: Create Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: FerrisScript ${{ github.ref_name }}
+        body_path: RELEASE_NOTES.md
+        draft: false
+        prerelease: false
+
+    - name: Upload Linux Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./ferrisscript-linux-x86_64.so/libferrisscript_godot_bind.so
+        asset_name: ferrisscript-linux-x86_64.so
+        asset_content_type: application/octet-stream
+
+    - name: Upload Windows Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./ferrisscript-windows-x86_64.dll/ferrisscript_godot_bind.dll
+        asset_name: ferrisscript-windows-x86_64.dll
+        asset_content_type: application/octet-stream
+
+    - name: Upload macOS Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./ferrisscript-macos-x86_64.dylib/libferrisscript_godot_bind.dylib
+        asset_name: ferrisscript-macos-x86_64.dylib
+        asset_content_type: application/octet-stream
+
+    - name: Upload GDExtension Config
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./godot_test/ferrisscript.gdextension
+        asset_name: ferrisscript.gdextension
+        asset_content_type: text/plain
+
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Install tarpaulin
+      run: cargo install cargo-tarpaulin
+
+    - name: Generate coverage
+      run: cargo tarpaulin --workspace --out Xml --output-dir coverage
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage/cobertura.xml
+        fail_ci_if_error: false
