@@ -223,23 +223,23 @@ Signature: __________
 
 ### Common Issues
 
-**"Can't open dynamic library"**
+#### "Can't open dynamic library"
 
 - Run: `cargo build --package FerrisScript_godot_bind`
 - Verify: `target/debug/FerrisScript_godot_bind.dll` exists
 
-**"No loader found for resource"**
+#### "No loader found for resource"
 
 - Verify: `FerrisScript.gdextension` is in project root
 - Check: Extension symbol is `gdext_rust_init`
 
-**"FerrisScriptNode not found"**
+#### "FerrisScriptNode not found"
 
 - Extension didn't load - check Godot Output for errors
 - Verify DLL is in correct location
 - Try restart Godot editor
 
-**Script doesn't load**
+#### Script doesn't load
 
 - Check script_path is correct
 - Try absolute path: `Y:/cpark/Projects/FerrisScript/examples/hello.ferris`

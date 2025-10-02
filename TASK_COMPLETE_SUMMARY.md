@@ -191,16 +191,16 @@ High-level summary of task completion
 
 ### Follow-up Actions (Optional)
 
-3. **Address MD036 Violations** (Low Priority)
+1. **Address MD036 Violations** (Low Priority)
    - Review the 34 emphasis-as-heading instances
    - Decide: convert to headings, disable rule, or leave as-is
 
-4. **Fix Link Check Failures** (Medium Priority)
+2. **Fix Link Check Failures** (Medium Priority)
    - Create missing documentation files
    - Update link-check ignore patterns
    - See DOCS_LINT_FIXES.md for specific recommendations
 
-5. **Review MD029 and MD056** (Low Priority)
+3. **Review MD029 and MD056** (Low Priority)
    - CONTRIBUTING.md list numbering style
    - VERSION_PLANNING.md table structure
 
@@ -262,13 +262,13 @@ git diff 5f094f9^..5f094f9 -- docs/FAQ.md
 
 ### Medium Priority
 
-4. Review and decide on MD036 violations (emphasis vs headings)
-5. Fix malformed tables in VERSION_PLANNING.md
+1. Review and decide on MD036 violations (emphasis vs headings)
+2. Fix malformed tables in VERSION_PLANNING.md
 
 ### Low Priority
 
-6. Review list numbering style in CONTRIBUTING.md
-7. Consider adding spell-check CI (separate task)
+1. Review list numbering style in CONTRIBUTING.md
+2. Consider adding spell-check CI (separate task)
 
 ---
 

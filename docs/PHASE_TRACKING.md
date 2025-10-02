@@ -246,4 +246,4 @@ git checkout -b feature/docs-conduct
 
 ---
 
-**End of Phase Tracking Document**
+End of Phase Tracking Document

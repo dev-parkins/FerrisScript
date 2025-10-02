@@ -782,4 +782,4 @@ When reporting issues, include:
 
 ---
 
-**Made with 🦀 and ❤️ for the Godot community**
+Made with 🦀 and ❤️ for the Godot community

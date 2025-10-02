@@ -170,7 +170,7 @@ jobs:
 
 ### Recommendation
 
-**Implement Option 1 (Path-Based Conditional Execution)**
+#### Implement Option 1 (Path-Based Conditional Execution)
 
 **Reasoning:**
 
@@ -180,9 +180,9 @@ jobs:
 4. Provides docs-specific checks (link validation)
 5. Fastest for docs-only changes
 
-**Implementation Phase:** v0.0.3 (after v0.0.2 docs complete)
+Implementation Phase: v0.0.3 (after v0.0.2 docs complete)
 
-**Estimated Setup Time:** 1-2 hours
+Estimated Setup Time: 1-2 hours
 
 ---
 
@@ -637,4 +637,4 @@ Replace placeholder URL with actual Discussions URL.
 
 ---
 
-**Made with 🦀 and ❤️ for the Godot community**
+Made with 🦀 and ❤️ for the Godot community

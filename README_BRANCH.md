@@ -189,14 +189,14 @@ GHA docs-lint workflow:
 
 ### Short Term (Before merging PR #3)
 
-3. ⚠️ Create missing documentation files or update references
-4. ⚠️ Update link-check config to ignore private URLs
+1. ⚠️ Create missing documentation files or update references
+2. ⚠️ Update link-check config to ignore private URLs
 
 ### Long Term (After PR #3)
 
-5. Review MD036 violations (emphasis vs headings)
-6. Fix malformed tables in VERSION_PLANNING.md
-7. Review list numbering style in CONTRIBUTING.md
+1. Review MD036 violations (emphasis vs headings)
+2. Fix malformed tables in VERSION_PLANNING.md
+3. Review list numbering style in CONTRIBUTING.md
 
 ---
 

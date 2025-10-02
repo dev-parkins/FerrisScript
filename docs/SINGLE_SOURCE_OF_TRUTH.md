@@ -292,4 +292,4 @@ If FerrisScript adds translated docs:
 
 ---
 
-**End of Single Source of Truth Matrix**
+End of Single Source of Truth Matrix

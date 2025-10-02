@@ -173,7 +173,7 @@ During v0.X.Y (pre-stable):
 
 | Feature | v0.0.1 | v0.0.2 | v0.1.0 | v0.2.0+ |
 |---------|--------|--------|--------|---------|
-| **Language** |
+| **Language** | | | | |
 | Variables (let/mut) | ✅ | ✅ | ✅ | ✅ |
 | Basic types (i32, f32, bool, String) | ✅ | ✅ | ✅ | ✅ |
 | Functions | ✅ | ✅ | ✅ | ✅ |
@@ -185,7 +185,7 @@ During v0.X.Y (pre-stable):
 | Enums | ❌ | ❌ | ✅ | ✅ |
 | Structs | ❌ | ❌ | ✅ | ✅ |
 | Traits | ❌ | ❌ | ❌ | 🤔 |
-| **Godot** |
+| **Godot** | | | | |
 | GDExtension | ✅ | ✅ | ✅ | ✅ |
 | Vector2, Node | ✅ | ✅ | ✅ | ✅ |
 | _ready,_process | ✅ | ✅ | ✅ | ✅ |
@@ -194,7 +194,7 @@ During v0.X.Y (pre-stable):
 | Signals | ❌ | ❌ | ✅ | ✅ |
 | Custom properties | ❌ | ❌ | ✅ | ✅ |
 | 3D support | ❌ | ❌ | ❌ | 🤔 |
-| **Tooling** |
+| **Tooling** | | | | |
 | Tests | ✅ | ✅ | ✅ | ✅ |
 | CI/CD | ✅ | ✅ | ✅ | ✅ |
 | Syntax highlighting | ❌ | ✅ | ✅ | ✅ |

@@ -142,37 +142,37 @@ Hello, Godot! FerrisScript is working!
 
 Test with different example files:
 
-**Test 1: Branch Logic**
+#### Test 1: Branch Logic
 
 - Set `script_path` to `res://../examples/branch.ferris`
 - Run scene
 - Should see output from if/else branches
 
-**Test 2: Global Variables**
+#### Test 2: Global Variables
 
 - Set `script_path` to `res://../examples/bounce.ferris`
 - Run scene
 - Should initialize without errors (no output expected yet)
 
-**Test 3: Functions**
+#### Test 3: Functions
 
 - Set `script_path` to `res://../examples/functions.ferris`
 - Run scene
 - Should execute function definitions without errors
 
-**Test 4: Error Handling**
+#### Test 4: Error Handling
 
 - Set `script_path` to `res://../examples/type_error.ferris`
 - Run scene
 - Should see error message in console: "Type mismatch..."
 
-**Test 5: Invalid Path**
+#### Test 5: Invalid Path
 
 - Set `script_path` to `res://nonexistent.ferris`
 - Run scene
 - Should see error: "Failed to read script file..."
 
-**Test 6: Hot Reload**
+#### Test 6: Hot Reload
 
 - Run scene with hello.ferris
 - Edit hello.ferris (change the message)
@@ -185,31 +185,31 @@ Test with different example files:
 
 ### Extension Not Loading
 
-**Error: "Can't open dynamic library"**
+#### Error: "Can't open dynamic library"
 
 - Solution: Rebuild the extension with `cargo build --package FerrisScript_godot_bind`
 - Verify the DLL/SO/DYLIB file exists in target/debug/
 - Check that the path in `FerrisScript.gdextension` matches your build location
 
-**Error: "No loader found for resource"**
+#### Error: "No loader found for resource"
 
 - Solution: Ensure `FerrisScript.gdextension` is in the project root
 - Verify the entry_symbol is correct: `gdext_rust_init`
 
-**Error: "Entry symbol not found"**
+#### Error: "Entry symbol not found"
 
 - Solution: This usually means the Rust crate type isn't set correctly
 - Verify `crate-type = ["cdylib"]` in `godot_bind/Cargo.toml`
 
 ### Script Not Loading
 
-**Error: "Failed to read script file"**
+#### Error: "Failed to read script file"
 
 - Check that the path is correct relative to Godot project
 - Try absolute path: `Y:/cpark/Projects/FerrisScript/examples/hello.ferris`
 - Verify file exists and has .ferris extension
 
-**Error: "Failed to compile script"**
+#### Error: "Failed to compile script"
 
 - Check the script for syntax errors
 - Run the compiler tests to verify: `cargo test -p FerrisScript_compiler`
@@ -217,7 +217,7 @@ Test with different example files:
 
 ### Runtime Errors
 
-**Error: "Error calling function '_ready'"**
+#### Error: "Error calling function '_ready'"
 
 - Check that the script defines a `_ready()` function
 - Verify function signature is correct: `fn _ready() { ... }`

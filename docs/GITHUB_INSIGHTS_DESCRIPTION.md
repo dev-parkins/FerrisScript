@@ -112,7 +112,7 @@ We welcome contributions! Check out our [good first issues](https://github.com/d
 
 ---
 
-**Made with 🦀 and ❤️ for the Godot community**
+Made with 🦀 and ❤️ for the Godot community
 ```
 
 ---
@@ -166,4 +166,4 @@ performance and safety of Rust with the ease of use of a scripting language.
 
 ---
 
-**Made with 🦀 and ❤️ for the Godot community**
+Made with 🦀 and ❤️ for the Godot community

@@ -414,4 +414,4 @@ All deliverables completed with proper cross-referencing, no duplication, and co
 
 ---
 
-**Made with 🦀 and ❤️ for the Godot community**
+Made with 🦀 and ❤️ for the Godot community

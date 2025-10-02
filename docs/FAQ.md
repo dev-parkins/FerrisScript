@@ -478,4 +478,4 @@ See [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) for detailed roadmap.
 
 ---
 
-**Made with 🦀 and ❤️ for the Godot community**
+Made with 🦀 and ❤️ for the Godot community

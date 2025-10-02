@@ -128,29 +128,29 @@ For detailed installation instructions, see the [README.md Installation section]
 
 1. **Fork and clone the repository**:
 
-```bash
-# Fork via GitHub UI, then:
-git clone https://github.com/YOUR_USERNAME/FerrisScript.git
-cd FerrisScript
-```
+   ```bash
+   # Fork via GitHub UI, then:
+   git clone https://github.com/YOUR_USERNAME/FerrisScript.git
+   cd FerrisScript
+   ```
 
 2. **Add the upstream remote**:
 
-```bash
-git remote add upstream https://github.com/dev-parkins/FerrisScript.git
-```
+   ```bash
+   git remote add upstream https://github.com/dev-parkins/FerrisScript.git
+   ```
 
 3. **Build the project**:
 
-```bash
-cargo build
-```
+   ```bash
+   cargo build
+   ```
 
 4. **Run the tests** to verify your setup:
 
-```bash
-cargo test
-```
+   ```bash
+   cargo test
+   ```
 
 All 96 tests should pass. If they don't, please open an issue.
 
@@ -176,33 +176,33 @@ We use a **feature branch workflow** with **squash and merge** strategy.
 
 1. **Create a feature branch** with a descriptive name:
 
-```bash
-git checkout -b feature/your-feature-name
-# or
-git checkout -b fix/bug-description
-```
+   ```bash
+   git checkout -b feature/your-feature-name
+   # or
+   git checkout -b fix/bug-description
+   ```
 
 2. **Make your changes** in small, logical commits:
 
-```bash
-git add .
-git commit -m "feat: add new feature"
-# or
-git commit -m "fix: resolve issue with parser"
-```
+   ```bash
+   git add .
+   git commit -m "feat: add new feature"
+   # or
+   git commit -m "fix: resolve issue with parser"
+   ```
 
 3. **Keep your branch up to date**:
 
-```bash
-git fetch upstream
-git rebase upstream/main
-```
+   ```bash
+   git fetch upstream
+   git rebase upstream/main
+   ```
 
 4. **Push your branch**:
 
-```bash
-git push origin feature/your-feature-name
-```
+   ```bash
+   git push origin feature/your-feature-name
+   ```
 
 5. **Open a Pull Request** via GitHub:
    - Use a clear, descriptive title
@@ -399,4 +399,4 @@ Thank you for contributing to FerrisScript! 🦀❤️
 
 ---
 
-**Made with 🦀 and ❤️ for the Godot community**
+Made with 🦀 and ❤️ for the Godot community

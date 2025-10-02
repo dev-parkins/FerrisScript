@@ -478,7 +478,7 @@ Currently supported `self` properties:
 2. **JIT compilation**: Compile to machine code at runtime
 3. **Tree-walking**: Directly execute AST
 
-**Decision: Tree-walking**
+### Decision: Tree-walking
 
 **Reasons:**
 
@@ -502,7 +502,7 @@ Currently supported `self` properties:
 2. **GDExtension**: Native Rust extension
 3. **Standalone VM**: External process communicating via IPC
 
-**Decision: GDExtension**
+### Decision: GDExtension
 
 **Reasons:**
 
@@ -519,7 +519,7 @@ Currently supported `self` properties:
 
 ### Why No Garbage Collection?
 
-**Decision: Static scoping + no heap allocation**
+#### Decision: Static scoping + no heap allocation
 
 FerrisScript currently has **no dynamic memory allocation** in scripts:
 
@@ -543,7 +543,7 @@ Currently not needed for game scripting use cases.
 2. **C-like**: Curly braces, semicolons
 3. **Lua-like**: Minimal syntax, `end` keywords
 
-**Decision: Rust-like**
+### Decision: Rust-like
 
 **Reasons:**
 

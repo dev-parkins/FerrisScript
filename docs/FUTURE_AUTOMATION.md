@@ -162,4 +162,4 @@ When planning v0.0.3 or v0.1.0, review this document for automation opportunitie
 
 ---
 
-**End of Future Automation Ideas**
+End of Future Automation Ideas

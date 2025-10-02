@@ -2,10 +2,10 @@
   <img src="assets/ferrisscript-logo.png" alt="FerrisScript Logo" width="300"/>
   
 # FerrisScript 🦀
-  
-  **A Rust-inspired scripting language for Godot 4.x**
-  
-  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+A Rust-inspired scripting language for Godot 4.x
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
   [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
   [![Godot](https://img.shields.io/badge/godot-4.2%2B-blue.svg)](https://godotengine.org/)
   
@@ -470,4 +470,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with 🦀 and ❤️ for the Godot community**
+Made with 🦀 and ❤️ for the Godot community
