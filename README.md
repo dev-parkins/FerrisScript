@@ -1,10 +1,15 @@
-# FerrisScript 🦀
-
-> **A Rust-inspired scripting language for Godot 4.x**
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
-[![Godot](https://img.shields.io/badge/godot-4.2%2B-blue.svg)](https://godotengine.org/)
+<div align="center">
+  <img src="assets/ferrisscript-logo.png" alt="FerrisScript Logo" width="300"/>
+  
+  # FerrisScript 🦀
+  
+  **A Rust-inspired scripting language for Godot 4.x**
+  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+  [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
+  [![Godot](https://img.shields.io/badge/godot-4.2%2B-blue.svg)](https://godotengine.org/)
+  
+</div>
 
 FerrisScript (named after [Ferris 🦀](https://rustacean.net/), the Rust mascot) is a **statically-typed, Rust-inspired scripting language** designed specifically for Godot 4.x game development. It brings Rust's safety and performance philosophy to game scripting while maintaining a lightweight, easy-to-learn syntax.
 
