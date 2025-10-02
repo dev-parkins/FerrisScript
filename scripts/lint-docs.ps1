@@ -48,13 +48,14 @@ Get-ChildItem -Path . -Filter *.md -Recurse | Where-Object {
     $checkedFiles++
     Write-Host "   Checking: $($_.Name)" -ForegroundColor Gray
     $output = npx markdown-link-check $_.FullName --config .markdown-link-check.json 2>&1
+    $outputText = $output | Out-String
     
-    # Check for dead links in output
-    if ($output -match '\[✖\]') {
+    # Check for dead links in output (both [✖] and ERROR: patterns)
+    if ($outputText -match '\[✖\]' -or $outputText -match 'ERROR:') {
         $linkCheckFailed = $true
         Write-Host "   ❌ Dead links in: $($_.Name)" -ForegroundColor Red
         # Extract and show dead links
-        $output -split "`n" | Where-Object { $_ -match '\[✖\]' } | ForEach-Object {
+        $outputText -split "`n" | Where-Object { $_ -match '\[✖\]' } | ForEach-Object {
             Write-Host "      $_" -ForegroundColor Red
             $deadLinks += "File: $($_.Name) - $_"
         }

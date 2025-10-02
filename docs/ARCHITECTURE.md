@@ -935,7 +935,7 @@ To test with Godot:
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute to FerrisScript. When making architectural changes:
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for how to contribute to FerrisScript. When making architectural changes:
 
 1. **Discuss in an issue first**: Avoid wasted effort on rejected designs
 2. **Update this document**: Keep ARCHITECTURE.md in sync with code

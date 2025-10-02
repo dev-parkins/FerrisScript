@@ -88,7 +88,7 @@ ferrisscript/
 
 ### 1. Choose a Task
 
-Check the roadmap in [ARCHITECTURE.md](../ARCHITECTURE.md) or create an issue for new features.
+Check the roadmap in [ARCHITECTURE.md](ARCHITECTURE.md) or create an issue for new features.
 
 ### 2. Create a Branch
 
@@ -429,7 +429,7 @@ Before submitting a PR:
 
 ### FerrisScript Docs
 
-- [ARCHITECTURE.md](../ARCHITECTURE.md) - Technical design and decisions
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Technical design and decisions
 - [RELEASE_NOTES.md](../RELEASE_NOTES.md) - Release information
 - [docs/archive/](archive/) - Version-specific development docs
 

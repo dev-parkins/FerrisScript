@@ -11,6 +11,18 @@
     },
     {
       "pattern": "^https://127.0.0.1"
+    },
+    {
+      "comment": "GitHub settings pages require authentication",
+      "pattern": "^https://github.com/.*/settings"
+    },
+    {
+      "comment": "Shields.io status page has CORS issues in CI",
+      "pattern": "^https://status.shields.io"
+    },
+    {
+      "comment": "Mailto links cannot be verified",
+      "pattern": "^mailto:"
     }
   ],
   "replacementPatterns": [],

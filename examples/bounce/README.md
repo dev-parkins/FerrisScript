@@ -478,7 +478,7 @@ fn _process(delta: f32) {
 }
 ```
 
-**Note**: Rotation is not yet implemented in FerrisScript v0.0.1. See [ROADMAP.md](../../docs/ROADMAP.md).
+**Note**: Rotation is not yet implemented in FerrisScript v0.0.1. See [v0.1.0-ROADMAP.md](../../docs/v0.1.0-ROADMAP.md) for planned features.
 
 ## Real-World Use Cases
 
@@ -518,8 +518,8 @@ func _process(delta):
 After understanding this example:
 
 1. **Try the variations** above to explore conditionals and state
-2. **Read [LANGUAGE_REFERENCE.md](../../docs/LANGUAGE_REFERENCE.md)**: Learn about all operators and control flow
-3. **Explore [ARCHITECTURE.md](../../docs/ARCHITECTURE.md)**: Understand how global variables work internally
+2. **Read [ARCHITECTURE.md](../../docs/ARCHITECTURE.md)**: Learn about the language design and how features like global variables work internally
+3. **Explore [v0.1.0-ROADMAP.md](../../docs/v0.1.0-ROADMAP.md)**: See what's planned for future releases
 4. **Build your own**: Try making a simple game (Pong, Breakout, etc.)
 
 ## Questions?

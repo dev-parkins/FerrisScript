@@ -77,7 +77,7 @@ cargo build --workspace --release
 4. Add `FerrisScriptNode` to your scene
 5. Set the `script_path` property to your script
 
-See [README.md](README.md) for detailed instructions.
+See [README.md](../../../README.md) for detailed instructions.
 
 ### 📝 Example Scripts
 
@@ -166,7 +166,7 @@ cargo test --workspace -- --show-output
 - ⚠️ Interpreted execution (no bytecode)
 - ⚠️ Value cloning (no reference counting)
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical details.
+See [ARCHITECTURE.md](../../../docs/ARCHITECTURE.md) for full technical details.
 
 ### 🐛 Known Issues
 
@@ -212,11 +212,11 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical details.
 
 ### 📄 License
 
-FerrisScript is licensed under the [MIT License](LICENSE).
+FerrisScript is licensed under the [MIT License](../../../LICENSE).
 
 ### 🤝 Contributing
 
-Contributions are welcome! Please see [README.md](README.md) for contribution guidelines.
+Contributions are welcome! Please see [README.md](../../../README.md) for contribution guidelines.
 
 ### 📧 Contact
 

@@ -250,7 +250,7 @@ fn _process(delta: f32) {
 }
 ```
 
-**Note**: Input handling is not yet implemented in FerrisScript v0.0.1. See [ROADMAP.md](../../docs/ROADMAP.md).
+**Note**: Input handling is not yet implemented in FerrisScript v0.0.1. See [v0.1.0-ROADMAP.md](../../docs/v0.1.0-ROADMAP.md) for planned features.
 
 ### 6. Print Position (Debugging)
 
@@ -313,8 +313,8 @@ func _process(delta):
 After understanding this example:
 
 1. **[Bounce Example](../bounce/README.md)**: Add boundaries and conditionals
-2. **[LANGUAGE_REFERENCE.md](../../docs/LANGUAGE_REFERENCE.md)**: Learn about variables, types, and operators
-3. **[ARCHITECTURE.md](../../docs/ARCHITECTURE.md)**: Understand how `self.position` works internally
+2. **[ARCHITECTURE.md](../../docs/ARCHITECTURE.md)**: Learn about variables, types, operators, and how `self.position` works internally
+3. **[v0.1.0-ROADMAP.md](../../docs/v0.1.0-ROADMAP.md)**: See what's planned for future releases
 
 ## Questions?
 
