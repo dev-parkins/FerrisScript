@@ -7,7 +7,7 @@
 
 ## What Was Built
 
-Phase 6 implements complete Godot integration for RustyScript:
+Phase 6 implements complete Godot integration for FerrisScript:
 
 ### Core Features
 ✅ **GDExtension Setup**
@@ -15,14 +15,14 @@ Phase 6 implements complete Godot integration for RustyScript:
 - Configured for Windows/Linux/macOS
 - Extension builds successfully (3.5 MB DLL)
 
-✅ **RustyScriptNode Class**
-- Custom Godot Node that loads .rscr files
+✅ **FerrisScriptNode Class**
+- Custom Godot Node that loads .ferris files
 - `script_path` property (visible in Godot Inspector)
 - `reload_script()` method for hot-reloading
 - Proper Godot lifecycle integration
 
 ✅ **Script Loading & Compilation**
-- Reads .rscr files from filesystem
+- Reads .ferris files from filesystem
 - Compiles using our compiler
 - Caches compiled AST per node instance
 - Error handling with Godot console output
@@ -35,15 +35,15 @@ Phase 6 implements complete Godot integration for RustyScript:
 
 ✅ **Test Infrastructure**
 - Complete Godot test project (`godot_test/`)
-- Example scene configured for hello.rscr
+- Example scene configured for hello.ferris
 - Comprehensive testing documentation (150+ lines)
 
 ### Build Verification ✅
 
 ```powershell
 # All automated checks pass:
-✅ cargo build --package rustyscript_godot_bind  # SUCCESS
-✅ DLL exists: target/debug/rustyscript_godot_bind.dll (3.5 MB)
+✅ cargo build --package FerrisScript_godot_bind  # SUCCESS
+✅ DLL exists: target/debug/FerrisScript_godot_bind.dll (3.5 MB)
 ✅ All 88 workspace tests pass (69 compiler + 18 runtime + 1 godot)
 ✅ No compilation errors or warnings
 ```
@@ -57,20 +57,20 @@ The following **cannot be automated** and require actual Godot testing:
 ### Critical Tests (Must Pass)
 
 1. **Extension Loading**
-   - [ ] Godot loads `rustyscript.gdextension` without errors
+   - [ ] Godot loads `FerrisScript.gdextension` without errors
    - [ ] No "Can't open dynamic library" errors
 
 2. **Node Registration**
-   - [ ] RustyScriptNode appears in "Create New Node" dialog
-   - [ ] Can add RustyScriptNode to scene
+   - [ ] FerrisScriptNode appears in "Create New Node" dialog
+   - [ ] Can add FerrisScriptNode to scene
 
 3. **Property Exposure**
    - [ ] `script_path` property visible in Inspector
-   - [ ] Can set path to `res://../examples/hello.rscr`
+   - [ ] Can set path to `res://../examples/hello.ferris`
 
 4. **Script Execution**
    - [ ] Scene runs without crashing
-   - [ ] Console shows: "Successfully loaded RustyScript: ..."
+   - [ ] Console shows: "Successfully loaded FerrisScript: ..."
    - [ ] Console shows: "Hello, Godot!"
 
 5. **Error Handling**
@@ -87,7 +87,7 @@ The following **cannot be automated** and require actual Godot testing:
 1. **Open Godot 4.2+**
    ```
    File → Import
-   Navigate to: Y:\cpark\Projects\RustyScript\godot_test\project.godot
+   Navigate to: Y:\cpark\Projects\FerrisScript\godot_test\project.godot
    Click: Import & Edit
    ```
 
@@ -99,7 +99,7 @@ The following **cannot be automated** and require actual Godot testing:
 3. **Check Output panel** (bottom of Godot editor)
    ```
    Expected output:
-   Successfully loaded RustyScript: res://../examples/hello.rscr
+   Successfully loaded FerrisScript: res://../examples/hello.ferris
    Hello, Godot!
    ```
 
@@ -125,16 +125,16 @@ Phase 6 is **complete** when all these are verified:
 
 ### Godot Integration (Requires Manual Testing ⚠️)
 - [ ] Extension loads in Godot without errors
-- [ ] RustyScriptNode appears in node list
+- [ ] FerrisScriptNode appears in node list
 - [ ] script_path property works
 - [ ] Can set path to example files
 - [ ] Scene runs without crashing
 
 ### Runtime Execution (Requires Manual Testing ⚠️)
-- [ ] hello.rscr prints "Hello, Godot!"
-- [ ] branch.rscr executes without errors
-- [ ] functions.rscr executes without errors
-- [ ] type_error.rscr shows error message
+- [ ] hello.ferris prints "Hello, Godot!"
+- [ ] branch.ferris executes without errors
+- [ ] functions.ferris executes without errors
+- [ ] type_error.ferris shows error message
 - [ ] Invalid file path shows error message
 
 ### Advanced Features (Requires Manual Testing ⚠️)
@@ -165,8 +165,8 @@ Result: [ ] PASS  [ ] FAIL
 
 Checklist:
 [ ] Extension loads
-[ ] RustyScriptNode available
-[ ] hello.rscr works
+[ ] FerrisScriptNode available
+[ ] hello.ferris works
 [ ] Error handling works
 [ ] All tests documented passed
 
@@ -182,8 +182,8 @@ Signature: __________
 ## 📁 Files to Review
 
 ### Implementation Files
-- `crates/godot_bind/src/lib.rs` - RustyScriptNode implementation (115 lines)
-- `rustyscript.gdextension` - Extension manifest
+- `crates/godot_bind/src/lib.rs` - FerrisScriptNode implementation (115 lines)
+- `FerrisScript.gdextension` - Extension manifest
 
 ### Testing Files
 - `docs/PHASE6_TESTING.md` - Comprehensive testing guide
@@ -192,11 +192,11 @@ Signature: __________
 - `godot_test/README.md` - Quick start guide
 
 ### Example Scripts (for testing)
-- `examples/hello.rscr` - Basic print test
-- `examples/branch.rscr` - If/else test
-- `examples/loop.rscr` - While loop test
-- `examples/functions.rscr` - Function call test
-- `examples/type_error.rscr` - Error handling test
+- `examples/hello.ferris` - Basic print test
+- `examples/branch.ferris` - If/else test
+- `examples/loop.ferris` - While loop test
+- `examples/functions.ferris` - Function call test
+- `examples/type_error.ferris` - Error handling test
 
 ---
 
@@ -205,22 +205,22 @@ Signature: __________
 ### Common Issues
 
 **"Can't open dynamic library"**
-- Run: `cargo build --package rustyscript_godot_bind`
-- Verify: `target/debug/rustyscript_godot_bind.dll` exists
+- Run: `cargo build --package FerrisScript_godot_bind`
+- Verify: `target/debug/FerrisScript_godot_bind.dll` exists
 
 **"No loader found for resource"**
-- Verify: `rustyscript.gdextension` is in project root
+- Verify: `FerrisScript.gdextension` is in project root
 - Check: Extension symbol is `gdext_rust_init`
 
-**"RustyScriptNode not found"**
+**"FerrisScriptNode not found"**
 - Extension didn't load - check Godot Output for errors
 - Verify DLL is in correct location
 - Try restart Godot editor
 
 **Script doesn't load**
 - Check script_path is correct
-- Try absolute path: `Y:/cpark/Projects/RustyScript/examples/hello.rscr`
-- Verify .rscr file exists
+- Try absolute path: `Y:/cpark/Projects/FerrisScript/examples/hello.ferris`
+- Verify .ferris file exists
 
 ### Getting Help
 
@@ -245,7 +245,7 @@ Once manual tests pass, proceed to Phase 7:
 - Implement `_process(delta)` callback
 - Add per-frame script execution
 - Pass delta parameter to scripts
-- Test with move.rscr (moving objects)
+- Test with move.ferris (moving objects)
 
 ---
 
@@ -279,7 +279,7 @@ Once manual tests pass, proceed to Phase 7:
 - ✅ Documentation (testing guides, examples)
 
 **What this means:**
-- RustyScript can compile and execute code ✅
+- FerrisScript can compile and execute code ✅
 - Scripts can be loaded into Godot ✅
 - _ready() callbacks work ✅
 - Error handling is robust ✅
@@ -304,3 +304,4 @@ If you encounter any issues or have questions:
 5. Try absolute paths if relative paths fail
 
 **Ready to test in Godot!** 🎮
+

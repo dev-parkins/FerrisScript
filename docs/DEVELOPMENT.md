@@ -1,4 +1,4 @@
-# RustyScript Development Guide
+# FerrisScript Development Guide
 
 ## Quick Start
 
@@ -10,20 +10,20 @@
 
 ```powershell
 # Clone the repository (when available on GitHub)
-git clone https://github.com/yourusername/rustyscript.git
-cd rustyscript
+git clone https://github.com/yourusername/FerrisScript.git
+cd FerrisScript
 
 # Build all crates (except godot_bind which requires Godot setup)
-cargo build -p rustyscript_compiler -p rustyscript_runtime
+cargo build -p FerrisScript_compiler -p FerrisScript_runtime
 
 # Run tests
-cargo test -p rustyscript_compiler -p rustyscript_runtime
+cargo test -p FerrisScript_compiler -p FerrisScript_runtime
 ```
 
 ### Project Structure
 
 ```
-rustyscript/
+FerrisScript/
 ├── Cargo.toml              # Workspace configuration
 ├── docs/
 │   └── copilot-checklist.md # Development roadmap
@@ -31,10 +31,10 @@ rustyscript/
 │   ├── compiler/           # Lexer, parser, type checker
 │   ├── runtime/            # Execution engine
 │   └── godot_bind/         # Godot 4.x integration (gdext)
-└── examples/               # Example .rscr scripts
-    ├── hello.rscr          # Basic print example
-    ├── move.rscr           # Movement example
-    └── bounce.rscr         # Stateful bouncing example
+└── examples/               # Example .ferris scripts
+    ├── hello.ferris          # Basic print example
+    ├── move.ferris           # Movement example
+    └── bounce.ferris         # Stateful bouncing example
 ```
 
 ## Development Status
@@ -43,7 +43,7 @@ rustyscript/
 - [x] Git repository with proper .gitignore
 - [x] Workspace structure with compiler, runtime, godot_bind crates
 - [x] Godot 4.x compatibility (gdext instead of gdnative)
-- [x] Example .rscr files
+- [x] Example .ferris files
 
 ### 🔄 Next Steps (See docs/copilot-checklist.md)
 - [ ] Phase 2: Implement minimal lexer
@@ -79,3 +79,4 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/):
 ## License
 
 MIT (to be added)
+

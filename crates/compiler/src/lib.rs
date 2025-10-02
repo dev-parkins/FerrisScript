@@ -27,47 +27,47 @@ mod tests {
 
     #[test]
     fn test_compile_hello() {
-        let source = std::fs::read_to_string(example_path("hello.rscr")).unwrap();
+        let source = std::fs::read_to_string(example_path("hello.ferris")).unwrap();
         assert!(compile(&source).is_ok());
     }
 
     #[test]
     fn test_compile_move() {
-        let source = std::fs::read_to_string(example_path("move.rscr")).unwrap();
+        let source = std::fs::read_to_string(example_path("move.ferris")).unwrap();
         assert!(compile(&source).is_ok());
     }
 
     #[test]
     fn test_compile_bounce() {
-        let source = std::fs::read_to_string(example_path("bounce.rscr")).unwrap();
+        let source = std::fs::read_to_string(example_path("bounce.ferris")).unwrap();
         assert!(compile(&source).is_ok());
     }
 
     #[test]
     fn test_compile_branch() {
-        let source = std::fs::read_to_string(example_path("branch.rscr")).unwrap();
+        let source = std::fs::read_to_string(example_path("branch.ferris")).unwrap();
         let result = compile(&source);
         if let Err(e) = &result {
-            eprintln!("branch.rscr error: {}", e);
+            eprintln!("branch.ferris error: {}", e);
         }
         assert!(result.is_ok());
     }
 
     #[test]
     fn test_compile_loop() {
-        let source = std::fs::read_to_string(example_path("loop.rscr")).unwrap();
+        let source = std::fs::read_to_string(example_path("loop.ferris")).unwrap();
         assert!(compile(&source).is_ok());
     }
 
     #[test]
     fn test_compile_functions() {
-        let source = std::fs::read_to_string(example_path("functions.rscr")).unwrap();
+        let source = std::fs::read_to_string(example_path("functions.ferris")).unwrap();
         assert!(compile(&source).is_ok());
     }
 
     #[test]
     fn test_compile_type_error() {
-        let source = std::fs::read_to_string(example_path("type_error.rscr")).unwrap();
+        let source = std::fs::read_to_string(example_path("type_error.ferris")).unwrap();
         let result = compile(&source);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Type mismatch"));
@@ -75,13 +75,13 @@ mod tests {
 
     #[test]
     fn test_compile_scene() {
-        let source = std::fs::read_to_string(example_path("scene.rscr")).unwrap();
+        let source = std::fs::read_to_string(example_path("scene.ferris")).unwrap();
         assert!(compile(&source).is_ok());
     }
 
     #[test]
     fn test_compile_reload() {
-        let source = std::fs::read_to_string(example_path("reload.rscr")).unwrap();
+        let source = std::fs::read_to_string(example_path("reload.ferris")).unwrap();
         assert!(compile(&source).is_ok());
     }
 }

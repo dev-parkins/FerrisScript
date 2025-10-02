@@ -1,6 +1,6 @@
 # Phase 8 Testing Guide: Mutable State & Control Flow
 
-**Purpose**: Validate that mutable variables persist between frames and control flow works correctly in RustyScript
+**Purpose**: Validate that mutable variables persist between frames and control flow works correctly in FerrisScript
 
 **Last Updated**: October 1, 2025
 
@@ -11,8 +11,8 @@
 ### Setup
 1. Open Godot 4.2+ project from `godot_test/`
 2. Open the test scene (or create a new one)
-3. Add a `RustyScriptNode` (extends Node2D)
-4. Set `script_path` to `res://scripts/bounce_test.rscr`
+3. Add a `FerrisScriptNode` (extends Node2D)
+4. Set `script_path` to `res://scripts/bounce_test.ferris`
 5. Add a Sprite2D or ColorRect as child (for visualization)
 
 ### Expected Behavior
@@ -112,7 +112,7 @@ Node will bounce between x = -200 and x = 200
 - [x] Tests pass for mutable variable updates
 
 ### Phase 8.2: Persistent Script State ✅
-- [x] Environment stored in RustyScriptNode
+- [x] Environment stored in FerrisScriptNode
 - [x] Same env reused across _process calls
 - [x] Global variables persist between frames
 - [x] Tests demonstrate counter persistence
@@ -135,7 +135,7 @@ Node will bounce between x = -200 and x = 200
 ## 🧪 Extended Test Scenarios
 
 ### Scenario 1: Variable Boundaries
-Modify `bounce_test.rscr` to test edge cases:
+Modify `bounce_test.ferris` to test edge cases:
 ```rust
 let boundary: f32 = 50.0;  // Smaller boundary
 ```
@@ -148,7 +148,7 @@ let speed: f32 = 300.0;  // Faster movement
 Expected: Faster movement, same bouncing logic
 
 ### Scenario 3: Multiple Nodes
-Create 2+ RustyScriptNode instances with bounce_test.rscr
+Create 2+ FerrisScriptNode instances with bounce_test.ferris
 Expected: Each node has independent state (separate environments)
 
 ---
@@ -162,7 +162,7 @@ Expected: Each node has independent state (separate environments)
 - Node not visible (add child Sprite2D/ColorRect)
 
 **Solution:**
-1. Check console for "Successfully loaded RustyScript" message
+1. Check console for "Successfully loaded FerrisScript" message
 2. Check console for "Bounce test started" message
 3. Verify script_path property in Inspector
 
@@ -222,10 +222,10 @@ Overall Result: ✅ PASS / ⚠️ PARTIAL / ❌ FAIL
 ## 🎓 Learning Objectives
 
 By completing this test, you should understand:
-1. How mutable variables persist in RustyScript across frames
+1. How mutable variables persist in FerrisScript across frames
 2. How control flow (if statements) works in game loops
 3. How self property modification integrates with Godot
-4. Performance characteristics of RustyScript execution
+4. Performance characteristics of FerrisScript execution
 
 ---
 
@@ -237,3 +237,4 @@ Once all tests pass:
 3. Note performance characteristics
 4. Consider any improvements for future versions
 5. Proceed to Phase 9 (Polish & Documentation)
+

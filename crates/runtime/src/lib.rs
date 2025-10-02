@@ -1,4 +1,4 @@
-use rustyscript_compiler::ast::{self, BinaryOp, UnaryOp};
+use ferrisscript_compiler::ast::{self, BinaryOp, UnaryOp};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -688,7 +688,7 @@ pub fn call_function(name: &str, args: &[Value], env: &mut Env) -> Result<Value,
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rustyscript_compiler::compile;
+    use ferrisscript_compiler::compile;
 
     #[test]
     fn test_env_basic() {

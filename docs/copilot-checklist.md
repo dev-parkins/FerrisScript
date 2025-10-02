@@ -1,8 +1,10 @@
-# RustyScript 0.0.1 Development Checklist
+# FerrisScript 🦀 0.0.1 Development Checklist
 
 **Project Goal**: Create a minimal proof-of-concept Rust-inspired scripting language for Godot 4.x
 
-**Last Updated**: October 1, 2025
+**Named After**: Ferris 🦀, the Rust mascot
+
+**Last Updated**: January 2025
 
 ---
 
@@ -442,26 +444,24 @@ can be done later. Ready to proceed to Phase 7 (_process callback).
 
 ---
 
-## 🎉 Phase 9: Polish & Documentation (1-2 commits)
+### ✅ Phase 9: Polish & Documentation (1 commit) ✅
 
-- [ ] **9.1** Update README with build instructions
-  - Commit: `docs: add comprehensive build and usage instructions`
-  - How to build the workspace
-  - How to use in Godot projects
-  - Known limitations
-  - Future roadmap
+- [x] **9.1** Rebrand from RustyScript to FerrisScript
+  - Commit: `docs: phase 9 complete - rebrand to FerrisScript and add comprehensive documentation` ✅
+  - Renamed project to FerrisScript (after Ferris 🦀, the Rust mascot) ✅
+  - Updated all package names (rustyscript_* → ferrisscript_*) ✅
+  - Changed file extension (.rscr → .ferris) ✅
+  - Updated Godot class names (RustyScriptNode → FerrisScriptNode) ✅
+  - Updated GDExtension configuration (rustyscript.gdextension → ferrisscript.gdextension) ✅
+  - Fixed all test file references ✅
+  - All 96 tests passing ✅
 
-- [ ] **9.2** Add CI/CD configuration (optional)
-  - Commit: `ci: add GitHub Actions workflow`
-  - Run tests on push
-  - Build all targets
-  - Check formatting and clippy
-
-- [ ] **9.3** Create release notes for 0.0.1
-  - Commit: `docs: add 0.0.1 release notes`
-  - Summarize features
-  - Document examples
-  - List known issues
+- [x] **9.2** Create comprehensive documentation
+  - Main README.md with quick start, API reference, build instructions ✅
+  - godot_test/README.md with detailed testing guide ✅
+  - Updated all PHASE*_TESTING.md files with new branding ✅
+  - Added contribution guidelines ✅
+  - Added status and roadmap sections ✅
 
 ---
 

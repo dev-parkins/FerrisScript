@@ -1,5 +1,5 @@
 [package]
-name = "rustyscript_godot_bind"
+name = "ferrisscript_godot_bind"
 version = "0.0.1"
 edition = "2021"
 
@@ -7,8 +7,8 @@ edition = "2021"
 # gdext is the Godot 4.x Rust binding (formerly gdextension)
 # Using version 0.1 which is compatible with Godot 4.2+
 godot = "0.1"
-rustyscript_compiler = { path = "../compiler" }
-rustyscript_runtime = { path = "../runtime" }
+ferrisscript_compiler = { path = "../compiler" }
+ferrisscript_runtime = { path = "../runtime" }
 
 [lib]
 crate-type = ["cdylib"]

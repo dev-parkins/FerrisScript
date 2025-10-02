@@ -1,7 +1,7 @@
 use godot::prelude::*;
 use godot::classes::{FileAccess, file_access::ModeFlags};
-use rustyscript_compiler::{ast, compile};
-use rustyscript_runtime::{Env, Value, call_function, execute};
+use ferrisscript_compiler::{ast, compile};
+use ferrisscript_runtime::{Env, Value, call_function, execute};
 use std::cell::RefCell;
 
 // Thread-local storage for node properties during script execution
@@ -58,18 +58,18 @@ fn godot_print_builtin(args: &[Value]) -> Result<Value, String> {
     Ok(Value::Nil)
 }
 
-struct RustyScriptExtension;
+struct FerrisScriptExtension;
 
 #[gdextension]
-unsafe impl ExtensionLibrary for RustyScriptExtension {}
+unsafe impl ExtensionLibrary for FerrisScriptExtension {}
 
 #[derive(GodotClass)]
 #[class(base=Node2D)]  // Changed from Node to Node2D for position property
-pub struct RustyScriptNode {
+pub struct FerrisScriptNode {
     base: Base<Node2D>,
     
-    /// Path to the .rscr script file (e.g., "res://scripts/hello.rscr")
-    #[export(file = "*.rscr")]
+    /// Path to the .ferris script file (e.g., "res://scripts/hello.ferris")
+    #[export(file = "*.ferris")]
     script_path: GString,
     
     // Runtime state
@@ -79,9 +79,9 @@ pub struct RustyScriptNode {
 }
 
 #[godot_api]
-impl INode2D for RustyScriptNode {
+impl INode2D for FerrisScriptNode {
     fn init(base: Base<Node2D>) -> Self {
-        RustyScriptNode {
+        FerrisScriptNode {
             base,
             script_path: GString::new(),
             env: None,
@@ -105,7 +105,7 @@ impl INode2D for RustyScriptNode {
     fn process(&mut self, delta: f64) {
         // Execute _process function if script is loaded
         if self.script_loaded {
-            // Convert delta to Float (f32 for RustyScript)
+            // Convert delta to Float (f32 for FerrisScript)
             let delta_value = Value::Float(delta as f32);
             self.call_script_function_with_self("_process", &[delta_value]);
         }
@@ -113,8 +113,8 @@ impl INode2D for RustyScriptNode {
 }
 
 #[godot_api]
-impl RustyScriptNode {
-    /// Load and compile the RustyScript file
+impl FerrisScriptNode {
+    /// Load and compile the FerrisScript file
     fn load_script(&mut self) {
         let path_gstring = self.script_path.clone();
         let path = path_gstring.to_string();
@@ -155,7 +155,7 @@ impl RustyScriptNode {
         self.env = Some(env);
         self.script_loaded = true;
         
-        godot_print!("Successfully loaded RustyScript: {}", path);
+        godot_print!("Successfully loaded FerrisScript: {}", path);
     }
     
     /// Call a function in the loaded script with self binding
