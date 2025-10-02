@@ -1,5 +1,24 @@
 # Documentation Linting Fixes - Summary
 
+## How to Apply to PR #3
+
+The fixes have been made and are available in this branch. To apply them to PR #3 (`feature/docs-phase4`), run:
+
+```bash
+# Checkout the PR branch
+git checkout feature/docs-phase4
+
+# Cherry-pick the fix commits
+git cherry-pick 5f094f9 ee151d5
+
+# Push to update PR #3
+git push origin feature/docs-phase4
+```
+
+Alternatively, you can merge this branch into PR #3's branch.
+
+---
+
 ## What Was Fixed (Automatically)
 
 Successfully reduced markdown linting errors from **~1000** to **44** by auto-fixing simple formatting issues:
