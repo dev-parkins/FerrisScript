@@ -20,9 +20,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `docs/v0.0.2-QUICK-START.md` - Quick start guide
   - `docs/VALIDATION_REPORT.md` - Installation validation results
   - `docs/SINGLE_SOURCE_OF_TRUTH.md` - Anti-duplication matrix
+  - `docs/PHASE_TRACKING.md` - Action items for all phases
+  - `docs/FUTURE_AUTOMATION.md` - Godot CLI automation planning
+- **Community Documentation (Phase 2)**
+  - `CONTRIBUTING.md` - Comprehensive contribution guide with development setup, PR workflow, code style, and first-time contributor resources
+  - `CODE_OF_CONDUCT.md` - Contributor Covenant 2.1 code of conduct
+  - `.github/ISSUE_TEMPLATE/bug_report.md` - Bug report template with environment details
+  - `.github/ISSUE_TEMPLATE/feature_request.md` - Feature request template with use cases
+  - `.github/ISSUE_TEMPLATE/documentation.md` - Documentation improvement template
+  - `.github/ISSUE_TEMPLATE/config.yml` - Issue template configuration with links to Discussions and guides
+  - `.github/PULL_REQUEST_TEMPLATE.md` - PR template with checklist and type indicators
 
 ### Fixed
 - Installation instructions: corrected `cd` command to match actual repository directory name (`FerrisScript` instead of `ferrisscript`) for case-sensitive file systems (Linux/macOS)
+- README.md: removed 255 lines of corrupted duplicate source code that was appended after closing message
 
 ---
 
