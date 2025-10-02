@@ -1,11 +1,11 @@
 <div align="center">
   <img src="assets/ferrisscript-logo.png" alt="FerrisScript Logo" width="300"/>
   
-  # FerrisScript 🦀
-  
-  **A Rust-inspired scripting language for Godot 4.x**
-  
-  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+# FerrisScript 🦀
+
+A Rust-inspired scripting language for Godot 4.x
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
   [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
   [![Godot](https://img.shields.io/badge/godot-4.2%2B-blue.svg)](https://godotengine.org/)
   
@@ -47,6 +47,7 @@ cargo test --workspace
 ### Using in Godot
 
 1. **Build the GDExtension:**
+
    ```bash
    cargo build --package ferrisscript_godot_bind
    ```
@@ -56,6 +57,7 @@ cargo test --workspace
    - Import project from `godot_test/project.godot`
 
 3. **Create your first script:**
+
    ```rust
    // my_script.ferris
    fn _ready() {
@@ -227,6 +229,7 @@ cargo build --package ferrisscript_godot_bind
 ```
 
 This creates:
+
 - **Windows**: `target/debug/ferrisscript_godot_bind.dll`
 - **Linux**: `target/debug/libferrisscript_godot_bind.so`
 - **macOS**: `target/debug/libferrisscript_godot_bind.dylib`
@@ -274,6 +277,78 @@ fn _process(delta: f32) {
 2. In the Inspector, set `script_path` to `res://scripts/player.ferris`
 3. Run your game!
 
+## 📚 Examples
+
+FerrisScript comes with comprehensive examples to help you get started:
+
+### 🎯 [Hello World](examples/hello/README.md)
+
+**Difficulty**: Beginner  
+Learn the basics of FerrisScript with a simple "Hello, World!" script.
+
+- Using the `_ready()` lifecycle hook
+- Calling builtin functions (`print`)
+- Basic FerrisScript syntax
+
+```ferris
+fn _ready() {
+    print("Hello from FerrisScript!");
+}
+```
+
+**[📖 Full tutorial →](examples/hello/README.md)**
+
+### 🚀 [Move Example](examples/move/README.md)
+
+**Difficulty**: Beginner  
+Create smooth movement with frame-by-frame updates.
+
+- Using `_process(delta)` for animations
+- Accessing node properties (`self.position`)
+- Understanding delta time for framerate-independent movement
+
+```ferris
+fn _process(delta: f32) {
+    self.position.x += 50.0 * delta;
+}
+```
+
+**[📖 Full tutorial →](examples/move/README.md)**
+
+### ⚡ [Bounce Example](examples/bounce/README.md)
+
+**Difficulty**: Intermediate  
+Build a bouncing animation with boundary checks.
+
+- Global variables and state management
+- Conditional statements (`if`)
+- Direction reversal and boundary detection
+
+```ferris
+let mut dir: f32 = 1.0;
+
+fn _process(delta: f32) {
+    self.position.x += dir * 100.0 * delta;
+
+    if self.position.x > 10.0 {
+        dir = -1.0;
+    }
+    if self.position.x < -10.0 {
+        dir = 1.0;
+    }
+}
+```
+
+**[📖 Full tutorial →](examples/bounce/README.md)**
+
+### More Examples
+
+- **`functions.ferris`**: Function definitions and calls
+- **`collections.ferris`**: Arrays and dictionaries (v0.1.0+)
+- **`match.ferris`**: Pattern matching (v0.1.0+)
+
+See the [`examples/`](examples/) directory for all available scripts.
+
 ## 📚 API Reference
 
 ### Built-in Functions
@@ -288,6 +363,7 @@ fn _process(delta: f32) {
 ### Self Binding
 
 Access node properties via `self`:
+
 - `self.position` - Node's position (Vector2)
 - `self.position.x` - X coordinate (f32)
 - `self.position.y` - Y coordinate (f32)
@@ -394,4 +470,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with 🦀 and ❤️ for the Godot community**
+Made with 🦀 and ❤️ for the Godot community

@@ -91,8 +91,56 @@ Documentation improvements are always appreciated! This includes:
 1. Review the [Anti-Duplication Matrix](docs/SINGLE_SOURCE_OF_TRUTH.md) to ensure you're editing the primary location for content
 2. Link to existing documentation rather than duplicating it
 3. Follow the structure outlined in [Phase Tracking](docs/PHASE_TRACKING.md)
+4. **Run documentation linting locally** before pushing (see [Documentation Quality Checks](#documentation-quality-checks) below)
 
 Use the [documentation template](.github/ISSUE_TEMPLATE/documentation.md) when creating documentation-related issues.
+
+#### Documentation Quality Checks
+
+**IMPORTANT**: Always run documentation linting locally before pushing to catch issues early!
+
+We use automated tools to ensure documentation quality:
+
+- **markdownlint**: Checks markdown formatting consistency
+- **markdown-link-check**: Verifies all links work (internal and external)
+
+**Quick Setup** (first time only):
+
+```bash
+npm install
+```
+
+**Before Every Documentation Commit**:
+
+```bash
+# Option 1: VS Code Task (Recommended)
+# Press Ctrl+Shift+P, type "Run Task", select "Docs: Full Check"
+
+# Option 2: npm script
+npm run docs:check
+
+# Option 3: PowerShell script
+.\scripts\lint-docs.ps1
+
+# To auto-fix formatting issues:
+npm run docs:fix
+# or
+.\scripts\lint-docs.ps1 --fix
+```
+
+**What Gets Checked**:
+
+- ✅ Heading hierarchy and style
+- ✅ List formatting consistency
+- ✅ Code block formatting
+- ✅ Line length (soft limit: 120 chars)
+- ✅ Trailing whitespace
+- ✅ Internal links (broken references)
+- ✅ External links (with retries)
+
+**CI Integration**: These same checks run automatically on pull requests. Catching issues locally saves review time!
+
+See [scripts/README.md](scripts/README.md) for detailed documentation linting guide.
 
 ### Contributing Code
 
@@ -128,29 +176,29 @@ For detailed installation instructions, see the [README.md Installation section]
 
 1. **Fork and clone the repository**:
 
-```bash
-# Fork via GitHub UI, then:
-git clone https://github.com/YOUR_USERNAME/FerrisScript.git
-cd FerrisScript
-```
+   ```bash
+   # Fork via GitHub UI, then:
+   git clone https://github.com/YOUR_USERNAME/FerrisScript.git
+   cd FerrisScript
+   ```
 
 2. **Add the upstream remote**:
 
-```bash
-git remote add upstream https://github.com/dev-parkins/FerrisScript.git
-```
+   ```bash
+   git remote add upstream https://github.com/dev-parkins/FerrisScript.git
+   ```
 
 3. **Build the project**:
 
-```bash
-cargo build
-```
+   ```bash
+   cargo build
+   ```
 
 4. **Run the tests** to verify your setup:
 
-```bash
-cargo test
-```
+   ```bash
+   cargo test
+   ```
 
 All 96 tests should pass. If they don't, please open an issue.
 
@@ -176,33 +224,33 @@ We use a **feature branch workflow** with **squash and merge** strategy.
 
 1. **Create a feature branch** with a descriptive name:
 
-```bash
-git checkout -b feature/your-feature-name
-# or
-git checkout -b fix/bug-description
-```
+   ```bash
+   git checkout -b feature/your-feature-name
+   # or
+   git checkout -b fix/bug-description
+   ```
 
 2. **Make your changes** in small, logical commits:
 
-```bash
-git add .
-git commit -m "feat: add new feature"
-# or
-git commit -m "fix: resolve issue with parser"
-```
+   ```bash
+   git add .
+   git commit -m "feat: add new feature"
+   # or
+   git commit -m "fix: resolve issue with parser"
+   ```
 
 3. **Keep your branch up to date**:
 
-```bash
-git fetch upstream
-git rebase upstream/main
-```
+   ```bash
+   git fetch upstream
+   git rebase upstream/main
+   ```
 
 4. **Push your branch**:
 
-```bash
-git push origin feature/your-feature-name
-```
+   ```bash
+   git push origin feature/your-feature-name
+   ```
 
 5. **Open a Pull Request** via GitHub:
    - Use a clear, descriptive title
@@ -291,6 +339,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 
 **Types**:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation only
@@ -300,6 +349,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 - `chore`: Maintenance tasks
 
 **Examples**:
+
 ```
 feat(parser): add support for match expressions
 fix(lexer): handle escaped quotes in strings
@@ -397,4 +447,4 @@ Thank you for contributing to FerrisScript! 🦀❤️
 
 ---
 
-**Made with 🦀 and ❤️ for the Godot community**
+Made with 🦀 and ❤️ for the Godot community

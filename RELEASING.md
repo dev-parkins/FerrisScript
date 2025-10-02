@@ -39,6 +39,7 @@ git push -u origin main
 ```
 
 **Expected Output**:
+
 ```
 Enumerating objects: 500+, done.
 Counting objects: 100%, done.
@@ -98,6 +99,7 @@ git push origin v0.0.1
 ```
 
 **Expected Output**:
+
 ```
 To https://github.com/dev-parkins/FerrisScript.git
  * [new tag]         v0.0.1 -> v0.0.1
@@ -120,6 +122,7 @@ When the tag is pushed, GitHub Actions will automatically:
 5. ✅ Use RELEASE_NOTES.md as release description
 
 **Check Progress**:
+
 - Actions: https://github.com/dev-parkins/FerrisScript/actions
 - Releases: https://github.com/dev-parkins/FerrisScript/releases
 
@@ -154,6 +157,7 @@ Once the release workflow completes:
 ### 1. Verify Release Assets
 
 Check that all files are downloadable:
+
 - [ ] `ferrisscript-linux-x86_64.so`
 - [ ] `ferrisscript-windows-x86_64.dll`
 - [ ] `ferrisscript-macos-x86_64.dylib`
@@ -184,12 +188,14 @@ file ferrisscript-linux-x86_64.so
 ### 4. Announce Release
 
 Consider announcing on:
+
 - [ ] Godot Discord/Forum
 - [ ] Reddit (r/godot, r/rust)
 - [ ] Twitter/X with #godot #rustlang #gamedev
 - [ ] Dev.to or personal blog
 
 **Example Tweet**:
+
 ```
 🎉 FerrisScript v0.0.1 is here!
 
@@ -212,6 +218,7 @@ https://github.com/dev-parkins/FerrisScript
 ### Issue: Git Push Fails with "Permission Denied"
 
 **Solution**: Configure Git credentials
+
 ```bash
 # Using GitHub CLI
 gh auth login
@@ -224,12 +231,14 @@ ssh-keygen -t ed25519 -C "your-email@example.com"
 ### Issue: GitHub Actions Fails
 
 **Check**:
+
 1. Workflow file syntax: `.github/workflows/ci.yml`
 2. Rust version compatibility
 3. Dependency availability
 4. Platform-specific build issues
 
 **Debug**:
+
 ```bash
 # Run tests locally first
 cargo test --workspace
@@ -243,6 +252,7 @@ cargo build --target x86_64-apple-darwin
 ### Issue: Release Artifacts Missing
 
 **Check**:
+
 1. Workflow completed successfully
 2. Artifact upload steps passed
 3. Release job triggered by tag push
@@ -250,6 +260,7 @@ cargo build --target x86_64-apple-darwin
 
 **Manual Upload**:
 If automated upload fails, manually attach files:
+
 ```bash
 # Build locally
 cargo build --release
@@ -277,6 +288,7 @@ After release, monitor:
 After v0.0.1 release, plan for v0.1.0:
 
 **Priority Features**:
+
 1. Array/collection types
 2. For loops
 3. Match expressions  
@@ -284,11 +296,13 @@ After v0.0.1 release, plan for v0.1.0:
 5. Signal support
 
 **Tooling**:
+
 1. Language Server Protocol (LSP)
 2. Syntax highlighting plugin
 3. VS Code extension
 
 **Documentation**:
+
 1. Tutorial series
 2. API reference site
 3. Video tutorials

@@ -10,6 +10,7 @@
 4. In Inspector, change `Script Path` to `res://scripts/process_test.ferris`
 5. Press F5 to run
 6. **Expected Output (every 60 frames):**
+
    ```
    Process test started! Counting frames...
    60 frames passed! Delta was: 0.016667
@@ -31,7 +32,7 @@
 
 ## Acceptance Criteria
 
-### ✅ Phase 7 Complete When:
+### ✅ Phase 7 Complete When
 
 - [ ] **_process callback works**
   - Script's `_process(delta)` function is called every frame
@@ -63,30 +64,36 @@
 
 1. Close Godot if it's open
 2. Rebuild the extension:
+
    ```powershell
    cargo build --package FerrisScript_godot_bind
    ```
+
 3. Open Godot and import `godot_test/project.godot`
 
 ### Test Scenarios
 
 #### Scenario 1: Frame Counting
+
 - Script: `process_test.ferris`
 - Purpose: Verify _process is called and delta is valid
 - Pass Criteria: See periodic messages (every 60 frames)
 
 #### Scenario 2: Horizontal Movement
+
 - Script: `move_test.ferris`
 - Purpose: Verify self.position.x can be modified
 - Pass Criteria: Node moves smoothly to the right
 
 #### Scenario 3: Check Position Values
+
 1. Run with `move_test.ferris`
 2. Stop after 5 seconds
 3. Check Position in Inspector
 4. X should be approximately: initial_x + (50 * 5) = initial_x + 250
 
 #### Scenario 4: Verify Property Isolation
+
 1. Add a second FerrisScriptNode to the scene
 2. Set both to `move_test.ferris`
 3. Run the scene
@@ -96,22 +103,26 @@
 ## Troubleshooting
 
 ### Node doesn't move
+
 - Check that node type is FerrisScriptNode (not regular Node)
 - Verify script path is correct
 - Check console for errors
 - Ensure extension loaded successfully
 
 ### "Property 'position' not supported" error
+
 - FerrisScriptNode must inherit from Node2D
 - Rebuild extension if you changed base class
 - Restart Godot to reload extension
 
 ### FPS drops
+
 - Check Godot's profiler (Debug > Profiler)
 - Script execution should be <0.1ms per frame
 - If slow, may need optimization in runtime
 
 ### Position resets every frame
+
 - Check if script is being reloaded
 - Verify environment persists between frames
 - Global variables should maintain state
@@ -127,7 +138,7 @@ And in the scene view, you should see the node smoothly moving to the right at 5
 ## Next Steps After Validation
 
 Once Phase 7 tests pass:
+
 - Phase 8: Mutable state tracking
 - Phase 9: Polish and documentation
 - 0.0.1 release!
-

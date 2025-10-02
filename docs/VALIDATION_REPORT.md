@@ -33,6 +33,7 @@
 **Status:** ⚠️ **DEFERRED** - Will validate in Phase 3 (Godot integration testing)
 
 **Note:** Godot validation requires:
+
 - Installing Godot 4.2+
 - Testing `godot_test/project.godot` import
 - Testing `.ferris` script execution
@@ -49,6 +50,7 @@
 ### Command 1: Clone Repository
 
 **Documentation:**
+
 ```bash
 git clone https://github.com/dev-parkins/FerrisScript.git
 cd ferrisscript
@@ -57,15 +59,18 @@ cd ferrisscript
 **Issue Found:** ❌ **CRITICAL - Directory name mismatch**
 
 **Problem:**
+
 - README instructs: `cd ferrisscript` (lowercase)
 - Actual directory: `FerrisScript` (capitalized)
 - This will cause `cd` to fail on case-sensitive file systems (Linux, macOS)
 
 **Impact:**
+
 - **Windows:** Works (case-insensitive)
 - **Linux/macOS:** FAILS - directory not found
 
 **Fix Required:**
+
 ```bash
 # Option 1: Match actual directory name (recommended)
 git clone https://github.com/dev-parkins/FerrisScript.git
@@ -85,6 +90,7 @@ cd FerrisScript
 ### Command 2: Build the Project
 
 **Documentation:**
+
 ```bash
 cargo build --workspace
 ```
@@ -92,11 +98,13 @@ cargo build --workspace
 **Status:** ✅ **PASS** - Builds successfully
 
 **Build Time Measurement:**
+
 - **First build (clean):** Not measured (workspace already built)
 - **Rebuild (no changes):** ~1-2 seconds
 - **Expected first build:** 3-5 minutes (based on dependency count)
 
 **Output:** All crates compile successfully:
+
 - `rustyscript_compiler`
 - `rustyscript_runtime`
 - `rustyscript_godot_bind`
@@ -104,6 +112,7 @@ cargo build --workspace
 **Note:** Build uses `--workspace` flag correctly, compiling all 3 crates.
 
 **Recommendation for FAQ.md:**
+
 ```markdown
 **Q: How long does the build take?**
 A: First build typically takes 3-5 minutes on modern hardware due to dependency compilation. Subsequent builds are much faster (1-2 seconds if no changes).
@@ -114,6 +123,7 @@ A: First build typically takes 3-5 minutes on modern hardware due to dependency 
 ### Command 3: Run Tests
 
 **Documentation:**
+
 ```bash
 cargo test --workspace
 ```
@@ -121,6 +131,7 @@ cargo test --workspace
 **Status:** ✅ **PASS** - All tests passing
 
 **Test Results:**
+
 ```
 Test Summary:
 - rustyscript_compiler: 69 tests passed
@@ -140,6 +151,7 @@ Total: 96 tests, 0 failures
 ### Step 1: Build the GDExtension
 
 **Documentation:**
+
 ```bash
 cargo build --package ferrisscript_godot_bind
 ```
@@ -155,12 +167,14 @@ cargo build --package ferrisscript_godot_bind
 ### Step 2: Open the Test Project
 
 **Documentation:**
+
 - Open Godot 4.2+
 - Import project from `godot_test/project.godot`
 
 **Status:** ⚠️ **DEFERRED** - Requires Godot installation
 
 **Validation Checklist (for Phase 3):**
+
 - [ ] `godot_test/project.godot` file exists
 - [ ] Godot recognizes project structure
 - [ ] No import errors
@@ -172,6 +186,7 @@ cargo build --package ferrisscript_godot_bind
 ### Step 3: Create Your First Script
 
 **Documentation:**
+
 ```rust
 // my_script.ferris
 fn _ready() {
@@ -188,6 +203,7 @@ fn _process(delta: f32) {
 **File Extension Verified:** ✅ `.ferris` is correct (15+ example files use `.ferris`)
 
 **Validation Checklist (for Phase 3):**
+
 - [ ] Create `my_script.ferris` in Godot project
 - [ ] Verify syntax is correct
 - [ ] Test script execution in Godot
@@ -198,6 +214,7 @@ fn _process(delta: f32) {
 ### Step 4: Attach to a Node
 
 **Documentation:**
+
 - Add `FerrisScriptNode` to your scene
 - Set `script_path` to `res://scripts/my_script.ferris`
 - Run your game!
@@ -205,6 +222,7 @@ fn _process(delta: f32) {
 **Status:** ⚠️ **DEFERRED** - Requires Godot testing
 
 **Validation Checklist (for Phase 3):**
+
 - [ ] `FerrisScriptNode` exists in Godot
 - [ ] `script_path` property is available
 - [ ] Script executes when game runs
@@ -229,6 +247,7 @@ fn _process(delta: f32) {
 **Status:** ✅ **NO DUPLICATION**
 
 **Recommendation:**
+
 - Keep quick start (4 steps) in README
 - TROUBLESHOOTING.md should reference README for steps, not duplicate
 - If detailed Godot guide is needed, create `docs/GODOT_INTEGRATION.md` and link from README
@@ -246,6 +265,7 @@ fn _process(delta: f32) {
 ### Installation Section
 
 **Missing Information:**
+
 1. **Platform-specific notes:**
    - Windows: May need Visual Studio C++ tools
    - Linux: May need `libclang-dev`
@@ -259,6 +279,7 @@ fn _process(delta: f32) {
    - Users may not know if build completed correctly
 
 **Recommendations for TROUBLESHOOTING.md:**
+
 ```markdown
 ## Platform-Specific Prerequisites
 
@@ -272,9 +293,11 @@ sudo apt install libclang-dev build-essential
 ```
 
 ### macOS
+
 ```bash
 xcode-select --install
 ```
+
 ```
 
 ---
@@ -358,23 +381,27 @@ Based on testing with existing built workspace:
 ## 8. Validation Checklist
 
 ### Prerequisites
+
 - [x] Rust 1.70+ requirement verified
 - [ ] Godot 4.2+ requirement (deferred to Phase 3)
 - [x] Git requirement verified
 
 ### Installation Commands
+
 - [x] `git clone` command tested
 - [x] **`cd ferrisscript` FAILS on case-sensitive systems** ❌
 - [x] `cargo build --workspace` tested ✅
 - [x] `cargo test --workspace` tested ✅ (96/96 tests pass)
 
 ### Godot Integration
+
 - [x] `cargo build --package ferrisscript_godot_bind` tested ✅
 - [ ] Godot project import (deferred to Phase 3)
 - [ ] `.ferris` script creation (deferred to Phase 3)
 - [ ] `FerrisScriptNode` attachment (deferred to Phase 3)
 
 ### Documentation Quality
+
 - [x] No duplicate installation instructions ✅
 - [x] No duplicate Godot instructions ✅
 - [x] File extension `.ferris` correct ✅
@@ -384,18 +411,22 @@ Based on testing with existing built workspace:
 ## 9. Immediate Actions Required
 
 ### Action 1: Fix README.md Directory Name
+
 **Priority:** 🔴 CRITICAL  
 **File:** `README.md` (line 38)  
 **Change:**
+
 ```diff
 - cd ferrisscript
 + cd FerrisScript
 ```
 
 ### Action 2: Update CHANGELOG.md
+
 **Priority:** 🟡 MODERATE  
 **File:** `CHANGELOG.md`  
 **Add to [Unreleased] > Fixed:**
+
 ```markdown
 - Fixed installation instructions: corrected `cd` command to match actual repository directory name (case-sensitive systems)
 ```
@@ -420,16 +451,19 @@ The following validations require Godot installation and will be completed in **
 ## 11. Recommendations for Upcoming Documentation
 
 ### For CONTRIBUTING.md (Phase 2)
+
 - Link to README for installation steps (don't duplicate)
 - Add development-specific steps (running examples, adding tests)
 - Document `cargo fmt` and `cargo clippy` requirements
 
 ### For FAQ.md (Phase 3)
+
 - Include build time estimates (3-5 minutes first build)
 - Explain `.ferris` file extension
 - Common installation errors (link to TROUBLESHOOTING.md)
 
 ### For TROUBLESHOOTING.md (Phase 3)
+
 - Platform-specific prerequisites (Windows/Linux/macOS)
 - Build errors and solutions
 - Godot integration issues
@@ -445,6 +479,7 @@ The following validations require Godot installation and will be completed in **
 **Status:** ✅ Validation complete (pending Godot integration testing in Phase 3)
 
 **Next Steps:**
+
 1. Fix critical issue: Update README.md directory name
 2. Create `docs/SINGLE_SOURCE_OF_TRUTH.md` (Task 1.2)
 3. Update `DOCUMENTATION_INVENTORY.md` with findings
@@ -452,4 +487,4 @@ The following validations require Godot installation and will be completed in **
 
 ---
 
-**End of Validation Report**
+End of Validation Report

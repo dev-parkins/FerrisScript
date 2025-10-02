@@ -13,6 +13,7 @@ FerrisScript v0.0.1 is the initial proof-of-concept release of a Rust-inspired s
 ### ✨ Features
 
 #### Language Support
+
 - ✅ **Variables**: `let` (immutable) and `let mut` (mutable)
 - ✅ **Types**: `i32`, `f32`, `bool`, `String`, `Vector2`, `Node`
 - ✅ **Type Coercion**: Automatic `i32 → f32` conversion
@@ -24,6 +25,7 @@ FerrisScript v0.0.1 is the initial proof-of-concept release of a Rust-inspired s
 - ✅ **Field Access**: Chained access (e.g., `self.position.x`)
 
 #### Godot Integration
+
 - ✅ **GDExtension**: Full Godot 4.x integration via `gdext`
 - ✅ **FerrisScriptNode**: Custom node type (extends `Node2D`)
 - ✅ **Script Loading**: Load `.ferris` files from `res://` paths
@@ -33,6 +35,7 @@ FerrisScript v0.0.1 is the initial proof-of-concept release of a Rust-inspired s
 - ✅ **Error Reporting**: Compilation and runtime errors to Godot console
 
 #### Developer Experience
+
 - ✅ **96 Automated Tests**: Comprehensive test coverage
 - ✅ **Example Scripts**: 11 examples demonstrating all features
 - ✅ **Documentation**: Complete README, architecture docs, testing guides
@@ -42,6 +45,7 @@ FerrisScript v0.0.1 is the initial proof-of-concept release of a Rust-inspired s
 ### 📦 Installation
 
 #### Prerequisites
+
 - Rust 1.70+ with Cargo
 - Godot 4.2+
 
@@ -73,11 +77,12 @@ cargo build --workspace --release
 4. Add `FerrisScriptNode` to your scene
 5. Set the `script_path` property to your script
 
-See [README.md](README.md) for detailed instructions.
+See [README.md](../../../README.md) for detailed instructions.
 
 ### 📝 Example Scripts
 
 #### Hello World (`hello.ferris`)
+
 ```rust
 fn _ready() {
     print("Hello, Godot! FerrisScript is working!");
@@ -85,6 +90,7 @@ fn _ready() {
 ```
 
 #### Movement (`move.ferris`)
+
 ```rust
 fn _process(delta: f32) {
     self.position.x += 50.0 * delta;
@@ -92,6 +98,7 @@ fn _process(delta: f32) {
 ```
 
 #### Bouncing (`bounce.ferris`)
+
 ```rust
 let mut velocity: f32 = 100.0;
 
@@ -121,6 +128,7 @@ cargo test --workspace -- --show-output
 ```
 
 **Test Results**: 96/96 passing (100% success rate)
+
 - Compiler: 69 tests
 - Runtime: 26 tests
 - Godot Bind: 1 test
@@ -136,6 +144,7 @@ cargo test --workspace -- --show-output
 ### 🔍 Known Limitations
 
 #### Language Features
+
 - ❌ No struct definitions (only built-in types)
 - ❌ No enums or pattern matching
 - ❌ No generics
@@ -144,6 +153,7 @@ cargo test --workspace -- --show-output
 - ❌ No string interpolation
 
 #### Godot Integration
+
 - ❌ Limited Godot type support (only `Vector2`, `Node`)
 - ❌ No signals
 - ❌ No custom properties (only `position`)
@@ -152,10 +162,11 @@ cargo test --workspace -- --show-output
 - ❌ No editor integration
 
 #### Performance
+
 - ⚠️ Interpreted execution (no bytecode)
 - ⚠️ Value cloning (no reference counting)
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical details.
+See [ARCHITECTURE.md](../../../docs/ARCHITECTURE.md) for full technical details.
 
 ### 🐛 Known Issues
 
@@ -164,6 +175,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical details.
 ### 🛣️ Roadmap (v0.1.0+)
 
 #### Language Features
+
 - [ ] Struct definitions with methods
 - [ ] Enums and match expressions
 - [ ] Array and dictionary types
@@ -171,6 +183,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical details.
 - [ ] For loops
 
 #### Godot Integration
+
 - [ ] More Godot types (Color, Rect2, Transform2D, etc.)
 - [ ] Signal support
 - [ ] Custom properties
@@ -178,12 +191,14 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical details.
 - [ ] Hot reload
 
 #### Tooling
+
 - [ ] Language Server Protocol (LSP)
 - [ ] Syntax highlighting plugin
 - [ ] Debugger integration
 - [ ] REPL
 
 #### Performance
+
 - [ ] Bytecode compilation
 - [ ] Constant folding
 - [ ] Reference counting
@@ -197,11 +212,11 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical details.
 
 ### 📄 License
 
-FerrisScript is licensed under the [MIT License](LICENSE).
+FerrisScript is licensed under the [MIT License](../../../LICENSE).
 
 ### 🤝 Contributing
 
-Contributions are welcome! Please see [README.md](README.md) for contribution guidelines.
+Contributions are welcome! Please see [README.md](../../../README.md) for contribution guidelines.
 
 ### 📧 Contact
 

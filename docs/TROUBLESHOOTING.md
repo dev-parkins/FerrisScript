@@ -49,6 +49,7 @@ This guide helps you resolve common issues when building, testing, or using Ferr
    - Install
 
 3. **Verify installation:**
+
    ```powershell
    # Check if MSVC is available
    where link.exe
@@ -58,6 +59,7 @@ This guide helps you resolve common issues when building, testing, or using Ferr
    ```
 
 4. **Rebuild FerrisScript:**
+
    ```powershell
    cargo clean
    cargo build
@@ -74,16 +76,19 @@ This guide helps you resolve common issues when building, testing, or using Ferr
 **Solution:**
 
 1. Update Rust toolchain:
+
    ```powershell
    rustup update
    ```
 
 2. Add Windows MSVC target (usually installed by default):
+
    ```powershell
    rustup target add x86_64-pc-windows-msvc
    ```
 
 3. Clean and rebuild:
+
    ```powershell
    cargo clean
    cargo build
@@ -108,6 +113,7 @@ This guide helps you resolve common issues when building, testing, or using Ferr
    - Add: `Y:\cpark\Projects\RustyScript\target`
 
 4. **Use fewer parallel jobs:**
+
    ```powershell
    cargo build -j 2  # Limit to 2 parallel jobs
    ```
@@ -125,16 +131,19 @@ This guide helps you resolve common issues when building, testing, or using Ferr
 **Solution:**
 
 1. Check execution policy:
+
    ```powershell
    Get-ExecutionPolicy
    ```
 
 2. If "Restricted", allow scripts:
+
    ```powershell
    Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
    ```
 
 3. Verify Rust is in PATH:
+
    ```powershell
    echo $env:PATH | Select-String cargo
    ```
@@ -155,22 +164,26 @@ This guide helps you resolve common issues when building, testing, or using Ferr
 **Solution:**
 
 1. Install Xcode Command Line Tools:
+
    ```bash
    xcode-select --install
    ```
 
 2. Accept license agreement:
+
    ```bash
    sudo xcodebuild -license accept
    ```
 
 3. Verify installation:
+
    ```bash
    xcode-select -p
    # Should output: /Library/Developer/CommandLineTools
    ```
 
 4. Rebuild FerrisScript:
+
    ```bash
    cargo clean
    cargo build
@@ -187,17 +200,20 @@ This guide helps you resolve common issues when building, testing, or using Ferr
 **Solution:**
 
 1. Reinstall Command Line Tools:
+
    ```bash
    sudo rm -rf /Library/Developer/CommandLineTools
    xcode-select --install
    ```
 
 2. Reset Xcode developer directory:
+
    ```bash
    sudo xcode-select --reset
    ```
 
 3. Clean and rebuild:
+
    ```bash
    cargo clean
    cargo build
@@ -212,22 +228,26 @@ This guide helps you resolve common issues when building, testing, or using Ferr
 **Solution:**
 
 1. Check macOS SDK:
+
    ```bash
    xcrun --show-sdk-path
    ```
 
 2. Update Homebrew (if using):
+
    ```bash
    brew update
    brew upgrade
    ```
 
 3. Install required libraries:
+
    ```bash
    brew install llvm
    ```
 
 4. Update Rust:
+
    ```bash
    rustup update
    ```
@@ -239,6 +259,7 @@ This guide helps you resolve common issues when building, testing, or using Ferr
 **Cause:** macOS uses case-insensitive filesystem by default, but git preserves case.
 
 **Error Example:**
+
 ```bash
 cd ferrisscript  # ERROR: No such file or directory
 ```
@@ -246,6 +267,7 @@ cd ferrisscript  # ERROR: No such file or directory
 **Solution:**
 
 Use the correct capitalization:
+
 ```bash
 cd FerrisScript  # Correct
 ```
@@ -280,6 +302,7 @@ sudo pacman -S base-devel clang
 ```
 
 **Verify installation:**
+
 ```bash
 clang --version
 pkg-config --version
@@ -294,6 +317,7 @@ pkg-config --version
 **Solution:**
 
 1. Install specific libclang version:
+
    ```bash
    # Ubuntu/Debian
    sudo apt install libclang-14-dev
@@ -303,12 +327,14 @@ pkg-config --version
    ```
 
 2. Set LIBCLANG_PATH environment variable:
+
    ```bash
    export LIBCLANG_PATH=/usr/lib/llvm-14/lib
    cargo build
    ```
 
 3. Make permanent (add to `~/.bashrc` or `~/.zshrc`):
+
    ```bash
    echo 'export LIBCLANG_PATH=/usr/lib/llvm-14/lib' >> ~/.bashrc
    source ~/.bashrc
@@ -321,6 +347,7 @@ pkg-config --version
 **Cause:** Case-sensitive filesystem + incorrect directory name.
 
 **Error:**
+
 ```bash
 cd ferrisscript  # ERROR (lowercase)
 ```
@@ -328,6 +355,7 @@ cd ferrisscript  # ERROR (lowercase)
 **Solution:**
 
 Use the correct capitalization:
+
 ```bash
 cd FerrisScript  # Correct (capital F and S)
 ```
@@ -343,18 +371,21 @@ cd FerrisScript  # Correct (capital F and S)
 **Solution:**
 
 1. **For build directory issues:**
+
    ```bash
    # Take ownership of target directory
    sudo chown -R $USER:$USER target/
    ```
 
 2. **For cargo cache issues:**
+
    ```bash
    # Reset cargo permissions
    sudo chown -R $USER:$USER ~/.cargo/
    ```
 
 3. **Never use sudo with cargo:**
+
    ```bash
    # DON'T do this:
    sudo cargo build  # ❌ Bad - creates permission issues
@@ -405,6 +436,7 @@ cargo build --workspace
 **If still failing:**
 
 1. Delete Cargo.lock and target directory:
+
    ```bash
    rm Cargo.lock
    rm -rf target/
@@ -444,12 +476,14 @@ cargo build
 **Solution:**
 
 1. Clean rebuild:
+
    ```bash
    cargo clean
    cargo build --package ferrisscript_godot_bind
    ```
 
 2. Update gdext dependency (if on main branch):
+
    ```bash
    cargo update -p gdext
    ```
@@ -463,6 +497,7 @@ cargo build
 ### Error: Build succeeds but tests fail
 
 **Symptoms:**
+
 ```bash
 cargo test  # Some tests fail
 ```
@@ -470,17 +505,20 @@ cargo test  # Some tests fail
 **Solution:**
 
 1. **Check if specific crate has issues:**
+
    ```bash
    cargo test --package rustyscript_compiler  # Test compiler only
    cargo test --package rustyscript_runtime    # Test runtime only
    ```
 
 2. **Run with backtrace for details:**
+
    ```bash
    RUST_BACKTRACE=1 cargo test
    ```
 
 3. **Check test output:**
+
    ```bash
    cargo test -- --nocapture  # Show println! output
    ```
@@ -498,6 +536,7 @@ cargo test  # Some tests fail
 ### Issue: Godot doesn't recognize `.gdextension` file
 
 **Symptoms:**
+
 - `.ferris` scripts don't appear in Godot
 - No "FerrisScript" option in script creation dialog
 - Errors in Godot console about missing extension
@@ -505,11 +544,13 @@ cargo test  # Some tests fail
 **Solution:**
 
 1. **Verify `.gdextension` file location:**
+
    ```
    godot_test/addons/ferrisscript/ferrisscript.gdextension
    ```
 
 2. **Check `.gdextension` syntax:**
+
    ```ini
    [configuration]
    entry_symbol = "gdext_rust_init"
@@ -521,6 +562,7 @@ cargo test  # Some tests fail
    ```
 
 3. **Verify library file exists:**
+
    ```bash
    # Linux
    ls godot_test/addons/ferrisscript/bin/*.so
@@ -535,6 +577,7 @@ cargo test  # Some tests fail
 4. **Restart Godot editor** - GDExtensions load at startup
 
 5. **Check Godot version** - Must be 4.2 or later
+
    ```
    Godot → Help → About
    ```
@@ -548,12 +591,14 @@ cargo test  # Some tests fail
 **Solution:**
 
 1. **Verify your platform:**
+
    ```bash
    rustc --version --verbose
    # Look for "host:" line
    ```
 
 2. **Build for correct target:**
+
    ```bash
    # Linux
    cargo build --package ferrisscript_godot_bind --target x86_64-unknown-linux-gnu
@@ -566,6 +611,7 @@ cargo test  # Some tests fail
    ```
 
 3. **Rebuild and replace library:**
+
    ```bash
    cargo build --package ferrisscript_godot_bind --release
    # Copy from target/release/ to godot_test/addons/ferrisscript/bin/
@@ -576,6 +622,7 @@ cargo test  # Some tests fail
 ### Issue: `.ferris` scripts cause Godot to crash
 
 **Symptoms:**
+
 - Godot crashes when loading scene with FerrisScript
 - "Segmentation fault" or similar errors
 
@@ -592,11 +639,13 @@ cargo test  # Some tests fail
    - Check Godot Output console
 
 2. **Test script in isolation:**
+
    ```bash
    cargo run --bin rustyscript_runtime your_script.ferris
    ```
 
 3. **Simplify script to minimal reproduction:**
+
    ```ferris
    fn main() {
        println!("Hello");  // Start simple
@@ -616,6 +665,7 @@ cargo test  # Some tests fail
 ### Error: "type mismatch" when running `.ferris` script
 
 **Example:**
+
 ```
 Error: Expected type i32, found f32
 ```
@@ -667,6 +717,7 @@ fn main() {
 **Debugging steps:**
 
 1. **Add println! statements:**
+
    ```ferris
    fn calculate(x: i32) -> i32 {
        println!("Input: {}", x);  // Debug
@@ -677,6 +728,7 @@ fn main() {
    ```
 
 2. **Run tests:**
+
    ```bash
    cargo test
    ```
@@ -686,6 +738,7 @@ fn main() {
    - `f32` → `i32` requires explicit cast (not supported in v0.0.1)
 
 4. **Verify operator precedence:**
+
    ```ferris
    let x = 2 + 3 * 4;  // Result: 14 (not 20)
    ```
@@ -729,4 +782,4 @@ When reporting issues, include:
 
 ---
 
-**Made with 🦀 and ❤️ for the Godot community**
+Made with 🦀 and ❤️ for the Godot community
