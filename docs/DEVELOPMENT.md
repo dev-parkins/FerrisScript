@@ -18,8 +18,8 @@ This guide covers development setup, workflows, and contribution guidelines for 
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ferrisscript.git
-cd ferrisscript
+git clone https://github.com/dev-parkins/FerrisScript.git
+cd FerrisScript
 
 # Build all crates
 cargo build --workspace

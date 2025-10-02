@@ -49,8 +49,8 @@ FerrisScript v0.0.1 is the initial proof-of-concept release of a Rust-inspired s
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/ferrisscript.git
-cd ferrisscript
+git clone https://github.com/dev-parkins/FerrisScript.git
+cd FerrisScript
 
 # Build all crates
 cargo build --workspace
@@ -205,8 +205,9 @@ Contributions are welcome! Please see [README.md](README.md) for contribution gu
 
 ### 📧 Contact
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/ferrisscript/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/ferrisscript/discussions)
+- **Repository**: [github.com/dev-parkins/FerrisScript](https://github.com/dev-parkins/FerrisScript)
+- **Issues**: [GitHub Issues](https://github.com/dev-parkins/FerrisScript/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/dev-parkins/FerrisScript/discussions)
 
 ---
 
@@ -219,9 +220,11 @@ Contributions are welcome! Please see [README.md](README.md) for contribution gu
 - [x] License added (MIT)
 - [x] Project rebranded to FerrisScript
 - [x] File extensions updated (`.rscr` → `.ferris`)
-- [ ] GitHub repository created
-- [ ] CI/CD workflow configured
-- [ ] Release tagged and published
+- [x] GitHub repository created (dev-parkins/FerrisScript)
+- [x] CI/CD workflow configured
+- [ ] Code pushed to GitHub
+- [ ] Release tagged (v0.0.1)
+- [ ] Release published on GitHub
 
 ---
 

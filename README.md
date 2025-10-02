@@ -29,7 +29,7 @@ FerrisScript (named after [Ferris 🦀](https://rustacean.net/), the Rust mascot
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ferrisscript.git
+git clone https://github.com/dev-parkins/FerrisScript.git
 cd ferrisscript
 
 # Build the project
@@ -383,8 +383,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact & Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/ferrisscript/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/ferrisscript/discussions)
+- **Issues**: [GitHub Issues](https://github.com/dev-parkins/FerrisScript/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/dev-parkins/FerrisScript/discussions)
 - **Documentation**: [docs/](./docs/)
 
 ---
