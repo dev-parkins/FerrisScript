@@ -163,40 +163,55 @@
 
 ---
 
-### 🏃 Phase 5: Stub Runtime (2 commits)
+### ✅ Phase 5: Stub Runtime (1 commit)
 
-- [ ] **5.1** Implement runtime environment and value representation
-  - Commit: `feat(runtime): implement runtime value types and environment`
-  - Value enum (Int, Float, Bool, String, etc.)
-  - Environment struct with variable scopes
-  - Scope push/pop for block scoping
+- [x] **5.1** Implement runtime environment and value representation
+  - Commit: `feat(runtime): implement complete runtime execution with 18 tests` ✅
+  - Value enum (Int, Float, Bool, String, Vector2, Nil) ✅
+  - Environment struct with variable scopes ✅
+  - Scope push/pop for block scoping ✅
+  - Function registry for user-defined functions ✅
+  - Built-in function registry ✅
 
-- [ ] **5.2** Implement statement execution
-  - Commit: `feat(runtime): implement statement execution`
-  - Execute let bindings
-  - Execute expression statements
-  - Execute if/else conditionals
-  - Execute while loops
+- [x] **5.2** Implement statement execution
+  - Commit: Combined into single comprehensive runtime implementation ✅
+  - Execute let bindings ✅
+  - Execute expression statements ✅
+  - Execute if/else conditionals ✅
+  - Execute while loops ✅
+  - Execute return statements ✅
+  - Execute assignments (including field assignments) ✅
 
-- [ ] **5.3** Implement expression evaluation
-  - Commit: `feat(runtime): implement expression evaluation`
-  - Evaluate literals
-  - Evaluate variables (lookup in environment)
-  - Evaluate binary operations
-  - Type coercion and runtime checks
+- [x] **5.3** Implement expression evaluation
+  - Commit: Combined into single comprehensive runtime implementation ✅
+  - Evaluate literals (Int, Float, Bool, String) ✅
+  - Evaluate variables (lookup in environment) ✅
+  - Evaluate binary operations (arithmetic, comparison, logical) ✅
+  - Evaluate unary operations (negation, not) ✅
+  - Evaluate function calls (user-defined and built-in) ✅
+  - Evaluate field access (Vector2.x, Vector2.y) ✅
+  - Type coercion and runtime checks (i32 → f32) ✅
 
-- [ ] **5.4** Implement built-in function stubs
-  - Commit: `feat(runtime): add built-in function stubs (print, etc.)`
-  - `print()` function
-  - Other utility functions as needed
-  - Function registry system
+- [x] **5.4** Implement built-in function stubs
+  - Commit: Combined into single comprehensive runtime implementation ✅
+  - `print()` function with multi-argument support ✅
+  - Function registry system for extensibility ✅
+  - Clean separation of built-in vs user-defined functions ✅
 
-- [ ] **5.5** Add runtime unit tests
-  - Commit: `test(runtime): add runtime execution unit tests`
-  - Test variable binding and lookup
-  - Test expression evaluation
-  - Test control flow
-  - Test `hello.rscr` execution
+- [x] **5.5** Add runtime unit tests
+  - Commit: Combined into single comprehensive runtime implementation ✅
+  - Test variable binding and lookup ✅
+  - Test expression evaluation (18 comprehensive tests total) ✅
+  - Test control flow (if/else, while loops) ✅
+  - Test `hello.rscr` execution pattern ✅
+  - Test arithmetic operations ✅
+  - Test comparison and logical operations ✅
+  - Test global variables and mutable state ✅
+  - Test function parameters and returns ✅
+  - Test type coercion at runtime ✅
+  - Test Vector2 field access ✅
+  - Test error handling (division by zero, undefined variables) ✅
+  - All 18 runtime tests passing ✅
 
 ---
 
@@ -332,13 +347,16 @@
 3. **Performance**: Interpreted vs bytecode compilation for 0.0.1
 4. **Runtime Value Representation**: How to bridge Rust values with Godot types efficiently
 
-### Implementation Learnings (Phases 1-4):
+### Implementation Learnings (Phases 1-5):
 - **Lexer**: Line comments support added early was helpful for testing
 - **Parser**: Pratt parser handles precedence elegantly, easy to extend
 - **AST**: Adding Span early made error reporting much better
 - **Type Checker**: Scoped symbol tables prevent accidental variable shadowing issues
-- **Testing**: Comprehensive unit tests (61 tests) gave confidence in each phase
+- **Runtime**: Implementing full execution revealed importance of type coercion and proper scope management
+- **Testing**: Comprehensive unit tests (88 tests total) gave confidence in each phase
 - **Example Files**: Testing with real examples (hello.rscr, move.rscr, bounce.rscr) validated design decisions
+- **Value Representation**: Using simple enum for values works well for MVP, can optimize later
+- **Control Flow**: FlowControl enum pattern elegantly handles returns in nested scopes
 
 ### Known Limitations for 0.0.1:
 - No struct definitions
@@ -537,7 +555,7 @@ Now that the compiler is complete and validated, the next phase focuses on **run
 - Type coercion happens at runtime
 - All runtime tests pass
 
-### Commit History (12 commits total)
+### Commit History (14 commits total)
 
 1. `chore: initialize git repository with .gitignore`
 2. `feat: scaffold workspace structure with compiler, runtime, and godot_bind crates`
@@ -551,5 +569,138 @@ Now that the compiler is complete and validated, the next phase focuses on **run
 10. `test(compiler): add comprehensive type checker tests`
 11. `refactor(compiler): fix unused variable warning in type_checker`
 12. `Add 8 new example files with integration tests - all 69 tests passing` ✅
+13. `docs: add comprehensive Phase 4 checkpoint with feature matrix and test coverage` ✅
+14. `feat(runtime): implement complete runtime execution with 18 tests` ✅
+
+---
+
+## 🎯 Checkpoint: Phase 5 Complete - Runtime Execution
+
+**Date**: Current Session  
+**Commit**: `feat(runtime): implement complete runtime execution with 18 tests`  
+**Total Tests**: 88 passing (69 compiler + 18 runtime + 1 godot_bind)
+
+### Phase 5 Implementation Summary
+
+**Runtime Architecture:**
+- **Value Enum**: Supports Int, Float, Bool, String, Vector2, Nil types
+- **Environment**: Scoped variable storage with push/pop for blocks
+- **Function Registry**: Separate storage for user-defined and built-in functions
+- **Control Flow**: FlowControl enum tracks return statements through nested scopes
+- **Type Coercion**: Runtime support for i32 → f32 automatic conversion
+
+**Implemented Features:**
+1. **Statement Execution**:
+   - Let bindings with initialization
+   - Variable assignment (including field assignment for Vector2)
+   - If/else conditionals with proper branching
+   - While loops with condition checking
+   - Return statements with value propagation
+   - Expression statements
+
+2. **Expression Evaluation**:
+   - Literals: integers, floats, booleans, strings
+   - Variable lookup with scope chain traversal
+   - Binary operations: +, -, *, /, ==, !=, <, <=, >, >=, &&, ||
+   - Unary operations: -, !
+   - Function calls with parameter binding and scope isolation
+   - Field access for Vector2 (pos.x, pos.y)
+   - Type coercion for mixed integer/float arithmetic
+
+3. **Built-in Functions**:
+   - `print()`: Multi-argument printing with value formatting
+   - Extensible registry system for adding more built-ins
+
+4. **Error Handling**:
+   - Division by zero detection
+   - Undefined variable detection
+   - Type mismatch errors at runtime
+   - Function arity checking
+   - Invalid field access errors
+
+**Test Coverage (18 tests):**
+- ✅ Environment basics (set, get)
+- ✅ Scoped variable lookup
+- ✅ Value type coercion (to_float, to_bool)
+- ✅ Built-in print function
+- ✅ Literal evaluation
+- ✅ Arithmetic operations (with precedence)
+- ✅ Comparison operations
+- ✅ Logical operations (&&, ||, !)
+- ✅ If/else statements with branching
+- ✅ While loops with counter
+- ✅ Global mutable variables across function calls
+- ✅ Function parameters and return values
+- ✅ Runtime type coercion (i32 + f32 → f32)
+- ✅ Vector2 field access
+- ✅ Hello world pattern (print in _ready)
+- ✅ Unary negation
+- ✅ Division by zero error handling
+- ✅ Undefined variable error handling
+
+**Acceptance Criteria Met:**
+- ✅ Can execute `hello.rscr` pattern (print function works)
+- ✅ Variable binding and lookup works correctly across scopes
+- ✅ Control flow (if/else, while) executes as expected
+- ✅ Type coercion happens at runtime (i32 → f32)
+- ✅ All 18 runtime tests pass
+- ✅ Integration with compiler successful (88 total tests passing)
+
+### Feature Support Matrix Update
+
+| Feature | Lexer | Parser | Type Checker | Runtime | Godot | Example |
+|---------|-------|--------|--------------|---------|-------|---------|
+| Functions | ✅ | ✅ | ✅ | ✅ | ⏳ | functions.rscr |
+| Let bindings | ✅ | ✅ | ✅ | ✅ | ⏳ | All |
+| Mut variables | ✅ | ✅ | ✅ | ✅ | ⏳ | bounce.rscr |
+| If/else | ✅ | ✅ | ✅ | ✅ | ⏳ | branch.rscr |
+| While loops | ✅ | ✅ | ✅ | ✅ | ⏳ | loop.rscr |
+| Return | ✅ | ✅ | ✅ | ✅ | ⏳ | functions.rscr |
+| Binary ops | ✅ | ✅ | ✅ | ✅ | ⏳ | All |
+| Unary ops | ✅ | ✅ | ✅ | ✅ | ⏳ | bounce.rscr |
+| Field access | ✅ | ✅ | ✅ | ✅ | ⏳ | move.rscr |
+| Compound assign | ✅ | ✅ | ✅ | ⏳ | ⏳ | move.rscr |
+| Function calls | ✅ | ✅ | ✅ | ✅ | ⏳ | hello.rscr |
+| Type coercion | ✅ | ✅ | ✅ | ✅ | ⏳ | Implicit i32→f32 |
+| Global vars | ✅ | ✅ | ✅ | ✅ | ⏳ | bounce.rscr |
+| Built-in print | ✅ | ✅ | ✅ | ✅ | ⏳ | hello.rscr |
+| Vector2 | ✅ | ✅ | ✅ | ✅ | ⏳ | move.rscr |
+
+Legend: ✅ Complete | ⏳ Next phase | ❌ Not planned for 0.0.1
+
+**Note**: Compound assignment (+=, -=) is parsed and type-checked but needs explicit runtime support in statement execution (currently only supports basic assignment).
+
+### Key Technical Insights from Phase 5
+
+1. **AST Tuple Patterns**: The AST uses tuple-style enum variants (e.g., `Expr::Variable(String, Span)`), which is more compact than struct-style variants but requires pattern matching adjustments.
+
+2. **Scope Management**: The scoped Environment with push/pop works perfectly for function calls and block scoping, preventing variable leakage.
+
+3. **Control Flow Handling**: Using a `FlowControl` enum to track return statements elegantly handles early returns from nested control structures.
+
+4. **Type Coercion Strategy**: Runtime type coercion is explicit in arithmetic operations - if either operand is float, both are coerced to float. This matches user expectations while keeping implementation simple.
+
+5. **Function Registry Separation**: Keeping built-in and user-defined functions in separate registries makes it easy to extend the language with new built-ins without polluting the user namespace.
+
+6. **Error Messages**: Runtime errors include context (e.g., "Undefined variable: x") making debugging easier even without line numbers yet.
+
+7. **Testing Strategy**: Creating small, focused unit tests for each feature + integration tests with real code patterns catches bugs early and validates end-to-end functionality.
+
+### Next Steps (Phase 6)
+
+Now that we have a working compiler and runtime, Phase 6 focuses on **Godot Integration**:
+
+**Immediate Goals:**
+1. Set up gdext project structure properly
+2. Create RustyScriptNode GDExtension class
+3. Implement script loading from .rscr files
+4. Implement _ready callback integration
+5. Test hello.rscr actually running in Godot
+
+**Challenges to Address:**
+- Bridging Rust values to Godot's Variant system
+- Managing script lifetime with Godot's node lifecycle
+- Handling self binding for node property access
+- Error reporting from runtime to Godot console
 
 ---
