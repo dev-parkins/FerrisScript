@@ -1,7 +1,15 @@
 # Documentation Organization Guide 📚
 
-**Last Updated**: October 2025  
-**Purpose**: Explains where each type of documentation lives and why
+**Last Updated**: October 2, 2025  
+**Purpose**: Prevent `/docs` clutter by separating user-facing docs from development artifacts
+
+---
+
+## 🚨 Problem: Documentation Clutter (October 2025)
+
+As of October 2, 2025, `/docs` contains 18+ files mixing permanent docs with development artifacts, making it hard to find user-facing documentation.
+
+**Solution:** Implement `/docs/meta` directory structure (see below).
 
 ---
 
@@ -15,39 +23,79 @@ These files should **always** be in the project root:
 | `README.md` | Project overview, quick start | Per major release |
 | `LICENSE` | Legal license (MIT) | Rarely |
 | `CHANGELOG.md` | Complete version history | Every release |
-
-### Contributor Documentation
-| File | Purpose | Update Frequency |
-|------|---------|------------------|
-| `CONTRIBUTING.md` | How to contribute (TODO v0.0.2) | As needed |
-| `CODE_OF_CONDUCT.md` | Community guidelines (TODO v0.0.2) | Rarely |
-
-### Technical Documentation
-| File | Purpose | Update Frequency |
-|------|---------|------------------|
-| `ARCHITECTURE.md` | Technical design decisions | When design changes |
-| `RELEASE_NOTES.md` | Current release notes | Every release |
-| `RELEASING.md` | Release process guide | As process evolves |
+| `CONTRIBUTING.md` | ✅ How to contribute (v0.0.2) | As needed |
+| `CODE_OF_CONDUCT.md` | ✅ Community guidelines (v0.0.2) | Rarely |
 
 **Why root?** These are the first files developers look for. GitHub displays them prominently.
 
 ---
 
-## 📂 docs/ Directory
+## 📂 docs/ Root (User-Facing Permanent Documentation)
 
-For detailed documentation that doesn't need to be immediately visible:
+**New Strategy:** Only 5-6 permanent, user-facing docs in `/docs` root.
 
-### Planning Documents
-| File | Purpose | Lifecycle |
-|------|---------|-----------|
-| `VERSION_PLANNING.md` | Version strategy overview | Living document |
-| `v0.0.2-CHECKLIST.md` | Patch release plan | Active until v0.0.2 release |
-| `v0.1.0-ROADMAP.md` | Feature roadmap | Active until v0.1.0 release |
-| `DOCUMENTATION_INVENTORY.md` | Doc audit | Updated quarterly |
-| `LOGO_SETUP.md` | Branding setup (moved from root) | Reference only |
+### Permanent User-Facing Documentation
+| File | Purpose | Audience |
+|------|---------|----------|
+| `FAQ.md` | ✅ 31 Q&As about installation, usage, Godot | Users |
+| `TROUBLESHOOTING.md` | ✅ Platform-specific error resolution | Users |
+| `DEVELOPMENT.md` | Developer setup and workflow | Contributors |
+| `v0.1.0-ROADMAP.md` | Public roadmap and features | Users & Contributors |
+| `GITHUB_BADGES_GUIDE.md` | ✅ Badge setup instructions | Maintainers |
+| `ARCHITECTURE.md` | 🔜 Phase 4: Technical design | Contributors |
 
-### Developer Guides (Future)
-- `TESTING.md` - Testing guide
+---
+
+## 📂 docs/meta/ (Development Artifacts - NEW)
+
+**Purpose:** Internal process docs, phase reports, and planning artifacts.
+
+### Directory Structure
+
+```
+docs/
+├── meta/
+│   ├── phase-reports/              # Phase completion reports
+│   │   ├── PHASE_2_COMPLETION_REPORT.md
+│   │   ├── PHASE_3_COMPLETION_REPORT.md
+│   │   └── PHASE_4_COMPLETION_REPORT.md (future)
+│   ├── v0.0.2/                     # v0.0.2-specific artifacts
+│   │   ├── v0.0.2-CHECKLIST.md
+│   │   ├── v0.0.2-DOCUMENTATION-WORKFLOW.md
+│   │   ├── v0.0.2-QUICK-START.md
+│   │   ├── PHASE_TRACKING.md
+│   │   ├── SINGLE_SOURCE_OF_TRUTH.md
+│   │   └── VALIDATION_REPORT.md
+│   ├── planning/                   # Cross-version planning
+│   │   ├── DOCUMENTATION_INVENTORY.md
+│   │   ├── DOCUMENTATION_ORGANIZATION.md (this file)
+│   │   ├── FUTURE_AUTOMATION.md
+│   │   ├── GITHUB_PROJECT_MANAGEMENT.md
+│   │   ├── GITHUB_INSIGHTS_DESCRIPTION.md
+│   │   ├── LOGO_SETUP.md
+│   │   └── VERSION_PLANNING.md
+│   └── README.md                   # Explains meta/ purpose
+├── archive/                        # Deprecated docs
+├── FAQ.md                          # User-facing
+├── TROUBLESHOOTING.md              # User-facing
+├── DEVELOPMENT.md                  # Contributor-facing
+├── v0.1.0-ROADMAP.md               # Public roadmap
+└── GITHUB_BADGES_GUIDE.md          # Setup instructions
+```
+
+### When to Add to meta/
+
+**Add to meta/ if:**
+- ✅ Internal process documentation (phase tracking, completion reports)
+- ✅ Version-specific planning artifacts (checklists, workflows)
+- ✅ Development decision records (why we chose X over Y)
+- ✅ Historical reference (validation reports, inventories)
+
+**Keep in /docs root if:**
+- ✅ User-facing documentation (FAQ, Troubleshooting)
+- ✅ Contributor-facing documentation (DEVELOPMENT.md)
+- ✅ Setup instructions (GITHUB_BADGES_GUIDE.md)
+- ✅ Public roadmaps (v0.1.0-ROADMAP.md)
 - `DEBUGGING.md` - Debug techniques
 - `PERFORMANCE.md` - Optimization guide
 - `API_REFERENCE.md` - Generated API docs
