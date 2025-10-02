@@ -361,12 +361,29 @@ can be done later. Ready to proceed to Phase 7 (_process callback).
   - Support for self.position access from RustyScript ✅
   - Support for self.position.x += syntax (get-modify-set) ✅
 
-- [ ] **7.4** Test `move.rscr` in Godot ⚠️ **MANUAL TESTING REQUIRED**
+- [x] **7.4** Test `move.rscr` in Godot ✅ **MANUAL TESTING COMPLETE**
   - Create move_test.rscr: moves node 50px/sec right ✅
-  - Create process_test.rscr: counts frames and prints delta ✅
+  - Create process_test.rscr: simplified for basic testing ✅
   - Comprehensive testing guide created (PHASE7_TESTING.md) ✅
-  - **User to test:** movement, self binding, property access ⚠️
-  - **User to verify:** performance acceptable (60 FPS) ⚠️
+  - **User tested:** movement works! Node moves continuously right ✅
+  - **User tested:** self.position.x modification confirmed working ✅
+  - **User tested:** Sprite2D child moves as expected ✅
+  - **Verified:** Performance acceptable (smooth movement) ✅
+
+**Phase 7 Validation Results (Oct 1, 2025):**
+- ✅ _process callback functional
+- ✅ self binding operational
+- ✅ Property getter/setter working correctly
+- ✅ self.position.x += syntax confirmed
+- ✅ Continuous smooth movement achieved
+- ✅ No FPS issues observed
+
+**Learnings & Limitations Found:**
+1. Global variables with `mut` need explicit type annotations
+2. Type inference for globals not yet implemented (→ 0.1.0)
+3. print() currently single-argument only (→ 0.1.0)
+4. Godot Inspector doesn't show live updates during play (expected behavior)
+5. Thread-local storage approach works well for property bridge
 
 ---
 
@@ -953,6 +970,67 @@ After Phase 6 manual validation passes, implement **Process Loop**:
 13. `docs: add comprehensive Phase 4 checkpoint with feature matrix and test coverage`
 14. `feat(runtime): implement complete runtime execution with 18 tests`
 15. `docs: update checklist with Phase 5 completion and technical insights`
-16. `feat(godot_bind): implement complete Phase 6 Godot integration` ✅ (PENDING VALIDATION)
+16. `feat(godot_bind): implement complete Phase 6 Godot integration` ✅
+17. `feat(godot_bind): implement basic _process callback` ✅
+18. `feat(runtime): add self binding infrastructure` ✅
+19. `feat(godot_bind): complete property bridge for self binding` ✅
+20. `docs: add Phase 7 testing guide and update checklist` ✅
+
+---
+
+## 🔮 Future Improvements (Post-0.0.1)
+
+### High Priority (0.1.0)
+
+**Type System Enhancements:**
+- [ ] Type inference for global variables with `mut`
+- [ ] Infer types from initializer expressions
+- [ ] Better error messages for type mismatches
+
+**Runtime Features:**
+- [ ] Variadic print() function (multiple arguments)
+- [ ] String interpolation/formatting
+- [ ] More built-in functions (len, abs, min, max, etc.)
+
+**Property Bridge:**
+- [ ] Add more Node2D properties (rotation, scale, modulate)
+- [ ] Support for custom properties
+- [ ] Optimize property sync (only write if changed)
+- [ ] Property change tracking/dirty flags
+
+### Medium Priority (0.2.0)
+
+**Language Features:**
+- [ ] Arrays and array operations
+- [ ] For loops
+- [ ] Break/continue in loops
+- [ ] Else-if chains
+- [ ] Match expressions
+
+**Godot Integration:**
+- [ ] Input handling (Input.is_action_pressed, etc.)
+- [ ] Signal system integration
+- [ ] Node tree navigation (get_parent, get_node, etc.)
+- [ ] Timer and delta accumulation utilities
+
+### Low Priority (0.3.0+)
+
+**Advanced Features:**
+- [ ] Structs/custom types
+- [ ] Methods on types
+- [ ] Closures
+- [ ] Async/await for coroutines
+
+**Tooling:**
+- [ ] LSP server for IDE support
+- [ ] Syntax highlighting for VSCode
+- [ ] Debugger integration
+- [ ] Hot-reload on file change
+
+**Performance:**
+- [ ] Bytecode compilation
+- [ ] JIT compilation
+- [ ] Property access optimization
+- [ ] Function inlining
 
 ---

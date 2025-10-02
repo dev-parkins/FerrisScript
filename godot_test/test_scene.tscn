@@ -3,4 +3,4 @@
 [node name="TestScene" type="Node"]
 
 [node name="RustyScriptTest" type="RustyScriptNode" parent="."]
-script_path = "res://scripts/hello.rscr"
+script_path = "res://scripts/process_test.rscr"
