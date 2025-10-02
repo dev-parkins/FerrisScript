@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `docs/v0.0.2-CHECKLIST.md` - Patch release planning
   - `docs/v0.1.0-ROADMAP.md` - Feature roadmap
   - `docs/DOCUMENTATION_INVENTORY.md` - Documentation audit
+- v0.0.2 documentation workflow with phase-by-phase guide
+  - `docs/v0.0.2-DOCUMENTATION-WORKFLOW.md` - Complete workflow
+  - `docs/v0.0.2-QUICK-START.md` - Quick start guide
+  - `docs/VALIDATION_REPORT.md` - Installation validation results
+  - `docs/SINGLE_SOURCE_OF_TRUTH.md` - Anti-duplication matrix
+
+### Fixed
+- Installation instructions: corrected `cd` command to match actual repository directory name (`FerrisScript` instead of `ferrisscript`) for case-sensitive file systems (Linux/macOS)
 
 ---
 
