@@ -1,0 +1,14 @@
+[configuration]
+entry_symbol = "gdext_rust_init"
+compatibility_minimum = 4.1
+reloadable = true
+
+[libraries]
+linux.debug.x86_64 =     "res://target/debug/librustyscript_godot_bind.so"
+linux.release.x86_64 =   "res://target/release/librustyscript_godot_bind.so"
+windows.debug.x86_64 =   "res://target/debug/rustyscript_godot_bind.dll"
+windows.release.x86_64 = "res://target/release/rustyscript_godot_bind.dll"
+macos.debug =            "res://target/debug/librustyscript_godot_bind.dylib"
+macos.release =          "res://target/release/librustyscript_godot_bind.dylib"
+macos.debug.arm64 =      "res://target/debug/librustyscript_godot_bind.dylib"
+macos.release.arm64 =    "res://target/release/librustyscript_godot_bind.dylib"

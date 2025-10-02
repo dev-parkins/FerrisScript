@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://../rustyscript.gdextension" id="1"]
+
+[node name="TestScene" type="Node"]
+
+[node name="RustyScriptTest" type="RustyScriptNode" parent="."]
+script_path = "res://../examples/hello.rscr"
