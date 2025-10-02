@@ -2,11 +2,14 @@ name: CI/CD
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: 
+      - main
+      - develop
     tags:
       - 'v*'
   pull_request:
-    branches: [ main ]
+    branches: 
+      - main
 
 env:
   CARGO_TERM_COLOR: always

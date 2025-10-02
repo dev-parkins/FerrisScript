@@ -649,90 +649,17 @@ Do you want me to also include **ready-to-run `cargo init` commands** to scaffol
 
 ```
 
-Let's pause here for now for a break to add additional examples:
-```
-# branch.rscr – test if/else branching
+---
 
-let x: Int = 5
+## 📚 More Examples
 
-if x > 3 {
-    print("big")
-} else {
-    print("small")
-}
+All example files are available in the [`examples/`](examples/) directory:
 
-```
-```
-# loop.rscr – test while and for loops
+- **`branch.ferris`**: If/else branching and control flow
+- **`loop.ferris`**: While loops and iteration
+- **`functions.ferris`**: Function definitions with parameters and returns
+- **`type_error.ferris`**: Type checking validation (intentional errors)
+- **`collections.ferris`**: Array operations (planned for v0.1.0+)
+- **`match.ferris`**: Pattern matching (planned for v0.1.0+)
 
-let i: Int = 0
-
-while i < 3 {
-    print("while loop: " + str(i))
-    i = i + 1
-}
-
-for j in 0..3 {
-    print("for loop: " + str(j))
-}
-```
-```
-# functions.rscr – test function definitions and return types
-
-fn add(a: Int, b: Int) -> Int {
-    return a + b
-}
-
-fn greet(name: String) {
-    print("Hello, " + name)
-}
-
-let sum: Int = add(2, 3)
-print("Sum is " + str(sum))
-
-greet("RustyScript")
-```
-```
-# type_error.rscr – negative test for type safety
-# Expected: compiler should reject mismatched types
-
-let x: Int = "hello"   # ❌ should fail type-check
-```
-```
-# scene.rscr – test Godot node access
-
-let sprite: Sprite = node("Player")
-sprite.flip_h = true
-sprite.position.x = sprite.position.x + 10
-```
-```
-# reload.rscr – test state across reloads
-
-let count: Int = 0
-
-count = count + 1
-print("Reload count: " + str(count))
-```
-```
-# collections.rscr – test arrays and iteration
-
-let nums: Array<Int> = [1, 2, 3]
-
-for n in nums {
-    print("num: " + str(n))
-}
-```
-```
-# match.rscr – test enums and pattern matching
-
-enum Dir { Left, Right, Up, Down }
-
-let d: Dir = Dir.Left
-
-match d {
-    Dir.Left => print("going left"),
-    Dir.Right => print("going right"),
-    Dir.Up => print("going up"),
-    Dir.Down => print("going down"),
-}
-```
+See the [examples directory](examples/) for the complete collection of working scripts.
