@@ -28,9 +28,9 @@
 
 <!-- List the specific changes you made -->
 
-- 
-- 
-- 
+-
+-
+-
 
 ## Testing
 
@@ -65,11 +65,13 @@ cargo run --bin rustyscript_runtime examples/your-example.ferris
 <!-- If applicable, add screenshots or terminal output to demonstrate your changes -->
 
 **Before:**
+
 ```
 <!-- Paste output or add screenshot -->
 ```
 
 **After:**
+
 ```
 <!-- Paste output or add screenshot -->
 ```
@@ -106,4 +108,6 @@ cargo run --bin rustyscript_runtime examples/your-example.ferris
 
 ---
 
-**Thank you for contributing to FerrisScript! 🦀**
+## Thank You
+
+Thank you for contributing to FerrisScript! 🦀

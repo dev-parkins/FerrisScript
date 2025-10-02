@@ -13,14 +13,16 @@ A clear and concise description of what the bug is.
 ## Steps to Reproduce
 
 1. Create a `.ferris` file with the following code:
-```ferris
-// Your code here
-```
+
+   ```ferris
+   // Your code here
+   ```
 
 2. Run the command:
-```bash
-cargo run --bin rustyscript_runtime your-file.ferris
-```
+
+   ```bash
+   cargo run --bin rustyscript_runtime your-file.ferris
+   ```
 
 3. Observe the error
 

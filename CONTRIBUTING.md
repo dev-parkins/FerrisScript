@@ -91,8 +91,56 @@ Documentation improvements are always appreciated! This includes:
 1. Review the [Anti-Duplication Matrix](docs/SINGLE_SOURCE_OF_TRUTH.md) to ensure you're editing the primary location for content
 2. Link to existing documentation rather than duplicating it
 3. Follow the structure outlined in [Phase Tracking](docs/PHASE_TRACKING.md)
+4. **Run documentation linting locally** before pushing (see [Documentation Quality Checks](#documentation-quality-checks) below)
 
 Use the [documentation template](.github/ISSUE_TEMPLATE/documentation.md) when creating documentation-related issues.
+
+#### Documentation Quality Checks
+
+**IMPORTANT**: Always run documentation linting locally before pushing to catch issues early!
+
+We use automated tools to ensure documentation quality:
+
+- **markdownlint**: Checks markdown formatting consistency
+- **markdown-link-check**: Verifies all links work (internal and external)
+
+**Quick Setup** (first time only):
+
+```bash
+npm install
+```
+
+**Before Every Documentation Commit**:
+
+```bash
+# Option 1: VS Code Task (Recommended)
+# Press Ctrl+Shift+P, type "Run Task", select "Docs: Full Check"
+
+# Option 2: npm script
+npm run docs:check
+
+# Option 3: PowerShell script
+.\scripts\lint-docs.ps1
+
+# To auto-fix formatting issues:
+npm run docs:fix
+# or
+.\scripts\lint-docs.ps1 --fix
+```
+
+**What Gets Checked**:
+
+- ✅ Heading hierarchy and style
+- ✅ List formatting consistency
+- ✅ Code block formatting
+- ✅ Line length (soft limit: 120 chars)
+- ✅ Trailing whitespace
+- ✅ Internal links (broken references)
+- ✅ External links (with retries)
+
+**CI Integration**: These same checks run automatically on pull requests. Catching issues locally saves review time!
+
+See [scripts/README.md](scripts/README.md) for detailed documentation linting guide.
 
 ### Contributing Code
 

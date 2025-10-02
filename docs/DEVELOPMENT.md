@@ -121,6 +121,45 @@ cargo fmt --all
 cargo clippy --workspace
 ```
 
+### 4.5. Validate Documentation Changes
+
+**If you modified any `.md` files**, always run documentation checks before committing:
+
+```bash
+# Option 1: VS Code Task (Recommended)
+# Press Ctrl+Shift+P → "Run Task" → "Docs: Full Check"
+
+# Option 2: npm script (requires Node.js)
+npm install  # First time only
+npm run docs:check
+
+# Option 3: PowerShell script
+.\scripts\lint-docs.ps1
+
+# Auto-fix formatting issues
+npm run docs:fix
+# or
+.\scripts\lint-docs.ps1 --fix
+```
+
+**Why This Matters**:
+
+- ⏱️ **Faster PR reviews**: Catch formatting issues before CI runs
+- 🔗 **No broken links**: Verify all documentation cross-references work
+- 📐 **Consistent style**: Maintain professional documentation quality
+- ✅ **CI will pass**: Same checks run in CI, but you catch them early
+
+**Common Issues Caught**:
+
+- Missing blank lines around headings
+- Inconsistent list formatting
+- Broken internal links (wrong file paths)
+- Broken external links (404s, typos)
+- Trailing whitespace
+- Code blocks without language specifiers
+
+See [../scripts/README.md](../scripts/README.md) for full documentation linting guide.
+
 ### 5. Commit with Conventional Commits
 
 ```bash

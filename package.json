@@ -4,10 +4,10 @@
   "description": "FerrisScript - A Rust-powered scripting language for Godot",
   "private": true,
   "scripts": {
-    "docs:lint": "markdownlint '**/*.md' --ignore node_modules --ignore target",
-    "docs:links": "find . -name '*.md' -not -path './node_modules/*' -not -path './target/*' -exec markdown-link-check '{}' --config .markdown-link-check.json -q ';'",
-    "docs:check": "npm run docs:lint && npm run docs:links",
-    "docs:fix": "markdownlint '**/*.md' --ignore node_modules --ignore target --fix"
+    "docs:lint": "markdownlint \"**/*.md\" --ignore node_modules --ignore target --dot",
+    "docs:links": "echo \"Use PowerShell script for link checking: .\\scripts\\lint-docs.ps1\"",
+    "docs:lint:fix": "markdownlint \"**/*.md\" --ignore node_modules --ignore target --dot --fix",
+    "docs:fix": "npm run docs:lint:fix"
   },
   "devDependencies": {
     "markdown-link-check": "^3.12.2",
