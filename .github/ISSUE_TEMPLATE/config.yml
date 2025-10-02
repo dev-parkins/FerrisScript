@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/dev-parkins/FerrisScript/discussions
+    about: Ask questions, share ideas, and discuss FerrisScript with the community
+  - name: 📚 Contributing Guide
+    url: https://github.com/dev-parkins/FerrisScript/blob/main/CONTRIBUTING.md
+    about: Learn how to contribute to FerrisScript
+  - name: 📖 Documentation
+    url: https://github.com/dev-parkins/FerrisScript/blob/main/README.md
+    about: Read the project documentation
+  - name: 🐛 Security Issues
+    url: https://github.com/dev-parkins/FerrisScript/security/advisories/new
+    about: Report security vulnerabilities privately
