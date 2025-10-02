@@ -5,7 +5,8 @@ edition = "2021"
 
 [dependencies]
 # gdext is the Godot 4.x Rust binding (formerly gdextension)
-godot = { git = "https://github.com/godot-rust/gdext", branch = "master" }
+# Using version 0.1 which is compatible with Godot 4.2+
+godot = "0.1"
 rustyscript_compiler = { path = "../compiler" }
 rustyscript_runtime = { path = "../runtime" }
 

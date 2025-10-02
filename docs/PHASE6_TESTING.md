@@ -3,6 +3,20 @@
 ## Overview
 This guide provides step-by-step instructions for building and testing the RustyScript Godot integration.
 
+## How RustyScript Files Work in Godot
+
+**Design Philosophy:**
+- `.rscr` files are **asset files**, not Godot scripts
+- They live inside your Godot project, just like textures, sounds, or JSON files
+- Reference them using `res://` paths (e.g., `res://scripts/hello.rscr`)
+- Godot's `FileAccess` API reads them at runtime
+- Our extension compiles and executes them on-demand
+
+**Why not use Godot's script system?**
+- RustyScript is a custom language, not GDScript/C#
+- We want full control over compilation and execution
+- This allows hot-reloading, custom error handling, and future optimizations
+
 ## Prerequisites
 
 1. **Rust toolchain** (already installed)
@@ -67,7 +81,8 @@ ls target\debug\rustyscript_godot_bind.dll
    - Click on "RustyScriptTest" node
    - In the Inspector panel, verify:
      - `Script Path` property is visible
-     - Value is set to `res://../examples/hello.rscr`
+     - Value is set to `res://scripts/hello.rscr`
+   - **Note:** `.rscr` files are treated as assets, placed inside the Godot project like textures or sounds
 
 5. **Run the Scene**
    - Click the "Play Scene" button (F6) or "Play" button (F5)
@@ -88,8 +103,9 @@ ls target\debug\rustyscript_godot_bind.dll
 3. **Configure Script Path**
    - Select the RustyScriptNode
    - In Inspector, find "Script Path" property
-   - Set to: `res://../examples/hello.rscr`
-   - (This path is relative to the Godot project)
+   - Set to: `res://scripts/hello.rscr`
+   - **Important:** `.rscr` files should be placed inside your Godot project directory
+   - Use `res://` paths just like any other Godot asset
 
 4. **Save and Run**
    - Save scene as `test_scene.tscn`
@@ -103,8 +119,8 @@ When you run the test scene, you should see:
 
 **In Godot's Output Panel:**
 ```
-Successfully loaded RustyScript: res://../examples/hello.rscr
-Hello, Godot!
+Successfully loaded RustyScript: res://scripts/hello.rscr
+Hello, Godot! RustyScript is working!
 ```
 
 **Behavior Verification:**

@@ -1,0 +1,4 @@
+// RustyScript example - called when node enters the scene tree
+fn _ready() {
+    print("Hello, Godot! RustyScript is working!");
+}

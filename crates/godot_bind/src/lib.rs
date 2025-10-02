@@ -1,4 +1,5 @@
 use godot::prelude::*;
+use godot::classes::{FileAccess, file_access::ModeFlags};
 use rustyscript_compiler::{ast, compile};
 use rustyscript_runtime::{Env, Value, call_function, execute};
 
@@ -54,16 +55,20 @@ impl INode for RustyScriptNode {
 impl RustyScriptNode {
     /// Load and compile the RustyScript file
     fn load_script(&mut self) {
-        let path = self.script_path.to_string();
+        let path_gstring = self.script_path.clone();
+        let path = path_gstring.to_string();
         
-        // Try to read the file
-        let source = match std::fs::read_to_string(&path) {
-            Ok(content) => content,
-            Err(e) => {
-                godot_error!("Failed to read script file '{}': {}", path, e);
+        // Use Godot's FileAccess to read the file (handles res:// paths correctly)
+        let file = match FileAccess::open(path_gstring.clone(), ModeFlags::READ) {
+            Some(f) => f,
+            None => {
+                godot_error!("Failed to open script file '{}': File not found or cannot be accessed", path);
                 return;
             }
         };
+        
+        // Read the entire file as a string
+        let source = file.get_as_text().to_string();
         
         // Compile the script
         let program = match compile(&source) {
