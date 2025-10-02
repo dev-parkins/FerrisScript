@@ -65,8 +65,13 @@ impl INode for RustyScriptNode {
         }
     }
 
-    fn process(&mut self, _delta: f64) {
-        // TODO: Execute _process function from script in Phase 7
+    fn process(&mut self, delta: f64) {
+        // Execute _process function if script is loaded
+        if self.script_loaded {
+            // Convert delta to Float (f32 for RustyScript)
+            let delta_value = Value::Float(delta as f32);
+            self.call_script_function("_process", &[delta_value]);
+        }
     }
 }
 

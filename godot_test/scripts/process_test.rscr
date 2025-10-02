@@ -1,0 +1,10 @@
+// Test script for _process callback
+// Prints delta time every frame
+
+fn _ready() {
+    print("Process test started!");
+}
+
+fn _process(delta: f32) {
+    print("Delta:", delta);
+}
