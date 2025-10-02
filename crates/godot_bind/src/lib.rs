@@ -3,6 +3,24 @@ use godot::classes::{FileAccess, file_access::ModeFlags};
 use rustyscript_compiler::{ast, compile};
 use rustyscript_runtime::{Env, Value, call_function, execute};
 
+/// Godot-specific print function that outputs to Godot's console
+fn godot_print_builtin(args: &[Value]) -> Result<Value, String> {
+    let output = args.iter()
+        .map(|v| match v {
+            Value::Int(i) => i.to_string(),
+            Value::Float(f) => f.to_string(),
+            Value::Bool(b) => b.to_string(),
+            Value::String(s) => s.clone(),
+            Value::Vector2 { x, y } => format!("Vector2({}, {})", x, y),
+            Value::Nil => "nil".to_string(),
+        })
+        .collect::<Vec<_>>()
+        .join(" ");
+    
+    godot_print!("{}", output);
+    Ok(Value::Nil)
+}
+
 struct RustyScriptExtension;
 
 #[gdextension]
@@ -13,7 +31,8 @@ unsafe impl ExtensionLibrary for RustyScriptExtension {}
 pub struct RustyScriptNode {
     base: Base<Node>,
     
-    #[var]
+    /// Path to the .rscr script file (e.g., "res://scripts/hello.rscr")
+    #[export(file = "*.rscr")]
     script_path: GString,
     
     // Runtime state
@@ -81,6 +100,10 @@ impl RustyScriptNode {
         
         // Create runtime environment and execute initialization
         let mut env = Env::new();
+        
+        // Override print() to use Godot's console
+        env.register_builtin("print".to_string(), godot_print_builtin);
+        
         if let Err(e) = execute(&program, &mut env) {
             godot_error!("Failed to initialize script '{}': {}", path, e);
             return;

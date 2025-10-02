@@ -106,6 +106,11 @@ impl Env {
     pub fn is_builtin(&self, name: &str) -> bool {
         self.builtin_fns.contains_key(name)
     }
+
+    /// Register or override a built-in function
+    pub fn register_builtin(&mut self, name: String, func: fn(&[Value]) -> Result<Value, String>) {
+        self.builtin_fns.insert(name, func);
+    }
 }
 
 // Built-in function implementations
