@@ -274,6 +274,78 @@ fn _process(delta: f32) {
 2. In the Inspector, set `script_path` to `res://scripts/player.ferris`
 3. Run your game!
 
+## 📚 Examples
+
+FerrisScript comes with comprehensive examples to help you get started:
+
+### 🎯 [Hello World](examples/hello/README.md)
+
+**Difficulty**: Beginner  
+Learn the basics of FerrisScript with a simple "Hello, World!" script.
+
+- Using the `_ready()` lifecycle hook
+- Calling builtin functions (`print`)
+- Basic FerrisScript syntax
+
+```ferris
+fn _ready() {
+    print("Hello from FerrisScript!");
+}
+```
+
+**[📖 Full tutorial →](examples/hello/README.md)**
+
+### 🚀 [Move Example](examples/move/README.md)
+
+**Difficulty**: Beginner  
+Create smooth movement with frame-by-frame updates.
+
+- Using `_process(delta)` for animations
+- Accessing node properties (`self.position`)
+- Understanding delta time for framerate-independent movement
+
+```ferris
+fn _process(delta: f32) {
+    self.position.x += 50.0 * delta;
+}
+```
+
+**[📖 Full tutorial →](examples/move/README.md)**
+
+### ⚡ [Bounce Example](examples/bounce/README.md)
+
+**Difficulty**: Intermediate  
+Build a bouncing animation with boundary checks.
+
+- Global variables and state management
+- Conditional statements (`if`)
+- Direction reversal and boundary detection
+
+```ferris
+let mut dir: f32 = 1.0;
+
+fn _process(delta: f32) {
+    self.position.x += dir * 100.0 * delta;
+
+    if self.position.x > 10.0 {
+        dir = -1.0;
+    }
+    if self.position.x < -10.0 {
+        dir = 1.0;
+    }
+}
+```
+
+**[📖 Full tutorial →](examples/bounce/README.md)**
+
+### More Examples
+
+- **`functions.ferris`**: Function definitions and calls
+- **`collections.ferris`**: Arrays and dictionaries (v0.1.0+)
+- **`match.ferris`**: Pattern matching (v0.1.0+)
+
+See the [`examples/`](examples/) directory for all available scripts.
+
 ## 📚 API Reference
 
 ### Built-in Functions

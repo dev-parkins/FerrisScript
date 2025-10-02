@@ -36,6 +36,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **GitHub Project Management Documentation**
   - `docs/GITHUB_PROJECT_MANAGEMENT.md` - CI/CD optimization strategies, label system (20 labels), milestone planning, wiki decision matrix, and implementation roadmap
   - `docs/GITHUB_INSIGHTS_DESCRIPTION.md` - Repository descriptions, topics, badges, and social preview guidance for improved discoverability
+- **Security and Architecture Documentation (Phase 4)**
+  - `SECURITY.md` - Vulnerability reporting policy with GitHub Security Advisories integration, 48-hour response time, coordinated disclosure process, and security best practices
+  - `docs/ARCHITECTURE.md` - Comprehensive system architecture documentation covering compiler pipeline (lexer→parser→type checker), runtime execution (tree-walking interpreter), Godot integration (GDExtension + thread-local storage), design decisions, extension points, and performance considerations
+  - `.github/workflows/docs-lint.yml` - Automated documentation linting CI with markdownlint and link checking
+  - `.markdownlint.json` - Markdown linting configuration with project-specific rules
+  - `.markdown-link-check.json` - Link checking configuration with retry logic and localhost ignoring
+- **Enhanced Example Documentation**
+  - `examples/hello/README.md` - Comprehensive hello world tutorial covering FerrisScript basics, `_ready()` lifecycle, `print()` function, running examples, common gotchas, and 4 variations
+  - `examples/move/README.md` - Movement tutorial explaining `_process(delta)`, framerate-independent movement, `self.position` access, delta time calculations, and 6 variations
+  - `examples/bounce/README.md` - Bouncing animation tutorial demonstrating global variables, mutability, conditionals, state management, boundary checks, and 6 variations
+  - `README.md` - Added dedicated Examples section with links to detailed example tutorials
 
 ### Changed
 - `.github/ISSUE_TEMPLATE/config.yml` - Updated Discussions link description to clarify available categories (Q&A, Ideas, Show and Tell)
