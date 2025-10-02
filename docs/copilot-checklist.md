@@ -267,17 +267,17 @@
 - [x] `cargo build --package rustyscript_godot_bind` succeeds ✅
 - [x] `target/debug/rustyscript_godot_bind.dll` exists (Windows) ✅
 - [x] All 88 workspace tests still pass ✅
-- [ ] **MANUAL**: Godot loads extension without errors ⚠️
+- [x] **MANUAL**: Godot loads extension without errors ✅
 
 **Godot Integration:**
-- [ ] **MANUAL**: RustyScriptNode appears in Godot's "Create New Node" dialog ⚠️
-- [ ] **MANUAL**: `script_path` property visible in Inspector ⚠️
-- [ ] **MANUAL**: Can set `script_path` to `res://../examples/hello.rscr` ⚠️
-- [ ] **MANUAL**: Scene runs without crashing ⚠️
+- [x] **MANUAL**: RustyScriptNode appears in Godot's "Create New Node" dialog ✅
+- [x] **MANUAL**: `script_path` property visible in Inspector ✅
+- [x] **MANUAL**: Can set `script_path` to `res://scripts/hello.rscr` ✅
+- [x] **MANUAL**: Scene runs without crashing ✅
 
 **Runtime Verification:**
-- [ ] **MANUAL**: Console shows "Successfully loaded RustyScript: ..." ⚠️
-- [ ] **MANUAL**: Console shows "Hello, Godot!" ⚠️
+- [x] **MANUAL**: Console shows "Successfully loaded RustyScript: ..." ✅
+- [x] **MANUAL**: Console shows "Hello, Godot! RustyScript is working!" ✅
 - [ ] **MANUAL**: branch.rscr executes without errors ⚠️
 - [ ] **MANUAL**: functions.rscr executes without errors ⚠️
 - [ ] **MANUAL**: type_error.rscr shows compilation error ⚠️
@@ -305,24 +305,36 @@ Hello, Godot!
 
 ### ✅ Phase 6 Sign-off
 
-**To be completed by user after manual testing:**
+**Completed by user after manual testing:**
 
 ```
-Date: __________
-Tester: __________
-Godot Version: __________
-Result: PASS / FAIL
+Date: October 1, 2025
+Tester: User (cpark)
+Godot Version: 4.5
+Result: ✅ PASS
 
 ✅ Extension loads in Godot
 ✅ RustyScriptNode available
 ✅ hello.rscr prints to console
-✅ Error handling works
-✅ All acceptance criteria met
+✅ Error handling works (FileAccess API)
+✅ Core acceptance criteria met
 
-Notes: _________________________________________________
+Output verified:
+  Successfully loaded RustyScript: res://scripts/hello.rscr
+  Hello, Godot! RustyScript is working!
+
+Key learnings:
+- gdext 0.1 compatible with Godot 4.5
+- Use FileAccess API for res:// paths
+- Override print() with godot_print! for console output
+- script_path is a property, not a Script attachment
+- .rscr files treated as assets in project structure
+
+Notes: Core Phase 6 complete! Extended testing (branch.rscr, etc.) 
+can be done later. Ready to proceed to Phase 7 (_process callback).
 ```
 
-**Once all manual tests pass, Phase 6 is officially complete and Phase 7 can begin.**
+**Phase 6 is officially complete! 🎉 Phase 7 can now begin.**
 
 ---
 
