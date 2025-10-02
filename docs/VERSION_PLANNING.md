@@ -309,12 +309,12 @@ The roadmap is not set in stone! We welcome input:
 
 ## 📚 Related Documentation
 
-- [README.md](README.md) - Project overview
+- [README.md](../README.md) - Project overview
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Technical design
-- [RELEASE_NOTES.md](RELEASE_NOTES.md) - v0.0.1 release details
-- [RELEASING.md](RELEASING.md) - How to create releases
-- [docs/v0.0.2-CHECKLIST.md](docs/v0.0.2-CHECKLIST.md) - Next version plan
-- [docs/v0.1.0-ROADMAP.md](docs/v0.1.0-ROADMAP.md) - Feature roadmap
+- [RELEASE_NOTES.md](../RELEASE_NOTES.md) - v0.0.1 release details
+- [RELEASING.md](../RELEASING.md) - How to create releases
+- [v0.0.2-CHECKLIST.md](v0.0.2-CHECKLIST.md) - Next version plan
+- [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) - Feature roadmap
 
 ---
 

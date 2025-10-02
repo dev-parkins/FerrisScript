@@ -463,7 +463,7 @@ Phase 5 is "Review & Merge" phase. Based on Phase 4 experience:
 1. ✅ **CI Passes**: Wait for docs-lint workflow to complete
 2. ✅ **GitHub Standards**: Verify 100% at /community URL
 3. ✅ **Cross-References**: Manually check a few links (CI checks all)
-4. ✅ **Examples Work**: Run `cargo run --example hello` (should still compile)
+4. ✅ **Examples Compile**: Run `cargo test --package ferrisscript_compiler test_compile_hello`
 5. ✅ **CHANGELOG**: Verify Phase 4 entries are clear
 6. ✅ **Branch History**: Verify no merge commits (should be clean)
 
@@ -486,6 +486,11 @@ Phase 5 is "Review & Merge" phase. Based on Phase 4 experience:
 2. **Verify GitHub Community Standards**: Check /community URL
 3. **Test CI**: Create a small doc change to verify linting works
 4. **Update v0.0.2 checklist**: Mark Phase 4 as complete
+
+### Known Issues Fixed Post-Commit
+
+1. **Duplicate ARCHITECTURE.md**: Removed from root (kept only in `/docs/ARCHITECTURE.md` per organization guidelines)
+2. **Example Running Instructions**: Clarified that `cargo run --example hello` doesn't work (`.ferris` files are not Rust examples). Updated to use `cargo test --package ferrisscript_compiler test_compile_hello` instead.
 
 ---
 

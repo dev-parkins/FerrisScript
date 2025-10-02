@@ -161,7 +161,7 @@ cargo test --workspace -- --show-output
 - ⚠️ Interpreted execution (no bytecode)
 - ⚠️ Value cloning (no reference counting)
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for full technical details.
+See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for full technical details.
 
 ### 🐛 Known Issues
 
