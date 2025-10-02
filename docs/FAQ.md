@@ -324,7 +324,7 @@ See [CONTRIBUTING.md - Testing Guidelines](../CONTRIBUTING.md#testing-guidelines
 
 ### What's the code review process?
 
-1. **Submit PR** - Use the [PR template](.github/PULL_REQUEST_TEMPLATE.md)
+1. **Submit PR** - Use the [PR template](../.github/PULL_REQUEST_TEMPLATE.md)
 2. **CI checks** - All tests must pass, code must be formatted
 3. **Maintainer review** - Typically within 2-3 days
 4. **Address feedback** - Make requested changes

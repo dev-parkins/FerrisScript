@@ -95,7 +95,7 @@ During v0.X.Y (pre-stable):
 
 **Estimated Timeline**: 10-15 days focused work
 
-📋 **Full Checklist**: See [docs/v0.0.2-CHECKLIST.md](docs/v0.0.2-CHECKLIST.md)
+📋 **Full Checklist**: See [v0.0.2-CHECKLIST.md](v0.0.2-CHECKLIST.md)
 
 ---
 
@@ -147,7 +147,7 @@ During v0.X.Y (pre-stable):
 
 **Estimated Timeline**: 5-7 months (20-29 weeks)
 
-📋 **Full Roadmap**: See [docs/v0.1.0-ROADMAP.md](docs/v0.1.0-ROADMAP.md)
+📋 **Full Roadmap**: See [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md)
 
 ---
 
@@ -242,9 +242,9 @@ During v0.X.Y (pre-stable):
 
 | Document | Purpose | Target Audience |
 |----------|---------|-----------------|
-| [v0.0.2-CHECKLIST.md](docs/v0.0.2-CHECKLIST.md) | Detailed patch release plan | Contributors |
-| [v0.1.0-ROADMAP.md](docs/v0.1.0-ROADMAP.md) | Comprehensive feature roadmap | All stakeholders |
-| [DOCUMENTATION_INVENTORY.md](docs/DOCUMENTATION_INVENTORY.md) | Documentation audit | Maintainers |
+| [v0.0.2-CHECKLIST.md](v0.0.2-CHECKLIST.md) | Detailed patch release plan | Contributors |
+| [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) | Comprehensive feature roadmap | All stakeholders |
+| [DOCUMENTATION_INVENTORY.md](DOCUMENTATION_INVENTORY.md) | Documentation audit | Maintainers |
 | This file | High-level version strategy | Everyone |
 
 ---
@@ -266,7 +266,7 @@ During v0.X.Y (pre-stable):
    - Create GitHub Discussions topics
 
 2. **Start v0.0.2 Planning**
-   - Review [v0.0.2-CHECKLIST.md](docs/v0.0.2-CHECKLIST.md)
+   - Review [v0.0.2-CHECKLIST.md](v0.0.2-CHECKLIST.md)
    - Prioritize based on early feedback
    - Create GitHub issues for tasks
    - Set realistic timeline

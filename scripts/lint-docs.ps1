@@ -38,8 +38,36 @@ Write-Host ""
 
 # Run markdown-link-check
 Write-Host "🔗 Step 2/2: Running markdown-link-check..." -ForegroundColor Cyan
-npm run docs:links
-$linkCheckExitCode = $LASTEXITCODE
+$linkCheckFailed = $false
+$checkedFiles = 0
+$deadLinks = @()
+
+Get-ChildItem -Path . -Filter *.md -Recurse | Where-Object { 
+    $_.FullName -notmatch 'node_modules' -and $_.FullName -notmatch 'target' 
+} | ForEach-Object {
+    $checkedFiles++
+    Write-Host "   Checking: $($_.Name)" -ForegroundColor Gray
+    $output = npx markdown-link-check $_.FullName --config .markdown-link-check.json 2>&1
+    
+    # Check for dead links in output
+    if ($output -match '\[✖\]') {
+        $linkCheckFailed = $true
+        Write-Host "   ❌ Dead links in: $($_.Name)" -ForegroundColor Red
+        # Extract and show dead links
+        $output -split "`n" | Where-Object { $_ -match '\[✖\]' } | ForEach-Object {
+            Write-Host "      $_" -ForegroundColor Red
+            $deadLinks += "File: $($_.Name) - $_"
+        }
+    }
+}
+
+Write-Host ""
+Write-Host "   Files checked: $checkedFiles" -ForegroundColor Cyan
+if ($deadLinks.Count -gt 0) {
+    Write-Host "   Dead links found: $($deadLinks.Count)" -ForegroundColor Red
+}
+
+$linkCheckExitCode = if ($linkCheckFailed) { 1 } else { 0 }
 Write-Host ""
 
 # Summary
