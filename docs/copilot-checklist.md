@@ -338,31 +338,35 @@ can be done later. Ready to proceed to Phase 7 (_process callback).
 
 ---
 
-### 🔄 Phase 7: Process Loop (2-3 commits)
+### 🔄 Phase 7: Process Loop (3 commits) ✅
 
-- [ ] **7.1** Implement `_process` callback integration
-  - Commit: `feat(godot_bind): implement _process callback integration`
-  - Find `_process` function in compiled script
-  - Call on every frame
-  - Pass delta parameter
+- [x] **7.1** Implement `_process` callback integration
+  - Commit: `feat(godot_bind): implement basic _process callback` ✅
+  - Hook INode2D::process() to call script's `_process(delta)` function ✅
+  - Pass delta parameter as Float value ✅
+  - Only call if script is loaded ✅
 
-- [ ] **7.2** Implement `self` binding mechanism
-  - Commit: `feat(runtime): implement self binding for Godot node access`
-  - Special `self` variable in runtime environment
-  - Bridge to Godot node properties
-  - Field access through Godot's property system
+- [x] **7.2** Implement `self` binding mechanism
+  - Commit: `feat(runtime): add self binding infrastructure` ✅
+  - Value::SelfObject variant added to represent Godot node ✅
+  - PropertyGetter/PropertySetter callback types in Env ✅
+  - Field access on SelfObject delegates to callbacks ✅
+  - Nested field assignment (self.position.x) implemented ✅
 
-- [ ] **7.3** Implement property getter/setter bridge
-  - Commit: `feat(godot_bind): implement property getter/setter bridge`
-  - Get node properties from Godot (e.g., `position`)
-  - Set node properties back to Godot
-  - Type conversion between runtime values and Godot types
+- [x] **7.3** Implement property getter/setter bridge
+  - Commit: `feat(godot_bind): complete property bridge for self binding` ✅
+  - Thread-local storage for node properties during execution ✅
+  - get_node_property_tls() reads Godot properties ✅
+  - set_node_property_tls() writes Godot properties ✅
+  - Support for self.position access from RustyScript ✅
+  - Support for self.position.x += syntax (get-modify-set) ✅
 
-- [ ] **7.4** Test `move.rscr` in Godot
-  - Commit: `test(godot_bind): verify move.rscr works in Godot`
-  - Create test scene with moving node
-  - Verify position updates each frame
-  - Document any issues or limitations
+- [ ] **7.4** Test `move.rscr` in Godot ⚠️ **MANUAL TESTING REQUIRED**
+  - Create move_test.rscr: moves node 50px/sec right ✅
+  - Create process_test.rscr: counts frames and prints delta ✅
+  - Comprehensive testing guide created (PHASE7_TESTING.md) ✅
+  - **User to test:** movement, self binding, property access ⚠️
+  - **User to verify:** performance acceptable (60 FPS) ⚠️
 
 ---
 
