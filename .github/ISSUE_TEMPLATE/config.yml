@@ -2,7 +2,7 @@ blank_issues_enabled: false
 contact_links:
   - name: 💬 GitHub Discussions
     url: https://github.com/dev-parkins/FerrisScript/discussions
-    about: Ask questions, share ideas, and discuss FerrisScript with the community
+    about: Ask questions, share ideas, and discuss FerrisScript with the community (Q&A, Ideas, Show and Tell)
   - name: 📚 Contributing Guide
     url: https://github.com/dev-parkins/FerrisScript/blob/main/CONTRIBUTING.md
     about: Learn how to contribute to FerrisScript
