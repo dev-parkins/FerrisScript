@@ -4,10 +4,10 @@
 
 [node name="TestScene" type="Node"]
 
-[node name="RustyScriptTest" type="RustyScriptNode" parent="."]
-script_path = "res://scripts/bounce_test.rscr"
+[node name="FerrisScriptNode" type="FerrisScriptNode" parent="."]
+script_path = "res://scripts/bounce_test.ferris"
 
-[node name="Sprite2D" type="Sprite2D" parent="RustyScriptTest"]
-position = Vector2(220.5, 73)
-scale = Vector2(87, 64)
+[node name="Sprite2D" type="Sprite2D" parent="FerrisScriptNode"]
+position = Vector2(107.5, 36.5)
+scale = Vector2(35, 33)
 texture = SubResource("CanvasTexture_6adnx")

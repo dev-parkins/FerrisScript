@@ -765,7 +765,7 @@ mod tests {
     #[test]
     fn test_parse_hello_example() {
         let input = r#"fn _ready() {
-    print("Hello from RustyScript!");
+    print("Hello from FerrisScript!");
 }"#;
         let tokens = tokenize(input).unwrap();
         let program = parse(&tokens).unwrap();

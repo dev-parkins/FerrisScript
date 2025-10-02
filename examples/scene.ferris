@@ -1,7 +1,8 @@
-// scene.rscr – test Godot node access
+// scene.ferris – test Godot node access
 // Note: node() function and Sprite type not yet implemented
 // This shows desired future functionality
 
 fn _process(delta: f32) {
     self.position.x = self.position.x + 10.0;
 }
+

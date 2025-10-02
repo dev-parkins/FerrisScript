@@ -1,4 +1,4 @@
-// reload.rscr – test state across reloads
+// reload.ferris – test state across reloads
 // Note: This will be tested once runtime is implemented
 
 let mut count: i32 = 0;
@@ -6,3 +6,4 @@ let mut count: i32 = 0;
 fn _process(delta: f32) {
     count = count + 1;
 }
+

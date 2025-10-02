@@ -1,4 +1,4 @@
-// branch.rscr – test if/else branching
+// branch.ferris – test if/else branching
 
 let x: i32 = 5;
 
@@ -9,3 +9,4 @@ fn _ready() {
         print("small");
     }
 }
+

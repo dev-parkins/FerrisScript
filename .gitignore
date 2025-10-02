@@ -36,3 +36,6 @@ Thumbs.db
 
 # Documentation builds
 /target/doc/
+
+# Godot UID files (auto-generated)
+*.gdextension.uid

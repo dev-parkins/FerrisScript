@@ -614,7 +614,7 @@ fn _process(delta: f32) {
 }
 ```
 
-### `examples/bounce.rscr`
+### `examples/bounce.ferris`
 
 ```rust
 let mut dir: f32 = 1.0;
@@ -629,24 +629,6 @@ fn _process(delta: f32) {
         dir = 1.0;
     }
 }
-```
-
----
-
-## ✅ Notes
-
-* This scaffold is **Copilot-ready**: stubs and placeholder functions allow auto-completion of lexer, parser, type-checker, AST traversal, and Godot integration.
-* The focus of 0.0.1 is **proof of concept**, with minimal features to attach scripts to Godot nodes and run `_ready` / `_process`.
-* Hot reload and advanced features (structs, signals, persistent state) are left for later versions.
-
-```
-
----
-
-This is ready to **copy directly from the canvas** and export as a Markdown file.  
-
-Do you want me to also include **ready-to-run `cargo init` commands** to scaffold the crates on disk so you can start coding immediately?
-
 ```
 
 ---

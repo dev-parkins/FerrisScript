@@ -1,6 +1,7 @@
-// type_error.rscr – negative test for type safety
+// type_error.ferris – negative test for type safety
 // Expected: compiler should reject mismatched types
 
 fn _ready() {
     let x: i32 = true;
 }
+

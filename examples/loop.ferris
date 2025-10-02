@@ -1,4 +1,4 @@
-// loop.rscr – test while loops
+// loop.ferris – test while loops
 // Note: for loops not yet implemented
 
 let mut i: i32 = 0;
@@ -8,3 +8,4 @@ fn _ready() {
         i = i + 1;
     }
 }
+

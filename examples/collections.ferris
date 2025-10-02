@@ -1,4 +1,4 @@
-// collections.rscr – test arrays and iteration
+// collections.ferris – test arrays and iteration
 // Note: Arrays and for loops not yet implemented
 // This shows desired future functionality
 
@@ -7,3 +7,4 @@
 // for n in nums {
 //     print("num");
 // }
+

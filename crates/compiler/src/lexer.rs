@@ -507,13 +507,13 @@ mod tests {
 
     #[test]
     fn test_tokenize_strings() {
-        let tokens = tokenize(r#""hello" "world" "Hello from RustyScript!""#).unwrap();
+        let tokens = tokenize(r#""hello" "world" "Hello from FerrisScript!""#).unwrap();
         assert_eq!(
             tokens,
             vec![
                 Token::StringLit("hello".to_string()),
                 Token::StringLit("world".to_string()),
-                Token::StringLit("Hello from RustyScript!".to_string()),
+                Token::StringLit("Hello from FerrisScript!".to_string()),
                 Token::Eof
             ]
         );
@@ -589,7 +589,7 @@ mod tests {
     #[test]
     fn test_tokenize_hello_example() {
         let input = r#"fn _ready() {
-    print("Hello from RustyScript!");
+    print("Hello from FerrisScript!");
 }"#;
         let tokens = tokenize(input).unwrap();
         assert_eq!(
@@ -602,7 +602,7 @@ mod tests {
                 Token::LBrace,
                 Token::Ident("print".to_string()),
                 Token::LParen,
-                Token::StringLit("Hello from RustyScript!".to_string()),
+                Token::StringLit("Hello from FerrisScript!".to_string()),
                 Token::RParen,
                 Token::Semicolon,
                 Token::RBrace,

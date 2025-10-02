@@ -1,4 +1,4 @@
-// match.rscr – test enums and pattern matching
+// match.ferris – test enums and pattern matching
 // Note: Enums and match expressions not yet implemented
 // This shows desired future functionality
 
@@ -9,3 +9,4 @@
 //     Dir.Left => print("going left"),
 //     Dir.Right => print("going right"),
 // }
+
