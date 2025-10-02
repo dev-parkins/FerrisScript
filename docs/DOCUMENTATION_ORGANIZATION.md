@@ -18,6 +18,7 @@ As of October 2, 2025, `/docs` contains 18+ files mixing permanent docs with dev
 These files should **always** be in the project root:
 
 ### Core Project Files
+
 | File | Purpose | Update Frequency |
 |------|---------|------------------|
 | `README.md` | Project overview, quick start | Per major release |
@@ -35,6 +36,7 @@ These files should **always** be in the project root:
 **New Strategy:** Only 5-6 permanent, user-facing docs in `/docs` root.
 
 ### Permanent User-Facing Documentation
+
 | File | Purpose | Audience |
 |------|---------|----------|
 | `FAQ.md` | ✅ 31 Q&As about installation, usage, Godot | Users |
@@ -86,12 +88,14 @@ docs/
 ### When to Add to meta/
 
 **Add to meta/ if:**
+
 - ✅ Internal process documentation (phase tracking, completion reports)
 - ✅ Version-specific planning artifacts (checklists, workflows)
 - ✅ Development decision records (why we chose X over Y)
 - ✅ Historical reference (validation reports, inventories)
 
 **Keep in /docs root if:**
+
 - ✅ User-facing documentation (FAQ, Troubleshooting)
 - ✅ Contributor-facing documentation (DEVELOPMENT.md)
 - ✅ Setup instructions (GITHUB_BADGES_GUIDE.md)
@@ -109,6 +113,7 @@ docs/
 For historical, version-specific documentation:
 
 ### Structure
+
 ```
 docs/archive/
 ├── v0.0.1/
@@ -123,6 +128,7 @@ docs/archive/
 ```
 
 ### What Goes in Archive
+
 - ✅ Version-specific release notes
 - ✅ Development phase documentation
 - ✅ Testing reports for that version
@@ -153,6 +159,7 @@ assets/
 ### When Creating a New Release
 
 1. **Update CHANGELOG.md**
+
    ```markdown
    ## [0.0.2] - 2025-11-XX
    ### Added
@@ -166,11 +173,13 @@ assets/
    - Or keep both if you want multi-version in one file
 
 3. **Archive old release notes**
+
    ```bash
    cp RELEASE_NOTES.md docs/archive/v0.0.1/RELEASE_NOTES_v0.0.1.md
    ```
 
 4. **Move completed checklists to archive**
+
    ```bash
    git mv docs/v0.0.2-CHECKLIST.md docs/archive/v0.0.2/
    ```
@@ -184,7 +193,9 @@ assets/
 ## 🔄 Documentation Lifecycle
 
 ### Active Documents (Root)
+
 **Stay in root, update frequently:**
+
 - README.md
 - CHANGELOG.md
 - RELEASE_NOTES.md (latest version)
@@ -192,18 +203,23 @@ assets/
 - CONTRIBUTING.md
 
 ### Planning Documents (docs/)
+
 **Active until feature/version complete:**
+
 - VERSION_PLANNING.md (permanent)
 - v0.X.Y-CHECKLIST.md (until that version releases)
 - v0.X.0-ROADMAP.md (until that version releases)
 
 **Lifecycle:**
+
 ```
 Create → Work on → Complete → Archive → Create next
 ```
 
 ### Archived Documents (docs/archive/)
+
 **Historical record, rarely updated:**
+
 - Version-specific release notes
 - Completed checklists
 - Phase summaries
@@ -214,6 +230,7 @@ Create → Work on → Complete → Archive → Create next
 ## ✅ Current State (Post-Cleanup)
 
 ### Root Structure ✅
+
 ```
 /
 ├── README.md              ✅ Main docs
@@ -226,6 +243,7 @@ Create → Work on → Complete → Archive → Create next
 ```
 
 ### docs/ Structure ✅
+
 ```
 docs/
 ├── VERSION_PLANNING.md           ✅ Strategy overview
@@ -273,17 +291,20 @@ docs/
 ## 🚦 Next Steps for v0.0.2
 
 ### Documentation to Create
+
 1. **CONTRIBUTING.md** (root) - High priority!
 2. **CODE_OF_CONDUCT.md** (root)
 3. **FAQ.md** (root or docs/)
 4. **TROUBLESHOOTING.md** (root or docs/)
 
 ### Documentation to Review
+
 1. Check for duplicate DEVELOPMENT.md (root vs docs/)
 2. Update VERSION_PLANNING.md as decisions are made
 3. Keep CHANGELOG.md updated with each PR
 
 ### Documentation to Archive (After v0.0.2)
+
 1. Move `docs/v0.0.2-CHECKLIST.md` → `docs/archive/v0.0.2/`
 2. Copy RELEASE_NOTES.md → `docs/archive/v0.0.2/RELEASE_NOTES_v0.0.2.md`
 3. Create `docs/v0.0.3-CHECKLIST.md` or start v0.1.0 work
@@ -293,11 +314,13 @@ docs/
 ## 📚 Documentation Standards
 
 ### File Naming
+
 - **Root docs**: UPPERCASE (README.md, CONTRIBUTING.md)
 - **Subdocs**: lowercase with hyphens (api-reference.md)
 - **Archived**: Include version in name (RELEASE_NOTES_v0.0.1.md)
 
 ### Content Standards
+
 - Start with purpose statement
 - Include "Last Updated" date on living docs
 - Use emojis for visual scanning
@@ -305,6 +328,7 @@ docs/
 - Keep line length ≤100 characters
 
 ### Maintenance
+
 - Review docs quarterly for accuracy
 - Archive old version docs when releasing new versions
 - Update CHANGELOG.md with every release

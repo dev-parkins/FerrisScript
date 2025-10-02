@@ -65,6 +65,7 @@ We follow a **coordinated disclosure** approach:
 6. After the advisory is published, you are free to discuss the vulnerability publicly
 
 We ask that you:
+
 - Give us reasonable time to address the vulnerability before public disclosure
 - Avoid exploiting the vulnerability beyond what is necessary to demonstrate it
 - Make a good faith effort to avoid privacy violations, data destruction, and service disruption
@@ -98,10 +99,12 @@ When using FerrisScript in your projects:
 ## Contact
 
 For security-related questions or concerns, please contact:
+
 - **Email**: dev-parkins@users.noreply.github.com (with "SECURITY" in subject)
 - **GitHub Security**: https://github.com/dev-parkins/FerrisScript/security/advisories
 
 For general questions, feature requests, or non-security bugs, please use:
+
 - **GitHub Issues**: https://github.com/dev-parkins/FerrisScript/issues
 - **GitHub Discussions**: https://github.com/dev-parkins/FerrisScript/discussions
 

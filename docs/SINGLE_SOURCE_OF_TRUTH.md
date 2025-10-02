@@ -68,12 +68,14 @@ These documents are frequently accessed and must remain authoritative. **Always 
 ### ✅ DO: Link to Primary Source
 
 **Good Example (FAQ.md):**
+
 ```markdown
 **Q: How do I install FerrisScript?**
 A: See the [Installation section in README.md](../README.md#installation) for complete instructions.
 ```
 
 **Good Example (CONTRIBUTING.md):**
+
 ```markdown
 ## Getting Started
 
@@ -84,6 +86,7 @@ Before contributing, ensure you have FerrisScript installed. Follow the
 ### ❌ DON'T: Duplicate Content
 
 **Bad Example (FAQ.md):**
+
 ```markdown
 **Q: How do I install FerrisScript?**
 A: Run these commands:
@@ -92,6 +95,7 @@ git clone https://github.com/dev-parkins/FerrisScript.git
 cd FerrisScript
 cargo build --workspace
 ```
+
 ```
 
 **Why it's bad:** If installation steps change, this becomes outdated and misleading.
@@ -244,12 +248,14 @@ Get-ChildItem -Path . -Recurse -Include "*.md" | Select-String "git clone" | Sel
 ```
 
 ### Check for Duplicate Prerequisites
+
 ```powershell
 # Search for "Rust 1.70" in all markdown files
 Get-ChildItem -Path . -Recurse -Include "*.md" | Select-String "Rust 1.70" | Select-Object Path, LineNumber
 ```
 
 ### Check for Duplicate Godot Steps
+
 ```powershell
 # Search for "_ready()" function in docs (should only be in examples)
 Get-ChildItem -Path . -Recurse -Include "*.md" | Select-String "_ready\(\)" | Select-Object Path, LineNumber
@@ -260,6 +266,7 @@ Get-ChildItem -Path . -Recurse -Include "*.md" | Select-String "_ready\(\)" | Se
 ## Future Considerations
 
 ### Auto-Generated Documentation
+
 - API reference (from Rust docs)
 - Test coverage reports
 - Benchmark results
@@ -267,7 +274,9 @@ Get-ChildItem -Path . -Recurse -Include "*.md" | Select-String "_ready\(\)" | Se
 **Rule:** Never manually duplicate auto-generated content. Always link to generated docs.
 
 ### Localization/Translations
+
 If FerrisScript adds translated docs:
+
 - Translate entire files, not snippets
 - Maintain same structure as English docs
 - Update all translations when primary source changes

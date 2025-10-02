@@ -28,22 +28,26 @@ From validation report, include:
 ### FAQ.md Content (from Validation Report)
 
 **Installation & Setup:**
+
 - [ ] Q: Minimum requirements? → A: Rust 1.70+, Godot 4.2+, Git (link to README)
 - [ ] Q: Build time? → A: 3-5 minutes first build (validated)
 - [ ] Q: Compile errors? → A: Link to TROUBLESHOOTING.md
 - [ ] Q: Need Godot to build? → A: No, only for testing integration
 
 **Using FerrisScript:**
+
 - [ ] Q: Create first `.ferris` file? → A: Link to Language Overview in README
 - [ ] Q: Use without Godot? → A: Not yet, v0.2.0 planned for standalone
 - [ ] Q: Difference from GDScript? → A: Compiled to native code, better performance
 
 **Godot Integration:**
+
 - [ ] Q: Load in Godot? → A: Link to README "Using in Godot" (4 steps)
 - [ ] Q: Godot doesn't recognize? → A: Check .gdextension file, link to TROUBLESHOOTING.md
 - [ ] Q: Mix with GDScript? → A: Yes, side-by-side
 
 **Performance:**
+
 - [ ] Q: Faster than GDScript? → A: Early benchmarks 2-5x, not optimized yet
 - [ ] Q: Optimization plans? → A: Link to v0.1.0-ROADMAP.md
 
@@ -56,16 +60,19 @@ From validation report, include:
 **Platform-Specific Prerequisites:**
 
 Windows:
+
 - [ ] Issue: MSVC linker not found
 - [ ] Solution: Install Visual Studio 2019+ with C++ tools
 - [ ] Reference: Validation identified this gap
 
 Linux:
+
 - [ ] Issue: Missing libclang
 - [ ] Solution: `sudo apt install libclang-dev build-essential`
 - [ ] Reference: Validation identified this gap
 
 macOS:
+
 - [ ] Issue: "xcrun: error: invalid active developer path"
 - [ ] Solution: `xcode-select --install`
 - [ ] Reference: Validation identified this gap
@@ -218,16 +225,19 @@ git checkout -b feature/docs-conduct
 
 ## Summary of Tracking
 
-### Immediate (v0.0.2):
+### Immediate (v0.0.2)
+
 - ✅ Phase 1 complete (validation, duplication matrix)
 - ⏳ Phase 2-6 (follow workflow document)
 
-### Deferred (v0.0.3+):
+### Deferred (v0.0.3+)
+
 - Godot CLI automation
 - Code coverage reporting
 - Additional platform testing
 
-### Tracked In:
+### Tracked In
+
 - `docs/v0.0.2-DOCUMENTATION-WORKFLOW.md` - Main workflow
 - `docs/VALIDATION_REPORT.md` - Detailed findings
 - `docs/SINGLE_SOURCE_OF_TRUTH.md` - Duplication prevention

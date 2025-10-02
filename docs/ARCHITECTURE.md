@@ -224,6 +224,7 @@ Program {
 #### Error Recovery
 
 The parser **does not** attempt error recovery. On the first parse error, it returns immediately with an error message including:
+
 - Expected token vs. actual token
 - Line and column number
 
@@ -248,11 +249,13 @@ The type checker validates the AST before execution.
 #### Type System
 
 FerrisScript has a **gradual type system**:
+
 - Type annotations are **optional** (e.g., `let x = 5` or `let x: int = 5`)
 - Type inference is **limited** (mainly for literals)
 - Runtime type coercion (e.g., `int` to `float` for arithmetic)
 
 Supported types:
+
 - **Primitives**: `int`, `float`, `bool`, `string`
 - **Godot types**: `Vector2`
 - **Special**: `nil` (unit type)
@@ -299,6 +302,7 @@ pub enum Value {
 ### Environment (Scope Management)
 
 The `Env` struct manages:
+
 - **Variable scopes**: Stack of hashmaps for lexical scoping
 - **Functions**: Global function registry (name → AST `Function`)
 - **Builtin functions**: Native Rust functions (e.g., `print`, `sqrt`)
@@ -450,6 +454,7 @@ node.set_position(new_pos);
 ```
 
 **Why thread-local?**
+
 - Godot nodes are not `Send + Sync` (cannot cross thread boundaries)
 - Thread-local storage avoids lifetime issues with `&mut self`
 
@@ -468,6 +473,7 @@ Currently supported `self` properties:
 ### Why a Tree-Walking Interpreter?
 
 **Alternatives considered:**
+
 1. **Bytecode VM**: Compile AST → bytecode → execute
 2. **JIT compilation**: Compile to machine code at runtime
 3. **Tree-walking**: Directly execute AST
@@ -475,12 +481,14 @@ Currently supported `self` properties:
 **Decision: Tree-walking**
 
 **Reasons:**
+
 - **Simplicity**: Minimal code, easier to debug and extend
 - **Development speed**: Get language features working quickly
 - **Small scripts**: Game scripts are typically <500 lines, so performance isn't critical
 - **Flexibility**: Easy to add new AST nodes and operators
 
 **Trade-offs:**
+
 - **Performance**: Slower than bytecode VM (not a concern for game scripts)
 - **Memory**: AST is kept in memory (acceptable for small scripts)
 
@@ -489,6 +497,7 @@ Currently supported `self` properties:
 ### Why GDExtension (Not GDScript Integration)?
 
 **Alternatives considered:**
+
 1. **Transpile to GDScript**: Compile `.ferris` → `.gd` files
 2. **GDExtension**: Native Rust extension
 3. **Standalone VM**: External process communicating via IPC
@@ -496,12 +505,14 @@ Currently supported `self` properties:
 **Decision: GDExtension**
 
 **Reasons:**
+
 - **Performance**: Native code runs faster than GDScript
 - **Type safety**: Rust's type system prevents many bugs
 - **Ecosystem**: Leverage Rust crates (e.g., for future language features)
 - **Direct access**: Can access Godot's C++ API directly
 
 **Trade-offs:**
+
 - **Compilation required**: Users must compile the extension (provides pre-built binaries)
 - **Platform-specific**: Separate builds for Windows/Linux/macOS
 - **Complexity**: More complex than pure GDScript
@@ -511,11 +522,13 @@ Currently supported `self` properties:
 **Decision: Static scoping + no heap allocation**
 
 FerrisScript currently has **no dynamic memory allocation** in scripts:
+
 - All values are stack-allocated or in the `Env` hashmaps
 - Scopes are popped when blocks end (automatic cleanup)
 - No closures or first-class functions (would require heap allocation)
 
 **Future**: If we add closures, we'd need:
+
 - Reference counting (like Rust's `Rc`)
 - Tracing GC (like Python)
 - Ownership system (like Rust)
@@ -525,6 +538,7 @@ Currently not needed for game scripting use cases.
 ### Why Rust-Like Syntax?
 
 **Alternatives considered:**
+
 1. **Python-like**: Indentation-based, dynamic typing
 2. **C-like**: Curly braces, semicolons
 3. **Lua-like**: Minimal syntax, `end` keywords
@@ -532,12 +546,14 @@ Currently not needed for game scripting use cases.
 **Decision: Rust-like**
 
 **Reasons:**
+
 - **Familiarity**: Rust syntax is popular and well-documented
 - **Type annotations**: Optional types (`let x: int = 5`) fit game scripting
 - **Clear intent**: `mut` keyword makes mutability explicit
 - **Consistency**: Matches Godot's GDScript `var` vs. `const` distinction
 
 **Trade-offs:**
+
 - **Learning curve**: Users must learn Rust syntax (mitigated by examples)
 - **Verbosity**: More keywords than Python or Lua
 
@@ -552,6 +568,7 @@ This section explains how to extend FerrisScript with new features.
 **Example: Add `%` (modulo) operator**
 
 1. **Add token** (`lexer.rs`):
+
    ```rust
    pub enum Token {
        // ... existing tokens ...
@@ -563,6 +580,7 @@ This section explains how to extend FerrisScript with new features.
    ```
 
 2. **Add AST node** (`ast.rs`):
+
    ```rust
    pub enum BinaryOp {
        // ... existing ops ...
@@ -571,6 +589,7 @@ This section explains how to extend FerrisScript with new features.
    ```
 
 3. **Add parsing** (`parser.rs`):
+
    ```rust
    fn parse_factor(&mut self) -> Result<Expr, String> {
        // ... existing code ...
@@ -587,6 +606,7 @@ This section explains how to extend FerrisScript with new features.
    ```
 
 4. **Add evaluation** (`runtime/lib.rs`):
+
    ```rust
    BinaryOp::Modulo => {
        let left_int = left.to_int().ok_or("Modulo requires int")?;
@@ -596,6 +616,7 @@ This section explains how to extend FerrisScript with new features.
    ```
 
 5. **Add type checking** (`type_checker.rs`):
+
    ```rust
    BinaryOp::Modulo => {
        check_int_operands(left, right)?;
@@ -604,6 +625,7 @@ This section explains how to extend FerrisScript with new features.
    ```
 
 6. **Add tests** (`compiler/lib.rs`, `runtime/lib.rs`):
+
    ```rust
    #[test]
    fn test_modulo() {
@@ -619,6 +641,7 @@ This section explains how to extend FerrisScript with new features.
 **Example: Add `floor(x: float) -> int` function**
 
 1. **Implement the function** (`runtime/lib.rs`):
+
    ```rust
    fn builtin_floor(args: &[Value]) -> Result<Value, String> {
        if args.len() != 1 {
@@ -631,11 +654,13 @@ This section explains how to extend FerrisScript with new features.
    ```
 
 2. **Register in Env** (`runtime/lib.rs`, in `Env::new()`):
+
    ```rust
    env.builtin_fns.insert("floor".to_string(), builtin_floor);
    ```
 
 3. **Add tests**:
+
    ```rust
    #[test]
    fn test_floor() {
@@ -651,6 +676,7 @@ This section explains how to extend FerrisScript with new features.
 **Example: Add `Color { r, g, b, a }` type**
 
 1. **Add to Value enum** (`runtime/lib.rs`):
+
    ```rust
    pub enum Value {
        // ... existing variants ...
@@ -659,6 +685,7 @@ This section explains how to extend FerrisScript with new features.
    ```
 
 2. **Add type name** (`type_checker.rs`):
+
    ```rust
    pub enum Type {
        // ... existing types ...
@@ -667,6 +694,7 @@ This section explains how to extend FerrisScript with new features.
    ```
 
 3. **Add constructor builtin**:
+
    ```rust
    fn builtin_color(args: &[Value]) -> Result<Value, String> {
        if args.len() != 4 {
@@ -681,6 +709,7 @@ This section explains how to extend FerrisScript with new features.
    ```
 
 4. **Add Godot conversion** (`godot_bind/lib.rs`):
+
    ```rust
    // In property getter/setter:
    "modulate" => {
@@ -696,6 +725,7 @@ This section explains how to extend FerrisScript with new features.
 **Example: Add `self.rotation` (float) property**
 
 1. **Add thread-local storage** (`godot_bind/lib.rs`):
+
    ```rust
    thread_local! {
        static NODE_ROTATION: RefCell<Option<f32>> = const { RefCell::new(None) };
@@ -703,6 +733,7 @@ This section explains how to extend FerrisScript with new features.
    ```
 
 2. **Add to property getter**:
+
    ```rust
    fn get_node_property_tls(property_name: &str) -> Result<Value, String> {
        match property_name {
@@ -719,6 +750,7 @@ This section explains how to extend FerrisScript with new features.
    ```
 
 3. **Add to property setter**:
+
    ```rust
    fn set_node_property_tls(property_name: &str, value: Value) -> Result<(), String> {
        match property_name {
@@ -737,6 +769,7 @@ This section explains how to extend FerrisScript with new features.
    ```
 
 4. **Update `_process` hook** (`godot_bind/lib.rs`):
+
    ```rust
    // Before calling script function:
    NODE_ROTATION.with(|rot| *rot.borrow_mut() = Some(self.base().get_rotation()));
@@ -754,11 +787,13 @@ This section explains how to extend FerrisScript with new features.
 ### Current Performance Characteristics
 
 **Strengths:**
+
 - Zero-cost FFI between Rust and Godot (GDExtension)
 - No dynamic memory allocation in scripts (stack-only)
 - Short-circuit evaluation for logical operators
 
 **Bottlenecks:**
+
 - Tree-walking: Each AST node traversal has function call overhead
 - HashMap lookups: Variable resolution walks scope stack
 - String cloning: Variable names and string literals are cloned
@@ -795,6 +830,7 @@ Currently no benchmarks. To add:
 3. Compare against GDScript for equivalent scripts
 
 **Suggested benchmarks:**
+
 - Fibonacci (recursion performance)
 - Matrix multiply (loops and arithmetic)
 - Pathfinding (nested data structures)
@@ -812,6 +848,7 @@ Each crate has unit tests:
 - **Godot bind**: Test property access, lifecycle hooks (harder, requires Godot)
 
 **Example test** (`compiler/src/lib.rs`):
+
 ```rust
 #[test]
 fn test_compile_hello() {
@@ -823,6 +860,7 @@ fn test_compile_hello() {
 ### Integration Tests
 
 Located in `examples/`:
+
 - `hello.ferris`: Basic function call
 - `move.ferris`: Variable mutation, arithmetic
 - `bounce.ferris`: Conditionals, property access
@@ -909,9 +947,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute to FerrisScript. Wh
 ## Questions?
 
 For questions about the architecture:
+
 - **GitHub Discussions**: https://github.com/dev-parkins/FerrisScript/discussions
 - **Issue tracker**: https://github.com/dev-parkins/FerrisScript/issues
 
 For questions about Godot integration, see:
+
 - [Godot GDExtension docs](https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/index.html)
 - [godot-rust book](https://godot-rust.github.io/)

@@ -52,6 +52,7 @@ Phase 4 has been successfully completed, delivering comprehensive security docum
 ### 2. Documentation Linting CI (96 lines)
 
 **Files**:
+
 - `.github/workflows/docs-lint.yml` (43 lines)
 - `.markdownlint.json` (20 lines)
 - `.markdown-link-check.json` (23 lines)
@@ -68,6 +69,7 @@ Phase 4 has been successfully completed, delivering comprehensive security docum
 #### Markdownlint Configuration
 
 Disabled rules for FerrisScript documentation:
+
 - `MD013`: Line length (code examples can be long)
 - `MD033`: Inline HTML (needed for badges, images)
 - `MD041`: First line H1 (some docs have frontmatter)
@@ -122,6 +124,7 @@ Disabled rules for FerrisScript documentation:
 ### 4. Enhanced Example Documentation (1,022 lines)
 
 **Files**:
+
 - `examples/hello/README.md` (211 lines)
 - `examples/move/README.md` (308 lines)
 - `examples/bounce/README.md` (503 lines)
@@ -133,6 +136,7 @@ Disabled rules for FerrisScript documentation:
 **Concepts**: Functions, Print statements, Godot lifecycle hooks
 
 **Content**:
+
 - Line-by-line code explanation (4 sections)
 - Running instructions (2 methods: standalone + Godot)
 - Common gotchas (4 issues with solutions)
@@ -140,6 +144,7 @@ Disabled rules for FerrisScript documentation:
 - Links to next steps
 
 **Teaching Approach**:
+
 - Explains *why* `_ready()` is special (Godot lifecycle)
 - Shows where output appears (Godot Output panel)
 - Handles common beginner mistakes (missing output, file not found)
@@ -150,6 +155,7 @@ Disabled rules for FerrisScript documentation:
 **Concepts**: Frame-by-frame updates, Delta time, Property access
 
 **Content**:
+
 - Line-by-line code explanation (9 sections)
 - Delta time deep dive (with calculations at 60 FPS)
 - Framerate independence explanation
@@ -158,6 +164,7 @@ Disabled rules for FerrisScript documentation:
 - Physics vs visual movement guide
 
 **Teaching Approach**:
+
 - Explains delta time math (`50.0 * 0.016 = 0.8 px/frame`)
 - Compares framerate-dependent vs independent
 - Discusses when to use `_process` vs `_physics_process`
@@ -168,6 +175,7 @@ Disabled rules for FerrisScript documentation:
 **Concepts**: Global variables, Mutability, Conditionals, State management
 
 **Content**:
+
 - Line-by-line code explanation (11 sections)
 - Global vs local variables comparison
 - Frame-by-frame execution trace (22 frames shown)
@@ -176,6 +184,7 @@ Disabled rules for FerrisScript documentation:
 - Real-world use cases (7 examples)
 
 **Teaching Approach**:
+
 - Step-by-step execution trace shows bouncing behavior
 - Explains mutability (`mut` keyword) with type checker errors
 - Compares correct (global) vs incorrect (local) variable placement
@@ -184,12 +193,14 @@ Disabled rules for FerrisScript documentation:
 #### Root README Examples Section (72 lines)
 
 **Content**:
+
 - 3 featured examples with difficulty levels
 - Code snippets for each example
 - Direct links to full tutorials
 - Teaser for future examples (collections, match)
 
 **Impact**:
+
 - **Discoverability**: Examples now visible from main README
 - **Progressive Learning**: Clear difficulty progression
 - **Reduced Support Burden**: Answers "how do I..." questions
@@ -212,6 +223,7 @@ Disabled rules for FerrisScript documentation:
 | **Total** | **5.5-7.5 hours** | **~7.5 hours** | 🎯 Within range |
 
 **Notes**:
+
 - SECURITY.md faster due to excellent Context7 research (GitHub docs)
 - ARCHITECTURE.md on target despite 917 lines (clear structure from codebase)
 - Example READMEs took full 2 hours (high quality, detailed gotchas)
@@ -223,10 +235,12 @@ Disabled rules for FerrisScript documentation:
 ### Context7 MCP Integration
 
 **Query 1**: `resolve-library-id` for "github security policy"
+
 - **Result**: 30 library matches returned
 - **Selected**: `/websites/github_en` (GitHub documentation, 21,923 snippets, trust 7.5)
 
 **Query 2**: `get-library-docs` for GitHub Security Policy
+
 - **Topic**: "security policy SECURITY.md vulnerability reporting"
 - **Tokens**: 2,000
 - **Result**: 30 code snippets including:
@@ -236,6 +250,7 @@ Disabled rules for FerrisScript documentation:
   - Response timeline recommendations
 
 **Impact**:
+
 - **Time Saved**: ~30 minutes (no need to search/read GitHub docs manually)
 - **Quality**: Used official GitHub templates and best practices
 - **Confidence**: Referenced authoritative sources (docs.github.com)
@@ -288,6 +303,7 @@ Disabled rules for FerrisScript documentation:
 ### Pre-Commit Checks
 
 ✅ **All files staged correctly**:
+
 ```
 new file:   .github/workflows/docs-lint.yml
 new file:   .markdown-link-check.json
@@ -398,12 +414,14 @@ new file:   examples/move/README.md
 **Result**: Context7 returned 30 relevant snippets in <5 seconds, including official templates.
 
 **Recommendation**: Use Context7 for:
+
 - Security policies (SECURITY.md)
 - Accessibility guidelines (WCAG, ARIA)
 - API design (REST, GraphQL)
 - CI/CD workflows (GitHub Actions, GitLab CI)
 
 **Avoid Context7 for**:
+
 - Project-specific documentation (use grep/semantic search)
 - Tutorial-style explanations (write from scratch)
 - Novel/creative content (no reference examples needed)
@@ -413,11 +431,13 @@ new file:   examples/move/README.md
 **Observation**: Example READMEs (hello, move, bounce) collectively address **14 common gotchas**.
 
 **Predicted Impact**:
+
 - Reduces "Node doesn't move" issues (covered in move tutorial)
 - Reduces "Variable not changing" issues (covered in bounce tutorial)
 - Reduces "Nothing prints" issues (covered in hello tutorial)
 
 **Recommendation**: Every example should have:
+
 1. Line-by-line explanation
 2. Common gotchas (4-5 issues)
 3. Variations to try (4-6 examples)
@@ -428,6 +448,7 @@ new file:   examples/move/README.md
 **Lesson**: Automated linting prevents bad docs from reaching main.
 
 **Coverage**:
+
 - Markdown formatting (markdownlint)
 - Broken links (markdown-link-check)
 - Runs only on doc changes (efficient)
@@ -441,11 +462,13 @@ new file:   examples/move/README.md
 **Lesson**: 917-line ARCHITECTURE.md is comprehensive now, but requires maintenance.
 
 **Future Risks**:
+
 - Code evolves, doc lags behind
 - New features not documented
 - Design decisions forgotten
 
 **Mitigation**:
+
 - Add ARCHITECTURE.md to PR template checklist ("Update ARCHITECTURE.md if needed")
 - Link to ARCHITECTURE.md from CONTRIBUTING.md
 - Periodic audits (every minor version)
@@ -474,6 +497,7 @@ Phase 5 is "Review & Merge" phase. Based on Phase 4 experience:
 **Alternative**: Merge commit (to preserve Phase 4 branch history)
 
 **Reasoning**:
+
 - Phase 4 has 1 logical unit of work (security + architecture + examples)
 - Squash commit: "docs: Phase 4 - add SECURITY.md, CI linting, ARCHITECTURE.md, and enhanced examples"
 - Alternative: Keep all individual commits visible

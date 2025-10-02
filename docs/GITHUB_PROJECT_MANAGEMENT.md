@@ -13,6 +13,7 @@
 **File:** `.github/workflows/ci.yml`
 
 **Current Triggers:**
+
 ```yaml
 on:
   push:
@@ -23,6 +24,7 @@ on:
 ```
 
 **Current Jobs:**
+
 - `test` - Runs on all pushes/PRs (3 platforms: Ubuntu, Windows, macOS)
   - Cargo test
   - Clippy (continue-on-error)
@@ -32,6 +34,7 @@ on:
 ### Issue: Documentation PRs Running Full CI
 
 **Problem:** Documentation-only changes trigger:
+
 - 3x platform matrix tests (~5 minutes each = 15 minutes)
 - 3x platform release builds (~10 minutes each = 30 minutes)
 - **Total: ~45 minutes for a typo fix**
@@ -103,6 +106,7 @@ jobs:
 ```
 
 **Pros:**
+
 - ✅ Fast docs PRs (1-2 minutes vs 45 minutes)
 - ✅ Still validates markdown links
 - ✅ Full CI runs for code changes
@@ -110,10 +114,12 @@ jobs:
 - ✅ Industry standard (used by Rust, TypeScript, React)
 
 **Cons:**
+
 - ⚠️ Requires `dorny/paths-filter` action
 - ⚠️ More complex workflow file
 
 **Time Savings:**
+
 - Docs PR: 45 min → 2 min (95% reduction)
 - Code PR: No change (45 min)
 
@@ -139,10 +145,12 @@ jobs:
 ```
 
 **Pros:**
+
 - ✅ Simple workflow modification
 - ✅ Clear branch naming convention
 
 **Cons:**
+
 - ⚠️ Requires discipline (use `docs/` prefix)
 - ⚠️ Doesn't help with docs in feature branches
 - ⚠️ Still runs CI if one code file + docs files change
@@ -152,9 +160,11 @@ jobs:
 **Approach:** Use `workflow_dispatch` for docs
 
 **Pros:**
+
 - ✅ Maximum control
 
 **Cons:**
+
 - ❌ Manual trigger required (slows workflow)
 - ❌ Easy to forget
 
@@ -163,6 +173,7 @@ jobs:
 **Implement Option 1 (Path-Based Conditional Execution)**
 
 **Reasoning:**
+
 1. Industry standard (Rust, Node.js, React all use this)
 2. Automatic - no manual intervention
 3. Handles mixed PRs (some code + some docs)
@@ -237,16 +248,19 @@ jobs:
 ### Label Usage in Templates
 
 **Update `.github/ISSUE_TEMPLATE/bug_report.md`:**
+
 ```yaml
 labels: ["type: bug", "status: needs-triage"]
 ```
 
 **Update `.github/ISSUE_TEMPLATE/feature_request.md`:**
+
 ```yaml
 labels: ["type: feature", "status: needs-triage"]
 ```
 
 **Update `.github/ISSUE_TEMPLATE/documentation.md`:**
+
 ```yaml
 labels: ["type: documentation", "status: needs-triage"]
 ```
@@ -254,6 +268,7 @@ labels: ["type: documentation", "status: needs-triage"]
 ### Label Automation (Future - v0.0.3+)
 
 Use GitHub Actions to auto-label:
+
 - PRs that touch docs: `type: documentation`
 - PRs with >500 lines: `difficulty: hard`
 - PRs from first-time contributors: `good first issue`
@@ -328,6 +343,7 @@ Milestones group related issues/PRs for release planning.
 **Wait until v0.0.3** - Current workflow (branches + PRs + milestones) sufficient for now.
 
 **When to Adopt:**
+
 - More than 3 active contributors
 - Managing >20 concurrent issues
 - Need Kanban board visualization
@@ -337,6 +353,7 @@ Milestones group related issues/PRs for release planning.
 **Board Name:** "FerrisScript Development"
 
 **Columns:**
+
 - 📥 Backlog
 - 🎯 Planned (this version)
 - 🚧 In Progress
@@ -344,6 +361,7 @@ Milestones group related issues/PRs for release planning.
 - ✅ Done
 
 **Automation:**
+
 - Issues → Backlog
 - PRs → In Review
 - Merged PRs → Done
@@ -402,6 +420,7 @@ Milestones group related issues/PRs for release planning.
 ### Why Not Wiki for Core Docs?
 
 **Problems with Wiki for official docs:**
+
 1. ❌ Not version controlled (no PR review)
 2. ❌ Not part of releases (can diverge)
 3. ❌ Hard to maintain consistency
@@ -409,6 +428,7 @@ Milestones group related issues/PRs for release planning.
 5. ❌ Separate from code contributions
 
 **Exceptions (when Wiki is good):**
+
 1. ✅ Rapidly changing content (known issues)
 2. ✅ Community contributions (tutorials)
 3. ✅ Internal process docs (meeting notes)
@@ -427,6 +447,7 @@ Milestones group related issues/PRs for release planning.
 **Status:** User has enabled this
 
 **Recommended Categories:**
+
 ```
 💬 General - General discussion about FerrisScript
 💡 Ideas - Feature suggestions, brainstorming
@@ -436,6 +457,7 @@ Milestones group related issues/PRs for release planning.
 ```
 
 **Usage:**
+
 - Redirect "How do I..." questions from Issues → Discussions Q&A
 - Use for feature design discussions before creating issues
 - Community showcase
@@ -449,6 +471,7 @@ Milestones group related issues/PRs for release planning.
 **Purpose:** Sustainable funding for development
 
 **Tiers Example:**
+
 - $5/mo - Sponsor badge
 - $25/mo - Name in README
 - $100/mo - Priority support
@@ -459,6 +482,7 @@ Milestones group related issues/PRs for release planning.
 **File:** `SECURITY.md`
 
 **Content:**
+
 - Supported versions
 - How to report vulnerabilities (GitHub Security Advisories)
 - Response timeline
@@ -471,11 +495,13 @@ Milestones group related issues/PRs for release planning.
 **When:** v0.0.3+
 
 **Tools:**
+
 - CodeQL (GitHub native, free for public repos)
 - Clippy in CI (already have this)
 - Dependabot (auto-update dependencies)
 
 **Benefits:**
+
 - Catch security vulnerabilities
 - Automated dependency updates
 - Code quality insights
@@ -485,6 +511,7 @@ Milestones group related issues/PRs for release planning.
 **Recommendation:** Enable for `main` branch NOW
 
 **Settings → Branches → Add rule for `main`:**
+
 ```
 ✅ Require pull request before merging
   ✅ Require approvals (1)
@@ -499,6 +526,7 @@ Milestones group related issues/PRs for release planning.
 ```
 
 **Benefits:**
+
 - Prevents accidental pushes to main
 - Ensures CI passes
 - Requires code review
@@ -541,6 +569,7 @@ Milestones group related issues/PRs for release planning.
 ### 1. Enable Branch Protection (5 min)
 
 **Steps:**
+
 1. Go to: https://github.com/dev-parkins/FerrisScript/settings/branches
 2. Click "Add rule"
 3. Branch name pattern: `main`
@@ -555,6 +584,7 @@ Milestones group related issues/PRs for release planning.
 ### 2. Create Labels (30 min)
 
 **Fast method using GitHub CLI:**
+
 ```bash
 # If gh is installed and authenticated
 gh label create "priority: critical" --color "d73a4a" --description "Security, data loss, blocking issues"
@@ -567,6 +597,7 @@ gh label create "priority: high" --color "ff9800" --description "Major bugs, imp
 ### 3. Create v0.0.2 Milestone (5 min)
 
 **Steps:**
+
 1. Go to: https://github.com/dev-parkins/FerrisScript/milestones
 2. Click "New milestone"
 3. Title: `v0.0.2 - Documentation & Polish`

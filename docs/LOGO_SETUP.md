@@ -3,11 +3,13 @@
 ## Step 1: Save the Logo File
 
 1. Save your ChatGPT-generated logo as:
+
    ```
    Y:\cpark\Projects\RustyScript\assets\ferrisscript-logo.png
    ```
 
 2. Verify the file:
+
    ```powershell
    Test-Path ".\assets\ferrisscript-logo.png"
    ```
@@ -31,6 +33,7 @@ Preview it locally or on GitHub after pushing.
 ## Step 4: Optional - Create Additional Variants
 
 ### Favicon (for GitHub Pages or docs site)
+
 ```powershell
 # If you have ImageMagick installed:
 magick convert assets\ferrisscript-logo.png -resize 32x32 assets\favicon-32x32.png
@@ -38,12 +41,16 @@ magick convert assets\ferrisscript-logo.png -resize 16x16 assets\favicon-16x16.p
 ```
 
 ### Square Version (for avatars, social media)
+
 Crop to a square aspect ratio showing just the crab:
+
 - Size: 400×400px or 512×512px
 - Use: GitHub org avatar, Twitter profile, Discord server icon
 
 ### Dark Mode Version
+
 If needed for documentation that supports dark themes:
+
 - Replace cream background with dark (#1a1a1a or #0d1117 for GitHub dark)
 - Keep crab and text colors the same
 
@@ -68,6 +75,7 @@ git push origin main
 ## Step 6: Verify on GitHub
 
 After pushing, check:
+
 - [ ] README displays logo correctly
 - [ ] Logo renders at appropriate size (300px)
 - [ ] Image loads quickly
@@ -76,6 +84,7 @@ After pushing, check:
 ## Future Enhancements
 
 Consider creating:
+
 - [ ] Animated SVG version (crab waving)
 - [ ] Logo variants for different contexts
 - [ ] Sticker designs for conferences

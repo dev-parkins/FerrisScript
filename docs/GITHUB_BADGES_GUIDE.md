@@ -13,11 +13,13 @@ All badges use [shields.io](https://shields.io/) for consistent styling.
 ### GitHub Stars Badge
 
 **Badge Code:**
+
 ```markdown
 ![GitHub Stars](https://img.shields.io/github/stars/dev-parkins/FerrisScript?style=flat-square&logo=github)
 ```
 
 **Result:**
+
 - Shows current star count
 - Auto-updates when stars change
 - Flat square style matches modern GitHub design
@@ -69,10 +71,12 @@ A Rust-inspired scripting language for Godot 4 via GDExtension...
 ### Build Status (requires GitHub Actions)
 
 **Prerequisites:**
+
 - `.github/workflows/ci.yml` file exists
 - Workflow has `name: CI` or similar
 
 **Badge Code:**
+
 ```markdown
 ![Build Status](https://img.shields.io/github/actions/workflow/status/dev-parkins/FerrisScript/ci.yml?branch=main&style=flat-square&logo=github-actions)
 ```
@@ -112,6 +116,7 @@ A Rust-inspired scripting language for Godot 4 via GDExtension...
 ```
 
 **Update to 0.0.2:**
+
 ```markdown
 ![Version](https://img.shields.io/badge/version-0.0.2-blue?style=flat-square)
 ```
@@ -136,6 +141,7 @@ A Rust-inspired scripting language for Godot 4 via GDExtension...
 ```
 
 **Update to 120 tests:**
+
 ```markdown
 ![Tests](https://img.shields.io/badge/tests-120%20passing-green?style=flat-square)
 ```

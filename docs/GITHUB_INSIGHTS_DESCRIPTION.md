@@ -49,6 +49,7 @@ type-system
 **Current:** `assets/ferrisscript-logo.png`
 
 **Recommendation:** Create a social preview (1280x640px) with:
+
 - FerrisScript logo
 - Tagline: "Rust-Inspired Scripting for Godot"
 - Key features: 🦀 Type-Safe | ⚡ Fast | 🎮 Godot Native
@@ -61,11 +62,13 @@ type-system
 ## README Badges (already present ✅)
 
 Current badges:
+
 - ✅ License: MIT
 - ✅ Rust 1.70+
 - ✅ Godot 4.2+
 
 **Recommended additions:**
+
 ```markdown
 [![CI/CD](https://github.com/dev-parkins/FerrisScript/workflows/CI%2FCD/badge.svg)](https://github.com/dev-parkins/FerrisScript/actions)
 [![GitHub issues](https://img.shields.io/github/issues/dev-parkins/FerrisScript)](https://github.com/dev-parkins/FerrisScript/issues)

@@ -21,6 +21,7 @@ godot_test/
 ### Building the Extension
 
 From the repository root:
+
 ```bash
 cargo build --package FerrisScript_godot_bind
 ```
@@ -58,11 +59,13 @@ See individual test sections below for setup and validation steps.
 **Purpose**: Validates script loading and _ready() execution.
 
 **Setup:**
+
 1. Add FerrisScriptNode to scene
 2. Set `script_path` to `res://scripts/hello.ferris`
 3. Run scene (F5)
 
 **Expected Output:**
+
 ```
 Successfully loaded FerrisScript: res://scripts/hello.ferris
 Hello, Godot! FerrisScript is working!
@@ -73,12 +76,14 @@ Hello, Godot! FerrisScript is working!
 **Purpose**: Validates _process() and self.position modification.
 
 **Setup:**
+
 1. Add FerrisScriptNode to scene
 2. Add child Sprite2D (for visualization)
 3. Set `script_path` to `res://scripts/move_test.ferris`
 4. Run scene (F5)
 
 **Expected Behavior:**
+
 - Node moves right at 50 pixels/second
 - Movement is smooth without stuttering
 
@@ -87,12 +92,14 @@ Hello, Godot! FerrisScript is working!
 **Purpose**: Validates mutable state persistence and control flow.
 
 **Setup:**
+
 1. Add FerrisScriptNode to scene
 2. Add child Sprite2D with offset position
 3. Set `script_path` to `res://scripts/bounce_test.ferris`
 4. Run scene (F5)
 
 **Expected Behavior:**
+
 - Node bounces between x=-200 and x=200
 - Direction reverses at boundaries
 - Movement is smooth at 100 pixels/second
@@ -100,16 +107,19 @@ Hello, Godot! FerrisScript is working!
 ## 🐛 Troubleshooting
 
 ### Extension Not Loading
+
 - Build the extension: `cargo build --package FerrisScript_godot_bind`
 - Verify DLL exists: `target/debug/FerrisScript_godot_bind.dll`
 - Check Godot console for errors
 
 ### Script Doesn't Run
+
 - Verify `script_path` is set in Inspector
 - Check path uses `res://` prefix
 - Look for compilation errors in console
 
 ### Node Doesn't Move
+
 - Ensure scene is running (F5)
 - Check FPS is stable (View → Show FPS)
 - Verify child sprite/visual element is present
@@ -125,4 +135,3 @@ Hello, Godot! FerrisScript is working!
 **Last Updated**: October 1, 2025  
 **Godot Version**: 4.5  
 **Extension Version**: 0.0.1
-
