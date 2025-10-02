@@ -1,0 +1,10 @@
+// Test script for _process with self.position
+// Moves the node 50 pixels per second to the right
+
+fn _ready() {
+    print("Movement test started! Node will move right.");
+}
+
+fn _process(delta: f32) {
+    self.position.x += 50.0 * delta;
+}

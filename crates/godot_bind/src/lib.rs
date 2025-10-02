@@ -2,6 +2,42 @@ use godot::prelude::*;
 use godot::classes::{FileAccess, file_access::ModeFlags};
 use rustyscript_compiler::{ast, compile};
 use rustyscript_runtime::{Env, Value, call_function, execute};
+use std::cell::RefCell;
+
+// Thread-local storage for node properties during script execution
+thread_local! {
+    static NODE_POSITION: RefCell<Option<Vector2>> = RefCell::new(None);
+}
+
+/// Property getter for self binding (called from runtime)
+fn get_node_property_tls(property_name: &str) -> Result<Value, String> {
+    match property_name {
+        "position" => {
+            NODE_POSITION.with(|pos| {
+                pos.borrow().map(|p| Value::Vector2 { x: p.x, y: p.y })
+                    .ok_or_else(|| "Node position not available".to_string())
+            })
+        }
+        _ => Err(format!("Property '{}' not supported", property_name)),
+    }
+}
+
+/// Property setter for self binding (called from runtime)
+fn set_node_property_tls(property_name: &str, value: Value) -> Result<(), String> {
+    match property_name {
+        "position" => {
+            if let Value::Vector2 { x, y } = value {
+                NODE_POSITION.with(|pos| {
+                    *pos.borrow_mut() = Some(Vector2::new(x, y));
+                });
+                Ok(())
+            } else {
+                Err(format!("Expected Vector2 for position, got {:?}", value))
+            }
+        }
+        _ => Err(format!("Property '{}' not supported", property_name)),
+    }
+}
 
 /// Godot-specific print function that outputs to Godot's console
 fn godot_print_builtin(args: &[Value]) -> Result<Value, String> {
@@ -129,15 +165,19 @@ impl RustyScriptNode {
             return None;
         }
         
+        // Get current node position and store in thread-local storage
+        let position = self.base().get_position();
+        NODE_POSITION.with(|pos| {
+            *pos.borrow_mut() = Some(position);
+        });
+        
         let env = self.env.as_mut()?;
         
-        // Set up 'self' variable in environment
+        // Set up 'self' variable and property callbacks
         env.push_scope();
         env.set("self".to_string(), Value::SelfObject);
-        
-        //NOTE: Property getter/setter callbacks not yet fully implemented
-        // For Phase 7 MVP, self exists but property access needs more work
-        // This will be completed in a follow-up commit
+        env.set_property_getter(get_node_property_tls);
+        env.set_property_setter(set_node_property_tls);
         
         let result = match call_function(function_name, args, env) {
             Ok(value) => Some(value),
@@ -148,6 +188,13 @@ impl RustyScriptNode {
         };
         
         env.pop_scope();
+        
+        // Read back position from thread-local storage and update node
+        NODE_POSITION.with(|pos| {
+            if let Some(new_position) = *pos.borrow() {
+                self.base_mut().set_position(new_position);
+            }
+        });
         
         result
     }
