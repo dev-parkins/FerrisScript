@@ -7,19 +7,9 @@ on:
       - develop
     tags:
       - 'v*'
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.github/prompts/**'
-      - '.github/workflows/docs-lint.yml'
   pull_request:
     branches: 
       - main
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.github/prompts/**'
-      - '.github/workflows/docs-lint.yml'
 
 env:
   CARGO_TERM_COLOR: always
@@ -75,7 +65,6 @@ jobs:
   build:
     name: Build Release
     needs: test
-    if: github.event_name == 'pull_request' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
