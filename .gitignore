@@ -41,5 +41,13 @@ Thumbs.db
 # Documentation builds
 /target/doc/
 
+# Test coverage reports
+/target/coverage/
+*.profraw
+*.profdata
+lcov.info
+cobertura.xml
+tarpaulin-report.html
+
 # Godot UID files (auto-generated)
 *.gdextension.uid

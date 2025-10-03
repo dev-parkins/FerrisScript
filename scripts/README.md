@@ -2,6 +2,57 @@
 
 This directory contains helper scripts for development workflows.
 
+## Code Coverage
+
+### Prerequisites
+
+- **Rust toolchain** installed via rustup
+- **cargo-llvm-cov** (auto-installed by scripts if missing)
+
+### Usage
+
+#### PowerShell (Windows)
+
+```powershell
+.\scripts\coverage.ps1
+```
+
+#### Bash (Linux/macOS)
+
+```bash
+./scripts/coverage.sh
+```
+
+### What It Does
+
+1. Checks if `cargo-llvm-cov` is installed
+2. Auto-installs `llvm-tools-preview` and `cargo-llvm-cov` if needed
+3. Runs coverage analysis across all workspace crates
+4. Generates HTML report in `target/coverage/html/index.html`
+5. Generates LCOV report in `target/coverage/lcov.info`
+
+### Viewing Reports
+
+```powershell
+# Windows
+Invoke-Item target/coverage/html/index.html
+
+# Linux
+xdg-open target/coverage/html/index.html
+
+# macOS
+open target/coverage/html/index.html
+```
+
+### More Information
+
+See [docs/DEVELOPMENT.md - Code Coverage](../docs/DEVELOPMENT.md#-code-coverage) for:
+
+- Detailed coverage documentation
+- Why we use llvm-cov vs tarpaulin
+- Troubleshooting coverage issues
+- Coverage goals and best practices
+
 ## Documentation Linting
 
 ### Prerequisites

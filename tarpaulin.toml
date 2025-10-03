@@ -1,0 +1,53 @@
+# Tarpaulin Configuration
+# Test coverage tool for Rust projects
+# See: https://github.com/xd009642/tarpaulin
+
+[tool]
+# Run with: cargo tarpaulin --workspace
+# Or simply: cargo tarpaulin (this config will be used automatically)
+
+# Report types to generate
+out = ["Html", "Lcov", "Stdout"]
+
+# Output directories
+output-dir = "target/coverage"
+
+# Exclude patterns
+exclude = [
+    # Test files
+    "*/tests/*",
+    "*_test.rs",
+    "*/test_*.rs",
+    
+    # Generated code
+    "*/target/*",
+    
+    # External dependencies
+    "*/deps/*",
+]
+
+# Include only workspace crates
+workspace = true
+
+# Timeout for test execution
+timeout = "5m"
+
+# Follow test branches
+follow-exec = true
+
+# Count hits in coverage
+count = true
+
+# Fail if coverage is below threshold (percentage)
+fail-under = 0  # Start with 0, increase as coverage improves
+
+# Target coverage percentage (goal)
+# Current baseline: TBD (will be established after first run)
+# Target for v0.0.2: 80%
+
+[report]
+# Show branch coverage
+branches = true
+
+# Show line coverage
+lines = true

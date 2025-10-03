@@ -5,3 +5,11 @@ edition = "2021"
 
 [dependencies]
 ferrisscript_compiler = { path = "../compiler" }
+
+[dev-dependencies]
+criterion = { workspace = true }
+ferrisscript_compiler = { path = "../compiler" }
+
+[[bench]]
+name = "runtime_benchmarks"
+harness = false

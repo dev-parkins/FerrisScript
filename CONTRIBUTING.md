@@ -389,6 +389,95 @@ We aim for high test coverage, especially for:
 - Type checker (all type rules, error messages)
 - Runtime (execution correctness, error recovery)
 
+#### Running Code Coverage
+
+FerrisScript uses two code coverage tools for different environments:
+
+- **cargo-llvm-cov** - Preferred for local development (Windows, macOS, Linux)
+- **cargo-tarpaulin** - Used in CI (Linux only, due to Windows file locking issues)
+
+**Quick Start - Running Coverage Locally**:
+
+```bash
+# PowerShell (Windows)
+.\scripts\coverage.ps1
+
+# Bash (Linux/macOS)
+./scripts/coverage.sh
+```
+
+The scripts will:
+
+1. Automatically install `cargo-llvm-cov` if not present
+2. Run coverage analysis across all workspace crates
+3. Generate both HTML and LCOV reports in `target/coverage/`
+
+**Viewing Coverage Reports**:
+
+```powershell
+# Windows - Open HTML report
+Invoke-Item target/coverage/html/index.html
+
+# Linux
+xdg-open target/coverage/html/index.html
+
+# macOS
+open target/coverage/html/index.html
+```
+
+**Manual Coverage Commands**:
+
+```bash
+# Install prerequisites (first time only)
+rustup component add llvm-tools-preview
+cargo install cargo-llvm-cov
+
+# Run coverage with HTML output
+cargo llvm-cov --workspace --html --output-dir target/coverage
+
+# Run coverage with LCOV output (for external tools)
+cargo llvm-cov --workspace --lcov --output-path target/coverage/lcov.info
+
+# Run coverage for specific crate
+cargo llvm-cov -p ferrisscript_compiler --html
+```
+
+**Understanding Coverage Results**:
+
+- **Green lines**: Covered by tests
+- **Red lines**: Not covered by tests
+- **Yellow lines**: Partially covered (branches)
+- **Coverage percentage**: Shown per file and overall
+
+**Coverage Goals**:
+
+- **Current baseline**: Established in test coverage analysis
+- **Target for new code**: 80%+ line coverage
+- **Critical paths**: Parser, type checker, runtime should have high coverage
+
+**Why Two Tools?**
+
+- **cargo-llvm-cov**: Cross-platform, native Rust tooling, no file locking issues on Windows
+- **cargo-tarpaulin**: More mature in CI environments, used in GitHub Actions (Linux runners)
+
+See [docs/COVERAGE_SETUP_NOTES.md](docs/COVERAGE_SETUP_NOTES.md) for technical details on the Windows file locking issue that led to this dual-tool approach.
+
+**Before Submitting a PR**:
+
+For significant code changes:
+
+1. Run coverage locally: `.\scripts\coverage.ps1` or `./scripts/coverage.sh`
+2. Check that your new code is covered by tests
+3. Aim for 80%+ coverage on modified files
+4. CI will also run coverage checks using tarpaulin
+
+**Troubleshooting Coverage Issues**:
+
+- **"cargo-llvm-cov not found"**: The script will auto-install it, or run `cargo install cargo-llvm-cov` manually
+- **Windows file locking errors**: Close VS Code and rust-analyzer, or use the provided scripts which avoid these issues
+- **Coverage seems low**: Ensure tests are actually executing your code paths; add `#[cfg(test)]` module tests
+- **CI coverage differs from local**: CI uses tarpaulin (Linux), local uses llvm-cov; minor differences are normal
+
 ### Testing with Godot (Deferred)
 
 Currently, Godot integration testing is deferred as it requires manual setup. See [FUTURE_AUTOMATION.md](docs/FUTURE_AUTOMATION.md) for plans to automate this in v0.0.3+.
