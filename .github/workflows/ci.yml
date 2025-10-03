@@ -7,39 +7,26 @@ on:
       - develop
     tags:
       - 'v*'
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/prompts/**'
+      - '.github/workflows/docs-lint.yml'
   pull_request:
     branches: 
       - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/prompts/**'
+      - '.github/workflows/docs-lint.yml'
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  # Check if we should skip CI based on changed files
-  check-changes:
-    name: Check Changed Files
-    runs-on: ubuntu-latest
-    outputs:
-      should_skip: ${{ steps.filter.outputs.code != 'true' }}
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Check changed files
-      uses: dorny/paths-filter@v3
-      id: filter
-      with:
-        filters: |
-          code:
-            - '**'
-            - '!**.md'
-            - '!docs/**'
-            - '!.github/prompts/**'
-
   test:
     name: Test
-    needs: check-changes
-    if: needs.check-changes.outputs.should_skip != 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -87,10 +74,8 @@ jobs:
 
   build:
     name: Build Release
-    needs: [check-changes, test]
-    if: |
-      needs.check-changes.outputs.should_skip != 'true' && 
-      (github.event_name == 'pull_request' || startsWith(github.ref, 'refs/tags/v'))
+    needs: test
+    if: github.event_name == 'pull_request' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -156,8 +141,6 @@ jobs:
 
   coverage:
     name: Code Coverage
-    needs: check-changes
-    if: needs.check-changes.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
