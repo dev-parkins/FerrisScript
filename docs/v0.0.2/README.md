@@ -19,6 +19,7 @@ This directory contains version-specific documentation for FerrisScript v0.0.2, 
 | [v0.0.2-QUICK-START.md](v0.0.2-QUICK-START.md) | Quick start guide for v0.0.2 |
 | [PHASE_TRACKING.md](PHASE_TRACKING.md) | Development phase tracking |
 | [VALIDATION_REPORT.md](VALIDATION_REPORT.md) | Release validation and quality checks |
+| [DOCS_REORGANIZATION_SUMMARY.md](DOCS_REORGANIZATION_SUMMARY.md) | Documentation reorganization rationale and process |
 
 ### Technical Reports
 
