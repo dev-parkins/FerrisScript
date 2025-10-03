@@ -5,9 +5,7 @@
   "private": true,
   "scripts": {
     "docs:lint": "markdownlint \"**/*.md\" --ignore node_modules --ignore target --dot",
-    "docs:links": "echo \"Use PowerShell script for link checking: .\\scripts\\lint-docs.ps1\"",
-    "docs:lint:fix": "markdownlint \"**/*.md\" --ignore node_modules --ignore target --dot --fix",
-    "docs:fix": "npm run docs:lint:fix"
+    "docs:fix": "markdownlint \"**/*.md\" --ignore node_modules --ignore target --dot --fix"
   },
   "devDependencies": {
     "markdown-link-check": "^3.12.2",

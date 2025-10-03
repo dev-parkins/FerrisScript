@@ -127,19 +127,14 @@ cargo clippy --workspace
 
 ```bash
 # Option 1: VS Code Task (Recommended)
-# Press Ctrl+Shift+P → "Run Task" → "Docs: Full Check"
+# Install dependencies (first time only)
+npm install
 
-# Option 2: npm script (requires Node.js)
-npm install  # First time only
-npm run docs:check
-
-# Option 3: PowerShell script
-.\scripts\lint-docs.ps1
+# Check markdown formatting
+npm run docs:lint
 
 # Auto-fix formatting issues
 npm run docs:fix
-# or
-.\scripts\lint-docs.ps1 --fix
 ```
 
 **Why This Matters**:
@@ -403,8 +398,10 @@ lines = true
 
 **Current Status**:
 
-- Baseline coverage: See [TEST_COVERAGE_ANALYSIS.md](TEST_COVERAGE_ANALYSIS.md)
-- No enforcement yet (`fail-under = 0`)
+- **Test Count**: 116+ tests (and growing)
+- **Coverage**: Actively tracked via cargo-llvm-cov locally and cargo-tarpaulin in CI
+- **Enforcement**: No minimum threshold yet (`fail-under = 0`)
+- **Historical Baseline**: See version-specific archives for baseline snapshots
 
 **Target Goals**:
 

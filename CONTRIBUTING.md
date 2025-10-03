@@ -90,7 +90,7 @@ Documentation improvements are always appreciated! This includes:
 
 1. Review the [Anti-Duplication Matrix](docs/SINGLE_SOURCE_OF_TRUTH.md) to ensure you're editing the primary location for content
 2. Link to existing documentation rather than duplicating it
-3. Follow the structure outlined in [Phase Tracking](docs/PHASE_TRACKING.md)
+3. Check [DOCUMENTATION_ORGANIZATION.md](docs/DOCUMENTATION_ORGANIZATION.md) for where new docs should live
 4. **Run documentation linting locally** before pushing (see [Documentation Quality Checks](#documentation-quality-checks) below)
 
 Use the [documentation template](.github/ISSUE_TEMPLATE/documentation.md) when creating documentation-related issues.
@@ -113,19 +113,11 @@ npm install
 **Before Every Documentation Commit**:
 
 ```bash
-# Option 1: VS Code Task (Recommended)
-# Press Ctrl+Shift+P, type "Run Task", select "Docs: Full Check"
+# Check markdown formatting
+npm run docs:lint
 
-# Option 2: npm script
-npm run docs:check
-
-# Option 3: PowerShell script
-.\scripts\lint-docs.ps1
-
-# To auto-fix formatting issues:
+# Auto-fix formatting issues
 npm run docs:fix
-# or
-.\scripts\lint-docs.ps1 --fix
 ```
 
 **What Gets Checked**:

@@ -22,6 +22,7 @@ Tokenization speed for different input sizes:
 | **Large** (bounce example) | **3.74 ┬╡s** | ~267K ops/sec |
 
 **Analysis**:
+
 - Lexer performance scales linearly with input size
 - Small inputs (~20 chars) tokenize in under 400 nanoseconds
 - Medium inputs (~150 chars) tokenize in ~1.5 microseconds
@@ -39,6 +40,7 @@ Parsing speed (includes tokenization):
 | **Large** | **7.94 ┬╡s** | ~126K ops/sec |
 
 **Analysis**:
+
 - Parser adds ~200-220 ns overhead over lexing for small inputs
 - Medium and large inputs show roughly 2x parsing overhead
 - Parser maintains good performance even on complex nested structures
@@ -53,6 +55,7 @@ Type checking speed (includes tokenization + parsing):
 | **Medium** | **3.58 ┬╡s** | ~279K ops/sec |
 
 **Analysis**:
+
 - Type checker adds ~250 ns overhead for small inputs
 - Medium inputs: ~480 ns type checking overhead
 - Type checking is efficient and doesn't significantly slow compilation
@@ -66,6 +69,7 @@ Complete compilation (lex + parse + type check):
 | **Medium function** | **3.60 ┬╡s** |
 
 **Analysis**:
+
 - End-to-end compilation of a medium function: ~3.6 microseconds
 - This means FerrisScript can compile ~278K functions per second
 - Excellent for game scripting where functions are compiled once
@@ -91,6 +95,7 @@ Complete compilation (lex + parse + type check):
 | **Control flow** (if/else) | **1.31 ┬╡s** | ~763K ops/sec |
 
 **Analysis**:
+
 - Function call with simple arithmetic: ~1 microsecond
 - Control flow adds ~250 ns overhead
 - Very fast for typical game logic operations
@@ -103,6 +108,7 @@ Complete compilation (lex + parse + type check):
 | **100 iterations** | **17.76 ┬╡s** | ~178 ns/iter |
 
 **Analysis**:
+
 - Loop overhead: ~3.5 ┬╡s for 10 iterations (includes setup)
 - Steady-state performance: ~180 ns per iteration
 - Good scaling for typical game loop operations
@@ -116,6 +122,7 @@ Complete compilation (lex + parse + type check):
 | **20 levels** | **18.49 ┬╡s** | ~925 ns/call |
 
 **Analysis**:
+
 - Recursive function calls: ~1 microsecond per call
 - Good scaling - performance remains consistent at deeper depths
 - Suitable for algorithms requiring recursion (e.g., tree traversal)
@@ -128,6 +135,7 @@ Complete compilation (lex + parse + type check):
 | **Mutable updates** (4 updates) | **1.49 ┬╡s** |
 
 **Analysis**:
+
 - Variable declaration and access: ~510 ns per variable
 - Mutable variable updates: ~370 ns per update
 - Very efficient variable handling
@@ -141,6 +149,7 @@ Complete compilation (lex + parse + type check):
 | **Boolean logic** | **1.81 ┬╡s** | >, !=, &&, \|\| |
 
 **Analysis**:
+
 - Integer operations: ~850 ns per operation
 - Float operations: ~830 ns per operation (slightly faster!)
 - Boolean operations: ~450 ns per operation
@@ -152,22 +161,26 @@ Complete compilation (lex + parse + type check):
 
 ### Key Findings
 
-1. **Compilation Speed**: 
+1. **Compilation Speed**:
+
    - Small scripts compile in under 1 microsecond
    - Medium scripts (~150 chars) compile in ~3.6 microseconds
    - Suitable for hot-reload scenarios in game development
 
 2. **Execution Speed**:
+
    - Simple function calls: ~1 microsecond
    - Loop iterations: ~180 nanoseconds per iteration
    - Recursive calls: ~925 nanoseconds per call
 
 3. **Scaling**:
+
    - Lexer, parser, and type checker all scale linearly
    - Runtime performance remains consistent across different depths
    - No performance cliffs observed
 
 4. **Comparison to Native**:
+
    - Function call overhead is reasonable (~1 μs vs ~10 ns for native Rust)
    - Good enough for game scripting (1000s of calls per frame are feasible)
    - Arithmetic operations add ~850 ns vs <1 ns native (acceptable for scripting)
@@ -179,7 +192,7 @@ Potential optimization targets (in order of impact):
 1. **Function call overhead** (~1 μs per call)
    - Most significant overhead in the runtime
    - Could investigate call site optimization or JIT compilation
-   
+
 2. **Loop overhead** (~3.5 μs setup cost)
    - While per-iteration cost is good, setup could be optimized
    - Consider loop unrolling or specialized bytecode
@@ -224,16 +237,19 @@ Benchmarks generate HTML reports in `target/criterion/` for detailed analysis.
 ## Future Optimization Targets
 
 ### Short-term (v0.1.0)
+
 - [ ] Optimize HashMap variable lookups with faster alternatives
 - [ ] Implement instruction caching for frequently called functions
 - [ ] Add benchmark for Godot property access (when integration is ready)
 
 ### Medium-term (v0.2.0)
+
 - [ ] Investigate bytecode compilation instead of AST interpretation
 - [ ] Add SIMD optimizations for Vector2/Vector3 operations
 - [ ] Profile and optimize hot paths identified in real game scenarios
 
 ### Long-term (v1.0.0)
+
 - [ ] Consider JIT compilation for frequently executed functions
 - [ ] Evaluate LLVM backend for native code generation
 - [ ] Implement call site caching and inline caching techniques

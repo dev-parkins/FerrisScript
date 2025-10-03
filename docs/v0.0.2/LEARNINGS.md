@@ -12,6 +12,7 @@ This document captures insights, patterns, and lessons learned during FerrisScri
 **Issue**: `clippy::collapsible_match` warning in `crates/runtime/src/lib.rs:405`
 
 **Problem**:
+
 ```rust
 // Before (nested if let - discouraged)
 if let Some(var) = env.get_mut(name) {
@@ -22,6 +23,7 @@ if let Some(var) = env.get_mut(name) {
 ```
 
 **Solution**:
+
 ```rust
 // After (collapsed pattern - preferred)
 if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
@@ -30,6 +32,7 @@ if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
 ```
 
 **Learning**:
+
 - Clippy prefers pattern matching to be done in a single step when possible
 - This is more idiomatic Rust and reduces nesting
 - Makes code more readable and maintainable
@@ -41,21 +44,24 @@ if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
 **Issue**: Both tarpaulin and cargo-llvm-cov had installation/compatibility issues on Windows
 
 **Attempted Tools**:
+
 1. **cargo-tarpaulin** - File locking issues on Windows (OS error 32)
    - Cannot clean build directory while IDE processes hold file locks
    - Workaround: Use `--skip-clean` but still encounters runtime locks
-   
+
 2. **cargo-llvm-cov** - Silent installation failure during LTO phase
    - Compiles successfully but binary not installed to cargo bin
    - Likely Windows-specific linker issue
 
 **Solution**:
+
 - **Local Development**: Manual test analysis (review test names, code structure)
 - **CI Environment**: Use tarpaulin in Linux GitHub Actions (no file locking issues)
 - **Coverage Reports**: Generate in CI, upload to Codecov/Coveralls
 - **Documentation**: Created TEST_COVERAGE_ANALYSIS.md with manual gap analysis
 
 **Learning**:
+
 - Coverage tooling on Windows is challenging - prefer Linux CI for coverage
 - Manual analysis is time-consuming but valuable for understanding test gaps
 - Document test gaps qualitatively even without quantitative coverage metrics
@@ -68,6 +74,7 @@ if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
 **Task**: Implemented 20 high-priority edge case tests based on manual coverage analysis
 
 **Results**:
+
 - **Lexer Tests**: 10 new tests, all passing ✅
 - **Runtime Tests**: 10 new tests, all passing ✅
 - **Total Test Count**: 96 → 116 (+20.8% increase)
@@ -103,6 +110,7 @@ if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
    - Early returns from nested control flow work as expected
 
 **Testing Strategy Insights**:
+
 - Edge case tests should document **current behavior**, not just ideal behavior
 - Use `match` statements to handle multiple possible outcomes
 - Add TODO comments for features that should error but don't
@@ -110,6 +118,7 @@ if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
 - Balance between testing edge cases and testing realistic scenarios
 
 **Next Steps**:
+
 - Add runtime division-by-zero checks
 - Improve lexer integer literal parsing
 - Implement proper global mutability
@@ -122,6 +131,7 @@ if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
 ### Phase 4 Deliverables
 
 **Completed Items**:
+
 1. **Community Documentation** (✅ Complete)
    - CONTRIBUTING.md with comprehensive guidelines
    - CODE_OF_CONDUCT.md (Contributor Covenant 2.1)
@@ -159,18 +169,21 @@ if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
 ### Key Learnings
 
 **Documentation Best Practices**:
+
 - Keep helper/temporary docs out of source control unless viable long-term
 - Use git history to preserve temporary working documents
 - Update checklists as work progresses to track completion
 - Cross-platform support (PowerShell + Bash) is essential for open source
 
 **Git Workflow**:
+
 - Create feature branches for focused work areas
 - Keep commits atomic and well-described
 - Update documentation checklists in the same PR as features
 - Clean up temporary files before merging
 
 **Testing Discipline**:
+
 - Always run tests after code changes: `cargo test --workspace`
 - Always run clippy: `cargo clippy --workspace -- -D warnings`
 - Verify CI passes before merging
@@ -183,6 +196,7 @@ if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
 ### Root Directory Organization
 
 **Essential Files** (keep these):
+
 - README.md - Project overview
 - CONTRIBUTING.md - Contribution guidelines
 - CODE_OF_CONDUCT.md - Community standards
@@ -195,11 +209,13 @@ if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
 - package.json - Documentation tooling
 
 **Configuration Files** (keep these):
+
 - .gitignore - Git exclusions
 - .markdownlint.json - Markdown linting rules
 - .markdown-link-check.json - Link checking config
 
 **Temporary Files** (remove these):
+
 - APPLY_TO_PR3.md ❌
 - DOCS_LINT_FINAL_STATUS.md ❌
 - DOCS_LINT_FIXES.md ❌
@@ -249,6 +265,7 @@ if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
 ## Development Commands Reference
 
 ### Quality Checks
+
 ```bash
 # Run all tests
 cargo test --workspace
@@ -264,18 +281,17 @@ cargo tarpaulin --workspace
 ```
 
 ### Documentation
-```bash
-# Lint markdown files
-npm run lint:md
 
-# Check markdown links
-npm run lint:md:links
+```bash
+# Check markdown formatting
+npm run docs:lint
 
 # Auto-fix markdown issues
-npm run lint:md:fix
+npm run docs:fix
 ```
 
 ### Git Workflow
+
 ```bash
 # Create feature branch
 git checkout -b feature/descriptive-name

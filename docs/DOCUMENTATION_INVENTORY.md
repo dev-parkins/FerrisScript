@@ -1,44 +1,86 @@
 # 📊 FerrisScript Documentation Inventory
 
 **Last Updated**: October 2025  
-**Version**: v0.0.1  
+**Version**: v0.0.2 (in development)  
 **Purpose**: Complete inventory of all documentation and project structure
 
 ---
 
 ## 📚 Documentation Structure
 
-### Root Documentation (7 files)
+### Root Documentation (8 files)
 
 | File | Purpose | Status | Target Audience |
 |------|---------|--------|-----------------|
 | `README.md` | Main project overview, quick start, features | ✅ Complete | All users |
-| `ARCHITECTURE.md` | Technical design, implementation details | ✅ Complete | Contributors |
-| `RELEASE_NOTES.md` | v0.0.1 release details, changelog | ✅ Complete | All users |
-| `DEVELOPMENT.md` | Developer setup, workflow, testing | ✅ Complete | Contributors |
+| `CONTRIBUTING.md` | Contribution guidelines, workflow | ✅ Complete | Contributors |
+| `CODE_OF_CONDUCT.md` | Community standards | ✅ Complete | All users |
+| `SECURITY.md` | Security policy and vulnerability reporting | ✅ Complete | All users |
+| `RELEASE_NOTES.md` | Release details, changelog | ✅ Complete | All users |
 | `RELEASING.md` | Release process guide | ✅ Complete | Maintainers |
-| `LOGO_SETUP.md` | Branding setup guide | ✅ Complete | Maintainers |
+| `CHANGELOG.md` | Version history | ✅ Complete | All users |
 | `LICENSE` | MIT License | ✅ Complete | Legal |
+
+### General Documentation (docs/ - 14 files)
+
+| File | Purpose | Status | Target Audience |
+|------|---------|--------|-----------------|
+| `ARCHITECTURE.md` | Technical design, implementation | ✅ Complete | Contributors |
+| `DEVELOPMENT.md` | Developer setup, workflow, testing, coverage | ✅ Complete | Contributors |
+| `COVERAGE_SETUP_NOTES.md` | Coverage tooling technical reference | ✅ Complete | Maintainers |
+| `FAQ.md` | Frequently asked questions | ✅ Complete | All users |
+| `TROUBLESHOOTING.md` | Platform-specific help | ✅ Complete | All users |
+| `VERSION_PLANNING.md` | Version strategy and roadmap | ✅ Complete | All stakeholders |
+| `v0.1.0-ROADMAP.md` | Feature roadmap for v0.1.0 | ✅ Complete | All stakeholders |
+| `DOCUMENTATION_INVENTORY.md` | This file | ✅ Complete | Maintainers |
+| `DOCUMENTATION_ORGANIZATION.md` | Documentation structure guide | ✅ Complete | Maintainers |
+| `FUTURE_AUTOMATION.md` | Automation plans | ✅ Complete | Maintainers |
+| `GITHUB_BADGES_GUIDE.md` | GitHub badge setup | ✅ Complete | Maintainers |
+| `GITHUB_INSIGHTS_DESCRIPTION.md` | GitHub Insights configuration | ✅ Complete | Maintainers |
+| `GITHUB_PROJECT_MANAGEMENT.md` | Project management guide | ✅ Complete | Maintainers |
+| `LOGO_SETUP.md` | Branding setup guide | ✅ Complete | Maintainers |
+
+### Version-Specific Documentation (docs/v0.0.2/ - 12 files)
+
+| File | Purpose | Status |
+|------|---------|--------|
+| `README.md` | v0.0.2 directory overview | ✅ Complete |
+| `v0.0.2-CHECKLIST.md` | Release checklist | ✅ Complete |
+| `v0.0.2-DOCUMENTATION-WORKFLOW.md` | Documentation workflow | ✅ Complete |
+| `v0.0.2-QUICK-START.md` | Quick start guide | ✅ Complete |
+| `BENCHMARK_BASELINE.md` | Performance baseline | ✅ Complete |
+| `TEST_COVERAGE_ANALYSIS.md` | Coverage analysis | ✅ Complete |
+| `LEARNINGS.md` | Development learnings | ✅ Complete |
+| `PHASE_2_COMPLETION_REPORT.md` | Phase 2 report | ✅ Complete |
+| `PHASE_3_COMPLETION_REPORT.md` | Phase 3 report | ✅ Complete |
+| `PHASE_4_COMPLETION_REPORT.md` | Phase 4 report | ✅ Complete |
+| `PHASE_4_IMPLEMENTATION_PLAN.md` | Phase 4 plan | ✅ Complete |
+| `PHASE_TRACKING.md` | Phase tracking | ✅ Complete |
+| `VALIDATION_REPORT.md` | Validation report | ✅ Complete |
 
 ### Subdirectory Documentation (3 files)
 
 | File | Purpose | Status |
 |------|---------|--------|
 | `assets/README.md` | Logo usage guidelines | ✅ Complete |
+| `examples/*/README.md` | Example-specific guides | ✅ Complete |
 | `godot_test/README.md` | Godot integration testing guide | ✅ Complete |
-| `docs/DEVELOPMENT.md` | Duplicate of root (consolidate?) | ⚠️ Review |
+| `scripts/README.md` | Script documentation | ✅ Complete |
 
-### Archived Documentation (5 files)
+### Archived Documentation
 
-Located in `docs/archive/v0.0.1/`:
+**docs/archive/v0.0.1/** (6 files):
 
 - `v0.0.1-checklist.md` - Original phase checklist
 - `PHASE6_SUMMARY.md` - Phase 6 summary
 - `PHASE6_TESTING.md` - Phase 6 tests
 - `PHASE7_TESTING.md` - Phase 7 tests
 - `PHASE8_TESTING.md` - Phase 8 tests
+- `RELEASE_NOTES_v0.0.1.md` - v0.0.1 release notes
 
 **Status**: ✅ Properly archived
+
+**docs/v0.0.2/** - Will be archived after v0.0.2 release
 
 ---
 
@@ -67,20 +109,18 @@ Located in `docs/archive/v0.0.1/`:
 1. **Documentation Gaps**
    - ❌ No tutorial series (beginner → advanced)
    - ❌ No API reference documentation
-   - ❌ No troubleshooting guide
-   - ❌ No FAQ
    - ❌ No migration guide for future versions
-   - ❌ No performance benchmarks
 
-2. **Duplicates/Inconsistencies**
-   - ⚠️ `DEVELOPMENT.md` exists in both root and `docs/`
-   - ⚠️ Some documentation in root, some in `docs/`
+2. **Documentation Organization**
+   - ✅ Version-specific docs now in `docs/v0.0.2/`
+   - ✅ Clear separation of general vs. version-specific documentation
+   - ✅ Archive structure established for completed versions
 
-3. **Missing Community Files**
-   - ❌ `CONTRIBUTING.md`
-   - ❌ `CODE_OF_CONDUCT.md`
-   - ❌ Issue templates
-   - ❌ Pull request template
+3. **Community Files**
+   - ✅ `CONTRIBUTING.md` - Complete
+   - ✅ `CODE_OF_CONDUCT.md` - Complete
+   - ✅ Issue templates - Complete
+   - ✅ Pull request template - Complete
 
 4. **Tooling**
    - ❌ No syntax highlighting extension

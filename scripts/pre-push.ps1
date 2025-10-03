@@ -17,7 +17,7 @@ Write-Host "🔍 Running pre-push documentation checks..." -ForegroundColor Cyan
 Write-Host ""
 
 # Check if any .md files are being pushed
-$mdFilesChanged = git diff --name-only @{u}.. | Select-String -Pattern "\.md$"
+$mdFilesChanged = git diff --name-only "@{u}.." | Select-String -Pattern "\.md$"
 
 if (-not $mdFilesChanged) {
     Write-Host "✅ No markdown files changed, skipping documentation checks" -ForegroundColor Green
@@ -64,8 +64,6 @@ if ($lintExitCode -ne 0) {
     Write-Host ""
     Write-Host "To fix automatically, run:" -ForegroundColor Yellow
     Write-Host "   npm run docs:fix" -ForegroundColor Cyan
-    Write-Host "   # or" -ForegroundColor Yellow
-    Write-Host "   .\scripts\lint-docs.ps1 --fix" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "To bypass this check (not recommended):" -ForegroundColor Yellow
     Write-Host "   git push --no-verify" -ForegroundColor Cyan
