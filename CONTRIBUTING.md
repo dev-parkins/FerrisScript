@@ -212,14 +212,39 @@ You should see "Hello from FerrisScript!" printed to the console.
 
 We use a **feature branch workflow** with **squash and merge** strategy.
 
+### Branch Naming Convention
+
+We use **branch name prefixes** to automatically apply the appropriate PR template:
+
+| Prefix | Use For | PR Template Applied |
+|--------|---------|---------------------|
+| `bugfix/` or `fix/` | Bug fixes | 🐛 Bug Fix Template |
+| `feature/` or `feat/` | New features | ✨ Feature Template |
+| `docs/` or `doc/` | Documentation | 📝 Documentation Template |
+
+**Examples:**
+
+```bash
+git checkout -b bugfix/parser-null-pointer
+git checkout -b feature/async-script-loading
+git checkout -b docs/add-api-examples
+```
+
+💡 **Tip:** When you create a PR, our automation will detect your branch name and automatically apply the appropriate template!
+
 ### Creating a Pull Request
 
-1. **Create a feature branch** with a descriptive name:
+1. **Create a feature branch** with the appropriate prefix:
 
    ```bash
+   # For bug fixes
+   git checkout -b bugfix/your-bug-description
+   
+   # For new features
    git checkout -b feature/your-feature-name
-   # or
-   git checkout -b fix/bug-description
+   
+   # For documentation
+   git checkout -b docs/your-doc-update
    ```
 
 2. **Make your changes** in small, logical commits:
@@ -245,10 +270,29 @@ We use a **feature branch workflow** with **squash and merge** strategy.
    ```
 
 5. **Open a Pull Request** via GitHub:
-   - Use a clear, descriptive title
-   - Fill out the [PR template](.github/PULL_REQUEST_TEMPLATE.md)
-   - Reference related issues (e.g., "Closes #42")
+   - Use a clear, descriptive title following [Conventional Commits](https://www.conventionalcommits.org/)
+   - The appropriate PR template will be **automatically applied** based on your branch name
+   - Fill out all sections marked with `<!-- ... -->` comments
+   - Reference related issues (e.g., "Closes #42", "Fixes #123")
    - Describe what changed and why
+
+### PR Templates
+
+We have specialized templates for different PR types:
+
+- **🐛 Bug Fix** ([bug_fix.md](.github/PULL_REQUEST_TEMPLATE/bug_fix.md))
+  - Focus: Root cause, regression testing, before/after comparison
+  - Auto-applied for: `bugfix/*` or `fix/*` branches
+
+- **✨ Feature** ([feature.md](.github/PULL_REQUEST_TEMPLATE/feature.md))
+  - Focus: Motivation, usage examples, breaking changes, performance
+  - Auto-applied for: `feature/*` or `feat/*` branches
+
+- **📝 Documentation** ([docs.md](.github/PULL_REQUEST_TEMPLATE/docs.md))
+  - Focus: Markdown linting, link checking, code example testing
+  - Auto-applied for: `docs/*` or `doc/*` branches
+
+**Manual Selection:** You can also manually choose a template when creating a PR via the GitHub dropdown menu.
 
 ### PR Requirements
 
