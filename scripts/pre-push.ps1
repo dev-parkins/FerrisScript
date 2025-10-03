@@ -17,7 +17,7 @@ Write-Host "🔍 Running pre-push documentation checks..." -ForegroundColor Cyan
 Write-Host ""
 
 # Check if any .md files are being pushed
-$mdFilesChanged = git diff --name-only @{u}.. | Select-String -Pattern "\.md$"
+$mdFilesChanged = git diff --name-only "@{u}.." | Select-String -Pattern "\.md$"
 
 if (-not $mdFilesChanged) {
     Write-Host "✅ No markdown files changed, skipping documentation checks" -ForegroundColor Green
