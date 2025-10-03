@@ -161,18 +161,25 @@ npm run docs:fix
 **Why This Matters**:
 
 - ⏱️ **Faster PR reviews**: Catch formatting issues before CI runs
-- 🔗 **No broken links**: Verify all documentation cross-references work
-- 📐 **Consistent style**: Maintain professional documentation quality
+- **Consistent style**: Maintain professional documentation quality
 - ✅ **CI will pass**: Same checks run in CI, but you catch them early
 
 **Common Issues Caught**:
 
 - Missing blank lines around headings
 - Inconsistent list formatting
-- Broken internal links (wrong file paths)
-- Broken external links (404s, typos)
 - Trailing whitespace
 - Code blocks without language specifiers
+
+**Link Checking**: Broken links are automatically checked in CI. To check links manually:
+
+```bash
+# Check specific file
+npx markdown-link-check your-file.md
+
+# Check with config (quieter output)
+npx markdown-link-check your-file.md --config .markdown-link-check.json -q
+```
 
 See [../scripts/README.md](../scripts/README.md) for full documentation linting guide.
 

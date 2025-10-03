@@ -113,21 +113,26 @@ npm install
 **Before Every Documentation Commit**:
 
 ```bash
-# Check markdown formatting
+# Check markdown formatting (style/syntax)
 npm run docs:lint
 
 # Auto-fix formatting issues
 npm run docs:fix
+
+# Check for broken links (optional, but recommended)
+npx markdown-link-check your-file.md
 ```
 
-**What Gets Checked**:
+**What `npm run docs:lint` Checks**:
 
 - ✅ Heading hierarchy and style
 - ✅ List formatting consistency
 - ✅ Code block formatting
 - ✅ Line length (soft limit: 120 chars)
 - ✅ Trailing whitespace
-- ✅ Internal links (broken references)
+
+**Note:** Link checking is done automatically in CI, but you can check individual files locally with `markdown-link-check` if needed.
+
 - ✅ External links (with retries)
 
 **CI Integration**: These same checks run automatically on pull requests. Catching issues locally saves review time!
