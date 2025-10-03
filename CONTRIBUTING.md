@@ -90,7 +90,7 @@ Documentation improvements are always appreciated! This includes:
 
 1. Review the [Anti-Duplication Matrix](docs/SINGLE_SOURCE_OF_TRUTH.md) to ensure you're editing the primary location for content
 2. Link to existing documentation rather than duplicating it
-3. Follow the structure outlined in [Phase Tracking](docs/PHASE_TRACKING.md)
+3. Follow the structure outlined in [Phase Tracking](docs/v0.0.2/PHASE_TRACKING.md)
 4. **Run documentation linting locally** before pushing (see [Documentation Quality Checks](#documentation-quality-checks) below)
 
 Use the [documentation template](.github/ISSUE_TEMPLATE/documentation.md) when creating documentation-related issues.
