@@ -127,19 +127,14 @@ cargo clippy --workspace
 
 ```bash
 # Option 1: VS Code Task (Recommended)
-# Press Ctrl+Shift+P → "Run Task" → "Docs: Full Check"
+# Install dependencies (first time only)
+npm install
 
-# Option 2: npm script (requires Node.js)
-npm install  # First time only
-npm run docs:check
-
-# Option 3: PowerShell script
-.\scripts\lint-docs.ps1
+# Check markdown formatting
+npm run docs:lint
 
 # Auto-fix formatting issues
 npm run docs:fix
-# or
-.\scripts\lint-docs.ps1 --fix
 ```
 
 **Why This Matters**:

@@ -113,19 +113,11 @@ npm install
 **Before Every Documentation Commit**:
 
 ```bash
-# Option 1: VS Code Task (Recommended)
-# Press Ctrl+Shift+P, type "Run Task", select "Docs: Full Check"
+# Check markdown formatting
+npm run docs:lint
 
-# Option 2: npm script
-npm run docs:check
-
-# Option 3: PowerShell script
-.\scripts\lint-docs.ps1
-
-# To auto-fix formatting issues:
+# Auto-fix formatting issues
 npm run docs:fix
-# or
-.\scripts\lint-docs.ps1 --fix
 ```
 
 **What Gets Checked**:

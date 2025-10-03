@@ -283,14 +283,11 @@ cargo tarpaulin --workspace
 ### Documentation
 
 ```bash
-# Lint markdown files
-npm run lint:md
-
-# Check markdown links
-npm run lint:md:links
+# Check markdown formatting
+npm run docs:lint
 
 # Auto-fix markdown issues
-npm run lint:md:fix
+npm run docs:fix
 ```
 
 ### Git Workflow

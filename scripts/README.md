@@ -68,45 +68,19 @@ Run once to install dependencies:
 npm install
 ```
 
-### Usage Options
+### Usage
 
-#### Option 1: VS Code Tasks (Recommended)
-
-Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac), type "Run Task", and select:
-
-- **Docs: Full Check** - Runs both linting and link checking
-- **Docs: Lint All** - Check markdown formatting
-- **Docs: Check Links** - Verify all links work
-- **Docs: Fix Issues** - Auto-fix markdown formatting issues
-- **Docs: PowerShell Lint** - Use PowerShell script instead
-- **Docs: PowerShell Fix** - Use PowerShell script with auto-fix
-
-#### Option 2: npm Scripts
-
-```powershell
+```bash
 # Check markdown formatting
 npm run docs:lint
 
 # Auto-fix markdown formatting issues
 npm run docs:fix
-
-# Note: For link checking, use PowerShell script (Option 3)
-# Link checking requires platform-specific commands
 ```
 
-#### Option 3: PowerShell Script
-
-```powershell
-# Check only
-.\scripts\lint-docs.ps1
-
-# Check and auto-fix
-.\scripts\lint-docs.ps1 --fix
-```
+**Note**: These npm scripts use the same markdownlint configuration as CI, ensuring consistency between local development and automated checks.
 
 ### What Gets Checked
-
-#### Markdownlint
 
 - Heading styles and hierarchy
 - List formatting
@@ -115,17 +89,9 @@ npm run docs:fix
 - Trailing spaces
 - And more... (see `.markdownlint.json`)
 
-#### Markdown Link Check
-
-- All internal links (between docs)
-- External links (with retries and timeout handling)
-- Relative paths
-- Anchor links
-
-### Configuration Files
+### Configuration
 
 - **`.markdownlint.json`** - Markdown formatting rules
-- **`.markdown-link-check.json`** - Link checking behavior (timeouts, retries, ignored domains)
 
 ### CI Integration
 
