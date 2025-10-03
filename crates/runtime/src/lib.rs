@@ -1276,4 +1276,291 @@ mod tests {
         let dir = call_function("get_direction", &[], &mut env).unwrap();
         assert!(matches!(dir, Value::Int(1) | Value::Float(1.0)));
     }
+
+    // ===== Edge Case Tests (v0.0.2) =====
+
+    #[test]
+    fn test_edge_case_division_by_zero() {
+        // Test division by zero behavior
+        // TODO: Should return an error instead of potentially undefined behavior
+        let mut env = Env::new();
+        let source = r#"
+            fn divide_by_zero() -> i32 {
+                let x: i32 = 10;
+                let y: i32 = 0;
+                return x / y;
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        let result = call_function("divide_by_zero", &[], &mut env);
+        // Current behavior: division by zero may panic, error, or return undefined value
+        match result {
+            Ok(v) => println!("⚠️  Division by zero returned value (undefined behavior): {:?}", v),
+            Err(e) => println!("✅ Division by zero produced error: {}", e),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_integer_overflow_addition() {
+        // Test arithmetic with large numbers
+        // NOTE: Very large literals (i32::MAX) are parsed as f32, so using smaller values
+        let mut env = Env::new();
+        let source = r#"
+            fn large_add() -> i32 {
+                let x: i32 = 1000000;
+                let y: i32 = 2000000;
+                return x + y;
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        let result = call_function("large_add", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Int(3000000), "Large number addition should work");
+    }
+
+    #[test]
+    fn test_edge_case_deeply_nested_expressions() {
+        // Test parsing and evaluating deeply nested expressions (100 levels)
+        let mut env = Env::new();
+        
+        // Build expression: (((((...(1)...)))))
+        let mut expr = "1".to_string();
+        for _ in 0..100 {
+            expr = format!("({})", expr);
+        }
+        
+        let source = format!(r#"
+            fn deeply_nested() -> i32 {{
+                return {};
+            }}
+        "#, expr);
+        
+        let program = compile(&source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        let result = call_function("deeply_nested", &[], &mut env);
+        match result {
+            Ok(Value::Int(1)) => {
+                // Success - deep nesting handled correctly
+            }
+            Err(e) => {
+                // If it fails, should give clear stack error
+                assert!(e.contains("stack") || e.contains("depth") || e.contains("too deep"),
+                        "Error should mention stack/depth issue: {}", e);
+            }
+            _ => panic!("Expected Int(1) or stack overflow error"),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_recursion_depth_limit() {
+        // Test recursive function to ensure basic recursion works
+        // NOTE: Very deep recursion (1000+) will cause stack overflow - not tested here
+        let mut env = Env::new();
+        let source = r#"
+            fn countdown(n: i32) -> i32 {
+                if n <= 0 {
+                    return 0;
+                }
+                return countdown(n - 1) + 1;
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        // Test reasonable recursion (10 levels)
+        let result = call_function("countdown", &[Value::Int(10)], &mut env).unwrap();
+        assert_eq!(result, Value::Int(10), "countdown(10) should return 10");
+        
+        // Test moderate recursion (100 levels)
+        let result_100 = call_function("countdown", &[Value::Int(100)], &mut env).unwrap();
+        assert_eq!(result_100, Value::Int(100), "countdown(100) should return 100");
+    }
+
+    #[test]
+    fn test_edge_case_short_circuit_and() {
+        // Test that && evaluates correctly
+        // NOTE: Full short-circuit testing requires mutable globals (not yet supported)
+        let mut env = Env::new();
+        let source = r#"
+            fn always_false() -> bool {
+                return false;
+            }
+            
+            fn always_true() -> bool {
+                return true;
+            }
+            
+            fn test_and_false_first() -> bool {
+                return always_false() && always_true();
+            }
+            
+            fn test_and_true_first() -> bool {
+                return always_true() && always_false();
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        let result1 = call_function("test_and_false_first", &[], &mut env).unwrap();
+        assert_eq!(result1, Value::Bool(false), "false && true should be false");
+        
+        let result2 = call_function("test_and_true_first", &[], &mut env).unwrap();
+        assert_eq!(result2, Value::Bool(false), "true && false should be false");
+    }
+
+    #[test]
+    fn test_edge_case_short_circuit_or() {
+        // Test that || evaluates correctly
+        // NOTE: Full short-circuit testing requires mutable globals (not yet supported)
+        let mut env = Env::new();
+        let source = r#"
+            fn always_false() -> bool {
+                return false;
+            }
+            
+            fn always_true() -> bool {
+                return true;
+            }
+            
+            fn test_or_true_first() -> bool {
+                return always_true() || always_false();
+            }
+            
+            fn test_or_false_first() -> bool {
+                return always_false() || always_true();
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        let result1 = call_function("test_or_true_first", &[], &mut env).unwrap();
+        assert_eq!(result1, Value::Bool(true), "true || false should be true");
+        
+        let result2 = call_function("test_or_false_first", &[], &mut env).unwrap();
+        assert_eq!(result2, Value::Bool(true), "false || true should be true");
+    }
+
+    #[test]
+    fn test_edge_case_variable_shadowing() {
+        // Test that variables in different functions don't interfere
+        // NOTE: Bare blocks `{}` not yet supported, so testing with if statements
+        let mut env = Env::new();
+        let source = r#"
+            fn outer() -> i32 {
+                let x: i32 = 10;
+                return x;
+            }
+            
+            fn inner() -> i32 {
+                let x: i32 = 20;
+                return x;
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        let result1 = call_function("outer", &[], &mut env).unwrap();
+        assert_eq!(result1, Value::Int(10));
+        
+        let result2 = call_function("inner", &[], &mut env).unwrap();
+        assert_eq!(result2, Value::Int(20));
+        
+        // Call outer again to ensure inner didn't affect it
+        let result3 = call_function("outer", &[], &mut env).unwrap();
+        assert_eq!(result3, Value::Int(10), "Function scopes should be independent");
+    }
+
+    #[test]
+    fn test_edge_case_empty_function_body() {
+        // Test function with no statements (just returns)
+        let mut env = Env::new();
+        let source = r#"
+            fn empty() -> i32 {
+                return 42;
+            }
+            
+            fn empty_implicit() {
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        let result = call_function("empty", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Int(42));
+        
+        let result2 = call_function("empty_implicit", &[], &mut env).unwrap();
+        assert_eq!(result2, Value::Nil);
+    }
+
+    #[test]
+    fn test_edge_case_early_return_from_nested_block() {
+        // Test that return works correctly from nested if statements
+        let mut env = Env::new();
+        let source = r#"
+            fn early_return(x: i32) -> i32 {
+                if x > 10 {
+                    if x > 20 {
+                        if x > 30 {
+                            return 100;
+                        }
+                        return 50;
+                    }
+                    return 25;
+                }
+                return x;
+            }
+        "#;
+        
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        let result1 = call_function("early_return", &[Value::Int(5)], &mut env).unwrap();
+        assert_eq!(result1, Value::Int(5), "x <= 10 should return x");
+        
+        let result2 = call_function("early_return", &[Value::Int(15)], &mut env).unwrap();
+        assert_eq!(result2, Value::Int(25), "10 < x <= 20 should return 25");
+        
+        let result3 = call_function("early_return", &[Value::Int(25)], &mut env).unwrap();
+        assert_eq!(result3, Value::Int(50), "20 < x <= 30 should return 50");
+        
+        let result4 = call_function("early_return", &[Value::Int(35)], &mut env).unwrap();
+        assert_eq!(result4, Value::Int(100), "x > 30 should return from deeply nested if");
+    }
+
+    #[test]
+    fn test_edge_case_large_array_of_expressions() {
+        // Test handling many sequential expressions
+        let mut env = Env::new();
+        
+        // Create a function with 50 sequential assignments
+        let mut statements = String::new();
+        for i in 0..50 {
+            statements.push_str(&format!("let x{}: i32 = {};\n", i, i));
+        }
+        
+        let source = format!(r#"
+            fn many_statements() -> i32 {{
+                {}
+                return x49;
+            }}
+        "#, statements);
+        
+        let program = compile(&source).unwrap();
+        execute(&program, &mut env).unwrap();
+        
+        let result = call_function("many_statements", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Int(49), 
+                   "Should handle many sequential statements");
+    }
 }

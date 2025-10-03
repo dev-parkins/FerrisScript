@@ -759,4 +759,145 @@ fn test() {
         assert_eq!(Token::StringLit("test".to_string()).name(), "string");
         assert_eq!(Token::EqualEqual.name(), "==");
     }
+
+    // ===== Edge Case Tests (v0.0.2) =====
+
+    #[test]
+    fn test_edge_case_comments_only_file() {
+        // Test file with only comments (no actual code)
+        let input = "// This is a comment\n// Another comment\n// More comments";
+        let tokens = tokenize(input).unwrap();
+        assert_eq!(tokens, vec![Token::Eof], "File with only comments should produce only EOF token");
+    }
+
+    #[test]
+    fn test_edge_case_large_number_max() {
+        // Test parsing very large numbers (approaching i64::MAX when converted)
+        let input = "9223372036854775807"; // i64::MAX
+        let tokens = tokenize(input).unwrap();
+        assert_eq!(tokens.len(), 2); // Number + EOF
+        match &tokens[0] {
+            Token::Number(n) => {
+                assert!(*n > 0.0, "Large number should be positive");
+                assert!(n.is_finite(), "Large number should be finite");
+            }
+            _ => panic!("Expected Number token"),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_large_number_negative() {
+        // Test parsing very large negative numbers
+        let input = "-9223372036854775808"; // i64::MIN (as negative literal)
+        let tokens = tokenize(input).unwrap();
+        assert_eq!(tokens.len(), 3); // Minus + Number + EOF
+        assert_eq!(tokens[0], Token::Minus);
+        match &tokens[1] {
+            Token::Number(n) => {
+                assert!(*n > 0.0, "Number part should be positive");
+                assert!(n.is_finite(), "Large number should be finite");
+            }
+            _ => panic!("Expected Number token"),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_very_small_number() {
+        // Test parsing very small decimal numbers
+        let input = "0.000000001";
+        let tokens = tokenize(input).unwrap();
+        assert_eq!(tokens.len(), 2);
+        match &tokens[0] {
+            Token::Number(n) => {
+                assert!(*n > 0.0, "Small number should be positive");
+                assert!(*n < 0.001, "Number should be very small");
+                assert!(n.is_finite(), "Small number should be finite");
+            }
+            _ => panic!("Expected Number token"),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_very_long_identifier() {
+        // Test identifier with 1000 characters (stress test)
+        let long_name = "a".repeat(1000);
+        let tokens = tokenize(&long_name).unwrap();
+        assert_eq!(tokens.len(), 2); // Identifier + EOF
+        match &tokens[0] {
+            Token::Ident(name) => {
+                assert_eq!(name.len(), 1000, "Identifier should preserve full length");
+            }
+            _ => panic!("Expected Identifier token"),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_unicode_identifier() {
+        // Test identifiers with Unicode characters
+        let input = "函数名称 переменная μ α β";
+        let result = tokenize(input);
+        // Current implementation may not support Unicode identifiers
+        // This test documents the behavior
+        match result {
+            Ok(tokens) => {
+                // If it succeeds, verify tokens are created
+                assert!(tokens.len() > 1, "Should produce some tokens");
+            }
+            Err(e) => {
+                // If it fails, that's okay - documents that Unicode isn't supported yet
+                assert!(e.contains("Unexpected character") || e.contains("Invalid"), 
+                       "Should give clear error for unsupported Unicode");
+            }
+        }
+    }
+
+    #[test]
+    fn test_edge_case_mixed_comments_and_code() {
+        // Test file with comments interspersed with code
+        let input = "// Start\nlet x = 5; // inline comment\n// Middle\nlet y = 10;\n// End";
+        let tokens = tokenize(input).unwrap();
+        // Should have: let, x, =, 5, ;, let, y, =, 10, ;, EOF
+        assert_eq!(tokens.len(), 11);
+        assert_eq!(tokens[0], Token::Let);
+        assert_eq!(tokens[1], Token::Ident("x".to_string()));
+    }
+
+    #[test]
+    fn test_edge_case_empty_string_literal() {
+        // Test empty string literal ""
+        let input = r#""""#;
+        let tokens = tokenize(input).unwrap();
+        assert_eq!(tokens.len(), 2); // String + EOF
+        match &tokens[0] {
+            Token::StringLit(s) => {
+                assert_eq!(s, "", "Empty string should be preserved");
+            }
+            _ => panic!("Expected String token"),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_multiple_dots() {
+        // Test multiple dots (could be confused with field access or range)
+        let input = "x...y";
+        let tokens = tokenize(input).unwrap();
+        // Should tokenize as: x, ., ., ., y
+        assert!(tokens.len() >= 5);
+        assert_eq!(tokens[0], Token::Ident("x".to_string()));
+        assert_eq!(tokens[1], Token::Dot);
+        assert_eq!(tokens[2], Token::Dot);
+        assert_eq!(tokens[3], Token::Dot);
+    }
+
+    #[test]
+    fn test_edge_case_consecutive_operators() {
+        // Test sequences of operators that shouldn't combine
+        let input = "+-*/";
+        let tokens = tokenize(input).unwrap();
+        assert_eq!(tokens.len(), 5); // 4 operators + EOF
+        assert_eq!(tokens[0], Token::Plus);
+        assert_eq!(tokens[1], Token::Minus);
+        assert_eq!(tokens[2], Token::Star);
+        assert_eq!(tokens[3], Token::Slash);
+    }
 }
