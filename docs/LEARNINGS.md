@@ -35,6 +35,33 @@ if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
 - Makes code more readable and maintainable
 - Always run `cargo clippy --workspace -- -D warnings` to catch issues early
 
+### Test Coverage Tooling Challenges
+
+**Date**: October 2, 2025  
+**Issue**: Both tarpaulin and cargo-llvm-cov had installation/compatibility issues on Windows
+
+**Attempted Tools**:
+1. **cargo-tarpaulin** - File locking issues on Windows (OS error 32)
+   - Cannot clean build directory while IDE processes hold file locks
+   - Workaround: Use `--skip-clean` but still encounters runtime locks
+   
+2. **cargo-llvm-cov** - Silent installation failure during LTO phase
+   - Compiles successfully but binary not installed to cargo bin
+   - Likely Windows-specific linker issue
+
+**Solution**:
+- **Local Development**: Manual test analysis (review test names, code structure)
+- **CI Environment**: Use tarpaulin in Linux GitHub Actions (no file locking issues)
+- **Coverage Reports**: Generate in CI, upload to Codecov/Coveralls
+- **Documentation**: Created TEST_COVERAGE_ANALYSIS.md with manual gap analysis
+
+**Learning**:
+- Coverage tooling on Windows is challenging - prefer Linux CI for coverage
+- Manual analysis is time-consuming but valuable for understanding test gaps
+- Document test gaps qualitatively even without quantitative coverage metrics
+- Focus on high-priority edge cases identified through manual review
+- CI-generated coverage reports are sufficient for most projects
+
 ---
 
 ## Documentation Phase Completion (PR #3)
