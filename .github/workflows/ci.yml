@@ -7,9 +7,17 @@ on:
       - develop
     tags:
       - 'v*'
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/prompts/**'
   pull_request:
     branches: 
       - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/prompts/**'
 
 env:
   CARGO_TERM_COLOR: always
