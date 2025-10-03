@@ -403,7 +403,7 @@ lines = true
 
 **Current Status**:
 
-- Baseline coverage: See [TEST_COVERAGE_ANALYSIS.md](TEST_COVERAGE_ANALYSIS.md)
+- Baseline coverage: See [v0.0.2/TEST_COVERAGE_ANALYSIS.md](v0.0.2/TEST_COVERAGE_ANALYSIS.md)
 - No enforcement yet (`fail-under = 0`)
 
 **Target Goals**:

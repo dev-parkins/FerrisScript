@@ -95,7 +95,7 @@ During v0.X.Y (pre-stable):
 
 **Estimated Timeline**: 10-15 days focused work
 
-📋 **Full Checklist**: See [v0.0.2-CHECKLIST.md](v0.0.2-CHECKLIST.md)
+📋 **Full Checklist**: See [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md)
 
 ---
 
@@ -242,7 +242,7 @@ During v0.X.Y (pre-stable):
 
 | Document | Purpose | Target Audience |
 |----------|---------|-----------------|
-| [v0.0.2-CHECKLIST.md](v0.0.2-CHECKLIST.md) | Detailed patch release plan | Contributors |
+| [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md) | Detailed patch release plan | Contributors |
 | [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) | Comprehensive feature roadmap | All stakeholders |
 | [DOCUMENTATION_INVENTORY.md](DOCUMENTATION_INVENTORY.md) | Documentation audit | Maintainers |
 | This file | High-level version strategy | Everyone |
@@ -266,7 +266,7 @@ During v0.X.Y (pre-stable):
    - Create GitHub Discussions topics
 
 2. **Start v0.0.2 Planning**
-   - Review [v0.0.2-CHECKLIST.md](v0.0.2-CHECKLIST.md)
+   - Review [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md)
    - Prioritize based on early feedback
    - Create GitHub issues for tasks
    - Set realistic timeline
@@ -332,7 +332,7 @@ The roadmap is not set in stone! We welcome input:
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Technical design
 - [RELEASE_NOTES.md](../RELEASE_NOTES.md) - v0.0.1 release details
 - [RELEASING.md](../RELEASING.md) - How to create releases
-- [v0.0.2-CHECKLIST.md](v0.0.2-CHECKLIST.md) - Next version plan
+- [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md) - Next version plan
 - [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) - Feature roadmap
 
 ---
