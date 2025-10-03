@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "docs:lint": "markdownlint \"**/*.md\" --ignore node_modules --ignore target --dot",
-    "docs:fix": "markdownlint \"**/*.md\" --ignore node_modules --ignore target --dot --fix"
+    "docs:fix": "markdownlint \"**/*.md\" --ignore node_modules --ignore target --dot --fix",
+    "docs:check": "npm run docs:lint"
   },
   "devDependencies": {
     "markdown-link-check": "^3.12.2",

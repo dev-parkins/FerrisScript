@@ -1,0 +1,97 @@
+name: Auto Apply PR Template
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  apply-template:
+    name: Apply PR Template Based on Branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Select template based on branch name
+        id: template
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          TEMPLATE=""
+
+          echo "🔍 Analyzing branch: $BRANCH"
+
+          if [[ "$BRANCH" == bugfix/* ]] || [[ "$BRANCH" == fix/* ]]; then
+            TEMPLATE=".github/PULL_REQUEST_TEMPLATE/bug_fix.md"
+            echo "🐛 Detected bug fix branch"
+          elif [[ "$BRANCH" == feature/* ]] || [[ "$BRANCH" == feat/* ]]; then
+            TEMPLATE=".github/PULL_REQUEST_TEMPLATE/feature.md"
+            echo "✨ Detected feature branch"
+          elif [[ "$BRANCH" == docs/* ]] || [[ "$BRANCH" == doc/* ]]; then
+            TEMPLATE=".github/PULL_REQUEST_TEMPLATE/docs.md"
+            echo "📝 Detected documentation branch"
+          else
+            TEMPLATE=".github/PULL_REQUEST_TEMPLATE/docs.md"
+            echo "ℹ️ No pattern match, defaulting to docs template"
+          fi
+
+          # Verify template file exists
+          if [ ! -f "$TEMPLATE" ]; then
+            echo "❌ Template file not found: $TEMPLATE"
+            exit 1
+          fi
+
+          echo "✅ Selected template: $TEMPLATE"
+          echo "path=$TEMPLATE" >> $GITHUB_OUTPUT
+
+      - name: Apply template to PR body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const templatePath = '${{ steps.template.outputs.path }}';
+            
+            // Get current PR body
+            const currentBody = context.payload.pull_request.body || '';
+            
+            // Check if PR body already has substantial content (>50 chars of non-whitespace)
+            const contentLength = currentBody.trim().length;
+            if (contentLength > 50) {
+              console.log(`ℹ️ PR body already has content (${contentLength} chars), skipping template application`);
+              console.log('This likely means the PR was created with a template already applied.');
+              return;
+            }
+            
+            // Read template file
+            let templateBody;
+            try {
+              templateBody = fs.readFileSync(templatePath, 'utf8');
+              console.log(`✅ Read template file: ${templatePath}`);
+            } catch (error) {
+              console.error(`❌ Failed to read template file: ${error.message}`);
+              throw error;
+            }
+            
+            // Apply template to PR
+            try {
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                body: templateBody
+              });
+              
+              console.log('✅ Successfully applied PR template');
+              console.log(`📋 Template: ${templatePath}`);
+              
+              // Add a comment to let user know template was applied
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `🤖 **Automated PR Template Applied**\n\nBased on your branch name, I've applied the appropriate PR template. Please fill in all sections marked with \`<!-- ... -->\` comments.\n\n📋 Template used: \`${templatePath.split('/').pop()}\``
+              });
+              
+            } catch (error) {
+              console.error(`❌ Failed to apply template: ${error.message}`);
+              throw error;
+            }

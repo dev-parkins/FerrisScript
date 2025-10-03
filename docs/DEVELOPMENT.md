@@ -92,11 +92,32 @@ Check the roadmap in [ARCHITECTURE.md](ARCHITECTURE.md) or create an issue for n
 
 ### 2. Create a Branch
 
+Follow our **branch naming convention** to get the right PR template automatically:
+
 ```bash
-git checkout -b feat/your-feature-name
+# For bug fixes → Bug Fix PR template
+git checkout -b bugfix/your-bug-description
 # or
-git checkout -b fix/bug-description
+git checkout -b fix/parser-null-pointer
+
+# For new features → Feature PR template
+git checkout -b feature/your-feature-name
+# or
+git checkout -b feat/async-loading
+
+# For documentation → Documentation PR template
+git checkout -b docs/add-api-examples
+# or
+git checkout -b doc/update-readme
 ```
+
+**Why Branch Naming Matters:**
+
+- 🤖 **Auto-applies PR templates**: Correct template based on branch prefix
+- 📋 **Better organization**: Easy to identify PR types at a glance
+- ✅ **GitHub Copilot friendly**: Automated PRs get proper templates
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md#branch-naming-convention) for full details.
 
 ### 3. Make Changes
 
@@ -140,18 +161,25 @@ npm run docs:fix
 **Why This Matters**:
 
 - ⏱️ **Faster PR reviews**: Catch formatting issues before CI runs
-- 🔗 **No broken links**: Verify all documentation cross-references work
-- 📐 **Consistent style**: Maintain professional documentation quality
+- **Consistent style**: Maintain professional documentation quality
 - ✅ **CI will pass**: Same checks run in CI, but you catch them early
 
 **Common Issues Caught**:
 
 - Missing blank lines around headings
 - Inconsistent list formatting
-- Broken internal links (wrong file paths)
-- Broken external links (404s, typos)
 - Trailing whitespace
 - Code blocks without language specifiers
+
+**Link Checking**: Broken links are automatically checked in CI. To check links manually:
+
+```bash
+# Check specific file
+npx markdown-link-check your-file.md
+
+# Check with config (quieter output)
+npx markdown-link-check your-file.md --config .markdown-link-check.json -q
+```
 
 See [../scripts/README.md](../scripts/README.md) for full documentation linting guide.
 
@@ -177,9 +205,26 @@ git commit -m "chore: update dependencies to latest versions"
 ### 6. Push and Create PR
 
 ```bash
-git push origin feat/your-feature-name
+# Push your branch (use the actual branch name you created)
+git push origin bugfix/your-bug-description
+# or
+git push origin feature/your-feature-name
+# or
+git push origin docs/your-doc-update
+
 # Then create a pull request on GitHub
 ```
+
+**What Happens Next:**
+
+1. 🤖 Our automation detects your branch name
+2. 📋 Appropriate PR template is auto-applied to your PR
+3. ✍️ Fill out the template sections (marked with `<!-- ... -->` comments)
+4. ✅ CI runs tests and checks
+5. 👀 Maintainers review and provide feedback
+
+**For GitHub Copilot Users:**
+If you're using GitHub Copilot to create PRs automatically, the branch naming convention ensures your automated PRs get the correct template applied!
 
 ---
 
