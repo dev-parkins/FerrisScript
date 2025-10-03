@@ -109,8 +109,12 @@ cargo run examples/your-example.ferris
 
 <!-- Link to related documentation that users might want to read -->
 
-- [Related Doc 1](link)
-- [Related Doc 2](link)
+Examples:
+
+```markdown
+ - [Related Doc 1](link)
+ - [Related Doc 2](link)
+```
 
 ## Checklist
 
