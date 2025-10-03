@@ -17,23 +17,28 @@ Version-specific documentation can link anywhere, but general docs should remain
 ### ✅ Appropriate Links
 
 **From General Docs → General Docs**:
+
 - `DEVELOPMENT.md` → `ARCHITECTURE.md` ✅
 - `CONTRIBUTING.md` → `DOCUMENTATION_ORGANIZATION.md` ✅
 - `FAQ.md` → `TROUBLESHOOTING.md` ✅
 
 **From Version Docs → General Docs**:
+
 - `docs/v0.0.2/v0.0.2-CHECKLIST.md` → `../CONTRIBUTING.md` ✅
 
 **From Version Docs → Version Docs**:
+
 - `docs/v0.0.2/v0.0.2-CHECKLIST.md` → `LEARNINGS.md` ✅
 
 **Meta-Documentation Exceptions**:
+
 - `DOCUMENTATION_INVENTORY.md` can reference version-specific docs (it's cataloging them) ✅
 - `VERSION_PLANNING.md` can reference version-specific docs with clear "archived/historical" labels ✅
 
 ### ❌ Inappropriate Links
 
 **From General Docs → Version Docs**:
+
 - `DEVELOPMENT.md` → `v0.0.2/TEST_COVERAGE_ANALYSIS.md` ❌
 - `CONTRIBUTING.md` → `v0.0.2/PHASE_TRACKING.md` ❌
 - `README.md` → `v0.0.2/BENCHMARK_BASELINE.md` ❌
@@ -49,11 +54,13 @@ Version-specific documentation can link anywhere, but general docs should remain
 If general docs need to reference version-specific information, extract the evergreen content:
 
 **Before** (DEVELOPMENT.md):
+
 ```markdown
 - Baseline coverage: See [v0.0.2/TEST_COVERAGE_ANALYSIS.md](v0.0.2/TEST_COVERAGE_ANALYSIS.md)
 ```
 
 **After** (DEVELOPMENT.md):
+
 ```markdown
 - **Test Count**: 116+ tests (and growing)
 - **Coverage**: Actively tracked via cargo-llvm-cov locally and cargo-tarpaulin in CI
@@ -65,11 +72,13 @@ If general docs need to reference version-specific information, extract the ever
 If the content isn't needed in general docs, simply remove it:
 
 **Before** (CONTRIBUTING.md):
+
 ```markdown
 3. Follow the structure outlined in [Phase Tracking](docs/v0.0.2/PHASE_TRACKING.md)
 ```
 
 **After** (CONTRIBUTING.md):
+
 ```markdown
 3. Check [DOCUMENTATION_ORGANIZATION.md](docs/DOCUMENTATION_ORGANIZATION.md) for where new docs should live
 ```
@@ -79,11 +88,13 @@ If the content isn't needed in general docs, simply remove it:
 Only for `VERSION_PLANNING.md` and similar meta-docs:
 
 **Before**:
+
 ```markdown
 📋 **Full Checklist**: See [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md)
 ```
 
 **After**:
+
 ```markdown
 📋 **Historical Checklist**: [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md) *(archived for reference)*
 ```
@@ -95,12 +106,14 @@ Only for `VERSION_PLANNING.md` and similar meta-docs:
 ### General Documentation (docs/ root)
 
 **Characteristics**:
+
 - Applies to all versions
 - Continuously updated
 - No version numbers in content
 - Evergreen reference material
 
 **Examples**:
+
 - `ARCHITECTURE.md` - System architecture
 - `DEVELOPMENT.md` - Developer guide
 - `CONTRIBUTING.md` - Contribution guide
@@ -112,12 +125,14 @@ Only for `VERSION_PLANNING.md` and similar meta-docs:
 ### Version-Specific Documentation (docs/vX.Y.Z/)
 
 **Characteristics**:
+
 - Tied to specific version
 - Point-in-time snapshot
 - Contains version numbers
 - Archived after release
 
 **Examples**:
+
 - `docs/v0.0.2/v0.0.2-CHECKLIST.md` - Release checklist
 - `docs/v0.0.2/BENCHMARK_BASELINE.md` - Performance baseline
 - `docs/v0.0.2/LEARNINGS.md` - Development learnings
@@ -127,11 +142,13 @@ Only for `VERSION_PLANNING.md` and similar meta-docs:
 ### Meta-Documentation (special case)
 
 **Characteristics**:
+
 - Documents the documentation itself
 - Catalogs or inventories all docs
 - Plans future documentation
 
 **Examples**:
+
 - `DOCUMENTATION_INVENTORY.md` - Catalog of all docs
 - `VERSION_PLANNING.md` - Version strategy
 - `DOCUMENTATION_ORGANIZATION.md` - Organization principles
@@ -173,11 +190,13 @@ Review each match and verify it follows the guidelines above.
 ### Example 1: Coverage Information
 
 **❌ Bad** (general doc linking to version-specific):
+
 ```markdown
 See [v0.0.2/TEST_COVERAGE_ANALYSIS.md](v0.0.2/TEST_COVERAGE_ANALYSIS.md) for baseline coverage.
 ```
 
 **✅ Good** (general doc with extracted evergreen info):
+
 ```markdown
 **Current Coverage**: 116+ tests, actively tracked via cargo-llvm-cov and cargo-tarpaulin.
 For historical baselines, see version-specific documentation archives.
@@ -186,11 +205,13 @@ For historical baselines, see version-specific documentation archives.
 ### Example 2: Planning References
 
 **❌ Bad** (general doc treating archived content as current):
+
 ```markdown
 Follow the checklist in [v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md)
 ```
 
 **✅ Good** (meta-doc with clear archived label):
+
 ```markdown
 **Historical Checklist**: [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md) *(archived for reference)*
 ```
@@ -198,11 +219,13 @@ Follow the checklist in [v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md)
 ### Example 3: Contribution Guidelines
 
 **❌ Bad** (general doc referencing version-specific workflow):
+
 ```markdown
 Follow the structure in [Phase Tracking](docs/v0.0.2/PHASE_TRACKING.md)
 ```
 
 **✅ Good** (general doc referencing general organizational doc):
+
 ```markdown
 Check [DOCUMENTATION_ORGANIZATION.md](docs/DOCUMENTATION_ORGANIZATION.md) for documentation structure.
 ```
