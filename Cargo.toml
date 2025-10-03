@@ -11,3 +11,6 @@ version = "0.0.1"
 edition = "2021"
 authors = ["FerrisScript Contributors"]
 license = "MIT"
+
+[workspace.dependencies]
+criterion = "0.5"
