@@ -14,10 +14,10 @@ FerrisScript uses **branch name prefixes** to automatically apply the appropriat
 
 | Branch Prefix | PR Template | Use For |
 |---------------|-------------|---------|
-| `bugfix/*` or `fix/*` | [bug_fix.md](../.github/PULL_REQUEST_TEMPLATE/bug_fix.md) | Bug fixes, issue resolutions |
-| `feature/*` or `feat/*` | [feature.md](../.github/PULL_REQUEST_TEMPLATE/feature.md) | New features, enhancements |
-| `docs/*` or `doc/*` | [docs.md](../.github/PULL_REQUEST_TEMPLATE/docs.md) | Documentation updates |
-| *(anything else)* | [docs.md](../.github/PULL_REQUEST_TEMPLATE/docs.md) | Default fallback |
+| `bugfix/*` or `fix/*` | [bug_fix.md](../PULL_REQUEST_TEMPLATE/bug_fix.md) | Bug fixes, issue resolutions |
+| `feature/*` or `feat/*` | [feature.md](../PULL_REQUEST_TEMPLATE/feature.md) | New features, enhancements |
+| `docs/*` or `doc/*` | [docs.md](../PULL_REQUEST_TEMPLATE/docs.md) | Documentation updates |
+| *(anything else)* | [docs.md](../PULL_REQUEST_TEMPLATE/docs.md) | Default fallback |
 
 ---
 
@@ -226,10 +226,10 @@ This is useful if:
 
 ## 📚 Related Documentation
 
-- [CONTRIBUTING.md](../CONTRIBUTING.md#branch-naming-convention) - Full contribution guide
-- [DEVELOPMENT.md](../docs/DEVELOPMENT.md) - Development workflow
-- [PR Templates](.github/PULL_REQUEST_TEMPLATE/) - Actual template files
-- [Workflow File](.github/workflows/pr-template.yml) - Automation implementation
+- [CONTRIBUTING.md](../../CONTRIBUTING.md#branch-naming-convention) - Full contribution guide
+- [DEVELOPMENT.md](../../docs/DEVELOPMENT.md) - Development workflow
+- [PR Templates](../PULL_REQUEST_TEMPLATE/) - Actual template files
+- [Workflow File](../workflows/pr-template.yml) - Automation implementation
 
 ---
 
@@ -254,4 +254,4 @@ git push origin docs/doc-update
 
 ---
 
-**Questions?** See [CONTRIBUTING.md](../CONTRIBUTING.md) or open an issue!
+**Questions?** See [CONTRIBUTING.md](../../CONTRIBUTING.md) or open an issue!
