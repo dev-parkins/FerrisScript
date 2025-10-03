@@ -69,13 +69,6 @@ Context:
   - **Features**: Question-driven context gathering, systematic execution
   - **Status**: Ready to use
 
-### Legacy (Version-Specific)
-
-- **[edge-case-error-handling-v0.0.2.md](./edge-case-error-handling-v0.0.2.md)**
-  - **Type**: Version-specific (v0.0.2 only)
-  - **Status**: Archived - use generic prompt instead
-  - **Note**: Kept as an example of a complete context document
-
 ---
 
 ## 📖 Usage Examples
