@@ -95,7 +95,7 @@ During v0.X.Y (pre-stable):
 
 **Estimated Timeline**: 10-15 days focused work
 
-📋 **Full Checklist**: See [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md)
+📋 **Historical Checklist**: [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md) *(archived for reference)*
 
 ---
 
@@ -240,12 +240,12 @@ During v0.X.Y (pre-stable):
 
 ## 📋 Planning Documents
 
-| Document | Purpose | Target Audience |
-|----------|---------|-----------------|
-| [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md) | Detailed patch release plan | Contributors |
-| [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) | Comprehensive feature roadmap | All stakeholders |
-| [DOCUMENTATION_INVENTORY.md](DOCUMENTATION_INVENTORY.md) | Documentation audit | Maintainers |
-| This file | High-level version strategy | Everyone |
+| Document | Purpose | Target Audience | Status |
+|----------|---------|-----------------|--------|
+| [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md) | v0.0.2 release plan | Contributors | 📁 Archived |
+| [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) | Feature roadmap for v0.1.0 | All stakeholders | 🎯 Active |
+| [DOCUMENTATION_INVENTORY.md](DOCUMENTATION_INVENTORY.md) | Documentation audit | Maintainers | 📋 Reference |
+| This file | High-level version strategy | Everyone | 📖 Living |
 
 ---
 
@@ -265,9 +265,9 @@ During v0.X.Y (pre-stable):
    - Monitor for feedback and bug reports
    - Create GitHub Discussions topics
 
-2. **Start v0.0.2 Planning**
-   - Review [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md)
-   - Prioritize based on early feedback
+2. **Start v0.0.3 Planning** *(v0.0.2 is in progress)*
+   - Create version-specific checklist in `docs/v0.0.3/`
+   - Prioritize based on community feedback
    - Create GitHub issues for tasks
    - Set realistic timeline
 
@@ -330,9 +330,9 @@ The roadmap is not set in stone! We welcome input:
 
 - [README.md](../README.md) - Project overview
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Technical design
-- [RELEASE_NOTES.md](../RELEASE_NOTES.md) - v0.0.1 release details
+- [RELEASE_NOTES.md](../RELEASE_NOTES.md) - Release history
 - [RELEASING.md](../RELEASING.md) - How to create releases
-- [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md) - Next version plan
+- [v0.0.2/](v0.0.2/) - v0.0.2 archived documentation
 - [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) - Feature roadmap
 
 ---

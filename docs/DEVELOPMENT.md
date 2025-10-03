@@ -403,8 +403,10 @@ lines = true
 
 **Current Status**:
 
-- Baseline coverage: See [v0.0.2/TEST_COVERAGE_ANALYSIS.md](v0.0.2/TEST_COVERAGE_ANALYSIS.md)
-- No enforcement yet (`fail-under = 0`)
+- **Test Count**: 116+ tests (and growing)
+- **Coverage**: Actively tracked via cargo-llvm-cov locally and cargo-tarpaulin in CI
+- **Enforcement**: No minimum threshold yet (`fail-under = 0`)
+- **Historical Baseline**: See version-specific archives for baseline snapshots
 
 **Target Goals**:
 
