@@ -93,8 +93,10 @@ impl Parser {
             Token::Ident(n) => n,
             t => {
                 return Err(format!(
-                    "Expected identifier after 'let', found {}",
-                    t.name()
+                    "Expected identifier after 'let', found {} at line {}, column {}",
+                    t.name(),
+                    self.current_line,
+                    self.current_column
                 ))
             }
         };
@@ -103,7 +105,14 @@ impl Parser {
             self.advance();
             match self.advance() {
                 Token::Ident(t) => Some(t),
-                t => return Err(format!("Expected type, found {}", t.name())),
+                t => {
+                    return Err(format!(
+                        "Expected type, found {} at line {}, column {}",
+                        t.name(),
+                        self.current_line,
+                        self.current_column
+                    ))
+                }
             }
         } else {
             None
@@ -128,7 +137,14 @@ impl Parser {
 
         let name = match self.advance() {
             Token::Ident(n) => n,
-            t => return Err(format!("Expected function name, found {}", t.name())),
+            t => {
+                return Err(format!(
+                    "Expected function name, found {} at line {}, column {}",
+                    t.name(),
+                    self.current_line,
+                    self.current_column
+                ))
+            }
         };
 
         self.expect(Token::LParen)?;
@@ -138,14 +154,28 @@ impl Parser {
             let param_span = self.span();
             let param_name = match self.advance() {
                 Token::Ident(n) => n,
-                t => return Err(format!("Expected parameter name, found {}", t.name())),
+                t => {
+                    return Err(format!(
+                        "Expected parameter name, found {} at line {}, column {}",
+                        t.name(),
+                        self.current_line,
+                        self.current_column
+                    ))
+                }
             };
 
             self.expect(Token::Colon)?;
 
             let param_type = match self.advance() {
                 Token::Ident(t) => t,
-                t => return Err(format!("Expected parameter type, found {}", t.name())),
+                t => {
+                    return Err(format!(
+                        "Expected parameter type, found {} at line {}, column {}",
+                        t.name(),
+                        self.current_line,
+                        self.current_column
+                    ))
+                }
             };
 
             params.push(Param {
@@ -169,10 +199,20 @@ impl Parser {
                 self.advance();
                 match self.advance() {
                     Token::Ident(t) => Some(t),
-                    t => return Err(format!("Expected return type, found {}", t.name())),
+                    t => {
+                        return Err(format!(
+                            "Expected return type, found {} at line {}, column {}",
+                            t.name(),
+                            self.current_line,
+                            self.current_column
+                        ))
+                    }
                 }
             } else {
-                return Err("Expected '>' after '-' in return type".to_string());
+                return Err(format!(
+                    "Expected '>' after '-' in return type at line {}, column {}",
+                    self.current_line, self.current_column
+                ));
             }
         } else {
             None
@@ -264,8 +304,10 @@ impl Parser {
             Token::Ident(n) => n,
             t => {
                 return Err(format!(
-                    "Expected identifier after 'let', found {}",
-                    t.name()
+                    "Expected identifier after 'let', found {} at line {}, column {}",
+                    t.name(),
+                    self.current_line,
+                    self.current_column
                 ))
             }
         };
@@ -274,7 +316,14 @@ impl Parser {
             self.advance();
             match self.advance() {
                 Token::Ident(t) => Some(t),
-                t => return Err(format!("Expected type, found {}", t.name())),
+                t => {
+                    return Err(format!(
+                        "Expected type, found {} at line {}, column {}",
+                        t.name(),
+                        self.current_line,
+                        self.current_column
+                    ))
+                }
             }
         } else {
             None
@@ -368,7 +417,14 @@ impl Parser {
                 self.advance();
                 let field = match self.advance() {
                     Token::Ident(name) => name,
-                    t => return Err(format!("Expected field name after '.', found {}", t.name())),
+                    t => {
+                        return Err(format!(
+                            "Expected field name after '.', found {} at line {}, column {}",
+                            t.name(),
+                            self.current_line,
+                            self.current_column
+                        ))
+                    }
                 };
                 let span = left.span();
                 left = Expr::FieldAccess(Box::new(left), field, span);
@@ -496,7 +552,12 @@ impl Parser {
             Token::GreaterEqual => Ok(BinaryOp::Ge),
             Token::And => Ok(BinaryOp::And),
             Token::Or => Ok(BinaryOp::Or),
-            t => Err(format!("Not a binary operator: {}", t.name())),
+            t => Err(format!(
+                "Not a binary operator: {} at line {}, column {}",
+                t.name(),
+                self.current_line,
+                self.current_column
+            )),
         }
     }
 }
