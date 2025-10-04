@@ -1,4 +1,5 @@
 pub mod ast;
+pub mod error_context;
 pub mod lexer;
 pub mod parser;
 pub mod type_checker;
@@ -6,7 +7,7 @@ pub mod type_checker;
 /// Compile RustyScript source to AST
 pub fn compile(source: &str) -> Result<ast::Program, String> {
     let tokens = lexer::tokenize(source)?;
-    let ast = parser::parse(&tokens)?;
+    let ast = parser::parse(&tokens, source)?;
     type_checker::check(&ast)?;
     Ok(ast)
 }

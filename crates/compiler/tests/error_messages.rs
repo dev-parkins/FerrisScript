@@ -11,7 +11,7 @@ mod parser_errors {
     fn test_expected_identifier_after_let_includes_position() {
         let source = "let 123 = 5;";
         let tokens = lexer::tokenize(source).unwrap();
-        let result = parser::parse(&tokens);
+        let result = parser::parse(&tokens, source);
 
         assert!(result.is_err());
         let error = result.unwrap_err();
@@ -24,7 +24,7 @@ mod parser_errors {
     fn test_expected_type_includes_position() {
         let source = "let x: 123 = 5;";
         let tokens = lexer::tokenize(source).unwrap();
-        let result = parser::parse(&tokens);
+        let result = parser::parse(&tokens, source);
 
         assert!(result.is_err());
         let error = result.unwrap_err();
@@ -37,7 +37,7 @@ mod parser_errors {
     fn test_expected_function_name_includes_position() {
         let source = "fn 123() {}";
         let tokens = lexer::tokenize(source).unwrap();
-        let result = parser::parse(&tokens);
+        let result = parser::parse(&tokens, source);
 
         assert!(result.is_err());
         let error = result.unwrap_err();
@@ -50,7 +50,7 @@ mod parser_errors {
     fn test_expected_parameter_name_includes_position() {
         let source = "fn test(123: i32) {}";
         let tokens = lexer::tokenize(source).unwrap();
-        let result = parser::parse(&tokens);
+        let result = parser::parse(&tokens, source);
 
         assert!(result.is_err());
         let error = result.unwrap_err();
@@ -63,7 +63,7 @@ mod parser_errors {
     fn test_expected_parameter_type_includes_position() {
         let source = "fn test(x: 123) {}";
         let tokens = lexer::tokenize(source).unwrap();
-        let result = parser::parse(&tokens);
+        let result = parser::parse(&tokens, source);
 
         assert!(result.is_err());
         let error = result.unwrap_err();
@@ -76,7 +76,7 @@ mod parser_errors {
     fn test_expected_return_type_includes_position() {
         let source = "fn test() -> 123 {}";
         let tokens = lexer::tokenize(source).unwrap();
-        let result = parser::parse(&tokens);
+        let result = parser::parse(&tokens, source);
 
         assert!(result.is_err());
         let error = result.unwrap_err();
@@ -89,7 +89,7 @@ mod parser_errors {
     fn test_expected_arrow_after_dash_includes_position() {
         let source = "fn test() - {}";
         let tokens = lexer::tokenize(source).unwrap();
-        let result = parser::parse(&tokens);
+        let result = parser::parse(&tokens, source);
 
         assert!(result.is_err());
         let error = result.unwrap_err();
@@ -102,7 +102,7 @@ mod parser_errors {
     fn test_expected_field_name_includes_position() {
         let source = "fn test() { let x = self.123; }";
         let tokens = lexer::tokenize(source).unwrap();
-        let result = parser::parse(&tokens);
+        let result = parser::parse(&tokens, source);
 
         assert!(result.is_err());
         let error = result.unwrap_err();
@@ -115,7 +115,7 @@ mod parser_errors {
     fn test_top_level_syntax_error_includes_position() {
         let source = "123";
         let tokens = lexer::tokenize(source).unwrap();
-        let result = parser::parse(&tokens);
+        let result = parser::parse(&tokens, source);
 
         assert!(result.is_err());
         let error = result.unwrap_err();
@@ -128,7 +128,7 @@ mod parser_errors {
     fn test_unexpected_token_in_expression_includes_position() {
         let source = "fn test() { let x = }; }";
         let tokens = lexer::tokenize(source).unwrap();
-        let result = parser::parse(&tokens);
+        let result = parser::parse(&tokens, source);
 
         assert!(result.is_err());
         let error = result.unwrap_err();
@@ -198,7 +198,8 @@ mod lexer_errors {
         assert!(result.is_err());
         let error = result.unwrap_err();
         assert!(error.contains("Unexpected character '&'"));
-        assert!(error.contains("Did you mean '&&'?"));
+        assert!(error.contains("&&")); // Hint mentions &&
+        assert!(error.contains("logical AND")); // Full hint text
         assert!(error.contains("line"));
         assert!(error.contains("column"));
     }
@@ -211,7 +212,8 @@ mod lexer_errors {
         assert!(result.is_err());
         let error = result.unwrap_err();
         assert!(error.contains("Unexpected character '|'"));
-        assert!(error.contains("Did you mean '||'?"));
+        assert!(error.contains("||")); // Hint mentions ||
+        assert!(error.contains("logical OR")); // Full hint text
         assert!(error.contains("line"));
         assert!(error.contains("column"));
     }

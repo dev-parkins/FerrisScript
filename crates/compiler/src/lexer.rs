@@ -1,3 +1,5 @@
+use crate::error_context::format_error_with_context;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     // Keywords
@@ -93,17 +95,19 @@ impl Token {
     }
 }
 
-struct Lexer {
+struct Lexer<'a> {
     input: Vec<char>,
+    source: &'a str, // Keep original source for error context
     position: usize,
     line: usize,
     column: usize,
 }
 
-impl Lexer {
-    fn new(input: &str) -> Self {
+impl<'a> Lexer<'a> {
+    fn new(input: &'a str) -> Self {
         Lexer {
             input: input.chars().collect(),
+            source: input,
             position: 0,
             line: 1,
             column: 1,
@@ -193,9 +197,16 @@ impl Lexer {
         loop {
             match self.current() {
                 None => {
-                    return Err(format!(
+                    let base_msg = format!(
                         "Unterminated string at line {}, column {}",
                         start_line, start_col
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        start_line,
+                        start_col,
+                        "String must be closed with \"",
                     ));
                 }
                 Some('"') => {
@@ -226,15 +237,29 @@ impl Lexer {
                             self.advance();
                         }
                         Some(ch) => {
-                            return Err(format!(
+                            let base_msg = format!(
                                 "Invalid escape sequence '\\{}' at line {}, column {}",
                                 ch, self.line, self.column
+                            );
+                            return Err(format_error_with_context(
+                                &base_msg,
+                                self.source,
+                                self.line,
+                                self.column,
+                                &format!("Unknown escape '\\{}', valid escapes are \\n \\t \\r \\\\ \\\"", ch),
                             ));
                         }
                         None => {
-                            return Err(format!(
+                            let base_msg = format!(
                                 "Unterminated string at line {}, column {}",
                                 start_line, start_col
+                            );
+                            return Err(format_error_with_context(
+                                &base_msg,
+                                self.source,
+                                start_line,
+                                start_col,
+                                "String started here but never closed",
                             ));
                         }
                     }
@@ -350,28 +375,44 @@ impl Lexer {
                 }
             }
             '&' => {
+                let error_line = self.line;
+                let error_col = self.column;
                 self.advance();
                 if self.current() == Some('&') {
                     self.advance();
                     Token::And
                 } else {
-                    return Err(format!(
-                        "Unexpected character '&' at line {}, column {}. Did you mean '&&'?",
-                        self.line,
-                        self.column - 1
+                    let base_msg = format!(
+                        "Unexpected character '&' at line {}, column {}",
+                        error_line, error_col
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        error_line,
+                        error_col,
+                        "Did you mean '&&' for logical AND?",
                     ));
                 }
             }
             '|' => {
+                let error_line = self.line;
+                let error_col = self.column;
                 self.advance();
                 if self.current() == Some('|') {
                     self.advance();
                     Token::Or
                 } else {
-                    return Err(format!(
-                        "Unexpected character '|' at line {}, column {}. Did you mean '||'?",
-                        self.line,
-                        self.column - 1
+                    let base_msg = format!(
+                        "Unexpected character '|' at line {}, column {}",
+                        error_line, error_col
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        error_line,
+                        error_col,
+                        "Did you mean '||' for logical OR?",
                     ));
                 }
             }
@@ -408,9 +449,16 @@ impl Lexer {
                 Token::Colon
             }
             _ => {
-                return Err(format!(
+                let base_msg = format!(
                     "Unexpected character '{}' at line {}, column {}",
                     ch, self.line, self.column
+                );
+                return Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.line,
+                    self.column,
+                    "This character is not valid in FerrisScript",
                 ));
             }
         };
@@ -740,14 +788,22 @@ fn test() {
     fn test_error_single_ampersand() {
         let result = tokenize("a & b");
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Did you mean '&&'?"));
+        let error = result.unwrap_err();
+        // Error now includes context, check for key parts
+        assert!(error.contains("Unexpected character '&'"));
+        assert!(error.contains("&&"));
+        assert!(error.contains("logical AND"));
     }
 
     #[test]
     fn test_error_single_pipe() {
         let result = tokenize("a | b");
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Did you mean '||'?"));
+        let error = result.unwrap_err();
+        // Error now includes context, check for key parts
+        assert!(error.contains("Unexpected character '|'"));
+        assert!(error.contains("||"));
+        assert!(error.contains("logical OR"));
     }
 
     #[test]

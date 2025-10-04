@@ -507,7 +507,7 @@ mod tests {
     fn test_check_simple_function() {
         let input = "fn test() { let x: i32 = 5; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         assert!(check(&program).is_ok());
     }
 
@@ -515,7 +515,7 @@ mod tests {
     fn test_check_type_mismatch() {
         let input = "fn test() { let x: i32 = true; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         let result = check(&program);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Type mismatch"));
@@ -525,7 +525,7 @@ mod tests {
     fn test_check_undefined_variable() {
         let input = "fn test() { let x = y; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         let result = check(&program);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Undefined variable"));
@@ -535,7 +535,7 @@ mod tests {
     fn test_check_binary_expression() {
         let input = "fn test() { let x = 5 + 3; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         assert!(check(&program).is_ok());
     }
 
@@ -543,7 +543,7 @@ mod tests {
     fn test_check_binary_type_mismatch() {
         let input = "fn test() { let x = 5 + true; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         let result = check(&program);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("numeric types"));
@@ -553,7 +553,7 @@ mod tests {
     fn test_check_if_condition_must_be_bool() {
         let input = "fn test() { if 5 { let x = 1; } }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         let result = check(&program);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("must be bool"));
@@ -563,7 +563,7 @@ mod tests {
     fn test_check_function_call() {
         let input = r#"fn test() { print("hello"); }"#;
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         assert!(check(&program).is_ok());
     }
 
@@ -571,7 +571,7 @@ mod tests {
     fn test_check_undefined_function() {
         let input = "fn test() { foo(); }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         let result = check(&program);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Undefined function"));
@@ -581,7 +581,7 @@ mod tests {
     fn test_check_field_access() {
         let input = "fn test() { let x = self.position; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         assert!(check(&program).is_ok());
     }
 
@@ -589,7 +589,7 @@ mod tests {
     fn test_check_chained_field_access() {
         let input = "fn test() { let x = self.position.x; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         assert!(check(&program).is_ok());
     }
 
@@ -599,7 +599,7 @@ mod tests {
     print("Hello from FerrisScript!");
 }"#;
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         assert!(check(&program).is_ok());
     }
 
@@ -609,7 +609,7 @@ mod tests {
     self.position.x += 50.0 * delta;
 }"#;
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         assert!(check(&program).is_ok());
     }
 
@@ -628,7 +628,7 @@ fn _process(delta: f32) {
     }
 }"#;
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         assert!(check(&program).is_ok());
     }
 
@@ -636,7 +636,7 @@ fn _process(delta: f32) {
     fn test_check_type_coercion() {
         let input = "fn test() { let x: f32 = 5; }"; // i32 to f32 coercion
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         assert!(check(&program).is_ok());
     }
 
@@ -644,7 +644,7 @@ fn _process(delta: f32) {
     fn test_check_comparison_operators() {
         let input = "fn test() { let x = 5 > 3; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         assert!(check(&program).is_ok());
     }
 
@@ -652,7 +652,7 @@ fn _process(delta: f32) {
     fn test_check_logical_operators() {
         let input = "fn test() { let x = true && false; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         assert!(check(&program).is_ok());
     }
 
@@ -660,7 +660,7 @@ fn _process(delta: f32) {
     fn test_check_unary_operators() {
         let input = "fn test() { let x = -5; let y = !true; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
         assert!(check(&program).is_ok());
     }
 }

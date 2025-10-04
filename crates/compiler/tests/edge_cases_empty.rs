@@ -31,7 +31,7 @@ fn test_empty_file_parser() {
     // Test that parser handles empty token stream
     let input = "";
     let tokens = lexer::tokenize(input).expect("Lexer should succeed on empty input");
-    let result = parser::parse(&tokens);
+    let result = parser::parse(&tokens, input);
 
     // Should succeed with empty program
     assert!(
