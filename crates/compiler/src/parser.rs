@@ -45,12 +45,19 @@ impl<'a> Parser<'a> {
         if std::mem::discriminant(current) == std::mem::discriminant(&expected) {
             Ok(self.advance())
         } else {
-            Err(format!(
+            let base_msg = format!(
                 "Expected {}, found {} at line {}, column {}",
                 expected.name(),
                 current.name(),
                 self.current_line,
                 self.current_column
+            );
+            Err(format_error_with_context(
+                &base_msg,
+                self.source,
+                self.current_line,
+                self.current_column,
+                &format!("Expected {}", expected.name()),
             ))
         }
     }
@@ -69,11 +76,18 @@ impl<'a> Parser<'a> {
             } else if matches!(self.current(), Token::Fn) {
                 program.functions.push(self.parse_function()?);
             } else {
-                return Err(format!(
+                let base_msg = format!(
                     "Expected 'fn' or 'let' at top level, found {} at line {}, column {}",
                     self.current().name(),
                     self.current_line,
                     self.current_column
+                );
+                return Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.current_line,
+                    self.current_column,
+                    "Only function or global variable declarations allowed at top level",
                 ));
             }
         }
@@ -95,11 +109,18 @@ impl<'a> Parser<'a> {
         let name = match self.advance() {
             Token::Ident(n) => n,
             t => {
-                return Err(format!(
+                let base_msg = format!(
                     "Expected identifier after 'let', found {} at line {}, column {}",
                     t.name(),
                     self.current_line,
                     self.current_column
+                );
+                return Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.current_line,
+                    self.current_column,
+                    "Variable name must be an identifier",
                 ))
             }
         };
@@ -109,11 +130,18 @@ impl<'a> Parser<'a> {
             match self.advance() {
                 Token::Ident(t) => Some(t),
                 t => {
-                    return Err(format!(
+                    let base_msg = format!(
                         "Expected type, found {} at line {}, column {}",
                         t.name(),
                         self.current_line,
                         self.current_column
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        self.current_line,
+                        self.current_column,
+                        "Type annotation must be a valid type name (e.g., i32, f32, bool)",
                     ))
                 }
             }
@@ -141,11 +169,18 @@ impl<'a> Parser<'a> {
         let name = match self.advance() {
             Token::Ident(n) => n,
             t => {
-                return Err(format!(
+                let base_msg = format!(
                     "Expected function name, found {} at line {}, column {}",
                     t.name(),
                     self.current_line,
                     self.current_column
+                );
+                return Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.current_line,
+                    self.current_column,
+                    "Function name must be an identifier",
                 ))
             }
         };
@@ -158,11 +193,18 @@ impl<'a> Parser<'a> {
             let param_name = match self.advance() {
                 Token::Ident(n) => n,
                 t => {
-                    return Err(format!(
+                    let base_msg = format!(
                         "Expected parameter name, found {} at line {}, column {}",
                         t.name(),
                         self.current_line,
                         self.current_column
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        self.current_line,
+                        self.current_column,
+                        "Parameter name must be an identifier",
                     ))
                 }
             };
@@ -172,11 +214,18 @@ impl<'a> Parser<'a> {
             let param_type = match self.advance() {
                 Token::Ident(t) => t,
                 t => {
-                    return Err(format!(
+                    let base_msg = format!(
                         "Expected parameter type, found {} at line {}, column {}",
                         t.name(),
                         self.current_line,
                         self.current_column
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        self.current_line,
+                        self.current_column,
+                        "Parameter type must be a valid type name (e.g., i32, f32, bool)",
                     ))
                 }
             };
@@ -203,18 +252,32 @@ impl<'a> Parser<'a> {
                 match self.advance() {
                     Token::Ident(t) => Some(t),
                     t => {
-                        return Err(format!(
+                        let base_msg = format!(
                             "Expected return type, found {} at line {}, column {}",
                             t.name(),
                             self.current_line,
                             self.current_column
+                        );
+                        return Err(format_error_with_context(
+                            &base_msg,
+                            self.source,
+                            self.current_line,
+                            self.current_column,
+                            "Return type must be a valid type name (e.g., i32, f32, bool)",
                         ))
                     }
                 }
             } else {
-                return Err(format!(
+                let base_msg = format!(
                     "Expected '>' after '-' in return type at line {}, column {}",
                     self.current_line, self.current_column
+                );
+                return Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.current_line,
+                    self.current_column,
+                    "Function return type syntax is '-> Type'",
                 ));
             }
         } else {
@@ -306,11 +369,18 @@ impl<'a> Parser<'a> {
         let name = match self.advance() {
             Token::Ident(n) => n,
             t => {
-                return Err(format!(
+                let base_msg = format!(
                     "Expected identifier after 'let', found {} at line {}, column {}",
                     t.name(),
                     self.current_line,
                     self.current_column
+                );
+                return Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.current_line,
+                    self.current_column,
+                    "Variable name must be an identifier",
                 ))
             }
         };
@@ -320,11 +390,18 @@ impl<'a> Parser<'a> {
             match self.advance() {
                 Token::Ident(t) => Some(t),
                 t => {
-                    return Err(format!(
+                    let base_msg = format!(
                         "Expected type, found {} at line {}, column {}",
                         t.name(),
                         self.current_line,
                         self.current_column
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        self.current_line,
+                        self.current_column,
+                        "Type annotation must be a valid type name (e.g., i32, f32, bool)",
                     ))
                 }
             }
@@ -421,11 +498,18 @@ impl<'a> Parser<'a> {
                 let field = match self.advance() {
                     Token::Ident(name) => name,
                     t => {
-                        return Err(format!(
+                        let base_msg = format!(
                             "Expected field name after '.', found {} at line {}, column {}",
                             t.name(),
                             self.current_line,
                             self.current_column
+                        );
+                        return Err(format_error_with_context(
+                            &base_msg,
+                            self.source,
+                            self.current_line,
+                            self.current_column,
+                            "Field name must be an identifier (e.g., object.field_name)",
                         ))
                     }
                 };
@@ -555,12 +639,21 @@ impl<'a> Parser<'a> {
             Token::GreaterEqual => Ok(BinaryOp::Ge),
             Token::And => Ok(BinaryOp::And),
             Token::Or => Ok(BinaryOp::Or),
-            t => Err(format!(
-                "Not a binary operator: {} at line {}, column {}",
-                t.name(),
-                self.current_line,
-                self.current_column
-            )),
+            t => {
+                let base_msg = format!(
+                    "Not a binary operator: {} at line {}, column {}",
+                    t.name(),
+                    self.current_line,
+                    self.current_column
+                );
+                Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.current_line,
+                    self.current_column,
+                    "Valid binary operators: +, -, *, /, ==, !=, <, <=, >, >=, and, or",
+                ))
+            }
         }
     }
 }
