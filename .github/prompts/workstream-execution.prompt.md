@@ -177,6 +177,16 @@ Before declaring work complete:
 4. **What's the documentation requirement?** (rustdoc, user guides, changelogs)
 5. **What's the code review process?** (self-review, PR checklist, required approvals)
 
+**FerrisScript-Specific Documentation Quality:**
+
+- **Markdown formatting**: Always run `npm run docs:fix` before commit
+- **Markdown linting**: Always run `npm run docs:lint` to verify clean state
+- **Link validation**: Run `npx markdown-link-check <file.md>` on modified docs
+- **Linking guidelines**: Follow docs/DOCUMENTATION_LINKING_GUIDELINES.md
+  - Long-standing docs (README, CONTRIBUTING) should NOT link to version folders
+  - Use generalized or evergreen content instead of version-specific refs
+  - Check for 404s and update to current repositories/URLs
+
 ### About Contribution Workflow
 
 1. **What branch should I create?** (branch naming convention)
@@ -425,27 +435,43 @@ npm run docs:fix
 npm run docs:lint
 # Report: "✅ Markdown linting passes with no errors"
 
+# Link checking (if documentation was modified)
+# Check modified markdown files for broken links
+npx markdown-link-check <modified-file.md>
+# Report: "✅ All links verified" or list broken links to fix
+
 # Review
 git status && git diff
 # Report files changed
 ```
 
-**⚠️ CRITICAL - FerrisScript Project Rule:**
-**ALWAYS run `npm run docs:fix` before creating PR or end-of-prompt summary.**
-This auto-fixes markdown linting issues and reduces CI usage for trivial formatting.
+**⚠️ CRITICAL - FerrisScript Project Rules:**
+
+1. **ALWAYS run `npm run docs:fix`** before creating PR or end-of-prompt summary.
+   - Auto-fixes markdown linting issues
+   - Reduces CI usage for trivial formatting
+
+2. **ALWAYS check links in modified markdown files** before commit.
+   - Run: `npx markdown-link-check <file.md>` for each changed markdown file
+   - Fix any broken links (404s, incorrect paths, version-specific refs)
+   - Ensures documentation quality and reduces CI failures
+   - See DOCUMENTATION_LINKING_GUIDELINES.md for best practices
 
 ### After Push (Set Expectations)
 
 ```text
 ⚠️ **Always mention to user:**
 
-"PR created! Note: You may need to run:
-- Link checking (if documentation changed)
-- Cross-platform validation (CI will test Linux/macOS)
+"PR created! Note: CI will run:
+- Cross-platform validation (Linux/macOS)
+- Additional comprehensive link checks
+
+Quality checks already completed locally:
+✅ docs:fix (markdown formatting)
+✅ docs:lint (style verification)
+✅ markdown-link-check (broken link detection)
 
 Let me know if you need me to make any adjustments!"
-
-Note: docs:fix was already run automatically before commit.
 ```
 
 **Key: Report results, don't ask "Should I run X?" - just run it.**
