@@ -57,24 +57,21 @@ Closes the function body.
 
 ## Running This Example
 
-### Method 1: Standalone Test (Without Godot)
+### Method 1: Test Compilation (Without Godot)
 
-You can test FerrisScript compilation without Godot:
+You can verify FerrisScript files compile correctly without Godot:
 
-```powershell
-# From the project root, run compiler tests:
+```bash
+# Test this example with the test tool
+cargo run --example test_ferris -- examples/hello.ferris
+
+# Or run the test suite
 cargo test --package ferrisscript_compiler test_compile_hello
-
-# Or run all compiler tests:
-cargo test --package ferrisscript_compiler
 ```
 
-**Note**: This verifies the script compiles correctly but **does not execute** `print()` (requires Godot runtime).
+**Output**: `✓ Compilation successful!` - means the script is valid FerrisScript.
 
-**Why not `cargo run --example hello`?** The `.ferris` files are scripts for the FerrisScript language, not Rust examples. To run them, you need either:
-
-- The Godot runtime (Method 2 below), or
-- A standalone FerrisScript CLI (planned for v0.1.0)
+**Note**: This verifies the script compiles but **does not execute** `print()` (requires Godot runtime).
 
 ### Method 2: In Godot (Recommended)
 

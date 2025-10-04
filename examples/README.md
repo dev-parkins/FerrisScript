@@ -4,11 +4,24 @@ This directory contains example scripts demonstrating FerrisScript's features an
 
 ## Quick Start
 
-To run an example:
+### Testing Examples (Without Godot)
+
+To verify an example compiles correctly and see error messages:
 
 ```bash
-cargo run --bin ferrisscript_compiler examples/hello.ferris
+# Test any FerrisScript file
+cargo run --example test_ferris -- examples/hello.ferris
+
+# See what error messages look like
+cargo run --example test_ferris -- examples/error_showcase.ferris
+
+# Or run the test suite for all examples
+cargo test --package ferrisscript_compiler test_compile
 ```
+
+### Running Examples (In Godot)
+
+To actually execute examples, you need to run them in Godot with the FerrisScript GDExtension. See the "Running Examples in Godot" section below for setup instructions.
 
 ## Available Examples
 
@@ -94,14 +107,24 @@ An interactive example showing how FerrisScript provides helpful error messages.
 - Visual pointer (^) showing exact error location  
 - Helpful hints explaining what's expected
 
-**Try it:**
+**How to Use:**
 
-```bash
-# This works - shows the working example
-cargo run --bin ferrisscript_compiler examples/error_showcase.ferris
+1. **See it compile successfully**: 
+   ```bash
+   cargo run --example test_ferris -- examples/error_showcase.ferris
+   ```
+   Output: `✓ Compilation successful!`
 
-# Uncomment an error section to see helpful error messages
-```
+2. **See error messages in action**: 
+   - Open `error_showcase.ferris`
+   - Uncomment any error section (e.g., lines 71-73 for "Type Mismatch Error")
+   - Run the test again:
+     ```bash
+     cargo run --example test_ferris -- examples/error_showcase.ferris
+     ```
+   - See the error with source context, pointer, and helpful hint!
+
+3. **Learn by reading**: Browse through the commented examples to understand different error types without needing to trigger them.
 
 ---
 

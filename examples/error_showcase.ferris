@@ -6,8 +6,12 @@
 // - Visual pointer (^) showing exact error location
 // - Helpful hints explaining what's expected
 //
-// To see an error, uncomment a section and run:
-//   cargo run --bin ferrisscript_compiler examples/error_showcase.ferris
+// To see an error in action:
+// 1. Uncomment one of the error sections below
+// 2. Run: cargo run --example test_ferris -- examples/error_showcase.ferris
+// 3. See the helpful error message with source context!
+//
+// Or load this file in Godot with the FerrisScript GDExtension
 
 // ========================================
 // LEXER ERRORS
