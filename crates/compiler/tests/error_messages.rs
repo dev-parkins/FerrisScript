@@ -140,7 +140,7 @@ mod parser_errors {
 
 #[cfg(test)]
 mod lexer_errors {
-    use ferrisscript_compiler::{lexer, parser};
+    use ferrisscript_compiler::lexer;
 
     #[test]
     fn test_invalid_number_includes_position() {
