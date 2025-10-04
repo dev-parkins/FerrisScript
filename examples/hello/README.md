@@ -209,13 +209,188 @@ fn _process(delta: f32) {
 
 **Warning**: This will print every frame (60+ times per second)! Your console will fill up quickly.
 
+## Common Mistakes and Error Messages
+
+FerrisScript provides helpful error messages to guide you. Here are common mistakes you might make while learning:
+
+### Mistake 1: Typo in Function Name
+
+**Incorrect Code:**
+
+```ferris
+fn _redy() {  // Typo: should be _ready
+    print("Hello!");
+}
+```
+
+**Error Message:**
+
+```
+No entry point function found (missing _ready, _process, or other lifecycle methods)
+```
+
+**Fix**: Change `_redy` to `_ready`. Function names must be spelled exactly.
+
+---
+
+### Mistake 2: Forgetting Semicolon
+
+**Incorrect Code:**
+
+```ferris
+fn _ready() {
+    print("Hello")  // Missing semicolon
+}
+```
+
+**Error Message:**
+
+```
+Expected ';', found '}' at line 3, column 1
+
+ 1 | fn _ready() {
+ 2 |     print("Hello")
+   |                   ^ Expected ';' before end of statement
+ 3 | }
+```
+
+**Fix**: Add a semicolon after statements: `print("Hello");`
+
+---
+
+### Mistake 3: Wrong Argument Type for print()
+
+**Incorrect Code:**
+
+```ferris
+fn _ready() {
+    print(42);  // print expects string, not number
+}
+```
+
+**Error Message:**
+
+```
+Function 'print' argument 0 has wrong type: expected string, found i32 at line 2, column 5
+
+ 1 | fn _ready() {
+ 2 |     print(42);
+   |     ^ Argument 0 must be of type string
+ 3 | }
+```
+
+**Fix**: Convert to string or use a string literal: `print("42");`
+
+---
+
+### Mistake 4: Missing Quotes Around String
+
+**Incorrect Code:**
+
+```ferris
+fn _ready() {
+    print(Hello);  // Missing quotes
+}
+```
+
+**Error Message:**
+
+```
+Undefined variable 'Hello' at line 2, column 11
+
+ 1 | fn _ready() {
+ 2 |     print(Hello);
+   |           ^ Variable must be declared before use
+ 3 | }
+```
+
+**Fix**: Add quotes to make it a string: `print("Hello");`
+
+---
+
+### Mistake 5: Using Wrong Quote Type
+
+**Incorrect Code:**
+
+```ferris
+fn _ready() {
+    print('Hello');  // Single quotes not supported
+}
+```
+
+**Error Message:**
+
+```
+Unexpected character ''' at line 2, column 11
+
+ 1 | fn _ready() {
+ 2 |     print('Hello');
+   |           ^ This character is not valid in FerrisScript
+ 3 | }
+```
+
+**Fix**: Use double quotes for strings: `print("Hello");`
+
+---
+
+### Mistake 6: Unterminated String
+
+**Incorrect Code:**
+
+```ferris
+fn _ready() {
+    print("Hello
+    print("World");
+}
+```
+
+**Error Message:**
+
+```
+Unterminated string at line 2, column 11
+
+ 1 | fn _ready() {
+ 2 |     print("Hello
+   |           ^ String must be closed with "
+ 3 |     print("World");
+```
+
+**Fix**: Close the string on the same line: `print("Hello");`
+
+---
+
+### Tips for Reading Error Messages
+
+1. **Look at the line number**: The error message shows exactly where the problem is (line 2, column 11)
+
+2. **Read the source context**: The error shows ±2 lines of code around the problem
+
+3. **Follow the pointer**: The `^` character points to the exact location of the error
+
+4. **Read the hint**: The helpful message after the `^` explains what's expected
+
+5. **Try the fix**: Error messages often suggest the correct solution
+
+### Learning from Errors
+
+Error messages are your friend! They're designed to help you learn FerrisScript quickly. When you see an error:
+
+1. Don't panic - errors are normal while learning
+2. Read the entire message (not just the first line)
+3. Look at the source context to understand the problem
+4. Follow the helpful hint to fix it
+5. Learn the pattern for next time
+
+---
+
 ## Next Steps
 
 After understanding this example:
 
 1. **[Move Example](../move/README.md)**: Learn about `_process()` and animation
 2. **[Bounce Example](../bounce/README.md)**: Explore conditionals and state
-3. **[ARCHITECTURE.md](../../docs/ARCHITECTURE.md)**: System design and language details
+3. **[Error Showcase](../error_showcase.ferris)**: Interactive error demonstration
+4. **[ARCHITECTURE.md](../../docs/ARCHITECTURE.md)**: System design and language details
 
 ## Questions?
 
