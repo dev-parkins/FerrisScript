@@ -43,6 +43,7 @@ A: EDGE_CASE_ERROR_HANDLING_PLAN.md (Task 2.2: "Extract context ±2 lines from s
 
 **Q1: Has similar work been done before?**
 A: Phase 2 (PR #12) added line/column tracking to all 31 errors. Infrastructure exists:
+
 - ✅ Lexer tracks `self.line` and `self.column`
 - ✅ Parser has `self.current_line` and `self.current_column`
 - ✅ All errors include position: "at line X, column Y"
@@ -52,13 +53,15 @@ A: Phase 2 (PR #12) added line/column tracking to all 31 errors. Infrastructure 
 A: 153 tests total (111 original + 15 Phase 1 + 22 Phase 2 + 5 others). Phase 2 has error message validation tests.
 
 **Q3: What documentation exists?**
-A: 
+A:
+
 - EDGE_CASE_ERROR_HANDLING_PLAN.md - Original multi-phase plan
 - ERROR_MESSAGES_PHASE2_EXECUTION_PLAN.md - Line/column tracking (completed)
 - ERROR_MESSAGES_PHASE2_SUMMARY.md - Phase 2 completion summary
 
 **Q4: What patterns should I follow?**
 A: Example error format from plan (EDGE_CASE_ERROR_HANDLING_PLAN.md lines 303-313):
+
 ```
 Error: Unexpected token '}' at line 5, column 12
 
@@ -74,14 +77,16 @@ A: Don't modify AST structure, token types, or compilation behavior. Only enhanc
 ### Constraints
 
 **Q1: What changes are allowed?**
-A: 
+A:
+
 - Add source context to error messages
 - Modify function signatures to accept source string
 - Create helper functions for context extraction
 - Update tests to verify context display
 
 **Q2: What changes are NOT allowed?**
-A: 
+A:
+
 - No new features beyond error display
 - No breaking changes to public API (internal changes OK)
 - No colorization (that's Phase 4)
@@ -196,8 +201,9 @@ A: Using GitHub Copilot TODO list (already created with 8 phases)
 **Status**: ✅ Complete
 
 **Tasks**:
+
 - [x] Review all error generation in lexer.rs (6 errors)
-- [x] Review all error generation in parser.rs (14 errors) 
+- [x] Review all error generation in parser.rs (14 errors)
 - [x] Review all error generation in type_checker.rs (18 errors)
 - [x] Document current error message format patterns
 - [x] Identify function signatures that need modification (to accept source)
@@ -206,6 +212,7 @@ A: Using GitHub Copilot TODO list (already created with 8 phases)
 **Audit Results**:
 
 #### Lexer Errors (6 total)
+
 All errors already include `line` and `column`. Format: `"[Message] at line {}, column {}"`
 
 1. Line 196: Unterminated string
@@ -219,18 +226,22 @@ All errors already include `line` and `column`. Format: `"[Message] at line {}, 
 **Source Available**: ✅ Yes - `input` is the source string
 
 #### Parser Errors (14 total)
+
 All errors include `line` and `column`. Format: `"[Message] at line {}, column {}"`
 
 All 14 errors found in parser.rs (updated in Phase 2):
+
 - Lines 45, 69, 95, 109, 141, 158, 172, 203, 212, 306, 320, 421, 519, 555
 
 **Current API**: `pub fn parse(tokens: &[Token]) -> Result<Program, String>`  
 **Source Available**: ❌ No - only receives tokens, needs source parameter added
 
 #### Type Checker Errors (18 total)
+
 All errors include span position. Format: `"[Message] at [Span]"` or `"[Message] at line {}, column {}"`
 
 18 calls to `self.error()` found at lines:
+
 - 129, 140, 215, 223, 243, 259, 283, 319, 340, 361, 374, 391, 401, 414, 427, 440, 451, 465
 
 **Current API**: `pub fn check(program: &Program) -> Result<(), String>`  
@@ -239,17 +250,18 @@ All errors include span position. Format: `"[Message] at [Span]"` or `"[Message]
 #### Function Signature Changes Needed
 
 1. **Parser**: Add source parameter
-   - `parse(tokens: &[Token], source: &str)` 
+   - `parse(tokens: &[Token], source: &str)`
    - Pass to `Parser::new()`
-   
+
 2. **Type Checker**: Add source parameter
    - `check(program: &Program, source: &str)`
    - Pass to `TypeChecker` struct
-   
+
 3. **Compile**: Already has source, pass through
    - `compile(source: &str)` → pass to `parse()` and `check()`
 
 #### No Existing Helper Functions
+
 ❌ No error formatting helpers exist yet - will create in Phase 3.2
 
 ---
@@ -260,19 +272,22 @@ All errors include span position. Format: `"[Message] at [Span]"` or `"[Message]
 **Status**: ✅ Complete
 
 **Tasks**:
+
 - [x] Design function signature changes (lexer, parser, type_checker)
 - [x] Choose source string storage strategy (&str - simplest, source already available)
 - [x] Create helper function: `extract_source_context(source: &str, line: usize) -> String`
 - [x] Create helper function: `format_error_pointer(column, line_num_width, hint) -> String`
-- [x] Create comprehensive helper: `format_error_with_context()` 
+- [x] Create comprehensive helper: `format_error_with_context()`
 - [x] Write complete module with documentation and tests (11 tests, all passing!)
 
-**Deliverables**: 
+**Deliverables**:
+
 - ✅ `crates/compiler/src/error_context.rs` created (269 lines)
 - ✅ 11 comprehensive tests covering all edge cases
 - ✅ Module added to lib.rs and compiling
 
 **Design Decisions**:
+
 - ✅ Use `&str` references (source already available in lexer, will pass through for parser/type_checker)
 - ✅ Helper module keeps error formatting code DRY
 - ✅ Edge cases handled: line 1, last line, files with <3 lines, empty files
@@ -280,6 +295,7 @@ All errors include span position. Format: `"[Message] at [Span]"` or `"[Message]
 - ✅ Pointer alignment accounts for line number width
 
 **Function Signatures Needed**:
+
 1. Parser: Add source to `Parser::new()` (will store as field)
 2. Type Checker: Add source parameter to `check()` and `TypeChecker::new()`
 3. Compile: Pass source to `parse()` and `check()`
@@ -292,6 +308,7 @@ All errors include span position. Format: `"[Message] at [Span]"` or `"[Message]
 **Status**: Not Started
 
 **Tasks**:
+
 - [ ] Update `Lexer::new()` to store source reference
 - [ ] Update all 7 lexer errors to call `extract_source_context()`
 - [ ] Format errors with context + pointer line
@@ -299,14 +316,17 @@ All errors include span position. Format: `"[Message] at [Span]"` or `"[Message]
 - [ ] Run: `cargo test --package ferrisscript_compiler --lib lexer`
 
 **Files Modified**:
+
 - `crates/compiler/src/lexer.rs`
 
 **Example Before**:
+
 ```
 Invalid number '123.456.789' at line 5, column 10
 ```
 
 **Example After**:
+
 ```
 Invalid number '123.456.789' at line 5, column 10
 
@@ -324,6 +344,7 @@ Invalid number '123.456.789' at line 5, column 10
 **Status**: Not Started
 
 **Tasks**:
+
 - [ ] Update `Parser::new()` to store source reference
 - [ ] Update all 14 parser errors to use context helper
 - [ ] Ensure pointer alignment is correct for column positions
@@ -331,9 +352,11 @@ Invalid number '123.456.789' at line 5, column 10
 - [ ] Run: `cargo test --package ferrisscript_compiler --lib parser`
 
 **Files Modified**:
+
 - `crates/compiler/src/parser.rs`
 
 **Example**:
+
 ```
 Expected ';', found '}' at line 5, column 12
 
@@ -351,15 +374,18 @@ Expected ';', found '}' at line 5, column 12
 **Status**: Not Started
 
 **Tasks**:
+
 - [ ] Update `type_check()` to accept source parameter
 - [ ] Update all 10 type checker errors with context
 - [ ] Test type mismatch errors show context
 - [ ] Run: `cargo test --package ferrisscript_compiler --lib type_checker`
 
 **Files Modified**:
+
 - `crates/compiler/src/type_checker.rs`
 
 **Example**:
+
 ```
 Type mismatch at line 12, column 15: expected i32, found f32
 
@@ -377,6 +403,7 @@ Type mismatch at line 12, column 15: expected i32, found f32
 **Status**: Not Started
 
 **Tasks**:
+
 - [ ] Create `crates/compiler/tests/error_context.rs`
 - [ ] Test lexer errors include context (3 tests)
 - [ ] Test parser errors include context (5 tests)
@@ -386,9 +413,11 @@ Type mismatch at line 12, column 15: expected i32, found f32
 - [ ] Run: `cargo test --test error_context`
 
 **Files Created**:
+
 - `crates/compiler/tests/error_context.rs` (~200 lines)
 
 **Test Structure**:
+
 ```rust
 #[test]
 fn test_lexer_error_shows_context() {
@@ -409,6 +438,7 @@ fn test_lexer_error_shows_context() {
 **Status**: Not Started
 
 **Tasks**:
+
 - [ ] Run full test suite: `cargo test --workspace`
 - [ ] Verify all 153+ tests pass
 - [ ] Run clippy: `cargo clippy --workspace -- -D warnings`
@@ -423,11 +453,13 @@ fn test_lexer_error_shows_context() {
 - [ ] Create PR #13 targeting `main`
 
 **Files Updated**:
+
 - `docs/v0.0.2/TEST_COVERAGE_ANALYSIS.md`
 - `docs/v0.0.2/v0.0.2-CHECKLIST.md`
 - `docs/v0.0.2/EDGE_CASE_ERROR_HANDLING_PLAN.md`
 
 **Files Created**:
+
 - `docs/v0.0.2/ERROR_MESSAGES_PHASE3_SUMMARY.md`
 
 ---
@@ -437,10 +469,12 @@ fn test_lexer_error_shows_context() {
 ### Code Changes
 
 **Files Created**:
+
 - `crates/compiler/src/error_context.rs` - Helper functions for context extraction
 - `crates/compiler/tests/error_context.rs` - Validation tests (~15 tests)
 
 **Files Modified**:
+
 - `crates/compiler/src/lib.rs` - Update public API signatures
 - `crates/compiler/src/lexer.rs` - Add context to 7 errors
 - `crates/compiler/src/parser.rs` - Add context to 14 errors
@@ -449,11 +483,13 @@ fn test_lexer_error_shows_context() {
 ### Documentation
 
 **Files Updated**:
+
 - `docs/v0.0.2/TEST_COVERAGE_ANALYSIS.md` - Add ~15 new context tests
 - `docs/v0.0.2/v0.0.2-CHECKLIST.md` - Mark Phase 3 complete
 - `docs/v0.0.2/EDGE_CASE_ERROR_HANDLING_PLAN.md` - Update Phase 3 status
 
 **Files Created**:
+
 - `docs/v0.0.2/ERROR_MESSAGES_PHASE3_EXECUTION_PLAN.md` - This document
 - `docs/v0.0.2/ERROR_MESSAGES_PHASE3_SUMMARY.md` - Completion summary
 
@@ -493,6 +529,7 @@ pub fn format_error_with_context(
 ```
 
 **Edge Cases**:
+
 - File with 1 line: Show just that line
 - File with 2 lines: Show both lines
 - Error on line 1: Show lines 1-3
@@ -502,6 +539,7 @@ pub fn format_error_with_context(
 ### API Changes
 
 **Current (Phase 2)**:
+
 ```rust
 pub fn compile(input: &str) -> Result<Program, String>
 pub fn parse(tokens: Vec<Token>) -> Result<Program, String>
@@ -509,6 +547,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String>
 ```
 
 **Proposed (Phase 3)**:
+
 ```rust
 // No public API changes needed! Internal functions pass source through:
 // - tokenize() already has source
@@ -521,6 +560,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String>
 ### Error Message Format Standard
 
 **Template**:
+
 ```
 [Error Type] [Details] at line [LINE], column [COLUMN]
 
@@ -533,10 +573,12 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String>
 ```
 
 **Line Number Formatting**:
+
 - Right-align line numbers for files >99 lines
 - Use consistent spacing: "  3 |" vs " 42 |" vs "142 |"
 
 **Pointer Alignment**:
+
 - Column is 1-based (first character = column 1)
 - Pointer needs: (line number width) + (space) + (|) + (space) + (column-1 spaces) + (^)
 - Example: Line 5, column 12 → "    |            ^"
@@ -544,21 +586,25 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String>
 ### Trade-offs & Decisions
 
 **Decision 1: Don't Span Multiple Lines (Yet)**
+
 - **Why**: Multi-line error spans (e.g., unclosed string across 10 lines) are complex
 - **Trade-off**: Users see pointer at error start, not full span
 - **Future**: Phase 4 or 5 could add span ranges
 
 **Decision 2: Use &str Lifetimes (Not Arc<str>)**
+
 - **Why**: Source strings are short-lived (single compilation), no need for reference counting
 - **Trade-off**: Slightly more complex lifetime annotations
 - **Benefit**: Zero allocation overhead, better performance
 
 **Decision 3: Extract ±2 Lines (Not ±5)**
+
 - **Why**: 5 lines context = 11 total lines = cluttered terminal
 - **Trade-off**: Less context for complex errors
 - **Benefit**: Errors fit on screen, easier to read
 
 **Decision 4: No Colorization (Yet)**
+
 - **Why**: That's Phase 4 - keep changes focused
 - **Trade-off**: Errors less visually distinct
 - **Benefit**: Simpler implementation, easier review
@@ -570,6 +616,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String>
 Phase 0 is complete! Moving to Phase 3.1 (Audit) next.
 
 **Current Status**:
+
 - ✅ Branch created: `feature/error-messages-phase3`
 - ✅ Execution plan created
 - ✅ TODO list created

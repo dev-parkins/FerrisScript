@@ -18,52 +18,63 @@ This document tracks opportunities to update the `examples/` directory as new fe
 ### Core Examples
 
 **`examples/hello.ferris`**
+
 - **Status**: ✅ Up-to-date
 - **Demonstrates**: Basic function declaration, string literals, `print()` built-in
 - **Features Used**: Functions, strings, built-in functions
 
 **`examples/move.ferris`**
+
 - **Status**: ✅ Up-to-date  
 - **Demonstrates**: Godot integration, Vector2 type, field access, arithmetic, `_process()` lifecycle
 - **Features Used**: Godot types, field access, operators, lifecycle methods
 
 **`examples/bounce.ferris`**
+
 - **Status**: ✅ Up-to-date
 - **Demonstrates**: Global mutable state, control flow (if/while), compound assignment, floating-point math
 - **Features Used**: Global variables, if statements, while loops, compound assignment (`+=`, `*=`)
 
 **`examples/functions.ferris`**
+
 - **Status**: ✅ Up-to-date
 - **Demonstrates**: Function parameters, return types, type annotations, arithmetic
 - **Features Used**: Function parameters, return types, type inference
 
 **`examples/branch.ferris`**
+
 - **Status**: ✅ Up-to-date
 - **Demonstrates**: Conditional logic, if/else statements, boolean conditions
 - **Features Used**: If/else, comparison operators, boolean expressions
 
 **`examples/loop.ferris`**
+
 - **Status**: ✅ Up-to-date
 - **Demonstrates**: While loops, mutable state, compound assignment
 - **Features Used**: While loops, mutable variables, counter patterns
 
-**`examples/match.ferris`** 
+**`examples/match.ferris`**
+
 - **Status**: ⚠️ Future feature
 - **Note**: Match expressions not yet implemented
 
 **`examples/collections.ferris`**
+
 - **Status**: ⚠️ Future feature
 - **Note**: Arrays/collections not yet implemented
 
 **`examples/scene.ferris`**
+
 - **Status**: ⚠️ Future feature
 - **Note**: Advanced Godot features not yet implemented
 
 **`examples/reload.ferris`**
+
 - **Status**: ⚠️ Future feature
 - **Note**: Hot reload capabilities not yet fully implemented
 
 **`examples/type_error.ferris`**
+
 - **Status**: ✅ Up-to-date  
 - **Demonstrates**: Type errors (intentional errors for testing)
 - **Features Used**: Type mismatches, invalid operations
@@ -76,6 +87,7 @@ This document tracks opportunities to update the `examples/` directory as new fe
 
 **Status**: ✅ Completed (PR #13)  
 **Feature**: All 38 compiler errors now display:
+
 - ±2 lines of source code context
 - Visual pointer (^) at exact error location
 - Helpful hints explaining what's expected
@@ -89,6 +101,7 @@ This document tracks opportunities to update the `examples/` directory as new fe
 **Purpose**: Show users how helpful FerrisScript's error messages are
 
 **Content Ideas**:
+
 ```ferris
 // This example demonstrates FerrisScript's helpful error messages
 // Uncomment sections below to see different error types
@@ -142,6 +155,7 @@ fn test() {
 ```
 
 **Output**:
+
 ```
 Type mismatch in let binding 'x': expected i32, found bool at line 2, column 9
 
@@ -152,9 +166,11 @@ Type mismatch in let binding 'x': expected i32, found bool at line 2, column 9
 ```
 
 The error shows:
+
 - ± lines of source context
 - Visual pointer (^) at error location
 - Helpful hint explaining the issue
+
 ```
 
 #### 3. Update Example READMEs with Error Examples
@@ -180,6 +196,7 @@ fn _redy() {  // Typo: should be _ready
 FerrisScript will tell you: "No entry point '_ready' function found"
 
 **Wrong type for print()**:
+
 ```ferris
 fn _ready() {
     print(42);  // Error: print expects string
@@ -187,6 +204,7 @@ fn _ready() {
 ```
 
 Error message shows: "Function 'print' argument 0 has wrong type: expected string, found i32"
+
 ```
 
 ---
