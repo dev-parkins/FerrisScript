@@ -8,7 +8,7 @@ pub mod type_checker;
 pub fn compile(source: &str) -> Result<ast::Program, String> {
     let tokens = lexer::tokenize(source)?;
     let ast = parser::parse(&tokens, source)?;
-    type_checker::check(&ast)?;
+    type_checker::check(&ast, source)?;
     Ok(ast)
 }
 
