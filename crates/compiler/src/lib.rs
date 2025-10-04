@@ -1,7 +1,7 @@
+pub mod ast;
 pub mod lexer;
 pub mod parser;
 pub mod type_checker;
-pub mod ast;
 
 /// Compile RustyScript source to AST
 pub fn compile(source: &str) -> Result<ast::Program, String> {
