@@ -9,7 +9,7 @@ A Rust-inspired scripting language for Godot 4.x
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
 [![Godot](https://img.shields.io/badge/godot-4.2%2B-blue.svg)](https://godotengine.org/)
 [![Tests](https://img.shields.io/badge/tests-182%20passing-success.svg)](https://github.com/dev-parkins/FerrisScript/actions)
-[![Coverage](https://img.shields.io/badge/coverage-70--75%25-yellow.svg)](docs/v0.0.2/TEST_COVERAGE_ANALYSIS.md)
+[![Coverage](https://img.shields.io/badge/coverage-70--75%25-yellow.svg)](docs/DEVELOPMENT.md#-code-coverage)
 
 **Quick Links**: [📖 Docs](docs/) | [🐛 Issues](https://github.com/dev-parkins/FerrisScript/issues) | [💬 Discussions](https://github.com/dev-parkins/FerrisScript/discussions) | [❓ FAQ](docs/FAQ.md) | [🔧 Troubleshooting](docs/TROUBLESHOOTING.md)
 
@@ -38,7 +38,7 @@ FerrisScript (named after [Ferris 🦀](https://rustacean.net/), the Rust mascot
 - **Clear Contracts**: Function signatures document expected inputs/outputs
 - **Fewer Runtime Errors**: Many bugs caught before playtesting
 - **Code Confidence**: Refactor fearlessly with type safety
-- **Performance Baseline**: [16K+ function calls per frame at 60 FPS](docs/BENCHMARK_BASELINE.md)
+- **Performance Baseline**: 16K+ function calls per frame at 60 FPS
 
 **TL;DR**: FerrisScript brings Rust's "if it compiles, it probably works" philosophy to game scripting, making your game development faster and more reliable.
 
@@ -56,7 +56,7 @@ FerrisScript (named after [Ferris 🦀](https://rustacean.net/), the Rust mascot
 | **Hot Reload** | Planned (v0.1.0) | Yes |
 | **Maturity** | Alpha (v0.0.2) | Production-ready |
 
-\* Performance comparison is preliminary and varies by use case. See [BENCHMARK_BASELINE.md](docs/BENCHMARK_BASELINE.md) for details.
+\* Performance comparison is preliminary and varies by use case. Detailed benchmarks are documented in version-specific documentation.
 
 **When to Choose FerrisScript**:
 
@@ -227,7 +227,7 @@ FerrisScript is designed for **game scripting performance** with predictable ove
 3. **Use Appropriate Types**: `f32` for game math, `i32` for counters
 4. **Profile First**: Use Godot's profiler to identify bottlenecks
 
-See [BENCHMARK_BASELINE.md](docs/BENCHMARK_BASELINE.md) for detailed performance analysis and methodology.
+> **Note**: Detailed performance analysis and benchmarking methodology are documented in version-specific documentation.
 
 ## 🏗️ Project Structure
 
