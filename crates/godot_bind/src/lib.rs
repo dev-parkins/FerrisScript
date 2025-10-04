@@ -1,7 +1,7 @@
-use godot::prelude::*;
-use godot::classes::{FileAccess, file_access::ModeFlags};
 use ferrisscript_compiler::{ast, compile};
-use ferrisscript_runtime::{Env, Value, call_function, execute};
+use ferrisscript_runtime::{call_function, execute, Env, Value};
+use godot::classes::{file_access::ModeFlags, FileAccess};
+use godot::prelude::*;
 use std::cell::RefCell;
 
 // Thread-local storage for node properties during script execution
@@ -12,12 +12,11 @@ thread_local! {
 /// Property getter for self binding (called from runtime)
 fn get_node_property_tls(property_name: &str) -> Result<Value, String> {
     match property_name {
-        "position" => {
-            NODE_POSITION.with(|pos| {
-                pos.borrow().map(|p| Value::Vector2 { x: p.x, y: p.y })
-                    .ok_or_else(|| "Node position not available".to_string())
-            })
-        }
+        "position" => NODE_POSITION.with(|pos| {
+            pos.borrow()
+                .map(|p| Value::Vector2 { x: p.x, y: p.y })
+                .ok_or_else(|| "Node position not available".to_string())
+        }),
         _ => Err(format!("Property '{}' not supported", property_name)),
     }
 }
@@ -41,7 +40,8 @@ fn set_node_property_tls(property_name: &str, value: Value) -> Result<(), String
 
 /// Godot-specific print function that outputs to Godot's console
 fn godot_print_builtin(args: &[Value]) -> Result<Value, String> {
-    let output = args.iter()
+    let output = args
+        .iter()
         .map(|v| match v {
             Value::Int(i) => i.to_string(),
             Value::Float(f) => f.to_string(),
@@ -53,7 +53,7 @@ fn godot_print_builtin(args: &[Value]) -> Result<Value, String> {
         })
         .collect::<Vec<_>>()
         .join(" ");
-    
+
     godot_print!("{}", output);
     Ok(Value::Nil)
 }
@@ -64,14 +64,14 @@ struct FerrisScriptExtension;
 unsafe impl ExtensionLibrary for FerrisScriptExtension {}
 
 #[derive(GodotClass)]
-#[class(base=Node2D)]  // Changed from Node to Node2D for position property
+#[class(base=Node2D)] // Changed from Node to Node2D for position property
 pub struct FerrisScriptNode {
     base: Base<Node2D>,
-    
+
     /// Path to the .ferris script file (e.g., "res://scripts/hello.ferris")
     #[export(file = "*.ferris")]
     script_path: GString,
-    
+
     // Runtime state
     env: Option<Env>,
     program: Option<ast::Program>,
@@ -95,7 +95,7 @@ impl INode2D for FerrisScriptNode {
         if !self.script_path.is_empty() {
             self.load_script();
         }
-        
+
         // Execute _ready function if it exists
         if self.script_loaded {
             self.call_script_function("_ready", &[]);
@@ -118,19 +118,22 @@ impl FerrisScriptNode {
     fn load_script(&mut self) {
         let path_gstring = self.script_path.clone();
         let path = path_gstring.to_string();
-        
+
         // Use Godot's FileAccess to read the file (handles res:// paths correctly)
         let file = match FileAccess::open(path_gstring.clone(), ModeFlags::READ) {
             Some(f) => f,
             None => {
-                godot_error!("Failed to open script file '{}': File not found or cannot be accessed", path);
+                godot_error!(
+                    "Failed to open script file '{}': File not found or cannot be accessed",
+                    path
+                );
                 return;
             }
         };
-        
+
         // Read the entire file as a string
         let source = file.get_as_text().to_string();
-        
+
         // Compile the script
         let program = match compile(&source) {
             Ok(prog) => prog,
@@ -139,46 +142,50 @@ impl FerrisScriptNode {
                 return;
             }
         };
-        
+
         // Create runtime environment and execute initialization
         let mut env = Env::new();
-        
+
         // Override print() to use Godot's console
         env.register_builtin("print".to_string(), godot_print_builtin);
-        
+
         if let Err(e) = execute(&program, &mut env) {
             godot_error!("Failed to initialize script '{}': {}", path, e);
             return;
         }
-        
+
         self.program = Some(program);
         self.env = Some(env);
         self.script_loaded = true;
-        
+
         godot_print!("Successfully loaded FerrisScript: {}", path);
     }
-    
+
     /// Call a function in the loaded script with self binding
-    fn call_script_function_with_self(&mut self, function_name: &str, args: &[Value]) -> Option<Value> {
+    fn call_script_function_with_self(
+        &mut self,
+        function_name: &str,
+        args: &[Value],
+    ) -> Option<Value> {
         if !self.script_loaded {
             godot_warn!("Cannot call function '{}': no script loaded", function_name);
             return None;
         }
-        
+
         // Get current node position and store in thread-local storage
         let position = self.base().get_position();
         NODE_POSITION.with(|pos| {
             *pos.borrow_mut() = Some(position);
         });
-        
+
         let env = self.env.as_mut()?;
-        
+
         // Set up 'self' variable and property callbacks
         env.push_scope();
         env.set("self".to_string(), Value::SelfObject);
         env.set_property_getter(get_node_property_tls);
         env.set_property_setter(set_node_property_tls);
-        
+
         let result = match call_function(function_name, args, env) {
             Ok(value) => Some(value),
             Err(e) => {
@@ -186,28 +193,28 @@ impl FerrisScriptNode {
                 None
             }
         };
-        
+
         env.pop_scope();
-        
+
         // Read back position from thread-local storage and update node
         NODE_POSITION.with(|pos| {
             if let Some(new_position) = *pos.borrow() {
                 self.base_mut().set_position(new_position);
             }
         });
-        
+
         result
     }
-    
+
     /// Call a function in the loaded script (without self binding)
     fn call_script_function(&mut self, function_name: &str, args: &[Value]) -> Option<Value> {
         if !self.script_loaded {
             godot_warn!("Cannot call function '{}': no script loaded", function_name);
             return None;
         }
-        
+
         let env = self.env.as_mut()?;
-        
+
         match call_function(function_name, args, env) {
             Ok(value) => Some(value),
             Err(e) => {
@@ -216,7 +223,7 @@ impl FerrisScriptNode {
             }
         }
     }
-    
+
     /// Reload the script (useful for hot-reloading in development)
     #[func]
     pub fn reload_script(&mut self) {

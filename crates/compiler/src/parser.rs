@@ -165,18 +165,19 @@ impl Parser {
 
         let return_type = if matches!(self.current(), Token::Minus) {
             self.advance();
-        if matches!(self.current(), Token::Greater) {
-            self.advance();
-            match self.advance() {
-                Token::Ident(t) => Some(t),
-                t => return Err(format!("Expected return type, found {}", t.name())),
+            if matches!(self.current(), Token::Greater) {
+                self.advance();
+                match self.advance() {
+                    Token::Ident(t) => Some(t),
+                    t => return Err(format!("Expected return type, found {}", t.name())),
+                }
+            } else {
+                return Err("Expected '>' after '-' in return type".to_string());
             }
         } else {
-            return Err("Expected '>' after '-' in return type".to_string());
-        }
-    } else {
-        None
-    };        self.expect(Token::LBrace)?;
+            None
+        };
+        self.expect(Token::LBrace)?;
 
         let mut body = Vec::new();
         while !matches!(self.current(), Token::RBrace) {
@@ -230,12 +231,8 @@ impl Parser {
                             _ => unreachable!(),
                         };
 
-                        let value = Expr::Binary(
-                            Box::new(expr.clone()),
-                            binary_op,
-                            Box::new(rhs),
-                            span,
-                        );
+                        let value =
+                            Expr::Binary(Box::new(expr.clone()), binary_op, Box::new(rhs), span);
 
                         Ok(Stmt::Assign {
                             target: expr,
@@ -558,7 +555,9 @@ mod tests {
 
         assert_eq!(program.functions[0].body.len(), 1);
         match &program.functions[0].body[0] {
-            Stmt::Let { name, mutable, ty, .. } => {
+            Stmt::Let {
+                name, mutable, ty, ..
+            } => {
                 assert_eq!(name, "x");
                 assert_eq!(*mutable, false);
                 assert_eq!(*ty, None);
@@ -574,7 +573,9 @@ mod tests {
         let program = parse(&tokens).unwrap();
 
         match &program.functions[0].body[0] {
-            Stmt::Let { name, mutable, ty, .. } => {
+            Stmt::Let {
+                name, mutable, ty, ..
+            } => {
                 assert_eq!(name, "x");
                 assert_eq!(*mutable, true);
                 assert_eq!(ty.as_ref().unwrap(), "i32");
@@ -590,7 +591,11 @@ mod tests {
         let program = parse(&tokens).unwrap();
 
         match &program.functions[0].body[0] {
-            Stmt::If { then_branch, else_branch, .. } => {
+            Stmt::If {
+                then_branch,
+                else_branch,
+                ..
+            } => {
                 assert_eq!(then_branch.len(), 1);
                 assert_eq!(else_branch.len(), 0);
             }
@@ -605,7 +610,11 @@ mod tests {
         let program = parse(&tokens).unwrap();
 
         match &program.functions[0].body[0] {
-            Stmt::If { then_branch, else_branch, .. } => {
+            Stmt::If {
+                then_branch,
+                else_branch,
+                ..
+            } => {
                 assert_eq!(then_branch.len(), 1);
                 assert_eq!(else_branch.len(), 1);
             }

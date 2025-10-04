@@ -10,40 +10,40 @@ pub enum Token {
     Return,
     True,
     False,
-    
+
     // Literals
     Ident(String),
     Number(f32),
     StringLit(String),
-    
+
     // Delimiters
-    LParen,     // (
-    RParen,     // )
-    LBrace,     // {
-    RBrace,     // }
-    Comma,      // ,
-    Semicolon,  // ;
-    Dot,        // .
-    Colon,      // :
-    
+    LParen,    // (
+    RParen,    // )
+    LBrace,    // {
+    RBrace,    // }
+    Comma,     // ,
+    Semicolon, // ;
+    Dot,       // .
+    Colon,     // :
+
     // Operators
-    Plus,           // +
-    Minus,          // -
-    Star,           // *
-    Slash,          // /
-    Equal,          // =
-    EqualEqual,     // ==
-    NotEqual,       // !=
-    Less,           // <
-    LessEqual,      // <=
-    Greater,        // >
-    GreaterEqual,   // >=
-    And,            // &&
-    Or,             // ||
-    Not,            // !
-    PlusEqual,      // +=
-    MinusEqual,     // -=
-    
+    Plus,         // +
+    Minus,        // -
+    Star,         // *
+    Slash,        // /
+    Equal,        // =
+    EqualEqual,   // ==
+    NotEqual,     // !=
+    Less,         // <
+    LessEqual,    // <=
+    Greater,      // >
+    GreaterEqual, // >=
+    And,          // &&
+    Or,           // ||
+    Not,          // !
+    PlusEqual,    // +=
+    MinusEqual,   // -=
+
     // Special
     Eof,
 }
@@ -175,21 +175,18 @@ impl Lexer {
             }
         }
 
-        num_str
-            .parse::<f32>()
-            .map(Token::Number)
-            .map_err(|_| {
-                format!(
-                    "Invalid number '{}' at line {}, column {}",
-                    num_str, start_line, start_col
-                )
-            })
+        num_str.parse::<f32>().map(Token::Number).map_err(|_| {
+            format!(
+                "Invalid number '{}' at line {}, column {}",
+                num_str, start_line, start_col
+            )
+        })
     }
 
     fn read_string(&mut self) -> Result<Token, String> {
         let start_line = self.line;
         let start_col = self.column;
-        
+
         self.advance(); // consume opening quote
         let mut string = String::new();
 
@@ -360,7 +357,8 @@ impl Lexer {
                 } else {
                     return Err(format!(
                         "Unexpected character '&' at line {}, column {}. Did you mean '&&'?",
-                        self.line, self.column - 1
+                        self.line,
+                        self.column - 1
                     ));
                 }
             }
@@ -372,7 +370,8 @@ impl Lexer {
                 } else {
                     return Err(format!(
                         "Unexpected character '|' at line {}, column {}. Did you mean '||'?",
-                        self.line, self.column - 1
+                        self.line,
+                        self.column - 1
                     ));
                 }
             }
@@ -659,7 +658,7 @@ fn _process(delta: f32) {
     }
 }"#;
         let tokens = tokenize(input).unwrap();
-        
+
         // Verify key tokens are present
         assert!(tokens.contains(&Token::Let));
         assert!(tokens.contains(&Token::Mut));
@@ -767,7 +766,11 @@ fn test() {
         // Test file with only comments (no actual code)
         let input = "// This is a comment\n// Another comment\n// More comments";
         let tokens = tokenize(input).unwrap();
-        assert_eq!(tokens, vec![Token::Eof], "File with only comments should produce only EOF token");
+        assert_eq!(
+            tokens,
+            vec![Token::Eof],
+            "File with only comments should produce only EOF token"
+        );
     }
 
     #[test]
@@ -845,8 +848,10 @@ fn test() {
             }
             Err(e) => {
                 // If it fails, that's okay - documents that Unicode isn't supported yet
-                assert!(e.contains("Unexpected character") || e.contains("Invalid"), 
-                       "Should give clear error for unsupported Unicode");
+                assert!(
+                    e.contains("Unexpected character") || e.contains("Invalid"),
+                    "Should give clear error for unsupported Unicode"
+                );
             }
         }
     }

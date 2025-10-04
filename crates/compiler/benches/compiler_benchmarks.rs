@@ -1,9 +1,9 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use ferrisscript_compiler::{lexer, parser, type_checker};
 
 fn lexer_benchmarks(c: &mut Criterion) {
     let mut group = c.benchmark_group("lexer");
-    
+
     // Small input: single line
     let small_input = "let x: i32 = 42;";
     group.bench_with_input(
@@ -15,7 +15,7 @@ fn lexer_benchmarks(c: &mut Criterion) {
             });
         },
     );
-    
+
     // Medium input: function definition
     let medium_input = r#"
         fn calculate(x: i32, y: i32) -> i32 {
@@ -35,7 +35,7 @@ fn lexer_benchmarks(c: &mut Criterion) {
             });
         },
     );
-    
+
     // Large input: bounce example
     let large_input = r#"
         fn update(delta: f32) {
@@ -65,13 +65,13 @@ fn lexer_benchmarks(c: &mut Criterion) {
             });
         },
     );
-    
+
     group.finish();
 }
 
 fn parser_benchmarks(c: &mut Criterion) {
     let mut group = c.benchmark_group("parser");
-    
+
     // Small input
     let small_input = "let x: i32 = 42;";
     group.bench_with_input(
@@ -84,7 +84,7 @@ fn parser_benchmarks(c: &mut Criterion) {
             });
         },
     );
-    
+
     // Medium input
     let medium_input = r#"
         fn calculate(x: i32, y: i32) -> i32 {
@@ -105,7 +105,7 @@ fn parser_benchmarks(c: &mut Criterion) {
             });
         },
     );
-    
+
     // Large input
     let large_input = r#"
         fn update(delta: f32) {
@@ -136,13 +136,13 @@ fn parser_benchmarks(c: &mut Criterion) {
             });
         },
     );
-    
+
     group.finish();
 }
 
 fn type_checker_benchmarks(c: &mut Criterion) {
     let mut group = c.benchmark_group("type_checker");
-    
+
     // Small input
     let small_input = "let x: i32 = 42;";
     group.bench_with_input(
@@ -156,7 +156,7 @@ fn type_checker_benchmarks(c: &mut Criterion) {
             });
         },
     );
-    
+
     // Medium input
     let medium_input = r#"
         fn calculate(x: i32, y: i32) -> i32 {
@@ -178,13 +178,13 @@ fn type_checker_benchmarks(c: &mut Criterion) {
             });
         },
     );
-    
+
     group.finish();
 }
 
 fn full_pipeline_benchmarks(c: &mut Criterion) {
     let mut group = c.benchmark_group("full_pipeline");
-    
+
     // Complete compilation pipeline
     let input = r#"
         fn calculate(x: i32, y: i32) -> i32 {
@@ -195,7 +195,7 @@ fn full_pipeline_benchmarks(c: &mut Criterion) {
             return result;
         }
     "#;
-    
+
     group.bench_function("lex_parse_check", |b| {
         b.iter(|| {
             let tokens = lexer::tokenize(black_box(input)).unwrap();
@@ -203,7 +203,7 @@ fn full_pipeline_benchmarks(c: &mut Criterion) {
             let _ = type_checker::check(&ast);
         });
     });
-    
+
     group.finish();
 }
 

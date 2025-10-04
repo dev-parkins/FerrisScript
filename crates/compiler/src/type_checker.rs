@@ -419,7 +419,8 @@ impl TypeChecker {
                             span
                         ));
                     } else {
-                        for (i, (arg, expected_ty)) in args.iter().zip(sig.params.iter()).enumerate()
+                        for (i, (arg, expected_ty)) in
+                            args.iter().zip(sig.params.iter()).enumerate()
                         {
                             let arg_ty = self.check_expr(arg);
                             if !arg_ty.can_coerce_to(expected_ty) {
@@ -447,10 +448,7 @@ impl TypeChecker {
                         if field == "x" || field == "y" {
                             Type::F32
                         } else {
-                            self.error(format!(
-                                "Vector2 has no field '{}' at {}",
-                                field, span
-                            ));
+                            self.error(format!("Vector2 has no field '{}' at {}", field, span));
                             Type::Unknown
                         }
                     }
@@ -464,11 +462,7 @@ impl TypeChecker {
                         }
                     }
                     _ => {
-                        self.error(format!(
-                            "Type {} has no fields at {}",
-                            obj_ty.name(),
-                            span
-                        ));
+                        self.error(format!("Type {} has no fields at {}", obj_ty.name(), span));
                         Type::Unknown
                     }
                 }

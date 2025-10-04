@@ -8,11 +8,11 @@
 
 ## Current Test Suite Summary
 
-### Total Tests: 96 tests passing
+### Total Tests: 111 tests passing (+15 new edge case tests)
 
 **Breakdown by Crate:**
 
-- `ferrisscript_compiler`: 69 tests
+- `ferrisscript_compiler`: 84 tests (+15 integration tests)
 - `ferrisscript_runtime`: 26 tests  
 - `ferrisscript_godot_bind`: 1 test
 
@@ -35,8 +35,8 @@
 
 **Gaps Identified:**
 
-- ❌ **Empty file handling** - No test for completely empty input
-- ❌ **Comments-only files** - No test for files with only comments
+- ✅ **Empty file handling** - ✅ COMPLETED (PR #TBD: 4 tests in `edge_cases_empty.rs`)
+- ✅ **Comments-only files** - ✅ COMPLETED (PR #TBD: 5 tests in `edge_cases_comments.rs`)
 - ❌ **Large number literals** - No test for very large or boundary numbers (e.g., `i64::MAX`, `i64::MIN`)
 - ❌ **Invalid UTF-8** - No test for invalid UTF-8 sequences
 - ❌ **Deeply nested expressions** - Not specifically tested at lexer level
@@ -67,7 +67,7 @@
 - ❌ **Edge case expressions** - Empty blocks, missing semicolons
 - ❌ **Malformed input** - Incomplete statements at EOF
 - ❌ **Comment placement** - Comments in unusual positions
-- ❌ **Very long identifiers** - Identifiers with 1000+ characters
+- ✅ **Very long identifiers** - ✅ COMPLETED (PR #TBD: 6 tests in `edge_cases_long_identifiers.rs`)
 
 ### Type Checker Tests (~22 tests)
 
