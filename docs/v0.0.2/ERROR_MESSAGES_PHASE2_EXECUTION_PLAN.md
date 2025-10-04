@@ -145,7 +145,7 @@ Based on EDGE_CASE_ERROR_HANDLING_PLAN.md (AC-4):
 
 ## 📊 Execution Strategy Decision
 
-**DECISION: Option C - Incremental Validation (Phase 2 Only)**
+### DECISION: Option C - Incremental Validation (Phase 2 Only)
 
 **Rationale:**
 
@@ -296,19 +296,19 @@ Type mismatch at line 12, column 15: expected i32, found f32
 
 ### Trade-offs & Decisions
 
-**Decision 1: Defer Source Context Display**
+#### Decision 1: Defer Source Context Display
 
 - **Rationale**: Requires passing source string through compilation pipeline (more complex)
 - **Alternative**: Could implement now, but increases scope significantly
 - **Chosen**: Defer to Phase 3 for cleaner, focused PR
 
-**Decision 2: Pattern Matching vs. Exact Matching**
+#### Decision 2: Pattern Matching vs. Exact Matching
 
 - **Rationale**: Error message text may evolve, exact matching is brittle
 - **Alternative**: Use exact matching for stability
 - **Chosen**: Pattern matching for position info, exact for critical errors
 
-**Decision 3: Runtime Errors Deferred**
+#### Decision 3: Runtime Errors Deferred
 
 - **Rationale**: Requires call stack tracking infrastructure (not present)
 - **Alternative**: Implement minimal stack tracking now
@@ -354,7 +354,7 @@ Type mismatch at line 12, column 15: expected i32, found f32
 | Unterminated string | ✅ Yes | `Unterminated string at line 3, column 15` |
 | Invalid escape sequence | ✅ Yes | `Invalid escape sequence '\x' at line 4, column 20` |
 | Unexpected '&' | ✅ Yes | `Unexpected character '&' at line 2, column 5. Did you mean '&&'?` |
-| Unexpected '|' | ✅ Yes | `Unexpected character '|' at line 6, column 12. Did you mean '||'?` |
+| Unexpected '&#124;' | ✅ Yes | `Unexpected character '`&#124;`' at line 6, column 12. Did you mean '`&#124;&#124;`'?` |
 | Unexpected character | ✅ Yes | `Unexpected character '@' at line 1, column 3` |
 
 **Conclusion**: ✅ **Lexer errors are COMPLETE** - all already include line/column information!

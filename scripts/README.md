@@ -120,6 +120,43 @@ Run `npm install` to install dependencies
 
 Some sites may block automated requests. Check `.markdown-link-check.json` to configure retries or ignore specific domains.
 
+## Testing FerrisScript Files
+
+### test_ferris Example (Rust)
+
+The compiler package includes a test utility for verifying FerrisScript files:
+
+```bash
+# Test any FerrisScript file
+cargo run --example test_ferris -- examples/hello.ferris
+
+# See error messages with source context
+cargo run --example test_ferris -- examples/error_showcase.ferris
+```
+
+**What It Does:**
+
+- Compiles the FerrisScript file
+- Shows `✓ Compilation successful!` if valid
+- Shows `✗ Compilation failed:` with detailed error message if invalid
+- Error messages include:
+  - Source context (±2 lines around error)
+  - Visual pointer (^) at error location
+  - Helpful hint explaining what's expected
+
+**Use Cases:**
+
+- Quick syntax validation
+- Testing error message improvements
+- Learning FerrisScript error handling
+- Debugging script issues before loading in Godot
+
+### test_error.ps1 (PowerShell - Legacy)
+
+Located in `scripts/test_error.ps1`. See file for usage.
+
+**Note**: The Rust example (`test_ferris`) is now the recommended approach as it's cross-platform and better integrated.
+
 ### Adding New Scripts
 
 1. Create script in `scripts/` directory

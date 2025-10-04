@@ -151,7 +151,7 @@ fn type_checker_benchmarks(c: &mut Criterion) {
         |b, input| {
             b.iter(|| {
                 let tokens = lexer::tokenize(input).unwrap();
-                let ast = parser::parse(&tokens).unwrap();
+                let ast = parser::parse(&tokens, input).unwrap();
                 let _ = type_checker::check(black_box(&ast));
             });
         },
@@ -173,7 +173,7 @@ fn type_checker_benchmarks(c: &mut Criterion) {
         |b, input| {
             b.iter(|| {
                 let tokens = lexer::tokenize(input).unwrap();
-                let ast = parser::parse(&tokens).unwrap();
+                let ast = parser::parse(&tokens, input).unwrap();
                 let _ = type_checker::check(black_box(&ast));
             });
         },

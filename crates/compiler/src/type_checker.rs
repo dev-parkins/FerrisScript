@@ -1,4 +1,5 @@
 use crate::ast::*;
+use crate::error_context::format_error_with_context;
 use std::collections::HashMap;
 
 /// Type representation for type checking
@@ -54,21 +55,24 @@ struct FunctionSignature {
 }
 
 /// Type checking environment with scopes
-struct TypeChecker {
+struct TypeChecker<'a> {
     // Variable types in current scope (stack of scopes)
     scopes: Vec<HashMap<String, Type>>,
     // Function signatures
     functions: HashMap<String, FunctionSignature>,
     // Current errors
     errors: Vec<String>,
+    // Source code for error context
+    source: &'a str,
 }
 
-impl TypeChecker {
-    fn new() -> Self {
+impl<'a> TypeChecker<'a> {
+    fn new(source: &'a str) -> Self {
         let mut checker = TypeChecker {
             scopes: vec![HashMap::new()],
             functions: HashMap::new(),
             errors: Vec::new(),
+            source,
         };
 
         // Register built-in functions
@@ -126,9 +130,16 @@ impl TypeChecker {
             };
 
             if ty == Type::Unknown {
-                self.error(format!(
+                let base_msg = format!(
                     "Cannot infer type for global variable '{}' at {}",
                     var.name, var.span
+                );
+                self.error(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    var.span.line,
+                    var.span.column,
+                    "Add an explicit type annotation (e.g., let name: type = value)",
                 ));
             }
 
@@ -137,12 +148,23 @@ impl TypeChecker {
             // Check that initializer matches declared type
             let init_ty = self.check_expr(&var.value);
             if !init_ty.can_coerce_to(&ty) {
-                self.error(format!(
+                let base_msg = format!(
                     "Type mismatch in global variable '{}': expected {}, found {} at {}",
                     var.name,
                     ty.name(),
                     init_ty.name(),
                     var.span
+                );
+                self.error(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    var.span.line,
+                    var.span.column,
+                    &format!(
+                        "Value type {} cannot be coerced to {}",
+                        init_ty.name(),
+                        ty.name()
+                    ),
                 ));
             }
         }
@@ -212,20 +234,35 @@ impl TypeChecker {
                 };
 
                 if declared_ty == Type::Unknown {
-                    self.error(format!(
-                        "Cannot infer type for variable '{}' at {}",
-                        name, span
+                    let base_msg = format!("Cannot infer type for variable '{}' at {}", name, span);
+                    self.error(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        span.line,
+                        span.column,
+                        "Add an explicit type annotation (e.g., let name: type = value)",
                     ));
                 }
 
                 let value_ty = self.check_expr(value);
                 if !value_ty.can_coerce_to(&declared_ty) {
-                    self.error(format!(
+                    let base_msg = format!(
                         "Type mismatch in let binding '{}': expected {}, found {} at {}",
                         name,
                         declared_ty.name(),
                         value_ty.name(),
                         span
+                    );
+                    self.error(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        span.line,
+                        span.column,
+                        &format!(
+                            "Value type {} cannot be coerced to {}",
+                            value_ty.name(),
+                            declared_ty.name()
+                        ),
                     ));
                 }
 
@@ -240,11 +277,22 @@ impl TypeChecker {
                 let value_ty = self.check_expr(value);
 
                 if !value_ty.can_coerce_to(&target_ty) {
-                    self.error(format!(
+                    let base_msg = format!(
                         "Type mismatch in assignment: expected {}, found {} at {}",
                         target_ty.name(),
                         value_ty.name(),
                         span
+                    );
+                    self.error(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        span.line,
+                        span.column,
+                        &format!(
+                            "Value type {} cannot be coerced to {}",
+                            value_ty.name(),
+                            target_ty.name()
+                        ),
                     ));
                 }
             }
@@ -256,10 +304,17 @@ impl TypeChecker {
             } => {
                 let cond_ty = self.check_expr(cond);
                 if cond_ty != Type::Bool {
-                    self.error(format!(
+                    let base_msg = format!(
                         "If condition must be bool, found {} at {}",
                         cond_ty.name(),
                         span
+                    );
+                    self.error(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        span.line,
+                        span.column,
+                        "Condition must evaluate to a boolean value (true or false)",
                     ));
                 }
 
@@ -280,10 +335,17 @@ impl TypeChecker {
             Stmt::While { cond, body, span } => {
                 let cond_ty = self.check_expr(cond);
                 if cond_ty != Type::Bool {
-                    self.error(format!(
+                    let base_msg = format!(
                         "While condition must be bool, found {} at {}",
                         cond_ty.name(),
                         span
+                    );
+                    self.error(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        span.line,
+                        span.column,
+                        "Condition must evaluate to a boolean value (true or false)",
                     ));
                 }
 
@@ -316,7 +378,14 @@ impl TypeChecker {
                 if let Some(ty) = self.lookup_variable(name) {
                     ty
                 } else {
-                    self.error(format!("Undefined variable '{}' at {}", name, span));
+                    let base_msg = format!("Undefined variable '{}' at {}", name, span);
+                    self.error(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        span.line,
+                        span.column,
+                        "Variable must be declared before use",
+                    ));
                     Type::Unknown
                 }
             }
@@ -337,12 +406,19 @@ impl TypeChecker {
                                 Type::I32
                             }
                         } else {
-                            self.error(format!(
+                            let base_msg = format!(
                                 "Binary operation {} requires numeric types, found {} and {} at {}",
                                 op,
                                 left_ty.name(),
                                 right_ty.name(),
                                 span
+                            );
+                            self.error(format_error_with_context(
+                                &base_msg,
+                                self.source,
+                                span.line,
+                                span.column,
+                                "Arithmetic operations (+, -, *, /) require i32 or f32 types",
                             ));
                             Type::Unknown
                         }
@@ -358,12 +434,19 @@ impl TypeChecker {
                         {
                             Type::Bool
                         } else {
-                            self.error(format!(
+                            let base_msg = format!(
                                 "Comparison {} requires numeric types, found {} and {} at {}",
                                 op,
                                 left_ty.name(),
                                 right_ty.name(),
                                 span
+                            );
+                            self.error(format_error_with_context(
+                                &base_msg,
+                                self.source,
+                                span.line,
+                                span.column,
+                                "Comparison operators (<, <=, >, >=) require i32 or f32 types",
                             ));
                             Type::Bool
                         }
@@ -371,12 +454,19 @@ impl TypeChecker {
                     BinaryOp::And | BinaryOp::Or => {
                         // Logical operations require bool types
                         if left_ty != Type::Bool || right_ty != Type::Bool {
-                            self.error(format!(
+                            let base_msg = format!(
                                 "Logical operation {} requires bool types, found {} and {} at {}",
                                 op,
                                 left_ty.name(),
                                 right_ty.name(),
                                 span
+                            );
+                            self.error(format_error_with_context(
+                                &base_msg,
+                                self.source,
+                                span.line,
+                                span.column,
+                                "Logical operators (and, or) require boolean operands",
                             ));
                         }
                         Type::Bool
@@ -388,20 +478,34 @@ impl TypeChecker {
                 match op {
                     UnaryOp::Neg => {
                         if !matches!(expr_ty, Type::I32 | Type::F32) {
-                            self.error(format!(
+                            let base_msg = format!(
                                 "Unary negation requires numeric type, found {} at {}",
                                 expr_ty.name(),
                                 span
+                            );
+                            self.error(format_error_with_context(
+                                &base_msg,
+                                self.source,
+                                span.line,
+                                span.column,
+                                "Negation operator (-) requires i32 or f32 type",
                             ));
                         }
                         expr_ty
                     }
                     UnaryOp::Not => {
                         if expr_ty != Type::Bool {
-                            self.error(format!(
+                            let base_msg = format!(
                                 "Logical not requires bool type, found {} at {}",
                                 expr_ty.name(),
                                 span
+                            );
+                            self.error(format_error_with_context(
+                                &base_msg,
+                                self.source,
+                                span.line,
+                                span.column,
+                                "Not operator (!) requires boolean type",
                             ));
                         }
                         Type::Bool
@@ -411,12 +515,19 @@ impl TypeChecker {
             Expr::Call(name, args, span) => {
                 if let Some(sig) = self.functions.get(name).cloned() {
                     if args.len() != sig.params.len() {
-                        self.error(format!(
+                        let base_msg = format!(
                             "Function '{}' expects {} arguments, found {} at {}",
                             name,
                             sig.params.len(),
                             args.len(),
                             span
+                        );
+                        self.error(format_error_with_context(
+                            &base_msg,
+                            self.source,
+                            span.line,
+                            span.column,
+                            &format!("Expected {} argument(s)", sig.params.len()),
                         ));
                     } else {
                         for (i, (arg, expected_ty)) in
@@ -424,20 +535,38 @@ impl TypeChecker {
                         {
                             let arg_ty = self.check_expr(arg);
                             if !arg_ty.can_coerce_to(expected_ty) {
-                                self.error(format!(
+                                let base_msg = format!(
                                     "Function '{}' argument {} has wrong type: expected {}, found {} at {}",
                                     name,
                                     i,
                                     expected_ty.name(),
                                     arg_ty.name(),
                                     span
+                                );
+                                self.error(format_error_with_context(
+                                    &base_msg,
+                                    self.source,
+                                    span.line,
+                                    span.column,
+                                    &format!(
+                                        "Argument {} must be of type {}",
+                                        i,
+                                        expected_ty.name()
+                                    ),
                                 ));
                             }
                         }
                     }
                     sig.return_type
                 } else {
-                    self.error(format!("Undefined function '{}' at {}", name, span));
+                    let base_msg = format!("Undefined function '{}' at {}", name, span);
+                    self.error(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        span.line,
+                        span.column,
+                        "Function must be declared before use",
+                    ));
                     Type::Unknown
                 }
             }
@@ -448,7 +577,14 @@ impl TypeChecker {
                         if field == "x" || field == "y" {
                             Type::F32
                         } else {
-                            self.error(format!("Vector2 has no field '{}' at {}", field, span));
+                            let base_msg = format!("Vector2 has no field '{}' at {}", field, span);
+                            self.error(format_error_with_context(
+                                &base_msg,
+                                self.source,
+                                span.line,
+                                span.column,
+                                "Vector2 only has fields 'x' and 'y'",
+                            ));
                             Type::Unknown
                         }
                     }
@@ -462,7 +598,14 @@ impl TypeChecker {
                         }
                     }
                     _ => {
-                        self.error(format!("Type {} has no fields at {}", obj_ty.name(), span));
+                        let base_msg = format!("Type {} has no fields at {}", obj_ty.name(), span);
+                        self.error(format_error_with_context(
+                            &base_msg,
+                            self.source,
+                            span.line,
+                            span.column,
+                            "Field access is only valid for structured types",
+                        ));
                         Type::Unknown
                     }
                 }
@@ -480,8 +623,8 @@ impl TypeChecker {
     }
 }
 
-pub fn check(program: &Program) -> Result<(), String> {
-    let mut checker = TypeChecker::new();
+pub fn check(program: &Program, source: &str) -> Result<(), String> {
+    let mut checker = TypeChecker::new(source);
     checker.check_program(program);
 
     if checker.errors.is_empty() {
@@ -499,24 +642,25 @@ mod tests {
 
     #[test]
     fn test_check_empty() {
+        let input = "";
         let program = Program::new();
-        assert!(check(&program).is_ok());
+        assert!(check(&program, input).is_ok());
     }
 
     #[test]
     fn test_check_simple_function() {
         let input = "fn test() { let x: i32 = 5; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        assert!(check(&program).is_ok());
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
     }
 
     #[test]
     fn test_check_type_mismatch() {
         let input = "fn test() { let x: i32 = true; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        let result = check(&program);
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Type mismatch"));
     }
@@ -525,8 +669,8 @@ mod tests {
     fn test_check_undefined_variable() {
         let input = "fn test() { let x = y; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        let result = check(&program);
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Undefined variable"));
     }
@@ -535,16 +679,16 @@ mod tests {
     fn test_check_binary_expression() {
         let input = "fn test() { let x = 5 + 3; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        assert!(check(&program).is_ok());
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
     }
 
     #[test]
     fn test_check_binary_type_mismatch() {
         let input = "fn test() { let x = 5 + true; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        let result = check(&program);
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("numeric types"));
     }
@@ -553,8 +697,8 @@ mod tests {
     fn test_check_if_condition_must_be_bool() {
         let input = "fn test() { if 5 { let x = 1; } }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        let result = check(&program);
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("must be bool"));
     }
@@ -563,16 +707,16 @@ mod tests {
     fn test_check_function_call() {
         let input = r#"fn test() { print("hello"); }"#;
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        assert!(check(&program).is_ok());
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
     }
 
     #[test]
     fn test_check_undefined_function() {
         let input = "fn test() { foo(); }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        let result = check(&program);
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Undefined function"));
     }
@@ -581,16 +725,16 @@ mod tests {
     fn test_check_field_access() {
         let input = "fn test() { let x = self.position; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        assert!(check(&program).is_ok());
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
     }
 
     #[test]
     fn test_check_chained_field_access() {
         let input = "fn test() { let x = self.position.x; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        assert!(check(&program).is_ok());
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
     }
 
     #[test]
@@ -599,8 +743,8 @@ mod tests {
     print("Hello from FerrisScript!");
 }"#;
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        assert!(check(&program).is_ok());
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
     }
 
     #[test]
@@ -609,8 +753,8 @@ mod tests {
     self.position.x += 50.0 * delta;
 }"#;
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        assert!(check(&program).is_ok());
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
     }
 
     #[test]
@@ -628,39 +772,39 @@ fn _process(delta: f32) {
     }
 }"#;
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        assert!(check(&program).is_ok());
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
     }
 
     #[test]
     fn test_check_type_coercion() {
         let input = "fn test() { let x: f32 = 5; }"; // i32 to f32 coercion
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        assert!(check(&program).is_ok());
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
     }
 
     #[test]
     fn test_check_comparison_operators() {
         let input = "fn test() { let x = 5 > 3; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        assert!(check(&program).is_ok());
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
     }
 
     #[test]
     fn test_check_logical_operators() {
         let input = "fn test() { let x = true && false; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        assert!(check(&program).is_ok());
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
     }
 
     #[test]
     fn test_check_unary_operators() {
         let input = "fn test() { let x = -5; let y = !true; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
-        assert!(check(&program).is_ok());
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
     }
 }

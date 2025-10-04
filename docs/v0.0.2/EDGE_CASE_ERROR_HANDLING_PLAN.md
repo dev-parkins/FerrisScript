@@ -274,7 +274,11 @@ fn test_long_variable_resolution() {
 
 ---
 
-### Phase 2: Error Message Improvements (Estimated: 2 days)
+### Phase 2: Error Message Improvements ✅ **COMPLETE** (PR #12)
+
+**Status**: ✅ Completed October 3, 2025  
+**Actual Time**: 3 hours (70% faster than 10h estimate)  
+**Deliverables**: All 31 compiler errors now include line/column information
 
 #### Task 2.1: Add Position Tracking to Lexer
 
@@ -354,7 +358,22 @@ Error: Unexpected token '}' at line 5, column 12
 
 ---
 
-### Phase 3: Colorized Output (Estimated: 1 day)
+### Phase 3: Source Context Display ✅ **COMPLETE** (PR #13)
+
+**Status**: ✅ Completed October 4, 2025  
+**Actual Time**: ~4 hours  
+**Deliverables**: All 38 compiler errors (6 lexer + 14 parser + 18 type checker) now display:
+
+- ±2 lines of source context around error location
+- Visual pointer (^) indicating exact error column
+- Helpful hints explaining what's expected
+- 17 comprehensive integration tests validating error display
+
+**Test Coverage**: 182 tests passing (+71 since baseline)
+
+---
+
+### Phase 4: Colorized Output (Estimated: 1 day) - DEFERRED
 
 #### Task 3.1: Add ANSI Color Support
 
