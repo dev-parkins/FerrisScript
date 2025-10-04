@@ -160,7 +160,11 @@ impl<'a> TypeChecker<'a> {
                     self.source,
                     var.span.line,
                     var.span.column,
-                    &format!("Value type {} cannot be coerced to {}", init_ty.name(), ty.name()),
+                    &format!(
+                        "Value type {} cannot be coerced to {}",
+                        init_ty.name(),
+                        ty.name()
+                    ),
                 ));
             }
         }
@@ -230,10 +234,7 @@ impl<'a> TypeChecker<'a> {
                 };
 
                 if declared_ty == Type::Unknown {
-                    let base_msg = format!(
-                        "Cannot infer type for variable '{}' at {}",
-                        name, span
-                    );
+                    let base_msg = format!("Cannot infer type for variable '{}' at {}", name, span);
                     self.error(format_error_with_context(
                         &base_msg,
                         self.source,
@@ -257,7 +258,11 @@ impl<'a> TypeChecker<'a> {
                         self.source,
                         span.line,
                         span.column,
-                        &format!("Value type {} cannot be coerced to {}", value_ty.name(), declared_ty.name()),
+                        &format!(
+                            "Value type {} cannot be coerced to {}",
+                            value_ty.name(),
+                            declared_ty.name()
+                        ),
                     ));
                 }
 
@@ -283,7 +288,11 @@ impl<'a> TypeChecker<'a> {
                         self.source,
                         span.line,
                         span.column,
-                        &format!("Value type {} cannot be coerced to {}", value_ty.name(), target_ty.name()),
+                        &format!(
+                            "Value type {} cannot be coerced to {}",
+                            value_ty.name(),
+                            target_ty.name()
+                        ),
                     ));
                 }
             }
@@ -539,7 +548,11 @@ impl<'a> TypeChecker<'a> {
                                     self.source,
                                     span.line,
                                     span.column,
-                                    &format!("Argument {} must be of type {}", i, expected_ty.name()),
+                                    &format!(
+                                        "Argument {} must be of type {}",
+                                        i,
+                                        expected_ty.name()
+                                    ),
                                 ));
                             }
                         }
@@ -795,4 +808,3 @@ fn _process(delta: f32) {
         assert!(check(&program, input).is_ok());
     }
 }
-

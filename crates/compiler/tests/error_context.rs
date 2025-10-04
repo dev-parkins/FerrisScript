@@ -202,15 +202,21 @@ fn test_error_pointer_alignment() {
     // The error is at column 15 (after "let       ")
     // The pointer line should have spaces before ^
     assert!(error.contains("^"));
-    
+
     // Split into lines and find lines with pointer indicators
     let lines: Vec<&str> = error.lines().collect();
     let has_pointer = lines.iter().any(|l| l.contains("^"));
-    assert!(has_pointer, "Should have a pointer (^) somewhere in the error");
-    
+    assert!(
+        has_pointer,
+        "Should have a pointer (^) somewhere in the error"
+    );
+
     // The pointer should appear with proper indentation
     let pointer_lines: Vec<&&str> = lines.iter().filter(|l| l.contains("^")).collect();
-    assert!(!pointer_lines.is_empty(), "Should have at least one line with ^");
+    assert!(
+        !pointer_lines.is_empty(),
+        "Should have at least one line with ^"
+    );
 }
 
 #[test]
@@ -293,7 +299,7 @@ fn test_parser_invalid_binary_operator_context() {
     assert!(result.is_err());
     let error = result.unwrap_err();
 
-    // This will be caught by lexer first  
+    // This will be caught by lexer first
     assert!(error.contains("^"));
     assert!(error.contains("2 |") || error.contains("3 |"));
 }

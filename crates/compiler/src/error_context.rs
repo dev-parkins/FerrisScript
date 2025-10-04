@@ -2,7 +2,6 @@
 ///
 /// This module provides utilities to display error messages with surrounding
 /// source code context (±2 lines) and visual indicators pointing to the error location.
-
 /// Extract source code context around an error location
 ///
 /// Returns a formatted string with line numbers showing ±2 lines around the error,
@@ -111,12 +110,12 @@ pub fn format_error_with_context(
     hint: &str,
 ) -> String {
     let context = extract_source_context(source, line);
-    
+
     // Calculate line number width from the context
     let lines: Vec<&str> = source.lines().collect();
     let end_line = (line + 2).min(lines.len());
     let line_num_width = end_line.to_string().len().max(2);
-    
+
     let pointer = format_error_pointer(column, line_num_width, hint);
 
     format!("{}\n\n{}{}", base_message, context, pointer)
@@ -130,7 +129,7 @@ mod tests {
     fn test_extract_context_normal() {
         let source = "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7";
         let context = extract_source_context(source, 4);
-        
+
         assert!(context.contains(" 2 | line 2"));
         assert!(context.contains(" 3 | line 3"));
         assert!(context.contains(" 4 | line 4"));
@@ -144,7 +143,7 @@ mod tests {
     fn test_extract_context_first_line() {
         let source = "line 1\nline 2\nline 3\nline 4\nline 5";
         let context = extract_source_context(source, 1);
-        
+
         assert!(context.contains(" 1 | line 1"));
         assert!(context.contains(" 2 | line 2"));
         assert!(context.contains(" 3 | line 3"));
@@ -155,7 +154,7 @@ mod tests {
     fn test_extract_context_last_line() {
         let source = "line 1\nline 2\nline 3\nline 4\nline 5";
         let context = extract_source_context(source, 5);
-        
+
         assert!(context.contains(" 3 | line 3"));
         assert!(context.contains(" 4 | line 4"));
         assert!(context.contains(" 5 | line 5"));
@@ -167,7 +166,7 @@ mod tests {
     fn test_extract_context_short_file() {
         let source = "line 1\nline 2";
         let context = extract_source_context(source, 1);
-        
+
         assert!(context.contains(" 1 | line 1"));
         assert!(context.contains(" 2 | line 2"));
     }
@@ -176,7 +175,7 @@ mod tests {
     fn test_extract_context_single_line() {
         let source = "only line";
         let context = extract_source_context(source, 1);
-        
+
         assert!(context.contains(" 1 | only line"));
     }
 
@@ -184,7 +183,7 @@ mod tests {
     fn test_extract_context_empty_file() {
         let source = "";
         let context = extract_source_context(source, 1);
-        
+
         assert_eq!(context, "");
     }
 
@@ -233,9 +232,9 @@ mod tests {
         for i in 1..=150 {
             source.push_str(&format!("line {}\n", i));
         }
-        
+
         let context = extract_source_context(&source, 100);
-        
+
         // Line numbers should be right-aligned with 3-char width (for 100)
         assert!(context.contains(" 98 | line 98"));
         assert!(context.contains(" 99 | line 99"));

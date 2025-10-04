@@ -121,7 +121,7 @@ impl<'a> Parser<'a> {
                     self.current_line,
                     self.current_column,
                     "Variable name must be an identifier",
-                ))
+                ));
             }
         };
 
@@ -142,7 +142,7 @@ impl<'a> Parser<'a> {
                         self.current_line,
                         self.current_column,
                         "Type annotation must be a valid type name (e.g., i32, f32, bool)",
-                    ))
+                    ));
                 }
             }
         } else {
@@ -181,7 +181,7 @@ impl<'a> Parser<'a> {
                     self.current_line,
                     self.current_column,
                     "Function name must be an identifier",
-                ))
+                ));
             }
         };
 
@@ -205,7 +205,7 @@ impl<'a> Parser<'a> {
                         self.current_line,
                         self.current_column,
                         "Parameter name must be an identifier",
-                    ))
+                    ));
                 }
             };
 
@@ -226,7 +226,7 @@ impl<'a> Parser<'a> {
                         self.current_line,
                         self.current_column,
                         "Parameter type must be a valid type name (e.g., i32, f32, bool)",
-                    ))
+                    ));
                 }
             };
 
@@ -264,7 +264,7 @@ impl<'a> Parser<'a> {
                             self.current_line,
                             self.current_column,
                             "Return type must be a valid type name (e.g., i32, f32, bool)",
-                        ))
+                        ));
                     }
                 }
             } else {
@@ -381,7 +381,7 @@ impl<'a> Parser<'a> {
                     self.current_line,
                     self.current_column,
                     "Variable name must be an identifier",
-                ))
+                ));
             }
         };
 
@@ -402,7 +402,7 @@ impl<'a> Parser<'a> {
                         self.current_line,
                         self.current_column,
                         "Type annotation must be a valid type name (e.g., i32, f32, bool)",
-                    ))
+                    ));
                 }
             }
         } else {
@@ -510,7 +510,7 @@ impl<'a> Parser<'a> {
                             self.current_line,
                             self.current_column,
                             "Field name must be an identifier (e.g., object.field_name)",
-                        ))
+                        ));
                     }
                 };
                 let span = left.span();
