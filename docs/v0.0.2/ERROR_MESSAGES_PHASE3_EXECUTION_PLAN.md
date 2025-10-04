@@ -585,25 +585,25 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String>
 
 ### Trade-offs & Decisions
 
-**Decision 1: Don't Span Multiple Lines (Yet)**
+#### Decision 1: Don't Span Multiple Lines (Yet)
 
 - **Why**: Multi-line error spans (e.g., unclosed string across 10 lines) are complex
 - **Trade-off**: Users see pointer at error start, not full span
 - **Future**: Phase 4 or 5 could add span ranges
 
-**Decision 2: Use &str Lifetimes (Not Arc<str>)**
+#### Decision 2: Use &str Lifetimes (Not Arc<str>)
 
 - **Why**: Source strings are short-lived (single compilation), no need for reference counting
 - **Trade-off**: Slightly more complex lifetime annotations
 - **Benefit**: Zero allocation overhead, better performance
 
-**Decision 3: Extract ±2 Lines (Not ±5)**
+#### Decision 3: Extract ±2 Lines (Not ±5)
 
 - **Why**: 5 lines context = 11 total lines = cluttered terminal
 - **Trade-off**: Less context for complex errors
 - **Benefit**: Errors fit on screen, easier to read
 
-**Decision 4: No Colorization (Yet)**
+#### Decision 4: No Colorization (Yet)
 
 - **Why**: That's Phase 4 - keep changes focused
 - **Trade-off**: Errors less visually distinct

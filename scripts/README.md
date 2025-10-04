@@ -135,6 +135,7 @@ cargo run --example test_ferris -- examples/error_showcase.ferris
 ```
 
 **What It Does:**
+
 - Compiles the FerrisScript file
 - Shows `✓ Compilation successful!` if valid
 - Shows `✗ Compilation failed:` with detailed error message if invalid
@@ -144,6 +145,7 @@ cargo run --example test_ferris -- examples/error_showcase.ferris
   - Helpful hint explaining what's expected
 
 **Use Cases:**
+
 - Quick syntax validation
 - Testing error message improvements
 - Learning FerrisScript error handling

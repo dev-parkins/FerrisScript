@@ -109,19 +109,23 @@ An interactive example showing how FerrisScript provides helpful error messages.
 
 **How to Use:**
 
-1. **See it compile successfully**: 
+1. **See it compile successfully**:
+
    ```bash
    cargo run --example test_ferris -- examples/error_showcase.ferris
    ```
+
    Output: `✓ Compilation successful!`
 
-2. **See error messages in action**: 
+2. **See error messages in action**:
    - Open `error_showcase.ferris`
    - Uncomment any error section (e.g., lines 71-73 for "Type Mismatch Error")
    - Run the test again:
+
      ```bash
      cargo run --example test_ferris -- examples/error_showcase.ferris
      ```
+
    - See the error with source context, pointer, and helpful hint!
 
 3. **Learn by reading**: Browse through the commented examples to understand different error types without needing to trigger them.
