@@ -115,7 +115,7 @@ From `v0.1.0-ROADMAP.md` (lines 472-495):
 
 - [VS Code Language Extensions Guide](https://code.visualstudio.com/api/language-extensions/syntax-highlight-guide)
 - [TextMate Grammar Guide](https://macromates.com/manual/en/language_grammars)
-- Example: [Rust tmLanguage.json](https://github.com/rust-lang/vscode-rust/blob/master/syntaxes/rust.tmLanguage.json)
+- Example: [Rust Syntax Highlighting](https://github.com/rust-lang/rust-analyzer/tree/master/editors/code)
 
 ---
 
@@ -419,7 +419,7 @@ If LSP is too complex initially, consider:
 
 **Learning Resources**:
 
-- [Writing a Language Server in Rust](https://freemasen.com/blog/writing-a-language-server-in-rust/)
+- [tower-lsp Documentation](https://docs.rs/tower-lsp/)
 - [VS Code Extension Samples](https://github.com/microsoft/vscode-extension-samples)
 - [tower-lsp Examples](https://github.com/ebkalderon/tower-lsp/tree/master/examples)
 
