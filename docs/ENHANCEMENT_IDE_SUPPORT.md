@@ -11,6 +11,7 @@
 ### Goal
 
 Create VS Code extension and IDE support for `.ferris` files to provide:
+
 - Syntax highlighting
 - Code snippets
 - Language features (autocomplete, go-to-definition, hover documentation)
@@ -88,6 +89,7 @@ From `v0.1.0-ROADMAP.md` (lines 472-495):
 **Estimated Effort**: 2-3 days
 
 **Deliverables**:
+
 1. **TextMate Grammar** (`ferrisscript.tmLanguage.json`)
    - Keywords: `fn`, `let`, `mut`, `if`, `else`, `while`, `return`, etc.
    - Types: `i32`, `f32`, `bool`, `String`, `Vector2`, `Node`, etc.
@@ -110,6 +112,7 @@ From `v0.1.0-ROADMAP.md` (lines 472-495):
    - `while` - while loop
 
 **Resources**:
+
 - [VS Code Language Extensions Guide](https://code.visualstudio.com/api/language-extensions/syntax-highlight-guide)
 - [TextMate Grammar Guide](https://macromates.com/manual/en/language_grammars)
 - Example: [Rust tmLanguage.json](https://github.com/rust-lang/vscode-rust/blob/master/syntaxes/rust.tmLanguage.json)
@@ -160,11 +163,13 @@ From `v0.1.0-ROADMAP.md` (lines 472-495):
    - Return structured diagnostics (line, column, severity, message)
 
 **Dependencies**:
+
 - `tower-lsp` - LSP framework
 - `tokio` - Async runtime
 - `serde_json` - JSON-RPC communication
 
 **Resources**:
+
 - [tower-lsp Documentation](https://docs.rs/tower-lsp/)
 - [LSP Specification](https://microsoft.github.io/language-server-protocol/)
 - [VS Code Language Server Extension Guide](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide)
@@ -174,6 +179,7 @@ From `v0.1.0-ROADMAP.md` (lines 472-495):
 ### Phase 3: Advanced Features (v0.2.0+)
 
 **Future Enhancements**:
+
 - Semantic highlighting (context-aware colors)
 - Refactoring (rename symbol, extract function)
 - Code actions (quick fixes, imports)
@@ -338,6 +344,7 @@ impl LanguageServer for FerrisScriptLsp {
 ## 🔗 Related Roadmap Sections
 
 **v0.1.0-ROADMAP.md**:
+
 - Lines 30: "Add tooling (syntax highlighting, snippets)"
 - Lines 472-495: LSP implementation details
 - Lines 638: "LSP makes coding pleasant"
@@ -346,6 +353,7 @@ impl LanguageServer for FerrisScriptLsp {
 - Lines 824: LSP user guide documentation
 
 **v0.0.2-CHECKLIST.md**:
+
 - Lines 242-252: Editor Support (Foundation)
 
 ---
@@ -369,6 +377,7 @@ impl LanguageServer for FerrisScriptLsp {
 ### Alternatives to LSP
 
 If LSP is too complex initially, consider:
+
 1. **Basic TextMate grammar only** (1-2 days effort)
 2. **Static analysis in VS Code extension** (no separate server)
 3. **Diagnostic provider using compiler API** (5-7 days)
@@ -409,11 +418,13 @@ If LSP is too complex initially, consider:
 ## 📚 Resources
 
 **Learning Resources**:
+
 - [Writing a Language Server in Rust](https://freemasen.com/blog/writing-a-language-server-in-rust/)
 - [VS Code Extension Samples](https://github.com/microsoft/vscode-extension-samples)
 - [tower-lsp Examples](https://github.com/ebkalderon/tower-lsp/tree/master/examples)
 
 **Reference Implementations**:
+
 - [rust-analyzer](https://github.com/rust-lang/rust-analyzer) - Rust LSP (complex, feature-complete)
 - [ruff-lsp](https://github.com/astral-sh/ruff-lsp) - Python linter LSP (simpler example)
 - [Lua Language Server](https://github.com/LuaLS/lua-language-server) - Game scripting LSP
