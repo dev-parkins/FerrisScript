@@ -2,6 +2,124 @@
 
 This directory contains helper scripts for development workflows.
 
+## Quick Reference
+
+| Script | Purpose | Platforms |
+|--------|---------|-----------|
+| `test.sh` / `test.ps1` | Run all tests | All |
+| `bench.sh` / `bench.ps1` | Run benchmarks | All |
+| `format.sh` / `format.ps1` | Format code | All |
+| `coverage.sh` / `coverage.ps1` | Generate coverage | All |
+| `lint-docs.sh` / `lint-docs.ps1` | Lint documentation | All |
+| `pre-push.sh` / `pre-push.ps1` | Pre-push validation | All |
+
+**Tip**: All scripts have both `.sh` (Bash) and `.ps1` (PowerShell) versions for cross-platform support.
+
+---
+
+## Development Scripts
+
+### Test Runner
+
+Runs all tests in the workspace (182 tests).
+
+**PowerShell (Windows)**:
+
+```powershell
+.\scripts\test.ps1
+```
+
+**Bash (Linux/macOS)**:
+
+```bash
+./scripts/test.sh
+```
+
+**What It Does**:
+
+- Runs `cargo test --workspace`
+- Shows test results for all crates (compiler, runtime, godot_bind)
+- Returns exit code 0 on success, non-zero on failure
+
+**Use Cases**:
+
+- Quick validation during development
+- Pre-commit testing
+- CI/CD integration
+
+---
+
+### Benchmark Runner
+
+Runs performance benchmarks for the compiler.
+
+**PowerShell (Windows)**:
+
+```powershell
+.\scripts\bench.ps1
+```
+
+**Bash (Linux/macOS)**:
+
+```bash
+./scripts/bench.sh
+```
+
+**What It Does**:
+
+- Runs `cargo bench --package ferrisscript_compiler`
+- Executes lexer, parser, type checker benchmarks
+- Saves results to `target/criterion/`
+- Generates comparison reports
+
+**Use Cases**:
+
+- Performance regression testing
+- Optimization validation
+- Establishing baseline metrics
+
+**Benchmark Results**:
+
+- Lexer: 384 ns - 3.74 μs
+- Parser: 600 ns - 7.94 μs
+- Type Checker: 851 ns - 3.58 μs
+
+See [docs/BENCHMARK_BASELINE.md](../docs/BENCHMARK_BASELINE.md) for detailed analysis.
+
+---
+
+### Code Formatter
+
+Formats all Rust code in the workspace.
+
+**PowerShell (Windows)**:
+
+```powershell
+.\scripts\format.ps1
+```
+
+**Bash (Linux/macOS)**:
+
+```bash
+./scripts/format.sh
+```
+
+**What It Does**:
+
+- Runs `cargo fmt --all`
+- Formats all `.rs` files according to project style
+- Modifies files in-place
+
+**Use Cases**:
+
+- Pre-commit formatting
+- Consistent code style
+- Automatic style fixes
+
+**Tip**: Run `cargo fmt -- --check` to verify formatting without modifying files (useful in CI).
+
+---
+
 ## Code Coverage
 
 ### Prerequisites

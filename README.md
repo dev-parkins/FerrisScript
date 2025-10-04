@@ -6,12 +6,73 @@
 A Rust-inspired scripting language for Godot 4.x
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-  [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
-  [![Godot](https://img.shields.io/badge/godot-4.2%2B-blue.svg)](https://godotengine.org/)
-  
+[![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
+[![Godot](https://img.shields.io/badge/godot-4.2%2B-blue.svg)](https://godotengine.org/)
+[![Tests](https://img.shields.io/badge/tests-182%20passing-success.svg)](https://github.com/dev-parkins/FerrisScript/actions)
+[![Coverage](https://img.shields.io/badge/coverage-70--75%25-yellow.svg)](docs/v0.0.2/TEST_COVERAGE_ANALYSIS.md)
+
+**Quick Links**: [📖 Docs](docs/) | [🐛 Issues](https://github.com/dev-parkins/FerrisScript/issues) | [💬 Discussions](https://github.com/dev-parkins/FerrisScript/discussions) | [❓ FAQ](docs/FAQ.md) | [🔧 Troubleshooting](docs/TROUBLESHOOTING.md)
+
 </div>
 
 FerrisScript (named after [Ferris 🦀](https://rustacean.net/), the Rust mascot) is a **statically-typed, Rust-inspired scripting language** designed specifically for Godot 4.x game development. It brings Rust's safety and performance philosophy to game scripting while maintaining a lightweight, easy-to-learn syntax.
+
+## 🎯 Why FerrisScript?
+
+### For Rust Developers
+
+- **Familiar Syntax**: If you know Rust, you already know 80% of FerrisScript
+- **Type Safety**: Catch bugs at compile-time, not in production
+- **Performance**: Static type checking enables optimization opportunities
+- **No GC Pauses**: Deterministic performance for game loops
+
+### For Game Developers
+
+- **Better Tooling**: Static typing enables IDE features (autocomplete, go-to-definition)
+- **Easier Refactoring**: Type checker catches breaking changes automatically
+- **Self-Documenting**: Types serve as inline documentation
+- **Gradual Learning**: Start simple, grow into advanced features
+
+### For Teams
+
+- **Clear Contracts**: Function signatures document expected inputs/outputs
+- **Fewer Runtime Errors**: Many bugs caught before playtesting
+- **Code Confidence**: Refactor fearlessly with type safety
+- **Performance Baseline**: [16K+ function calls per frame at 60 FPS](docs/BENCHMARK_BASELINE.md)
+
+**TL;DR**: FerrisScript brings Rust's "if it compiles, it probably works" philosophy to game scripting, making your game development faster and more reliable.
+
+## ⚖️ FerrisScript vs. GDScript
+
+| Feature | FerrisScript | GDScript |
+|---------|-------------|----------|
+| **Type System** | Static, compile-time checked | Dynamic with optional hints |
+| **Error Detection** | Compile-time (before running game) | Runtime (during gameplay) |
+| **Performance** | ~1 μs/function call | ~2-3 μs/function call* |
+| **IDE Support** | LSP planned (v0.1.0) | Excellent (built-in) |
+| **Learning Curve** | Moderate (Rust-like syntax) | Easy (Python-like) |
+| **Refactoring Safety** | High (type checker catches breaks) | Medium (manual testing needed) |
+| **Godot Integration** | Via GDExtension | Native |
+| **Hot Reload** | Planned (v0.1.0) | Yes |
+| **Maturity** | Alpha (v0.0.2) | Production-ready |
+
+\* Performance comparison is preliminary and varies by use case. See [BENCHMARK_BASELINE.md](docs/BENCHMARK_BASELINE.md) for details.
+
+**When to Choose FerrisScript**:
+
+- You prefer static typing and compile-time safety
+- Coming from Rust/TypeScript/C# background
+- Building complex systems that benefit from type checking
+- Want performance predictability (no GC pauses)
+
+**When to Choose GDScript**:
+
+- Prototyping and rapid iteration
+- Small to medium projects
+- Prefer dynamic typing flexibility
+- Want seamless Godot editor integration
+
+**Use Both**: FerrisScript and GDScript can coexist in the same project. Use FerrisScript for performance-critical systems and GDScript for rapid prototyping.
 
 ## ✨ Features
 
@@ -139,6 +200,34 @@ FerrisScript supports the following types:
 - **Godot Types**: `Vector2`, `Node`, `Node2D`
 - **Type Inference**: Literals are automatically typed
 - **Type Coercion**: `i32` → `f32` automatic conversion
+
+### ⚡ Performance Characteristics
+
+FerrisScript is designed for **game scripting performance** with predictable overhead:
+
+| Operation | Performance | Notes |
+|-----------|-------------|-------|
+| **Lexer** | 384 ns - 3.74 μs | Per-script compilation |
+| **Parser** | 600 ns - 7.94 μs | Per-script compilation |
+| **Type Checker** | 851 ns - 3.58 μs | Per-script compilation |
+| **Function Call** | ~1.05 μs | Per-call overhead at runtime |
+| **Loop Iteration** | ~180 ns | Per-iteration overhead |
+
+**Real-World Performance**:
+
+- **60 FPS Budget**: 16.67 ms per frame
+- **Function Calls/Frame**: ~16,000 calls possible at 60 FPS
+- **Compilation**: Sub-millisecond for typical game scripts
+- **Memory**: Minimal overhead (~1 KB per script)
+
+**Optimization Tips**:
+
+1. **Cache Frequently Used Values**: Store `self.position` in local variables
+2. **Minimize Cross-Boundary Calls**: Batch operations when possible
+3. **Use Appropriate Types**: `f32` for game math, `i32` for counters
+4. **Profile First**: Use Godot's profiler to identify bottlenecks
+
+See [BENCHMARK_BASELINE.md](docs/BENCHMARK_BASELINE.md) for detailed performance analysis and methodology.
 
 ## 🏗️ Project Structure
 

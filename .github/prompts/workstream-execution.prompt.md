@@ -417,14 +417,22 @@ cargo clippy --workspace --tests
 cargo fmt --all
 # Report: "✅ Code formatted"
 
-# Documentation (if applicable)
+# Documentation linting (ALWAYS RUN - FerrisScript Specific)
+npm run docs:fix
+# Report: "✅ Documentation linting issues auto-fixed"
+
+# Verify documentation clean
 npm run docs:lint
-# Report: "✅ Markdown linting passes"
+# Report: "✅ Markdown linting passes with no errors"
 
 # Review
 git status && git diff
 # Report files changed
 ```
+
+**⚠️ CRITICAL - FerrisScript Project Rule:**
+**ALWAYS run `npm run docs:fix` before creating PR or end-of-prompt summary.**
+This auto-fixes markdown linting issues and reduces CI usage for trivial formatting.
 
 ### After Push (Set Expectations)
 
@@ -432,11 +440,12 @@ git status && git diff
 ⚠️ **Always mention to user:**
 
 "PR created! Note: You may need to run:
-- lint:fix (for any remaining style issues)
 - Link checking (if documentation changed)
 - Cross-platform validation (CI will test Linux/macOS)
 
 Let me know if you need me to make any adjustments!"
+
+Note: docs:fix was already run automatically before commit.
 ```
 
 **Key: Report results, don't ask "Should I run X?" - just run it.**
