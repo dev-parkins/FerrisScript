@@ -76,6 +76,81 @@ When suggesting a feature, please include:
 
 Use the [feature request template](.github/ISSUE_TEMPLATE/feature_request.md) when creating your issue.
 
+### Understanding Issue Labels
+
+FerrisScript uses a comprehensive label system to organize issues and pull requests. Understanding these labels helps you find tasks that match your interests and skill level.
+
+#### Label Categories
+
+**Priority Labels** (urgency):
+
+- `P0-Critical` 🔴 - Critical bugs or blockers requiring immediate attention
+- `P1-High` 🟠 - High priority tasks that should be addressed soon  
+- `P2-Medium` 🟡 - Medium priority tasks for regular workflow
+- `P3-Low` 🟢 - Low priority tasks or nice-to-have improvements
+
+**Type Labels** (nature of work):
+
+- `bug` 🐛 - Something isn't working correctly
+- `feature` ✨ - New feature or functionality request
+- `documentation` 📖 - Documentation improvements or additions
+- `enhancement` ⚡ - Improvement to existing functionality
+- `question` ❓ - Questions or clarifications needed
+- `discussion` 💬 - General discussion topics
+
+**Status Labels** (current state):
+
+- `needs-triage` 🏷️ - New issue awaiting initial review
+- `in-progress` 🚧 - Work is actively being done
+- `blocked` 🚫 - Blocked by external dependencies
+- `wontfix` ⛔ - Issue will not be addressed (with explanation)
+
+**Difficulty Labels** (skill level):
+
+- `good-first-issue` 🌱 - Good for newcomers to the project
+- `intermediate` 🌿 - Requires moderate knowledge of codebase  
+- `advanced` 🌳 - Requires deep understanding of architecture
+
+**Component Labels** (codebase area):
+
+- `compiler` - Related to lexer, parser, type checker
+- `runtime` - Related to execution environment
+- `godot-bind` - Related to Godot GDExtension bindings
+- `docs` - Related to documentation (not code)
+- `ci` - Related to CI/CD, GitHub Actions, workflows
+
+#### How to Use Labels
+
+**Finding Issues to Work On:**
+
+```
+# Good for beginners
+https://github.com/dev-parkins/FerrisScript/issues?q=is:open+label:good-first-issue
+
+# Documentation improvements
+https://github.com/dev-parkins/FerrisScript/issues?q=is:open+label:documentation
+
+# High priority bugs
+https://github.com/dev-parkins/FerrisScript/issues?q=is:open+label:P1-High+label:bug
+
+# Compiler-related work
+https://github.com/dev-parkins/FerrisScript/issues?q=is:open+label:compiler
+```
+
+**When Creating Issues:**
+
+- Maintainers will add appropriate labels during triage
+- You can suggest labels in your issue description
+- Labels help us prioritize and organize work
+
+**When Working on Issues:**
+
+- Check labels to understand priority and scope
+- Look for `good-first-issue` if you're new
+- Issues with `needs-triage` may need more discussion
+
+For complete label documentation, see [`docs/GITHUB_LABELS.md`](docs/GITHUB_LABELS.md).
+
 ### Contributing Documentation
 
 Documentation improvements are always appreciated! This includes:
@@ -528,9 +603,9 @@ Currently, Godot integration testing is deferred as it requires manual setup. Se
 New to open source? Welcome! Here's how to get started:
 
 1. **Look for beginner-friendly issues** labeled:
-   - `good first issue` - Ideal for newcomers
-   - `documentation` - Documentation improvements
-   - `help wanted` - We need contributors for these
+   - [`good-first-issue`](https://github.com/dev-parkins/FerrisScript/issues?q=is:open+label:good-first-issue) - Ideal for newcomers
+   - [`documentation`](https://github.com/dev-parkins/FerrisScript/issues?q=is:open+label:documentation) - Documentation improvements
+   - [`intermediate`](https://github.com/dev-parkins/FerrisScript/issues?q=is:open+label:intermediate) - Once you're comfortable with the basics
 
 2. **Start small**:
    - Fix a typo in documentation
