@@ -53,7 +53,7 @@ This folder contains detailed roadmaps for each development version on the path 
 **Key Deliverables**:
 
 - 🔥 Signal support (define, emit, connect)
-- Additional callbacks (_input, _physics_process, _enter_tree, _exit_tree)
+- Additional callbacks (_input,_physics_process,_enter_tree,_exit_tree)
 - Node query functions (get_node, get_parent, has_node, find_child)
 - Additional Godot types (Color, Rect2, Transform2D)
 - Custom property exports (@export)
