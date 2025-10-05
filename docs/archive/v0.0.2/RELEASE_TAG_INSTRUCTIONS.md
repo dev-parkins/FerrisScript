@@ -46,6 +46,7 @@ See CHANGELOG.md for complete details."
 ```
 
 **Verification**:
+
 ```powershell
 # Verify tag created
 git tag -l v0.0.2
@@ -88,6 +89,7 @@ gh release create v0.0.2 `
    - Choose existing tag: `v0.0.2`
 
 3. **Release Title**:
+
    ```
    v0.0.2: Community Foundation 🦀✨
    ```
@@ -114,6 +116,7 @@ gh release create v0.0.2 `
 Visit: https://github.com/dev-parkins/FerrisScript/releases/tag/v0.0.2
 
 **Verify**:
+
 - ✅ Title displays correctly
 - ✅ Description formatted properly (headings, code blocks, lists)
 - ✅ Tag shows `v0.0.2`
@@ -202,6 +205,7 @@ git push origin v0.0.2 --force
 3. Attach to GitHub release via `gh release upload` or web interface
 
 **Version Numbering**: v0.0.2 follows semantic versioning:
+
 - Major: 0 (pre-1.0 development)
 - Minor: 0 (no breaking changes yet)
 - Patch: 2 (second patch release)

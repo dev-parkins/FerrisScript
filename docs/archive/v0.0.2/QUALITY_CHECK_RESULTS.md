@@ -13,6 +13,7 @@
 **Command**: `cargo test --workspace`
 
 **Results**:
+
 ```
 test result: ok. 90 passed; 0 failed; 0 ignored
 test result: ok. 5 passed; 0 failed; 0 ignored
@@ -41,6 +42,7 @@ test result: ok. 6 passed; 0 failed; 0 ignored
 **Command**: `cargo build --workspace`
 
 **Results**:
+
 - ferrisscript_compiler v0.0.2: ✅ Built successfully
 - ferrisscript_runtime v0.0.2: ✅ Built successfully
 - ferrisscript_godot_bind v0.0.2: ✅ Built successfully
@@ -59,6 +61,7 @@ test result: ok. 6 passed; 0 failed; 0 ignored
 **Command**: `npm run docs:lint`
 
 **Results**:
+
 - RELEASE_NOTES.md: ✅ Fixed (blank lines around fences, headings, lists)
 - CHANGELOG.md: ✅ Clean
 - README.md: ✅ Clean
