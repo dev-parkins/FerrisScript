@@ -124,14 +124,115 @@ Hello, Godot! FerrisScript is working!
 - Check FPS is stable (View → Show FPS)
 - Verify child sprite/visual element is present
 
+## ✏️ Adding New Test Scripts
+
+### Creating a New Test Script
+
+1. **Create the `.ferris` file** in `scripts/` directory:
+
+   ```bash
+   # Example: Create a new rotation test
+   touch godot_test/scripts/rotation_test.ferris
+   ```
+
+2. **Write your FerrisScript code**:
+
+   ```rust
+   fn _ready() {
+       print("Rotation test initialized!");
+   }
+   
+   fn _process(delta: f32) {
+       // Rotate the node
+       self.rotation = self.rotation + (1.0 * delta);
+   }
+   ```
+
+3. **Add the script to a scene**:
+   - Open `test_scene.tscn` in Godot
+   - Add a new Node2D or use existing FerrisScriptNode
+   - Set `script_path` to `res://scripts/rotation_test.ferris`
+
+4. **Test the script**:
+   - Press F5 to run the scene
+   - Verify expected behavior in output/visually
+   - Check for errors in Godot console
+
+### Test Script Template
+
+Use this template for new test scripts:
+
+```rust
+// Test: [Brief description]
+// Expected: [Expected behavior]
+
+fn _ready() {
+    print("Test initialized: [test name]");
+    // Setup code here
+}
+
+fn _process(delta: f32) {
+    // Per-frame logic here
+}
+```
+
+### Testing Best Practices
+
+- **Start simple**: Test one feature at a time
+- **Print debug info**: Use `print()` to verify values
+- **Test incrementally**: Build complexity gradually
+- **Document expectations**: Add comments explaining expected behavior
+- **Clean up**: Remove or comment out debug prints when test passes
+
+### Common Test Patterns
+
+**Testing Position**:
+
+```rust
+fn _process(delta: f32) {
+    self.position.x = self.position.x + (50.0 * delta);
+    print("Position: ");
+    print(self.position.x);
+}
+```
+
+**Testing State**:
+
+```rust
+fn _ready() {
+    let mut counter: i32 = 0;
+}
+
+fn _process(delta: f32) {
+    counter = counter + 1;
+    if counter > 60 {
+        print("One second passed!");
+        counter = 0;
+    }
+}
+```
+
+**Testing Conditionals**:
+
+```rust
+fn _process(delta: f32) {
+    if self.position.x > 100.0 {
+        print("Reached target position!");
+    } else {
+        self.position.x = self.position.x + (50.0 * delta);
+    }
+}
+```
+
 ## 📚 Additional Resources
 
 - **Main Documentation**: See `../README.md`
-- **Phase Testing Guides**: See `../docs/PHASE*_TESTING.md`
-- **Development Checklist**: See `../docs/copilot-checklist.md`
+- **Testing Guide**: See `../docs/v0.0.2/TESTING.md`
+- **Example Scripts**: See `../examples/` directory
+- **Contributing**: See `../CONTRIBUTING.md`
 
 ---
 
-**Last Updated**: October 1, 2025  
-**Godot Version**: 4.5  
-**Extension Version**: 0.0.1
+**Last Updated**: October 5, 2025  
+**Godot Version**: 4.2+  
+**FerrisScript Version**: 0.0.2

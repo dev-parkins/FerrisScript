@@ -42,8 +42,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time error checking
 - Semantic highlighting
 - Code actions and quick fixes
-
----
-
-[0.1.0]: https://github.com/dev-parkins/FerrisScript/releases/tag/v0.0.2
-[Unreleased]: https://github.com/dev-parkins/FerrisScript/compare/v0.0.2...HEAD
