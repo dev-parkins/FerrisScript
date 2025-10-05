@@ -230,6 +230,17 @@ Code contributions are welcome for:
 2. **Wait for feedback** from maintainers to ensure alignment
 3. **Create a feature branch** from `main` for your work
 
+#### Maintaining Syntax Highlighting
+
+When adding new language features (keywords, operators, types, syntax constructs), you must update the VS Code syntax highlighting:
+
+1. Edit `extensions/vscode/syntaxes/ferrisscript.tmLanguage.json` to add the new patterns
+2. Test the highlighting on `.ferris` example files
+3. Update `extensions/vscode/CHANGELOG.md` to document the changes
+4. Consider adding relevant code snippets to `extensions/vscode/snippets/ferrisscript.json`
+
+See [SYNTAX_HIGHLIGHTING_MAINTENANCE.md](docs/SYNTAX_HIGHLIGHTING_MAINTENANCE.md) for detailed instructions, examples, and a quarterly audit checklist.
+
 ## Development Environment Setup
 
 ### Prerequisites

@@ -84,6 +84,33 @@ FerrisScript (named after [Ferris 🦀](https://rustacean.net/), the Rust mascot
 - 🎯 **Zero-Cost Abstractions** - Compiled to efficient runtime execution
 - 📦 **Minimal Dependencies** - Lightweight and fast compilation
 
+## 🎨 Editor Support
+
+### VS Code Extension
+
+FerrisScript has syntax highlighting and code snippets for Visual Studio Code:
+
+- **Syntax Highlighting**: Keywords (`fn`, `let`, `mut`, `if`, `else`, `while`, `return`), types (`i32`, `f32`, `bool`, `String`, `Vector2`, `Node`), operators, comments, strings
+- **Code Snippets**: `_ready`, `_process`, `let`, `fn`, `if`, `while`, and more
+- **Auto-closing**: Brackets, quotes, comment toggling
+- **Language Configuration**: Folding, indentation, word patterns
+
+**Installation**: Copy `extensions/vscode/` to your VS Code extensions folder:
+
+```bash
+# Windows
+cp -r extensions/vscode ~/.vscode/extensions/ferrisscript-0.1.0
+
+# Or use a symbolic link for development
+mklink /D "%USERPROFILE%\.vscode\extensions\ferrisscript-0.1.0" "path\to\FerrisScript\extensions\vscode"
+```
+
+**Reload VS Code**: Press `Ctrl+Shift+P` → "Developer: Reload Window"
+
+See [extensions/vscode/README.md](extensions/vscode/README.md) for full features, snippet reference, and known limitations.
+
+**Future**: IntelliSense (completion, hover, go-to-definition) coming in v0.0.5 with LSP implementation.
+
 ## 🚀 Quick Start
 
 ### Prerequisites
