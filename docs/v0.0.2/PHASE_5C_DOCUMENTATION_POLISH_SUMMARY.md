@@ -109,6 +109,7 @@ Phase 5C successfully completed comprehensive documentation polish for v0.0.2, i
 **Root Cause**: Earlier phases completed these items without updating the roadmap/checklist.
 
 **Items Present**:
+
 1. "Why FerrisScript?" section - Already added in earlier work
 2. GDScript comparison table - Already comprehensive
 3. Performance notes - Already included in comparison
