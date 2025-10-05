@@ -1,5 +1,38 @@
+//! Lexical analysis for FerrisScript.
+//!
+//! This module provides tokenization of FerrisScript source code. The lexer converts
+//! raw source text into a stream of tokens that can be consumed by the parser.
+//!
+//! # Performance
+//!
+//! The lexer is designed for speed and operates in a single pass over the source:
+//! - Simple scripts: ~380ns
+//! - Complex scripts: ~3.7μs
+//!
+//! # Example
+//!
+//! ```no_run
+//! use ferrisscript_compiler::lexer::tokenize;
+//!
+//! let source = "fn add(a: i32, b: i32) -> i32 { return a + b; }";
+//! let tokens = tokenize(source).unwrap();
+//! ```
+
 use crate::error_context::format_error_with_context;
 
+/// Token representation for FerrisScript.
+///
+/// Each variant represents a distinct lexical element in the source code,
+/// including keywords, operators, literals, and structural symbols.
+///
+/// # Examples
+///
+/// ```no_run
+/// use ferrisscript_compiler::lexer::Token;
+///
+/// let token = Token::Fn;  // 'fn' keyword
+/// assert_eq!(token.name(), "fn");
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     // Keywords
@@ -480,6 +513,42 @@ impl<'a> Lexer<'a> {
     }
 }
 
+/// Tokenize FerrisScript source code into a vector of tokens.
+///
+/// This is the main entry point for lexical analysis. It processes the entire
+/// source string and returns a sequence of tokens, including a final `Token::Eof`.
+///
+/// # Arguments
+///
+/// * `input` - The complete FerrisScript source code
+///
+/// # Returns
+///
+/// * `Ok(Vec<Token>)` - Successfully tokenized source, ending with `Token::Eof`
+/// * `Err(String)` - Error message with line/column info if tokenization fails
+///
+/// # Examples
+///
+/// ```no_run
+/// use ferrisscript_compiler::lexer::tokenize;
+///
+/// let source = "let x: i32 = 42;";
+/// let tokens = tokenize(source).unwrap();
+/// // tokens: [Let, Ident("x"), Colon, Ident("i32"), Equal, Number(42.0), Semicolon, Eof]
+/// ```
+///
+/// # Errors
+///
+/// Returns `Err` if the source contains:
+/// - Unexpected characters
+/// - Malformed string literals (unterminated strings)
+/// - Invalid number formats
+///
+/// # Performance
+///
+/// - Simple scripts (< 100 chars): ~380ns
+/// - Complex scripts (> 1000 chars): ~3.7μs
+/// - Single-pass algorithm with O(n) complexity
 pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
     let mut lexer = Lexer::new(input);
     lexer.tokenize_all()

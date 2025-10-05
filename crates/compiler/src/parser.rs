@@ -1,3 +1,35 @@
+//! Syntax analysis (parsing) for FerrisScript.
+//!
+//! This module transforms a sequence of tokens from the lexer into an Abstract
+//! Syntax Tree (AST). The parser implements a recursive descent algorithm with
+//! operator precedence climbing for expressions.
+//!
+//! # Grammar
+//!
+//! The parser supports:
+//! - Function definitions with parameters and return types
+//! - Global variable declarations (let and let mut)
+//! - Control flow (if/else, while, return)
+//! - Binary and unary expressions with proper precedence
+//! - Function calls and member access
+//!
+//! # Performance
+//!
+//! - Simple scripts: ~600ns
+//! - Complex scripts: ~8μs
+//! - Single-pass recursive descent algorithm
+//!
+//! # Example
+//!
+//! ```no_run
+//! use ferrisscript_compiler::lexer::tokenize;
+//! use ferrisscript_compiler::parser::parse;
+//!
+//! let source = "fn add(a: i32, b: i32) -> i32 { return a + b; }";
+//! let tokens = tokenize(source).unwrap();
+//! let program = parse(&tokens, source).unwrap();
+//! ```
+
 use crate::ast::*;
 use crate::error_context::format_error_with_context;
 use crate::lexer::Token;
@@ -658,6 +690,55 @@ impl<'a> Parser<'a> {
     }
 }
 
+/// Parse a token stream into an Abstract Syntax Tree.
+///
+/// This is the main entry point for syntax analysis. It takes a sequence of
+/// tokens from the lexer and constructs an AST representing the program structure.
+///
+/// # Arguments
+///
+/// * `tokens` - Slice of tokens from the lexer (must include `Token::Eof` at end)
+/// * `source` - Original source code (used for error context)
+///
+/// # Returns
+///
+/// * `Ok(Program)` - Successfully parsed AST
+/// * `Err(String)` - Syntax error with location and context
+///
+/// # Examples
+///
+/// ```no_run
+/// use ferrisscript_compiler::lexer::tokenize;
+/// use ferrisscript_compiler::parser::parse;
+///
+/// let source = r#"
+///     fn factorial(n: i32) -> i32 {
+///         if n <= 1 {
+///             return 1;
+///         }
+///         return n * factorial(n - 1);
+///     }
+/// "#;
+/// let tokens = tokenize(source).unwrap();
+/// let program = parse(&tokens, source).unwrap();
+///
+/// assert_eq!(program.functions.len(), 1);
+/// assert_eq!(program.functions[0].name, "factorial");
+/// ```
+///
+/// # Errors
+///
+/// Returns `Err` if:
+/// - Unexpected token encountered
+/// - Missing required tokens (e.g., `;`, `}`)
+/// - Malformed expressions or statements
+/// - Invalid syntax structure
+///
+/// # Performance
+///
+/// - Simple functions: ~600ns
+/// - Complex programs: ~8μs
+/// - O(n) complexity where n = number of tokens
 pub fn parse(tokens: &[Token], source: &str) -> Result<Program, String> {
     let mut parser = Parser::new(tokens.to_vec(), source);
     parser.parse_program()

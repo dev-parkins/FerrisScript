@@ -1,10 +1,92 @@
+//! FerrisScript Compiler
+//!
+//! This crate provides the complete compilation pipeline for FerrisScript, a Rust-inspired
+//! scripting language for the Godot game engine.
+//!
+//! # Overview
+//!
+//! The compiler transforms FerrisScript source code through several stages:
+//!
+//! 1. **Lexical Analysis** ([`lexer`]): Converts source text into tokens
+//! 2. **Parsing** ([`parser`]): Builds an Abstract Syntax Tree (AST) from tokens
+//! 3. **Type Checking** ([`type_checker`]): Verifies type correctness and safety
+//!
+//! # Quick Start
+//!
+//! ```no_run
+//! use ferrisscript_compiler::compile;
+//!
+//! let source = r#"
+//!     fn add(a: i32, b: i32) -> i32 {
+//!         return a + b;
+//!     }
+//! "#;
+//!
+//! match compile(source) {
+//!     Ok(program) => println!("Compilation successful!"),
+//!     Err(e) => eprintln!("Compilation error: {}", e),
+//! }
+//! ```
+//!
+//! # Modules
+//!
+//! - [`ast`]: Abstract Syntax Tree node definitions
+//! - [`error_context`]: Error formatting with source context
+//! - [`lexer`]: Lexical analysis (tokenization)
+//! - [`parser`]: Syntax analysis (AST generation)
+//! - [`type_checker`]: Semantic analysis (type checking)
+
 pub mod ast;
 pub mod error_context;
 pub mod lexer;
 pub mod parser;
 pub mod type_checker;
 
-/// Compile RustyScript source to AST
+/// Compile FerrisScript source code to an Abstract Syntax Tree (AST).
+///
+/// This is the main entry point for the compiler. It performs lexical analysis,
+/// parsing, and type checking in sequence, returning either a validated AST
+/// or a descriptive error message with source context.
+///
+/// # Arguments
+///
+/// * `source` - The complete FerrisScript source code as a string
+///
+/// # Returns
+///
+/// * `Ok(Program)` - A validated AST ready for execution
+/// * `Err(String)` - A formatted error message with line/column information and source context
+///
+/// # Examples
+///
+/// ```no_run
+/// use ferrisscript_compiler::compile;
+///
+/// // Simple function definition
+/// let source = "fn greet() { print(\"Hello!\"); }";
+/// let program = compile(source).unwrap();
+///
+/// // With type annotations
+/// let source = r#"
+///     fn calculate(x: f32, y: f32) -> f32 {
+///         return x * y + 10.0;
+///     }
+/// "#;
+/// let program = compile(source).unwrap();
+/// ```
+///
+/// # Errors
+///
+/// Returns `Err` if:
+/// - Source contains invalid tokens (lexer errors)
+/// - Syntax is malformed (parser errors)
+/// - Types are incompatible (type checker errors)
+///
+/// Error messages include:
+/// - Line and column numbers
+/// - Source code context (±2 lines)
+/// - Visual pointer to error location
+/// - Helpful hint about the issue
 pub fn compile(source: &str) -> Result<ast::Program, String> {
     let tokens = lexer::tokenize(source)?;
     let ast = parser::parse(&tokens, source)?;
