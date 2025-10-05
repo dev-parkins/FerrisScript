@@ -1,17 +1,20 @@
 use crate::ast::*;
+use crate::error_context::format_error_with_context;
 use crate::lexer::Token;
 
-struct Parser {
+struct Parser<'a> {
     tokens: Vec<Token>,
+    source: &'a str, // Keep source for error context
     position: usize,
     current_line: usize,
     current_column: usize,
 }
 
-impl Parser {
-    fn new(tokens: Vec<Token>) -> Self {
+impl<'a> Parser<'a> {
+    fn new(tokens: Vec<Token>, source: &'a str) -> Self {
         Parser {
             tokens,
+            source,
             position: 0,
             current_line: 1,
             current_column: 1,
@@ -42,12 +45,19 @@ impl Parser {
         if std::mem::discriminant(current) == std::mem::discriminant(&expected) {
             Ok(self.advance())
         } else {
-            Err(format!(
+            let base_msg = format!(
                 "Expected {}, found {} at line {}, column {}",
                 expected.name(),
                 current.name(),
                 self.current_line,
                 self.current_column
+            );
+            Err(format_error_with_context(
+                &base_msg,
+                self.source,
+                self.current_line,
+                self.current_column,
+                &format!("Expected {}", expected.name()),
             ))
         }
     }
@@ -66,11 +76,18 @@ impl Parser {
             } else if matches!(self.current(), Token::Fn) {
                 program.functions.push(self.parse_function()?);
             } else {
-                return Err(format!(
+                let base_msg = format!(
                     "Expected 'fn' or 'let' at top level, found {} at line {}, column {}",
                     self.current().name(),
                     self.current_line,
                     self.current_column
+                );
+                return Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.current_line,
+                    self.current_column,
+                    "Only function or global variable declarations allowed at top level",
                 ));
             }
         }
@@ -92,10 +109,19 @@ impl Parser {
         let name = match self.advance() {
             Token::Ident(n) => n,
             t => {
-                return Err(format!(
-                    "Expected identifier after 'let', found {}",
-                    t.name()
-                ))
+                let base_msg = format!(
+                    "Expected identifier after 'let', found {} at line {}, column {}",
+                    t.name(),
+                    self.current_line,
+                    self.current_column
+                );
+                return Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.current_line,
+                    self.current_column,
+                    "Variable name must be an identifier",
+                ));
             }
         };
 
@@ -103,7 +129,21 @@ impl Parser {
             self.advance();
             match self.advance() {
                 Token::Ident(t) => Some(t),
-                t => return Err(format!("Expected type, found {}", t.name())),
+                t => {
+                    let base_msg = format!(
+                        "Expected type, found {} at line {}, column {}",
+                        t.name(),
+                        self.current_line,
+                        self.current_column
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        self.current_line,
+                        self.current_column,
+                        "Type annotation must be a valid type name (e.g., i32, f32, bool)",
+                    ));
+                }
             }
         } else {
             None
@@ -128,7 +168,21 @@ impl Parser {
 
         let name = match self.advance() {
             Token::Ident(n) => n,
-            t => return Err(format!("Expected function name, found {}", t.name())),
+            t => {
+                let base_msg = format!(
+                    "Expected function name, found {} at line {}, column {}",
+                    t.name(),
+                    self.current_line,
+                    self.current_column
+                );
+                return Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.current_line,
+                    self.current_column,
+                    "Function name must be an identifier",
+                ));
+            }
         };
 
         self.expect(Token::LParen)?;
@@ -138,14 +192,42 @@ impl Parser {
             let param_span = self.span();
             let param_name = match self.advance() {
                 Token::Ident(n) => n,
-                t => return Err(format!("Expected parameter name, found {}", t.name())),
+                t => {
+                    let base_msg = format!(
+                        "Expected parameter name, found {} at line {}, column {}",
+                        t.name(),
+                        self.current_line,
+                        self.current_column
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        self.current_line,
+                        self.current_column,
+                        "Parameter name must be an identifier",
+                    ));
+                }
             };
 
             self.expect(Token::Colon)?;
 
             let param_type = match self.advance() {
                 Token::Ident(t) => t,
-                t => return Err(format!("Expected parameter type, found {}", t.name())),
+                t => {
+                    let base_msg = format!(
+                        "Expected parameter type, found {} at line {}, column {}",
+                        t.name(),
+                        self.current_line,
+                        self.current_column
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        self.current_line,
+                        self.current_column,
+                        "Parameter type must be a valid type name (e.g., i32, f32, bool)",
+                    ));
+                }
             };
 
             params.push(Param {
@@ -165,18 +247,43 @@ impl Parser {
 
         let return_type = if matches!(self.current(), Token::Minus) {
             self.advance();
-        if matches!(self.current(), Token::Greater) {
-            self.advance();
-            match self.advance() {
-                Token::Ident(t) => Some(t),
-                t => return Err(format!("Expected return type, found {}", t.name())),
+            if matches!(self.current(), Token::Greater) {
+                self.advance();
+                match self.advance() {
+                    Token::Ident(t) => Some(t),
+                    t => {
+                        let base_msg = format!(
+                            "Expected return type, found {} at line {}, column {}",
+                            t.name(),
+                            self.current_line,
+                            self.current_column
+                        );
+                        return Err(format_error_with_context(
+                            &base_msg,
+                            self.source,
+                            self.current_line,
+                            self.current_column,
+                            "Return type must be a valid type name (e.g., i32, f32, bool)",
+                        ));
+                    }
+                }
+            } else {
+                let base_msg = format!(
+                    "Expected '>' after '-' in return type at line {}, column {}",
+                    self.current_line, self.current_column
+                );
+                return Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.current_line,
+                    self.current_column,
+                    "Function return type syntax is '-> Type'",
+                ));
             }
         } else {
-            return Err("Expected '>' after '-' in return type".to_string());
-        }
-    } else {
-        None
-    };        self.expect(Token::LBrace)?;
+            None
+        };
+        self.expect(Token::LBrace)?;
 
         let mut body = Vec::new();
         while !matches!(self.current(), Token::RBrace) {
@@ -230,12 +337,8 @@ impl Parser {
                             _ => unreachable!(),
                         };
 
-                        let value = Expr::Binary(
-                            Box::new(expr.clone()),
-                            binary_op,
-                            Box::new(rhs),
-                            span,
-                        );
+                        let value =
+                            Expr::Binary(Box::new(expr.clone()), binary_op, Box::new(rhs), span);
 
                         Ok(Stmt::Assign {
                             target: expr,
@@ -266,10 +369,19 @@ impl Parser {
         let name = match self.advance() {
             Token::Ident(n) => n,
             t => {
-                return Err(format!(
-                    "Expected identifier after 'let', found {}",
-                    t.name()
-                ))
+                let base_msg = format!(
+                    "Expected identifier after 'let', found {} at line {}, column {}",
+                    t.name(),
+                    self.current_line,
+                    self.current_column
+                );
+                return Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.current_line,
+                    self.current_column,
+                    "Variable name must be an identifier",
+                ));
             }
         };
 
@@ -277,7 +389,21 @@ impl Parser {
             self.advance();
             match self.advance() {
                 Token::Ident(t) => Some(t),
-                t => return Err(format!("Expected type, found {}", t.name())),
+                t => {
+                    let base_msg = format!(
+                        "Expected type, found {} at line {}, column {}",
+                        t.name(),
+                        self.current_line,
+                        self.current_column
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        self.current_line,
+                        self.current_column,
+                        "Type annotation must be a valid type name (e.g., i32, f32, bool)",
+                    ));
+                }
             }
         } else {
             None
@@ -371,7 +497,21 @@ impl Parser {
                 self.advance();
                 let field = match self.advance() {
                     Token::Ident(name) => name,
-                    t => return Err(format!("Expected field name after '.', found {}", t.name())),
+                    t => {
+                        let base_msg = format!(
+                            "Expected field name after '.', found {} at line {}, column {}",
+                            t.name(),
+                            self.current_line,
+                            self.current_column
+                        );
+                        return Err(format_error_with_context(
+                            &base_msg,
+                            self.source,
+                            self.current_line,
+                            self.current_column,
+                            "Field name must be an identifier (e.g., object.field_name)",
+                        ));
+                    }
                 };
                 let span = left.span();
                 left = Expr::FieldAccess(Box::new(left), field, span);
@@ -499,13 +639,27 @@ impl Parser {
             Token::GreaterEqual => Ok(BinaryOp::Ge),
             Token::And => Ok(BinaryOp::And),
             Token::Or => Ok(BinaryOp::Or),
-            t => Err(format!("Not a binary operator: {}", t.name())),
+            t => {
+                let base_msg = format!(
+                    "Not a binary operator: {} at line {}, column {}",
+                    t.name(),
+                    self.current_line,
+                    self.current_column
+                );
+                Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.current_line,
+                    self.current_column,
+                    "Valid binary operators: +, -, *, /, ==, !=, <, <=, >, >=, and, or",
+                ))
+            }
         }
     }
 }
 
-pub fn parse(tokens: &[Token]) -> Result<Program, String> {
-    let mut parser = Parser::new(tokens.to_vec());
+pub fn parse(tokens: &[Token], source: &str) -> Result<Program, String> {
+    let mut parser = Parser::new(tokens.to_vec(), source);
     parser.parse_program()
 }
 
@@ -516,8 +670,9 @@ mod tests {
 
     #[test]
     fn test_parse_empty() {
+        let source = "";
         let tokens = vec![Token::Eof];
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, source).unwrap();
         assert_eq!(program.functions.len(), 0);
         assert_eq!(program.global_vars.len(), 0);
     }
@@ -526,7 +681,7 @@ mod tests {
     fn test_parse_simple_function() {
         let input = "fn test() {}";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         assert_eq!(program.functions.len(), 1);
         assert_eq!(program.functions[0].name, "test");
@@ -538,7 +693,7 @@ mod tests {
     fn test_parse_function_with_params() {
         let input = "fn add(x: i32, y: i32) {}";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         assert_eq!(program.functions.len(), 1);
         let func = &program.functions[0];
@@ -554,11 +709,13 @@ mod tests {
     fn test_parse_let_statement() {
         let input = "fn test() { let x = 5; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         assert_eq!(program.functions[0].body.len(), 1);
         match &program.functions[0].body[0] {
-            Stmt::Let { name, mutable, ty, .. } => {
+            Stmt::Let {
+                name, mutable, ty, ..
+            } => {
                 assert_eq!(name, "x");
                 assert_eq!(*mutable, false);
                 assert_eq!(*ty, None);
@@ -571,10 +728,12 @@ mod tests {
     fn test_parse_let_mut_with_type() {
         let input = "fn test() { let mut x: i32 = 5; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         match &program.functions[0].body[0] {
-            Stmt::Let { name, mutable, ty, .. } => {
+            Stmt::Let {
+                name, mutable, ty, ..
+            } => {
                 assert_eq!(name, "x");
                 assert_eq!(*mutable, true);
                 assert_eq!(ty.as_ref().unwrap(), "i32");
@@ -587,10 +746,14 @@ mod tests {
     fn test_parse_if_statement() {
         let input = "fn test() { if x > 5 { let y = 10; } }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         match &program.functions[0].body[0] {
-            Stmt::If { then_branch, else_branch, .. } => {
+            Stmt::If {
+                then_branch,
+                else_branch,
+                ..
+            } => {
                 assert_eq!(then_branch.len(), 1);
                 assert_eq!(else_branch.len(), 0);
             }
@@ -602,10 +765,14 @@ mod tests {
     fn test_parse_if_else_statement() {
         let input = "fn test() { if x { let a = 1; } else { let b = 2; } }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         match &program.functions[0].body[0] {
-            Stmt::If { then_branch, else_branch, .. } => {
+            Stmt::If {
+                then_branch,
+                else_branch,
+                ..
+            } => {
                 assert_eq!(then_branch.len(), 1);
                 assert_eq!(else_branch.len(), 1);
             }
@@ -617,7 +784,7 @@ mod tests {
     fn test_parse_while_statement() {
         let input = "fn test() { while x < 10 { x = x + 1; } }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         match &program.functions[0].body[0] {
             Stmt::While { body, .. } => {
@@ -631,7 +798,7 @@ mod tests {
     fn test_parse_expression_statement() {
         let input = "fn test() { print(5); }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         match &program.functions[0].body[0] {
             Stmt::Expr(Expr::Call(name, args, _)) => {
@@ -646,7 +813,7 @@ mod tests {
     fn test_parse_binary_expression() {
         let input = "fn test() { let x = 5 + 3 * 2; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         match &program.functions[0].body[0] {
             Stmt::Let { value, .. } => match value {
@@ -666,7 +833,7 @@ mod tests {
     fn test_parse_field_access() {
         let input = "fn test() { let x = self.position; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         match &program.functions[0].body[0] {
             Stmt::Let { value, .. } => match value {
@@ -687,7 +854,7 @@ mod tests {
     fn test_parse_chained_field_access() {
         let input = "fn test() { let x = self.position.x; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         match &program.functions[0].body[0] {
             Stmt::Let { value, .. } => match value {
@@ -714,7 +881,7 @@ mod tests {
     fn test_parse_assignment() {
         let input = "fn test() { x = 5; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         match &program.functions[0].body[0] {
             Stmt::Assign { target, .. } => match target {
@@ -729,7 +896,7 @@ mod tests {
     fn test_parse_compound_assignment() {
         let input = "fn test() { x += 5; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         match &program.functions[0].body[0] {
             Stmt::Assign { target, value, .. } => {
@@ -751,7 +918,7 @@ mod tests {
     fn test_parse_global_var() {
         let input = "let mut dir: f32 = 1.0;";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         assert_eq!(program.global_vars.len(), 1);
         let var = &program.global_vars[0];
@@ -766,7 +933,7 @@ mod tests {
     print("Hello from FerrisScript!");
 }"#;
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         assert_eq!(program.functions.len(), 1);
         assert_eq!(program.functions[0].name, "_ready");
@@ -780,7 +947,7 @@ mod tests {
     self.position.x += 50.0 * delta;
 }"#;
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         assert_eq!(program.functions.len(), 1);
         assert_eq!(program.functions[0].name, "_process");
@@ -804,7 +971,7 @@ fn _process(delta: f32) {
     }
 }"#;
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         assert_eq!(program.global_vars.len(), 1);
         assert_eq!(program.global_vars[0].name, "dir");
@@ -817,7 +984,7 @@ fn _process(delta: f32) {
     fn test_parse_return_statement() {
         let input = "fn test() -> i32 { return 42; }";
         let tokens = tokenize(input).unwrap();
-        let program = parse(&tokens).unwrap();
+        let program = parse(&tokens, input).unwrap();
 
         assert_eq!(program.functions[0].return_type, Some("i32".to_string()));
         match &program.functions[0].body[0] {
@@ -839,7 +1006,7 @@ fn _process(delta: f32) {
     fn test_parse_error_missing_brace() {
         let input = "fn test() {";
         let tokens = tokenize(input).unwrap();
-        let result = parse(&tokens);
+        let result = parse(&tokens, input);
         assert!(result.is_err());
     }
 }

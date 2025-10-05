@@ -1,3 +1,5 @@
+use crate::error_context::format_error_with_context;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     // Keywords
@@ -10,40 +12,40 @@ pub enum Token {
     Return,
     True,
     False,
-    
+
     // Literals
     Ident(String),
     Number(f32),
     StringLit(String),
-    
+
     // Delimiters
-    LParen,     // (
-    RParen,     // )
-    LBrace,     // {
-    RBrace,     // }
-    Comma,      // ,
-    Semicolon,  // ;
-    Dot,        // .
-    Colon,      // :
-    
+    LParen,    // (
+    RParen,    // )
+    LBrace,    // {
+    RBrace,    // }
+    Comma,     // ,
+    Semicolon, // ;
+    Dot,       // .
+    Colon,     // :
+
     // Operators
-    Plus,           // +
-    Minus,          // -
-    Star,           // *
-    Slash,          // /
-    Equal,          // =
-    EqualEqual,     // ==
-    NotEqual,       // !=
-    Less,           // <
-    LessEqual,      // <=
-    Greater,        // >
-    GreaterEqual,   // >=
-    And,            // &&
-    Or,             // ||
-    Not,            // !
-    PlusEqual,      // +=
-    MinusEqual,     // -=
-    
+    Plus,         // +
+    Minus,        // -
+    Star,         // *
+    Slash,        // /
+    Equal,        // =
+    EqualEqual,   // ==
+    NotEqual,     // !=
+    Less,         // <
+    LessEqual,    // <=
+    Greater,      // >
+    GreaterEqual, // >=
+    And,          // &&
+    Or,           // ||
+    Not,          // !
+    PlusEqual,    // +=
+    MinusEqual,   // -=
+
     // Special
     Eof,
 }
@@ -93,17 +95,19 @@ impl Token {
     }
 }
 
-struct Lexer {
+struct Lexer<'a> {
     input: Vec<char>,
+    source: &'a str, // Keep original source for error context
     position: usize,
     line: usize,
     column: usize,
 }
 
-impl Lexer {
-    fn new(input: &str) -> Self {
+impl<'a> Lexer<'a> {
+    fn new(input: &'a str) -> Self {
         Lexer {
             input: input.chars().collect(),
+            source: input,
             position: 0,
             line: 1,
             column: 1,
@@ -175,30 +179,34 @@ impl Lexer {
             }
         }
 
-        num_str
-            .parse::<f32>()
-            .map(Token::Number)
-            .map_err(|_| {
-                format!(
-                    "Invalid number '{}' at line {}, column {}",
-                    num_str, start_line, start_col
-                )
-            })
+        num_str.parse::<f32>().map(Token::Number).map_err(|_| {
+            format!(
+                "Invalid number '{}' at line {}, column {}",
+                num_str, start_line, start_col
+            )
+        })
     }
 
     fn read_string(&mut self) -> Result<Token, String> {
         let start_line = self.line;
         let start_col = self.column;
-        
+
         self.advance(); // consume opening quote
         let mut string = String::new();
 
         loop {
             match self.current() {
                 None => {
-                    return Err(format!(
+                    let base_msg = format!(
                         "Unterminated string at line {}, column {}",
                         start_line, start_col
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        start_line,
+                        start_col,
+                        "String must be closed with \"",
                     ));
                 }
                 Some('"') => {
@@ -229,15 +237,29 @@ impl Lexer {
                             self.advance();
                         }
                         Some(ch) => {
-                            return Err(format!(
+                            let base_msg = format!(
                                 "Invalid escape sequence '\\{}' at line {}, column {}",
                                 ch, self.line, self.column
+                            );
+                            return Err(format_error_with_context(
+                                &base_msg,
+                                self.source,
+                                self.line,
+                                self.column,
+                                &format!("Unknown escape '\\{}', valid escapes are \\n \\t \\r \\\\ \\\"", ch),
                             ));
                         }
                         None => {
-                            return Err(format!(
+                            let base_msg = format!(
                                 "Unterminated string at line {}, column {}",
                                 start_line, start_col
+                            );
+                            return Err(format_error_with_context(
+                                &base_msg,
+                                self.source,
+                                start_line,
+                                start_col,
+                                "String started here but never closed",
                             ));
                         }
                     }
@@ -353,26 +375,44 @@ impl Lexer {
                 }
             }
             '&' => {
+                let error_line = self.line;
+                let error_col = self.column;
                 self.advance();
                 if self.current() == Some('&') {
                     self.advance();
                     Token::And
                 } else {
-                    return Err(format!(
-                        "Unexpected character '&' at line {}, column {}. Did you mean '&&'?",
-                        self.line, self.column - 1
+                    let base_msg = format!(
+                        "Unexpected character '&' at line {}, column {}",
+                        error_line, error_col
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        error_line,
+                        error_col,
+                        "Did you mean '&&' for logical AND?",
                     ));
                 }
             }
             '|' => {
+                let error_line = self.line;
+                let error_col = self.column;
                 self.advance();
                 if self.current() == Some('|') {
                     self.advance();
                     Token::Or
                 } else {
-                    return Err(format!(
-                        "Unexpected character '|' at line {}, column {}. Did you mean '||'?",
-                        self.line, self.column - 1
+                    let base_msg = format!(
+                        "Unexpected character '|' at line {}, column {}",
+                        error_line, error_col
+                    );
+                    return Err(format_error_with_context(
+                        &base_msg,
+                        self.source,
+                        error_line,
+                        error_col,
+                        "Did you mean '||' for logical OR?",
                     ));
                 }
             }
@@ -409,9 +449,16 @@ impl Lexer {
                 Token::Colon
             }
             _ => {
-                return Err(format!(
+                let base_msg = format!(
                     "Unexpected character '{}' at line {}, column {}",
                     ch, self.line, self.column
+                );
+                return Err(format_error_with_context(
+                    &base_msg,
+                    self.source,
+                    self.line,
+                    self.column,
+                    "This character is not valid in FerrisScript",
                 ));
             }
         };
@@ -659,7 +706,7 @@ fn _process(delta: f32) {
     }
 }"#;
         let tokens = tokenize(input).unwrap();
-        
+
         // Verify key tokens are present
         assert!(tokens.contains(&Token::Let));
         assert!(tokens.contains(&Token::Mut));
@@ -741,14 +788,22 @@ fn test() {
     fn test_error_single_ampersand() {
         let result = tokenize("a & b");
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Did you mean '&&'?"));
+        let error = result.unwrap_err();
+        // Error now includes context, check for key parts
+        assert!(error.contains("Unexpected character '&'"));
+        assert!(error.contains("&&"));
+        assert!(error.contains("logical AND"));
     }
 
     #[test]
     fn test_error_single_pipe() {
         let result = tokenize("a | b");
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Did you mean '||'?"));
+        let error = result.unwrap_err();
+        // Error now includes context, check for key parts
+        assert!(error.contains("Unexpected character '|'"));
+        assert!(error.contains("||"));
+        assert!(error.contains("logical OR"));
     }
 
     #[test]
@@ -758,5 +813,152 @@ fn test() {
         assert_eq!(Token::Number(42.0).name(), "number");
         assert_eq!(Token::StringLit("test".to_string()).name(), "string");
         assert_eq!(Token::EqualEqual.name(), "==");
+    }
+
+    // ===== Edge Case Tests (v0.0.2) =====
+
+    #[test]
+    fn test_edge_case_comments_only_file() {
+        // Test file with only comments (no actual code)
+        let input = "// This is a comment\n// Another comment\n// More comments";
+        let tokens = tokenize(input).unwrap();
+        assert_eq!(
+            tokens,
+            vec![Token::Eof],
+            "File with only comments should produce only EOF token"
+        );
+    }
+
+    #[test]
+    fn test_edge_case_large_number_max() {
+        // Test parsing very large numbers (approaching i64::MAX when converted)
+        let input = "9223372036854775807"; // i64::MAX
+        let tokens = tokenize(input).unwrap();
+        assert_eq!(tokens.len(), 2); // Number + EOF
+        match &tokens[0] {
+            Token::Number(n) => {
+                assert!(*n > 0.0, "Large number should be positive");
+                assert!(n.is_finite(), "Large number should be finite");
+            }
+            _ => panic!("Expected Number token"),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_large_number_negative() {
+        // Test parsing very large negative numbers
+        let input = "-9223372036854775808"; // i64::MIN (as negative literal)
+        let tokens = tokenize(input).unwrap();
+        assert_eq!(tokens.len(), 3); // Minus + Number + EOF
+        assert_eq!(tokens[0], Token::Minus);
+        match &tokens[1] {
+            Token::Number(n) => {
+                assert!(*n > 0.0, "Number part should be positive");
+                assert!(n.is_finite(), "Large number should be finite");
+            }
+            _ => panic!("Expected Number token"),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_very_small_number() {
+        // Test parsing very small decimal numbers
+        let input = "0.000000001";
+        let tokens = tokenize(input).unwrap();
+        assert_eq!(tokens.len(), 2);
+        match &tokens[0] {
+            Token::Number(n) => {
+                assert!(*n > 0.0, "Small number should be positive");
+                assert!(*n < 0.001, "Number should be very small");
+                assert!(n.is_finite(), "Small number should be finite");
+            }
+            _ => panic!("Expected Number token"),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_very_long_identifier() {
+        // Test identifier with 1000 characters (stress test)
+        let long_name = "a".repeat(1000);
+        let tokens = tokenize(&long_name).unwrap();
+        assert_eq!(tokens.len(), 2); // Identifier + EOF
+        match &tokens[0] {
+            Token::Ident(name) => {
+                assert_eq!(name.len(), 1000, "Identifier should preserve full length");
+            }
+            _ => panic!("Expected Identifier token"),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_unicode_identifier() {
+        // Test identifiers with Unicode characters
+        let input = "函数名称 переменная μ α β";
+        let result = tokenize(input);
+        // Current implementation may not support Unicode identifiers
+        // This test documents the behavior
+        match result {
+            Ok(tokens) => {
+                // If it succeeds, verify tokens are created
+                assert!(tokens.len() > 1, "Should produce some tokens");
+            }
+            Err(e) => {
+                // If it fails, that's okay - documents that Unicode isn't supported yet
+                assert!(
+                    e.contains("Unexpected character") || e.contains("Invalid"),
+                    "Should give clear error for unsupported Unicode"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_edge_case_mixed_comments_and_code() {
+        // Test file with comments interspersed with code
+        let input = "// Start\nlet x = 5; // inline comment\n// Middle\nlet y = 10;\n// End";
+        let tokens = tokenize(input).unwrap();
+        // Should have: let, x, =, 5, ;, let, y, =, 10, ;, EOF
+        assert_eq!(tokens.len(), 11);
+        assert_eq!(tokens[0], Token::Let);
+        assert_eq!(tokens[1], Token::Ident("x".to_string()));
+    }
+
+    #[test]
+    fn test_edge_case_empty_string_literal() {
+        // Test empty string literal ""
+        let input = r#""""#;
+        let tokens = tokenize(input).unwrap();
+        assert_eq!(tokens.len(), 2); // String + EOF
+        match &tokens[0] {
+            Token::StringLit(s) => {
+                assert_eq!(s, "", "Empty string should be preserved");
+            }
+            _ => panic!("Expected String token"),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_multiple_dots() {
+        // Test multiple dots (could be confused with field access or range)
+        let input = "x...y";
+        let tokens = tokenize(input).unwrap();
+        // Should tokenize as: x, ., ., ., y
+        assert!(tokens.len() >= 5);
+        assert_eq!(tokens[0], Token::Ident("x".to_string()));
+        assert_eq!(tokens[1], Token::Dot);
+        assert_eq!(tokens[2], Token::Dot);
+        assert_eq!(tokens[3], Token::Dot);
+    }
+
+    #[test]
+    fn test_edge_case_consecutive_operators() {
+        // Test sequences of operators that shouldn't combine
+        let input = "+-*/";
+        let tokens = tokenize(input).unwrap();
+        assert_eq!(tokens.len(), 5); // 4 operators + EOF
+        assert_eq!(tokens[0], Token::Plus);
+        assert_eq!(tokens[1], Token::Minus);
+        assert_eq!(tokens[2], Token::Star);
+        assert_eq!(tokens[3], Token::Slash);
     }
 }

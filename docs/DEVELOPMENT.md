@@ -92,11 +92,32 @@ Check the roadmap in [ARCHITECTURE.md](ARCHITECTURE.md) or create an issue for n
 
 ### 2. Create a Branch
 
+Follow our **branch naming convention** to get the right PR template automatically:
+
 ```bash
-git checkout -b feat/your-feature-name
+# For bug fixes → Bug Fix PR template
+git checkout -b bugfix/your-bug-description
 # or
-git checkout -b fix/bug-description
+git checkout -b fix/parser-null-pointer
+
+# For new features → Feature PR template
+git checkout -b feature/your-feature-name
+# or
+git checkout -b feat/async-loading
+
+# For documentation → Documentation PR template
+git checkout -b docs/add-api-examples
+# or
+git checkout -b doc/update-readme
 ```
+
+**Why Branch Naming Matters:**
+
+- 🤖 **Auto-applies PR templates**: Correct template based on branch prefix
+- 📋 **Better organization**: Easy to identify PR types at a glance
+- ✅ **GitHub Copilot friendly**: Automated PRs get proper templates
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md#branch-naming-convention) for full details.
 
 ### 3. Make Changes
 
@@ -127,36 +148,38 @@ cargo clippy --workspace
 
 ```bash
 # Option 1: VS Code Task (Recommended)
-# Press Ctrl+Shift+P → "Run Task" → "Docs: Full Check"
+# Install dependencies (first time only)
+npm install
 
-# Option 2: npm script (requires Node.js)
-npm install  # First time only
-npm run docs:check
-
-# Option 3: PowerShell script
-.\scripts\lint-docs.ps1
+# Check markdown formatting
+npm run docs:lint
 
 # Auto-fix formatting issues
 npm run docs:fix
-# or
-.\scripts\lint-docs.ps1 --fix
 ```
 
 **Why This Matters**:
 
 - ⏱️ **Faster PR reviews**: Catch formatting issues before CI runs
-- 🔗 **No broken links**: Verify all documentation cross-references work
-- 📐 **Consistent style**: Maintain professional documentation quality
+- **Consistent style**: Maintain professional documentation quality
 - ✅ **CI will pass**: Same checks run in CI, but you catch them early
 
 **Common Issues Caught**:
 
 - Missing blank lines around headings
 - Inconsistent list formatting
-- Broken internal links (wrong file paths)
-- Broken external links (404s, typos)
 - Trailing whitespace
 - Code blocks without language specifiers
+
+**Link Checking**: Broken links are automatically checked in CI. To check links manually:
+
+```bash
+# Check specific file
+npx markdown-link-check your-file.md
+
+# Check with config (quieter output)
+npx markdown-link-check your-file.md --config .markdown-link-check.json -q
+```
 
 See [../scripts/README.md](../scripts/README.md) for full documentation linting guide.
 
@@ -182,9 +205,26 @@ git commit -m "chore: update dependencies to latest versions"
 ### 6. Push and Create PR
 
 ```bash
-git push origin feat/your-feature-name
+# Push your branch (use the actual branch name you created)
+git push origin bugfix/your-bug-description
+# or
+git push origin feature/your-feature-name
+# or
+git push origin docs/your-doc-update
+
 # Then create a pull request on GitHub
 ```
+
+**What Happens Next:**
+
+1. 🤖 Our automation detects your branch name
+2. 📋 Appropriate PR template is auto-applied to your PR
+3. ✍️ Fill out the template sections (marked with `<!-- ... -->` comments)
+4. ✅ CI runs tests and checks
+5. 👀 Maintainers review and provide feedback
+
+**For GitHub Copilot Users:**
+If you're using GitHub Copilot to create PRs automatically, the branch naming convention ensures your automated PRs get the correct template applied!
 
 ---
 
@@ -232,7 +272,339 @@ mod tests {
 
 ---
 
-## 📝 Code Style
+## � Code Coverage
+
+FerrisScript maintains high test coverage to ensure code quality and catch regressions early. This section explains how to generate, view, and interpret coverage reports.
+
+### Overview: Two Coverage Tools
+
+We use different coverage tools for different environments:
+
+| Tool | Environment | Purpose | Platform |
+|------|-------------|---------|----------|
+| **cargo-llvm-cov** | Local Development | Interactive development, Windows-compatible | Windows, macOS, Linux |
+| **cargo-tarpaulin** | CI/CD (GitHub Actions) | Automated coverage in CI pipelines | Linux only |
+
+**Why two tools?**
+
+- **cargo-llvm-cov**: Native LLVM-based coverage, no file locking issues on Windows, faster local execution
+- **cargo-tarpaulin**: Mature CI integration, generates Codecov-compatible reports, but has Windows file locking issues
+
+See [COVERAGE_SETUP_NOTES.md](COVERAGE_SETUP_NOTES.md) for the technical investigation that led to this approach.
+
+### Running Coverage Locally
+
+#### Quick Method: Use Coverage Scripts
+
+```bash
+# PowerShell (Windows)
+.\scripts\coverage.ps1
+
+# Bash (Linux/macOS)
+./scripts/coverage.sh
+```
+
+These scripts will:
+
+1. Check if `cargo-llvm-cov` is installed (auto-install if missing)
+2. Run coverage analysis on all workspace crates
+3. Generate HTML and LCOV reports in `target/coverage/`
+4. Display report locations
+
+#### Manual Method: Direct Commands
+
+```bash
+# First time setup
+rustup component add llvm-tools-preview
+cargo install cargo-llvm-cov
+
+# Generate HTML report (human-readable)
+cargo llvm-cov --workspace --html --output-dir target/coverage
+
+# Generate LCOV report (for tools like VSCode extensions)
+cargo llvm-cov --workspace --lcov --output-path target/coverage/lcov.info
+
+# Generate both formats at once
+cargo llvm-cov --workspace --html --output-dir target/coverage
+cargo llvm-cov --workspace --lcov --output-path target/coverage/lcov.info
+
+# Coverage for specific crate
+cargo llvm-cov -p ferrisscript_compiler --html
+
+# Coverage with test output visible
+cargo llvm-cov --workspace --html -- --nocapture
+```
+
+### Viewing Coverage Reports
+
+**HTML Report** (most user-friendly):
+
+```powershell
+# Windows
+Invoke-Item target/coverage/html/index.html
+
+# Linux
+xdg-open target/coverage/html/index.html
+
+# macOS
+open target/coverage/html/index.html
+```
+
+The HTML report shows:
+
+- Overall coverage percentage
+- Per-file coverage breakdown
+- Line-by-line coverage visualization (green = covered, red = not covered)
+- Branch coverage information
+
+**LCOV Report** (for tool integration):
+
+The `target/coverage/lcov.info` file can be used by:
+
+- VS Code extensions (e.g., "Coverage Gutters")
+- CI/CD systems (e.g., Codecov, Coveralls)
+- Code review tools
+
+### Understanding Coverage Metrics
+
+Coverage reports show several metrics:
+
+| Metric | Description | Target |
+|--------|-------------|--------|
+| **Line Coverage** | % of code lines executed by tests | 80%+ |
+| **Branch Coverage** | % of conditional branches tested | 75%+ |
+| **Function Coverage** | % of functions called by tests | 90%+ |
+
+**Color Coding in HTML Reports**:
+
+- 🟢 **Green**: Line is covered by tests
+- 🔴 **Red**: Line is not covered by tests
+- 🟡 **Yellow**: Line is partially covered (some branches not tested)
+- ⚪ **Gray**: Line is not executable (comments, blank lines)
+
+### Coverage in CI/CD
+
+**GitHub Actions Workflow**:
+
+Coverage is automatically generated on every push to `main` and in pull requests:
+
+```yaml
+# .github/workflows/ci.yml
+coverage:
+  name: Code Coverage
+  runs-on: ubuntu-latest
+  steps:
+    - name: Generate coverage
+      run: cargo tarpaulin --workspace --out Xml --output-dir coverage
+    
+    - name: Upload to Codecov
+      uses: codecov/codecov-action@v4
+```
+
+**Why Tarpaulin in CI?**
+
+- Well-established in Rust CI pipelines
+- Generates Cobertura XML for Codecov
+- No file locking issues on Linux runners
+- GitHub Actions uses `ubuntu-latest` (Linux)
+
+**Viewing CI Coverage**:
+
+- Check the "Code Coverage" job in GitHub Actions
+- View detailed reports on Codecov (if configured)
+- Coverage badge in README.md (future)
+
+### Coverage Configuration
+
+**tarpaulin.toml**:
+
+```toml
+[tool]
+out = ["Html", "Lcov", "Stdout"]
+output-dir = "target/coverage"
+workspace = true
+timeout = "5m"
+follow-exec = true
+count = true
+fail-under = 0  # Currently no enforcement, will increase as coverage improves
+
+[report]
+branches = true
+lines = true
+```
+
+**What's Excluded**:
+
+- Test files (`*/tests/*`, `*_test.rs`)
+- Generated code
+- External dependencies
+
+### Coverage Goals and Thresholds
+
+**Current Status**:
+
+- **Test Count**: 116+ tests (and growing)
+- **Coverage**: Actively tracked via cargo-llvm-cov locally and cargo-tarpaulin in CI
+- **Enforcement**: No minimum threshold yet (`fail-under = 0`)
+- **Historical Baseline**: See version-specific archives for baseline snapshots
+
+**Target Goals**:
+
+- **Overall coverage**: 80% line coverage
+- **Compiler crate**: 85%+ (critical path)
+- **Runtime crate**: 85%+ (critical path)
+- **Godot bind**: 70%+ (harder to test, requires Godot)
+
+**For New Code**:
+
+- All new features should include tests
+- Aim for 80%+ coverage on modified files
+- Test both success and error paths
+- Include edge cases and boundary conditions
+
+### Troubleshooting Coverage Issues
+
+#### Issue: "cargo-llvm-cov not found"
+
+**Solution**:
+
+```bash
+# Install llvm-tools-preview component
+rustup component add llvm-tools-preview
+
+# Install cargo-llvm-cov
+cargo install cargo-llvm-cov
+
+# Verify installation
+cargo llvm-cov --version
+```
+
+#### Issue: Windows File Locking (OS Error 32)
+
+**Solution**: Use `cargo-llvm-cov` instead of `cargo-tarpaulin`:
+
+```powershell
+# Don't use tarpaulin on Windows
+# cargo tarpaulin  # ❌ May fail with file locks
+
+# Use llvm-cov instead
+cargo llvm-cov --workspace --html  # ✅ Works on Windows
+```
+
+**Why this happens**:
+
+- Tarpaulin tries to clean the build directory
+- rust-analyzer or VS Code may lock files
+- llvm-cov doesn't have this issue
+
+**If you must use tarpaulin on Windows**:
+
+```powershell
+# Close VS Code and all IDEs
+# Kill rust-analyzer process
+Get-Process rust-analyzer -ErrorAction SilentlyContinue | Stop-Process
+
+# Then run tarpaulin
+cargo tarpaulin --workspace --skip-clean
+```
+
+#### Issue: Coverage Seems Low
+
+**Check**:
+
+1. **Are tests running?** `cargo test --workspace` should show test execution
+2. **Are tests in the right place?** Tests should be in `#[cfg(test)]` modules or `tests/` directories
+3. **Are features enabled?** Some code may be behind feature flags
+4. **Are examples included?** Example files aren't included in coverage by default
+
+**Improve coverage**:
+
+```rust
+// Add tests for error paths
+#[test]
+#[should_panic(expected = "expected error message")]
+fn test_error_handling() {
+    // Test code that should panic
+}
+
+// Test edge cases
+#[test]
+fn test_boundary_conditions() {
+    // Test empty input, maximum values, etc.
+}
+```
+
+#### Issue: CI Coverage Differs from Local
+
+**This is normal**:
+
+- CI uses tarpaulin (Linux)
+- Local uses llvm-cov (cross-platform)
+- Different coverage implementations may have small differences (1-3%)
+
+**If differences are large (>5%)**:
+
+- Check if CI is running all tests: `cargo test --workspace`
+- Verify both are using `--workspace` flag
+- Check for platform-specific code (`#[cfg(windows)]`, etc.)
+
+### Advanced Coverage Techniques
+
+**Exclude Code from Coverage**:
+
+```rust
+// Exclude specific function
+#[cfg(not(tarpaulin_include))]
+fn debug_only_function() {
+    // ...
+}
+
+// Exclude block
+#[cfg(not(tarpaulin))]
+{
+    // Debug-only code
+}
+```
+
+**Coverage for Specific Test**:
+
+```bash
+# Run coverage for specific test
+cargo llvm-cov --test integration_tests --html
+```
+
+**Coverage with Clean Build**:
+
+```bash
+# Clean previous coverage data
+cargo llvm-cov clean
+
+# Generate fresh coverage
+cargo llvm-cov --workspace --html
+```
+
+### Best Practices
+
+✅ **Do**:
+
+- Run coverage locally before submitting PRs
+- Add tests for new features immediately
+- Test both success and error paths
+- Include edge cases and boundary conditions
+- Use descriptive test names
+- Keep coverage above 80% for critical code
+
+❌ **Don't**:
+
+- Use tarpaulin on Windows (use llvm-cov)
+- Commit coverage reports to Git (they're in `.gitignore`)
+- Optimize for 100% coverage at the expense of code quality
+- Write tests just to increase coverage without testing behavior
+- Ignore low coverage warnings in CI
+
+---
+
+## �📝 Code Style
 
 ### Rust Conventions
 

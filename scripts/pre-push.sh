@@ -65,8 +65,6 @@ if [ $LINT_EXIT -ne 0 ]; then
     echo ""
     echo "To fix automatically, run:"
     echo "   npm run docs:fix"
-    echo "   # or"
-    echo "   ./scripts/lint-docs.sh --fix"
     echo ""
     echo "To bypass this check (not recommended):"
     echo "   git push --no-verify"

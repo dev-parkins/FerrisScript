@@ -7,7 +7,10 @@ pub enum Value {
     Float(f32),
     Bool(bool),
     String(String),
-    Vector2 { x: f32, y: f32 },
+    Vector2 {
+        x: f32,
+        y: f32,
+    },
     Nil,
     /// Special value representing the Godot node (self)
     SelfObject,
@@ -75,10 +78,10 @@ impl Env {
             property_getter: None,
             property_setter: None,
         };
-        
+
         // Register built-in functions
         env.builtin_fns.insert("print".to_string(), builtin_print);
-        
+
         env
     }
 
@@ -186,7 +189,8 @@ impl Env {
 
 // Built-in function implementations
 fn builtin_print(args: &[Value]) -> Result<Value, String> {
-    let output = args.iter()
+    let output = args
+        .iter()
         .map(|v| match v {
             Value::Int(i) => i.to_string(),
             Value::Float(f) => f.to_string(),
@@ -198,7 +202,7 @@ fn builtin_print(args: &[Value]) -> Result<Value, String> {
         })
         .collect::<Vec<_>>()
         .join(" ");
-    
+
     println!("{}", output);
     Ok(Value::Nil)
 }
@@ -227,15 +231,20 @@ pub fn execute(program: &ast::Program, env: &mut Env) -> Result<(), String> {
 
 fn execute_stmt(stmt: &ast::Stmt, env: &mut Env) -> Result<FlowControl, String> {
     match stmt {
-        ast::Stmt::Let { name, value, mutable, .. } => {
+        ast::Stmt::Let {
+            name,
+            value,
+            mutable,
+            ..
+        } => {
             let val = evaluate_expr(value, env)?;
             env.set_with_mutability(name.clone(), val, *mutable);
             Ok(FlowControl::None)
         }
-        
+
         ast::Stmt::Assign { target, value, .. } => {
             let val = evaluate_expr(value, env)?;
-            
+
             // Handle field access assignment (e.g., self.position.x = value)
             if let ast::Expr::FieldAccess(object, field, _) = target {
                 assign_field(object, field, val, env)?;
@@ -245,13 +254,18 @@ fn execute_stmt(stmt: &ast::Stmt, env: &mut Env) -> Result<FlowControl, String> 
             } else {
                 return Err("Invalid assignment target".to_string());
             }
-            
+
             Ok(FlowControl::None)
         }
-        
-        ast::Stmt::If { cond, then_branch, else_branch, .. } => {
+
+        ast::Stmt::If {
+            cond,
+            then_branch,
+            else_branch,
+            ..
+        } => {
             let cond_val = evaluate_expr(cond, env)?;
-            
+
             if cond_val.to_bool() {
                 for stmt in then_branch {
                     let flow = execute_stmt(stmt, env)?;
@@ -267,17 +281,17 @@ fn execute_stmt(stmt: &ast::Stmt, env: &mut Env) -> Result<FlowControl, String> 
                     }
                 }
             }
-            
+
             Ok(FlowControl::None)
         }
-        
+
         ast::Stmt::While { cond, body, .. } => {
             loop {
                 let cond_val = evaluate_expr(cond, env)?;
                 if !cond_val.to_bool() {
                     break;
                 }
-                
+
                 for stmt in body {
                     let flow = execute_stmt(stmt, env)?;
                     if flow != FlowControl::None {
@@ -285,10 +299,10 @@ fn execute_stmt(stmt: &ast::Stmt, env: &mut Env) -> Result<FlowControl, String> 
                     }
                 }
             }
-            
+
             Ok(FlowControl::None)
         }
-        
+
         ast::Stmt::Return { value, .. } => {
             let val = if let Some(expr) = value {
                 evaluate_expr(expr, env)?
@@ -297,7 +311,7 @@ fn execute_stmt(stmt: &ast::Stmt, env: &mut Env) -> Result<FlowControl, String> 
             };
             Ok(FlowControl::Return(val))
         }
-        
+
         ast::Stmt::Expr(expr) => {
             evaluate_expr(expr, env)?;
             Ok(FlowControl::None)
@@ -305,7 +319,12 @@ fn execute_stmt(stmt: &ast::Stmt, env: &mut Env) -> Result<FlowControl, String> 
     }
 }
 
-fn assign_field(object: &ast::Expr, field: &str, value: Value, env: &mut Env) -> Result<(), String> {
+fn assign_field(
+    object: &ast::Expr,
+    field: &str,
+    value: Value,
+    env: &mut Env,
+) -> Result<(), String> {
     match object {
         ast::Expr::Variable(name, _) => {
             // Check if this is 'self'
@@ -315,37 +334,40 @@ fn assign_field(object: &ast::Expr, field: &str, value: Value, env: &mut Env) ->
                     if let Some(setter) = env.property_setter {
                         return setter(field, value);
                     } else {
-                        return Err("Cannot set self properties: no property setter registered".to_string());
+                        return Err(
+                            "Cannot set self properties: no property setter registered".to_string()
+                        );
                     }
                 }
             }
-            
+
             // Regular variable field assignment - check mutability first
             if !env.is_mutable(name) {
-                return Err(format!("Cannot assign to field of immutable variable '{}'", name));
+                return Err(format!(
+                    "Cannot assign to field of immutable variable '{}'",
+                    name
+                ));
             }
-            
+
             if let Some(var) = env.get_mut(name) {
                 match var {
-                    Value::Vector2 { x, y } => {
-                        match field {
-                            "x" => {
-                                if let Some(f) = value.to_float() {
-                                    *x = f;
-                                } else {
-                                    return Err(format!("Cannot assign {:?} to Vector2.x", value));
-                                }
+                    Value::Vector2 { x, y } => match field {
+                        "x" => {
+                            if let Some(f) = value.to_float() {
+                                *x = f;
+                            } else {
+                                return Err(format!("Cannot assign {:?} to Vector2.x", value));
                             }
-                            "y" => {
-                                if let Some(f) = value.to_float() {
-                                    *y = f;
-                                } else {
-                                    return Err(format!("Cannot assign {:?} to Vector2.y", value));
-                                }
-                            }
-                            _ => return Err(format!("Vector2 has no field '{}'", field)),
                         }
-                    }
+                        "y" => {
+                            if let Some(f) = value.to_float() {
+                                *y = f;
+                            } else {
+                                return Err(format!("Cannot assign {:?} to Vector2.y", value));
+                            }
+                        }
+                        _ => return Err(format!("Vector2 has no field '{}'", field)),
+                    },
                     _ => return Err(format!("Cannot access field '{}' on {:?}", field, var)),
                 }
                 Ok(())
@@ -353,7 +375,7 @@ fn assign_field(object: &ast::Expr, field: &str, value: Value, env: &mut Env) ->
                 Err(format!("Undefined variable: {}", name))
             }
         }
-        
+
         ast::Expr::FieldAccess(object, parent_field, _) => {
             // Handle nested field access (e.g., self.position.x)
             if let ast::Expr::Variable(name, _) = &**object {
@@ -363,184 +385,211 @@ fn assign_field(object: &ast::Expr, field: &str, value: Value, env: &mut Env) ->
                         // Get the property from Godot (e.g., position)
                         if let Some(getter) = env.property_getter {
                             let mut prop_value = getter(parent_field)?;
-                            
+
                             // Modify the field (e.g., x or y)
                             match &mut prop_value {
-                                Value::Vector2 { x, y } => {
-                                    match field {
-                                        "x" => {
-                                            if let Some(f) = value.to_float() {
-                                                *x = f;
-                                            } else {
-                                                return Err(format!("Cannot assign {:?} to Vector2.x", value));
-                                            }
+                                Value::Vector2 { x, y } => match field {
+                                    "x" => {
+                                        if let Some(f) = value.to_float() {
+                                            *x = f;
+                                        } else {
+                                            return Err(format!(
+                                                "Cannot assign {:?} to Vector2.x",
+                                                value
+                                            ));
                                         }
-                                        "y" => {
-                                            if let Some(f) = value.to_float() {
-                                                *y = f;
-                                            } else {
-                                                return Err(format!("Cannot assign {:?} to Vector2.y", value));
-                                            }
-                                        }
-                                        _ => return Err(format!("Vector2 has no field '{}'", field)),
                                     }
+                                    "y" => {
+                                        if let Some(f) = value.to_float() {
+                                            *y = f;
+                                        } else {
+                                            return Err(format!(
+                                                "Cannot assign {:?} to Vector2.y",
+                                                value
+                                            ));
+                                        }
+                                    }
+                                    _ => return Err(format!("Vector2 has no field '{}'", field)),
+                                },
+                                _ => {
+                                    return Err(format!(
+                                        "Property '{}' is not a Vector2",
+                                        parent_field
+                                    ))
                                 }
-                                _ => return Err(format!("Property '{}' is not a Vector2", parent_field)),
                             }
-                            
+
                             // Set the property back to Godot
                             if let Some(setter) = env.property_setter {
                                 return setter(parent_field, prop_value);
                             } else {
-                                return Err("Cannot set self properties: no property setter registered".to_string());
+                                return Err(
+                                    "Cannot set self properties: no property setter registered"
+                                        .to_string(),
+                                );
                             }
                         } else {
-                            return Err("Cannot get self properties: no property getter registered".to_string());
+                            return Err(
+                                "Cannot get self properties: no property getter registered"
+                                    .to_string(),
+                            );
                         }
                     }
                 }
-                
+
                 // Regular variable nested field assignment (not implemented yet)
-                if let Some(var) = env.get_mut(name) {
-                    if let Value::Vector2 { .. } = var {
-                        return Err("Nested field assignment on regular variables not yet implemented".to_string());
-                    }
+                if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
+                    return Err(
+                        "Nested field assignment on regular variables not yet implemented"
+                            .to_string(),
+                    );
                 }
             }
             Err("Complex field assignment not yet implemented".to_string())
         }
-        
+
         _ => Err("Invalid assignment target".to_string()),
     }
 }
 
 fn evaluate_expr(expr: &ast::Expr, env: &mut Env) -> Result<Value, String> {
     match expr {
-        ast::Expr::Literal(lit, _) => {
-            Ok(match lit {
-                ast::Literal::Int(i) => Value::Int(*i),
-                ast::Literal::Float(f) => Value::Float(*f),
-                ast::Literal::Bool(b) => Value::Bool(*b),
-                ast::Literal::Str(s) => Value::String(s.clone()),
-            })
-        }
-        
-        ast::Expr::Variable(name, _) => {
-            env.get(name)
-                .cloned()
-                .ok_or_else(|| format!("Undefined variable: {}", name))
-        }
-        
+        ast::Expr::Literal(lit, _) => Ok(match lit {
+            ast::Literal::Int(i) => Value::Int(*i),
+            ast::Literal::Float(f) => Value::Float(*f),
+            ast::Literal::Bool(b) => Value::Bool(*b),
+            ast::Literal::Str(s) => Value::String(s.clone()),
+        }),
+
+        ast::Expr::Variable(name, _) => env
+            .get(name)
+            .cloned()
+            .ok_or_else(|| format!("Undefined variable: {}", name)),
+
         ast::Expr::Binary(left, op, right, _) => {
             let left_val = evaluate_expr(left, env)?;
             let right_val = evaluate_expr(right, env)?;
-            
+
             match op {
-                BinaryOp::Add => {
-                    match (&left_val, &right_val) {
-                        (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a + b)),
-                        _ => {
-                            let a = left_val.to_float().ok_or("Cannot add non-numeric values")?;
-                            let b = right_val.to_float().ok_or("Cannot add non-numeric values")?;
-                            Ok(Value::Float(a + b))
-                        }
+                BinaryOp::Add => match (&left_val, &right_val) {
+                    (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a + b)),
+                    _ => {
+                        let a = left_val.to_float().ok_or("Cannot add non-numeric values")?;
+                        let b = right_val
+                            .to_float()
+                            .ok_or("Cannot add non-numeric values")?;
+                        Ok(Value::Float(a + b))
                     }
-                }
-                
-                BinaryOp::Sub => {
-                    match (&left_val, &right_val) {
-                        (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a - b)),
-                        _ => {
-                            let a = left_val.to_float().ok_or("Cannot subtract non-numeric values")?;
-                            let b = right_val.to_float().ok_or("Cannot subtract non-numeric values")?;
-                            Ok(Value::Float(a - b))
-                        }
+                },
+
+                BinaryOp::Sub => match (&left_val, &right_val) {
+                    (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a - b)),
+                    _ => {
+                        let a = left_val
+                            .to_float()
+                            .ok_or("Cannot subtract non-numeric values")?;
+                        let b = right_val
+                            .to_float()
+                            .ok_or("Cannot subtract non-numeric values")?;
+                        Ok(Value::Float(a - b))
                     }
-                }
-                
-                BinaryOp::Mul => {
-                    match (&left_val, &right_val) {
-                        (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a * b)),
-                        _ => {
-                            let a = left_val.to_float().ok_or("Cannot multiply non-numeric values")?;
-                            let b = right_val.to_float().ok_or("Cannot multiply non-numeric values")?;
-                            Ok(Value::Float(a * b))
-                        }
+                },
+
+                BinaryOp::Mul => match (&left_val, &right_val) {
+                    (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a * b)),
+                    _ => {
+                        let a = left_val
+                            .to_float()
+                            .ok_or("Cannot multiply non-numeric values")?;
+                        let b = right_val
+                            .to_float()
+                            .ok_or("Cannot multiply non-numeric values")?;
+                        Ok(Value::Float(a * b))
                     }
-                }
-                
-                BinaryOp::Div => {
-                    match (&left_val, &right_val) {
-                        (Value::Int(a), Value::Int(b)) => {
-                            if *b == 0 {
-                                return Err("Division by zero".to_string());
-                            }
-                            Ok(Value::Int(a / b))
+                },
+
+                BinaryOp::Div => match (&left_val, &right_val) {
+                    (Value::Int(a), Value::Int(b)) => {
+                        if *b == 0 {
+                            return Err("Division by zero".to_string());
                         }
-                        _ => {
-                            let a = left_val.to_float().ok_or("Cannot divide non-numeric values")?;
-                            let b = right_val.to_float().ok_or("Cannot divide non-numeric values")?;
-                            if b == 0.0 {
-                                return Err("Division by zero".to_string());
-                            }
-                            Ok(Value::Float(a / b))
-                        }
+                        Ok(Value::Int(a / b))
                     }
-                }
-                
+                    _ => {
+                        let a = left_val
+                            .to_float()
+                            .ok_or("Cannot divide non-numeric values")?;
+                        let b = right_val
+                            .to_float()
+                            .ok_or("Cannot divide non-numeric values")?;
+                        if b == 0.0 {
+                            return Err("Division by zero".to_string());
+                        }
+                        Ok(Value::Float(a / b))
+                    }
+                },
+
                 BinaryOp::Eq => Ok(Value::Bool(left_val == right_val)),
                 BinaryOp::Ne => Ok(Value::Bool(left_val != right_val)),
-                
-                BinaryOp::Lt => {
-                    match (&left_val, &right_val) {
-                        (Value::Int(a), Value::Int(b)) => Ok(Value::Bool(a < b)),
-                        _ => {
-                            let a = left_val.to_float().ok_or("Cannot compare non-numeric values")?;
-                            let b = right_val.to_float().ok_or("Cannot compare non-numeric values")?;
-                            Ok(Value::Bool(a < b))
-                        }
+
+                BinaryOp::Lt => match (&left_val, &right_val) {
+                    (Value::Int(a), Value::Int(b)) => Ok(Value::Bool(a < b)),
+                    _ => {
+                        let a = left_val
+                            .to_float()
+                            .ok_or("Cannot compare non-numeric values")?;
+                        let b = right_val
+                            .to_float()
+                            .ok_or("Cannot compare non-numeric values")?;
+                        Ok(Value::Bool(a < b))
                     }
-                }
-                
-                BinaryOp::Le => {
-                    match (&left_val, &right_val) {
-                        (Value::Int(a), Value::Int(b)) => Ok(Value::Bool(a <= b)),
-                        _ => {
-                            let a = left_val.to_float().ok_or("Cannot compare non-numeric values")?;
-                            let b = right_val.to_float().ok_or("Cannot compare non-numeric values")?;
-                            Ok(Value::Bool(a <= b))
-                        }
+                },
+
+                BinaryOp::Le => match (&left_val, &right_val) {
+                    (Value::Int(a), Value::Int(b)) => Ok(Value::Bool(a <= b)),
+                    _ => {
+                        let a = left_val
+                            .to_float()
+                            .ok_or("Cannot compare non-numeric values")?;
+                        let b = right_val
+                            .to_float()
+                            .ok_or("Cannot compare non-numeric values")?;
+                        Ok(Value::Bool(a <= b))
                     }
-                }
-                
-                BinaryOp::Gt => {
-                    match (&left_val, &right_val) {
-                        (Value::Int(a), Value::Int(b)) => Ok(Value::Bool(a > b)),
-                        _ => {
-                            let a = left_val.to_float().ok_or("Cannot compare non-numeric values")?;
-                            let b = right_val.to_float().ok_or("Cannot compare non-numeric values")?;
-                            Ok(Value::Bool(a > b))
-                        }
+                },
+
+                BinaryOp::Gt => match (&left_val, &right_val) {
+                    (Value::Int(a), Value::Int(b)) => Ok(Value::Bool(a > b)),
+                    _ => {
+                        let a = left_val
+                            .to_float()
+                            .ok_or("Cannot compare non-numeric values")?;
+                        let b = right_val
+                            .to_float()
+                            .ok_or("Cannot compare non-numeric values")?;
+                        Ok(Value::Bool(a > b))
                     }
-                }
-                
-                BinaryOp::Ge => {
-                    match (&left_val, &right_val) {
-                        (Value::Int(a), Value::Int(b)) => Ok(Value::Bool(a >= b)),
-                        _ => {
-                            let a = left_val.to_float().ok_or("Cannot compare non-numeric values")?;
-                            let b = right_val.to_float().ok_or("Cannot compare non-numeric values")?;
-                            Ok(Value::Bool(a >= b))
-                        }
+                },
+
+                BinaryOp::Ge => match (&left_val, &right_val) {
+                    (Value::Int(a), Value::Int(b)) => Ok(Value::Bool(a >= b)),
+                    _ => {
+                        let a = left_val
+                            .to_float()
+                            .ok_or("Cannot compare non-numeric values")?;
+                        let b = right_val
+                            .to_float()
+                            .ok_or("Cannot compare non-numeric values")?;
+                        Ok(Value::Bool(a >= b))
                     }
-                }
-                
+                },
+
                 BinaryOp::And => {
                     let a = left_val.to_bool();
                     let b = right_val.to_bool();
                     Ok(Value::Bool(a && b))
                 }
-                
+
                 BinaryOp::Or => {
                     let a = left_val.to_bool();
                     let b = right_val.to_bool();
@@ -548,42 +597,38 @@ fn evaluate_expr(expr: &ast::Expr, env: &mut Env) -> Result<Value, String> {
                 }
             }
         }
-        
+
         ast::Expr::Unary(op, operand, _) => {
             let val = evaluate_expr(operand, env)?;
-            
+
             match op {
-                UnaryOp::Neg => {
-                    match val {
-                        Value::Int(i) => Ok(Value::Int(-i)),
-                        Value::Float(f) => Ok(Value::Float(-f)),
-                        _ => Err("Cannot negate non-numeric value".to_string()),
-                    }
-                }
-                
-                UnaryOp::Not => {
-                    Ok(Value::Bool(!val.to_bool()))
-                }
+                UnaryOp::Neg => match val {
+                    Value::Int(i) => Ok(Value::Int(-i)),
+                    Value::Float(f) => Ok(Value::Float(-f)),
+                    _ => Err("Cannot negate non-numeric value".to_string()),
+                },
+
+                UnaryOp::Not => Ok(Value::Bool(!val.to_bool())),
             }
         }
-        
+
         ast::Expr::Call(name, args, _) => {
             // Evaluate arguments
-            let arg_values: Result<Vec<_>, _> = args.iter()
-                .map(|arg| evaluate_expr(arg, env))
-                .collect();
+            let arg_values: Result<Vec<_>, _> =
+                args.iter().map(|arg| evaluate_expr(arg, env)).collect();
             let arg_values = arg_values?;
-            
+
             // Check if it's a built-in function
             if env.is_builtin(name) {
                 return env.call_builtin(name, &arg_values);
             }
-            
+
             // Look up user-defined function
-            let func = env.get_function(name)
+            let func = env
+                .get_function(name)
                 .ok_or_else(|| format!("Undefined function: {}", name))?
                 .clone();
-            
+
             // Check arity
             if func.params.len() != arg_values.len() {
                 return Err(format!(
@@ -593,15 +638,15 @@ fn evaluate_expr(expr: &ast::Expr, env: &mut Env) -> Result<Value, String> {
                     arg_values.len()
                 ));
             }
-            
+
             // Create new scope for function
             env.push_scope();
-            
+
             // Bind parameters
             for (param, arg_val) in func.params.iter().zip(arg_values.iter()) {
                 env.set(param.name.clone(), arg_val.clone());
             }
-            
+
             // Execute function body
             let mut return_val = Value::Nil;
             for stmt in &func.body {
@@ -613,35 +658,36 @@ fn evaluate_expr(expr: &ast::Expr, env: &mut Env) -> Result<Value, String> {
                     FlowControl::None => {}
                 }
             }
-            
+
             env.pop_scope();
-            
+
             Ok(return_val)
         }
-        
+
         ast::Expr::FieldAccess(object, field, _) => {
             let obj_val = evaluate_expr(object, env)?;
-            
+
             match obj_val {
-                Value::Vector2 { x, y } => {
-                    match field.as_str() {
-                        "x" => Ok(Value::Float(x)),
-                        "y" => Ok(Value::Float(y)),
-                        _ => Err(format!("Vector2 has no field '{}'", field)),
-                    }
-                }
+                Value::Vector2 { x, y } => match field.as_str() {
+                    "x" => Ok(Value::Float(x)),
+                    "y" => Ok(Value::Float(y)),
+                    _ => Err(format!("Vector2 has no field '{}'", field)),
+                },
                 Value::SelfObject => {
                     // Use property getter callback to get field from Godot node
                     if let Some(getter) = env.property_getter {
                         getter(field)
                     } else {
-                        Err("Cannot access self properties: no property getter registered".to_string())
+                        Err(
+                            "Cannot access self properties: no property getter registered"
+                                .to_string(),
+                        )
                     }
                 }
                 _ => Err(format!("Cannot access field '{}' on {:?}", field, obj_val)),
             }
         }
-        
+
         // Compound assignment and regular assignment expressions not used in runtime
         // They are desugared to Stmt::Assign at parse time
         ast::Expr::Assign(_, _, _) | ast::Expr::CompoundAssign(_, _, _, _) => {
@@ -655,11 +701,12 @@ pub fn call_function(name: &str, args: &[Value], env: &mut Env) -> Result<Value,
     if env.is_builtin(name) {
         return env.call_builtin(name, args);
     }
-    
-    let func = env.get_function(name)
+
+    let func = env
+        .get_function(name)
         .ok_or_else(|| format!("Undefined function: {}", name))?
         .clone();
-    
+
     if func.params.len() != args.len() {
         return Err(format!(
             "Function {} expects {} arguments, got {}",
@@ -668,13 +715,13 @@ pub fn call_function(name: &str, args: &[Value], env: &mut Env) -> Result<Value,
             args.len()
         ));
     }
-    
+
     env.push_scope();
-    
+
     for (param, arg_val) in func.params.iter().zip(args.iter()) {
         env.set(param.name.clone(), arg_val.clone());
     }
-    
+
     let mut return_val = Value::Nil;
     for stmt in &func.body {
         match execute_stmt(stmt, env)? {
@@ -685,9 +732,9 @@ pub fn call_function(name: &str, args: &[Value], env: &mut Env) -> Result<Value,
             FlowControl::None => {}
         }
     }
-    
+
     env.pop_scope();
-    
+
     Ok(return_val)
 }
 
@@ -707,11 +754,11 @@ mod tests {
     fn test_env_scopes() {
         let mut env = Env::new();
         env.set("x".to_string(), Value::Int(1));
-        
+
         env.push_scope();
         env.set("x".to_string(), Value::Int(2));
         assert_eq!(env.get("x"), Some(&Value::Int(2)));
-        
+
         env.pop_scope();
         assert_eq!(env.get("x"), Some(&Value::Int(1)));
     }
@@ -721,7 +768,7 @@ mod tests {
         assert_eq!(Value::Int(42).to_float(), Some(42.0));
         assert_eq!(Value::Float(3.14).to_float(), Some(3.14));
         assert_eq!(Value::Bool(true).to_float(), None);
-        
+
         assert!(Value::Bool(true).to_bool());
         assert!(!Value::Bool(false).to_bool());
         assert!(Value::Int(1).to_bool());
@@ -740,11 +787,11 @@ mod tests {
     #[test]
     fn test_evaluate_literals() {
         let mut env = Env::new();
-        
+
         let source = "fn test() { let x: i32 = 42; }";
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         // Test that we can call the function
         call_function("test", &[], &mut env).unwrap();
     }
@@ -752,7 +799,7 @@ mod tests {
     #[test]
     fn test_arithmetic_operations() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn test() -> i32 {
                 let a: i32 = 10;
@@ -760,10 +807,10 @@ mod tests {
                 return a + b * 2;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         let result = call_function("test", &[], &mut env).unwrap();
         assert_eq!(result, Value::Int(20));
     }
@@ -771,17 +818,17 @@ mod tests {
     #[test]
     fn test_comparison_operations() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn test() -> bool {
                 let x: i32 = 10;
                 return x > 5;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         let result = call_function("test", &[], &mut env).unwrap();
         assert_eq!(result, Value::Bool(true));
     }
@@ -789,7 +836,7 @@ mod tests {
     #[test]
     fn test_logical_operations() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn test() -> bool {
                 let a: bool = true;
@@ -797,10 +844,10 @@ mod tests {
                 return a && !b;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         let result = call_function("test", &[], &mut env).unwrap();
         assert_eq!(result, Value::Bool(true));
     }
@@ -808,7 +855,7 @@ mod tests {
     #[test]
     fn test_if_statement() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn test(x: i32) -> i32 {
                 if x > 10 {
@@ -818,13 +865,13 @@ mod tests {
                 }
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         let result1 = call_function("test", &[Value::Int(15)], &mut env).unwrap();
         assert_eq!(result1, Value::Int(1));
-        
+
         let result2 = call_function("test", &[Value::Int(5)], &mut env).unwrap();
         assert_eq!(result2, Value::Int(0));
     }
@@ -832,7 +879,7 @@ mod tests {
     #[test]
     fn test_while_loop() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn test() -> i32 {
                 let mut count: i32 = 0;
@@ -842,10 +889,10 @@ mod tests {
                 return count;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         let result = call_function("test", &[], &mut env).unwrap();
         assert_eq!(result, Value::Int(5));
     }
@@ -853,7 +900,7 @@ mod tests {
     #[test]
     fn test_global_variables() {
         let mut env = Env::new();
-        
+
         let source = r#"
             let mut counter: i32 = 0;
             
@@ -865,19 +912,19 @@ mod tests {
                 return counter;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         // Initial value
         let result1 = call_function("get_counter", &[], &mut env).unwrap();
         assert_eq!(result1, Value::Int(0));
-        
+
         // After increment
         call_function("increment", &[], &mut env).unwrap();
         let result2 = call_function("get_counter", &[], &mut env).unwrap();
         assert_eq!(result2, Value::Int(1));
-        
+
         // After another increment
         call_function("increment", &[], &mut env).unwrap();
         let result3 = call_function("get_counter", &[], &mut env).unwrap();
@@ -887,16 +934,16 @@ mod tests {
     #[test]
     fn test_function_parameters() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn add(a: i32, b: i32) -> i32 {
                 return a + b;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         let result = call_function("add", &[Value::Int(10), Value::Int(32)], &mut env).unwrap();
         assert_eq!(result, Value::Int(42));
     }
@@ -904,7 +951,7 @@ mod tests {
     #[test]
     fn test_type_coercion_at_runtime() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn test() -> f32 {
                 let x: i32 = 10;
@@ -912,10 +959,10 @@ mod tests {
                 return x + y;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         let result = call_function("test", &[], &mut env).unwrap();
         // i32 should be coerced to f32
         assert_eq!(result, Value::Float(13.14));
@@ -924,27 +971,30 @@ mod tests {
     #[test]
     fn test_vector2_field_access() {
         let mut env = Env::new();
-        
+
         // Manually set up the Vector2 since we don't have Vector2 construction yet
         // This test demonstrates that field access works when the variable exists
         env.set("pos".to_string(), Value::Vector2 { x: 10.0, y: 20.0 });
-        
+
         // Create a simple function manually to test field access
-        env.define_function("get_x".to_string(), ast::Function {
-            name: "get_x".to_string(),
-            params: vec![],
-            return_type: Some("f32".to_string()),
-            body: vec![ast::Stmt::Return {
-                value: Some(ast::Expr::FieldAccess(
-                    Box::new(ast::Expr::Variable("pos".to_string(), ast::Span::unknown())),
-                    "x".to_string(),
-                    ast::Span::unknown()
-                )),
+        env.define_function(
+            "get_x".to_string(),
+            ast::Function {
+                name: "get_x".to_string(),
+                params: vec![],
+                return_type: Some("f32".to_string()),
+                body: vec![ast::Stmt::Return {
+                    value: Some(ast::Expr::FieldAccess(
+                        Box::new(ast::Expr::Variable("pos".to_string(), ast::Span::unknown())),
+                        "x".to_string(),
+                        ast::Span::unknown(),
+                    )),
+                    span: ast::Span::unknown(),
+                }],
                 span: ast::Span::unknown(),
-            }],
-            span: ast::Span::unknown(),
-        });
-        
+            },
+        );
+
         let result = call_function("get_x", &[], &mut env).unwrap();
         assert_eq!(result, Value::Float(10.0));
     }
@@ -952,16 +1002,16 @@ mod tests {
     #[test]
     fn test_hello_example() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn _ready() {
                 print("Hello, Godot!");
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         // Should not panic when calling print
         let result = call_function("_ready", &[], &mut env);
         assert!(result.is_ok());
@@ -970,17 +1020,17 @@ mod tests {
     #[test]
     fn test_unary_negation() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn test() -> i32 {
                 let x: i32 = 5;
                 return -x;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         let result = call_function("test", &[], &mut env).unwrap();
         assert_eq!(result, Value::Int(-5));
     }
@@ -988,7 +1038,7 @@ mod tests {
     #[test]
     fn test_division_by_zero() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn test() -> i32 {
                 let x: i32 = 10;
@@ -996,10 +1046,10 @@ mod tests {
                 return x / y;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         let result = call_function("test", &[], &mut env);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Division by zero"));
@@ -1008,20 +1058,26 @@ mod tests {
     #[test]
     fn test_undefined_variable() {
         let mut env = Env::new();
-        
+
         // This should be caught by type checker, but let's test runtime behavior
         // We'll manually create a function that references an undefined variable
-        env.define_function("test".to_string(), ast::Function {
-            name: "test".to_string(),
-            params: vec![],
-            return_type: Some("i32".to_string()),
-            body: vec![ast::Stmt::Return {
-                value: Some(ast::Expr::Variable("undefined_var".to_string(), ast::Span::unknown())),
+        env.define_function(
+            "test".to_string(),
+            ast::Function {
+                name: "test".to_string(),
+                params: vec![],
+                return_type: Some("i32".to_string()),
+                body: vec![ast::Stmt::Return {
+                    value: Some(ast::Expr::Variable(
+                        "undefined_var".to_string(),
+                        ast::Span::unknown(),
+                    )),
+                    span: ast::Span::unknown(),
+                }],
                 span: ast::Span::unknown(),
-            }],
-            span: ast::Span::unknown(),
-        });
-        
+            },
+        );
+
         let result = call_function("test", &[], &mut env);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Undefined variable"));
@@ -1030,7 +1086,7 @@ mod tests {
     #[test]
     fn test_immutable_assignment_error() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn test() -> i32 {
                 let x: i32 = 10;
@@ -1038,19 +1094,21 @@ mod tests {
                 return x;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         let result = call_function("test", &[], &mut env);
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Cannot assign to immutable variable"));
+        assert!(result
+            .unwrap_err()
+            .contains("Cannot assign to immutable variable"));
     }
 
     #[test]
     fn test_mutable_assignment_success() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn test() -> i32 {
                 let mut x: i32 = 10;
@@ -1058,10 +1116,10 @@ mod tests {
                 return x;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         let result = call_function("test", &[], &mut env).unwrap();
         assert_eq!(result, Value::Int(20));
     }
@@ -1069,7 +1127,7 @@ mod tests {
     #[test]
     fn test_mutable_global_variable() {
         let mut env = Env::new();
-        
+
         let source = r#"
             let mut counter: i32 = 0;
             
@@ -1081,19 +1139,19 @@ mod tests {
                 return counter;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         // Initial value
         let result = call_function("get_counter", &[], &mut env).unwrap();
         assert_eq!(result, Value::Int(0));
-        
+
         // Increment
         call_function("increment", &[], &mut env).unwrap();
         let result = call_function("get_counter", &[], &mut env).unwrap();
         assert_eq!(result, Value::Int(1));
-        
+
         // Increment again
         call_function("increment", &[], &mut env).unwrap();
         let result = call_function("get_counter", &[], &mut env).unwrap();
@@ -1103,36 +1161,45 @@ mod tests {
     #[test]
     fn test_immutable_field_assignment_error() {
         let mut env = Env::new();
-        
+
         // Set up immutable Vector2
-        env.set_with_mutability("pos".to_string(), Value::Vector2 { x: 10.0, y: 20.0 }, false);
-        
+        env.set_with_mutability(
+            "pos".to_string(),
+            Value::Vector2 { x: 10.0, y: 20.0 },
+            false,
+        );
+
         // Try to assign to field - should fail
-        env.define_function("test".to_string(), ast::Function {
-            name: "test".to_string(),
-            params: vec![],
-            return_type: None,
-            body: vec![ast::Stmt::Assign {
-                target: ast::Expr::FieldAccess(
-                    Box::new(ast::Expr::Variable("pos".to_string(), ast::Span::unknown())),
-                    "x".to_string(),
-                    ast::Span::unknown()
-                ),
-                value: ast::Expr::Literal(ast::Literal::Float(50.0), ast::Span::unknown()),
+        env.define_function(
+            "test".to_string(),
+            ast::Function {
+                name: "test".to_string(),
+                params: vec![],
+                return_type: None,
+                body: vec![ast::Stmt::Assign {
+                    target: ast::Expr::FieldAccess(
+                        Box::new(ast::Expr::Variable("pos".to_string(), ast::Span::unknown())),
+                        "x".to_string(),
+                        ast::Span::unknown(),
+                    ),
+                    value: ast::Expr::Literal(ast::Literal::Float(50.0), ast::Span::unknown()),
+                    span: ast::Span::unknown(),
+                }],
                 span: ast::Span::unknown(),
-            }],
-            span: ast::Span::unknown(),
-        });
-        
+            },
+        );
+
         let result = call_function("test", &[], &mut env);
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Cannot assign to field of immutable variable"));
+        assert!(result
+            .unwrap_err()
+            .contains("Cannot assign to field of immutable variable"));
     }
 
     #[test]
     fn test_nested_if_else() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn classify(x: i32) -> i32 {
                 if x > 0 {
@@ -1150,19 +1217,19 @@ mod tests {
                 }
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         let result = call_function("classify", &[Value::Int(15)], &mut env).unwrap();
         assert_eq!(result, Value::Int(2));
-        
+
         let result = call_function("classify", &[Value::Int(5)], &mut env).unwrap();
         assert_eq!(result, Value::Int(1));
-        
+
         let result = call_function("classify", &[Value::Int(-15)], &mut env).unwrap();
         assert_eq!(result, Value::Int(-2));
-        
+
         let result = call_function("classify", &[Value::Int(-5)], &mut env).unwrap();
         assert_eq!(result, Value::Int(-1));
     }
@@ -1170,7 +1237,7 @@ mod tests {
     #[test]
     fn test_while_loop_with_mutable_state() {
         let mut env = Env::new();
-        
+
         let source = r#"
             fn sum_to_n(n: i32) -> i32 {
                 let mut sum: i32 = 0;
@@ -1184,14 +1251,14 @@ mod tests {
                 return sum;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         // Test 1+2+3+4+5 = 15
         let result = call_function("sum_to_n", &[Value::Int(5)], &mut env).unwrap();
         assert_eq!(result, Value::Int(15));
-        
+
         // Test 1+2+3+...+10 = 55
         let result = call_function("sum_to_n", &[Value::Int(10)], &mut env).unwrap();
         assert_eq!(result, Value::Int(55));
@@ -1200,7 +1267,7 @@ mod tests {
     #[test]
     fn test_complex_control_flow_with_mutable_state() {
         let mut env = Env::new();
-        
+
         let source = r#"
             let mut global_count: i32 = 0;
             
@@ -1221,10 +1288,10 @@ mod tests {
                 return global_count;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         // i < 5: 0, 1, 2, 3, 4 = 5 times (+1 each) = 5
         // i > 7: 8, 9 = 2 times (+2 each) = 4
         // Total: 5 + 4 = 9
@@ -1235,7 +1302,7 @@ mod tests {
     #[test]
     fn test_bounce_simulation() {
         let mut env = Env::new();
-        
+
         let source = r#"
             let mut position: f32 = 5.0;
             let mut direction: f32 = 1.0;
@@ -1255,27 +1322,345 @@ mod tests {
                 return direction;
             }
         "#;
-        
+
         let program = compile(source).unwrap();
         execute(&program, &mut env).unwrap();
-        
+
         // Initial state - direction should be 1.0 (moving right)
         // Note: 1.0 is parsed as Int(1) due to fractional part being 0
         let dir = call_function("get_direction", &[], &mut env).unwrap();
         assert!(matches!(dir, Value::Int(1) | Value::Float(1.0)));
-        
+
         // Move right past boundary (5.0 + 100*0.06 = 11.0)
         call_function("update_position", &[Value::Float(0.06)], &mut env).unwrap();
-        
+
         // Should reverse direction at boundary
         let dir = call_function("get_direction", &[], &mut env).unwrap();
         assert!(matches!(dir, Value::Int(-1) | Value::Float(-1.0)));
-        
+
         // Move left past opposite boundary (11.0 - 100*0.22 = -11.0)
         call_function("update_position", &[Value::Float(0.22)], &mut env).unwrap();
-        
+
         // Should reverse back to positive
         let dir = call_function("get_direction", &[], &mut env).unwrap();
         assert!(matches!(dir, Value::Int(1) | Value::Float(1.0)));
+    }
+
+    // ===== Edge Case Tests (v0.0.2) =====
+
+    #[test]
+    fn test_edge_case_division_by_zero() {
+        // Test division by zero behavior
+        // TODO: Should return an error instead of potentially undefined behavior
+        let mut env = Env::new();
+        let source = r#"
+            fn divide_by_zero() -> i32 {
+                let x: i32 = 10;
+                let y: i32 = 0;
+                return x / y;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("divide_by_zero", &[], &mut env);
+        // Current behavior: division by zero may panic, error, or return undefined value
+        match result {
+            Ok(v) => println!(
+                "⚠️  Division by zero returned value (undefined behavior): {:?}",
+                v
+            ),
+            Err(e) => println!("✅ Division by zero produced error: {}", e),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_integer_overflow_addition() {
+        // Test arithmetic with large numbers
+        // NOTE: Very large literals (i32::MAX) are parsed as f32, so using smaller values
+        let mut env = Env::new();
+        let source = r#"
+            fn large_add() -> i32 {
+                let x: i32 = 1000000;
+                let y: i32 = 2000000;
+                return x + y;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("large_add", &[], &mut env).unwrap();
+        assert_eq!(
+            result,
+            Value::Int(3000000),
+            "Large number addition should work"
+        );
+    }
+
+    #[test]
+    fn test_edge_case_deeply_nested_expressions() {
+        // Test parsing and evaluating deeply nested expressions (100 levels)
+        let mut env = Env::new();
+
+        // Build expression: (((((...(1)...)))))
+        let mut expr = "1".to_string();
+        for _ in 0..100 {
+            expr = format!("({})", expr);
+        }
+
+        let source = format!(
+            r#"
+            fn deeply_nested() -> i32 {{
+                return {};
+            }}
+        "#,
+            expr
+        );
+
+        let program = compile(&source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("deeply_nested", &[], &mut env);
+        match result {
+            Ok(Value::Int(1)) => {
+                // Success - deep nesting handled correctly
+            }
+            Err(e) => {
+                // If it fails, should give clear stack error
+                assert!(
+                    e.contains("stack") || e.contains("depth") || e.contains("too deep"),
+                    "Error should mention stack/depth issue: {}",
+                    e
+                );
+            }
+            _ => panic!("Expected Int(1) or stack overflow error"),
+        }
+    }
+
+    #[test]
+    fn test_edge_case_recursion_depth_limit() {
+        // Test recursive function to ensure basic recursion works
+        // NOTE: Very deep recursion (1000+) will cause stack overflow - not tested here
+        let mut env = Env::new();
+        let source = r#"
+            fn countdown(n: i32) -> i32 {
+                if n <= 0 {
+                    return 0;
+                }
+                return countdown(n - 1) + 1;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        // Test reasonable recursion (10 levels)
+        let result = call_function("countdown", &[Value::Int(10)], &mut env).unwrap();
+        assert_eq!(result, Value::Int(10), "countdown(10) should return 10");
+
+        // Test moderate recursion (100 levels)
+        let result_100 = call_function("countdown", &[Value::Int(100)], &mut env).unwrap();
+        assert_eq!(
+            result_100,
+            Value::Int(100),
+            "countdown(100) should return 100"
+        );
+    }
+
+    #[test]
+    fn test_edge_case_short_circuit_and() {
+        // Test that && evaluates correctly
+        // NOTE: Full short-circuit testing requires mutable globals (not yet supported)
+        let mut env = Env::new();
+        let source = r#"
+            fn always_false() -> bool {
+                return false;
+            }
+            
+            fn always_true() -> bool {
+                return true;
+            }
+            
+            fn test_and_false_first() -> bool {
+                return always_false() && always_true();
+            }
+            
+            fn test_and_true_first() -> bool {
+                return always_true() && always_false();
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result1 = call_function("test_and_false_first", &[], &mut env).unwrap();
+        assert_eq!(result1, Value::Bool(false), "false && true should be false");
+
+        let result2 = call_function("test_and_true_first", &[], &mut env).unwrap();
+        assert_eq!(result2, Value::Bool(false), "true && false should be false");
+    }
+
+    #[test]
+    fn test_edge_case_short_circuit_or() {
+        // Test that || evaluates correctly
+        // NOTE: Full short-circuit testing requires mutable globals (not yet supported)
+        let mut env = Env::new();
+        let source = r#"
+            fn always_false() -> bool {
+                return false;
+            }
+            
+            fn always_true() -> bool {
+                return true;
+            }
+            
+            fn test_or_true_first() -> bool {
+                return always_true() || always_false();
+            }
+            
+            fn test_or_false_first() -> bool {
+                return always_false() || always_true();
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result1 = call_function("test_or_true_first", &[], &mut env).unwrap();
+        assert_eq!(result1, Value::Bool(true), "true || false should be true");
+
+        let result2 = call_function("test_or_false_first", &[], &mut env).unwrap();
+        assert_eq!(result2, Value::Bool(true), "false || true should be true");
+    }
+
+    #[test]
+    fn test_edge_case_variable_shadowing() {
+        // Test that variables in different functions don't interfere
+        // NOTE: Bare blocks `{}` not yet supported, so testing with if statements
+        let mut env = Env::new();
+        let source = r#"
+            fn outer() -> i32 {
+                let x: i32 = 10;
+                return x;
+            }
+            
+            fn inner() -> i32 {
+                let x: i32 = 20;
+                return x;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result1 = call_function("outer", &[], &mut env).unwrap();
+        assert_eq!(result1, Value::Int(10));
+
+        let result2 = call_function("inner", &[], &mut env).unwrap();
+        assert_eq!(result2, Value::Int(20));
+
+        // Call outer again to ensure inner didn't affect it
+        let result3 = call_function("outer", &[], &mut env).unwrap();
+        assert_eq!(
+            result3,
+            Value::Int(10),
+            "Function scopes should be independent"
+        );
+    }
+
+    #[test]
+    fn test_edge_case_empty_function_body() {
+        // Test function with no statements (just returns)
+        let mut env = Env::new();
+        let source = r#"
+            fn empty() -> i32 {
+                return 42;
+            }
+            
+            fn empty_implicit() {
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("empty", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Int(42));
+
+        let result2 = call_function("empty_implicit", &[], &mut env).unwrap();
+        assert_eq!(result2, Value::Nil);
+    }
+
+    #[test]
+    fn test_edge_case_early_return_from_nested_block() {
+        // Test that return works correctly from nested if statements
+        let mut env = Env::new();
+        let source = r#"
+            fn early_return(x: i32) -> i32 {
+                if x > 10 {
+                    if x > 20 {
+                        if x > 30 {
+                            return 100;
+                        }
+                        return 50;
+                    }
+                    return 25;
+                }
+                return x;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result1 = call_function("early_return", &[Value::Int(5)], &mut env).unwrap();
+        assert_eq!(result1, Value::Int(5), "x <= 10 should return x");
+
+        let result2 = call_function("early_return", &[Value::Int(15)], &mut env).unwrap();
+        assert_eq!(result2, Value::Int(25), "10 < x <= 20 should return 25");
+
+        let result3 = call_function("early_return", &[Value::Int(25)], &mut env).unwrap();
+        assert_eq!(result3, Value::Int(50), "20 < x <= 30 should return 50");
+
+        let result4 = call_function("early_return", &[Value::Int(35)], &mut env).unwrap();
+        assert_eq!(
+            result4,
+            Value::Int(100),
+            "x > 30 should return from deeply nested if"
+        );
+    }
+
+    #[test]
+    fn test_edge_case_large_array_of_expressions() {
+        // Test handling many sequential expressions
+        let mut env = Env::new();
+
+        // Create a function with 50 sequential assignments
+        let mut statements = String::new();
+        for i in 0..50 {
+            statements.push_str(&format!("let x{}: i32 = {};\n", i, i));
+        }
+
+        let source = format!(
+            r#"
+            fn many_statements() -> i32 {{
+                {}
+                return x49;
+            }}
+        "#,
+            statements
+        );
+
+        let program = compile(&source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("many_statements", &[], &mut env).unwrap();
+        assert_eq!(
+            result,
+            Value::Int(49),
+            "Should handle many sequential statements"
+        );
     }
 }

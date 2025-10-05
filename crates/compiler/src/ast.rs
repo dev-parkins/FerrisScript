@@ -158,7 +158,13 @@ impl fmt::Display for Stmt {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Stmt::Expr(expr) => write!(f, "{};", expr),
-            Stmt::Let { name, mutable, ty, value, .. } => {
+            Stmt::Let {
+                name,
+                mutable,
+                ty,
+                value,
+                ..
+            } => {
                 write!(f, "let ")?;
                 if *mutable {
                     write!(f, "mut ")?;
@@ -172,7 +178,12 @@ impl fmt::Display for Stmt {
             Stmt::Assign { target, value, .. } => {
                 write!(f, "{} = {};", target, value)
             }
-            Stmt::If { cond, then_branch, else_branch, .. } => {
+            Stmt::If {
+                cond,
+                then_branch,
+                else_branch,
+                ..
+            } => {
                 write!(f, "if {} {{ ", cond)?;
                 for stmt in then_branch {
                     write!(f, "{} ", stmt)?;

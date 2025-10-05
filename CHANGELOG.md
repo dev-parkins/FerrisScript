@@ -13,15 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Comprehensive version planning documentation
   - `docs/VERSION_PLANNING.md` - Version strategy overview
-  - `docs/v0.0.2-CHECKLIST.md` - Patch release planning
+  - `docs/v0.0.2/v0.0.2-CHECKLIST.md` - Patch release planning
   - `docs/v0.1.0-ROADMAP.md` - Feature roadmap
   - `docs/DOCUMENTATION_INVENTORY.md` - Documentation audit
 - v0.0.2 documentation workflow with phase-by-phase guide
-  - `docs/v0.0.2-DOCUMENTATION-WORKFLOW.md` - Complete workflow
-  - `docs/v0.0.2-QUICK-START.md` - Quick start guide
-  - `docs/VALIDATION_REPORT.md` - Installation validation results
+  - `docs/v0.0.2/v0.0.2-DOCUMENTATION-WORKFLOW.md` - Complete workflow
+  - `docs/v0.0.2/v0.0.2-QUICK-START.md` - Quick start guide
+  - `docs/v0.0.2/VALIDATION_REPORT.md` - Installation validation results
   - `docs/SINGLE_SOURCE_OF_TRUTH.md` - Anti-duplication matrix
-  - `docs/PHASE_TRACKING.md` - Action items for all phases
+  - `docs/v0.0.2/PHASE_TRACKING.md` - Action items for all phases
   - `docs/FUTURE_AUTOMATION.md` - Godot CLI automation planning
 - **Community Documentation (Phase 2)**
   - `CONTRIBUTING.md` - Comprehensive contribution guide with development setup, PR workflow, code style, and first-time contributor resources

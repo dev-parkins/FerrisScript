@@ -90,7 +90,7 @@ Documentation improvements are always appreciated! This includes:
 
 1. Review the [Anti-Duplication Matrix](docs/SINGLE_SOURCE_OF_TRUTH.md) to ensure you're editing the primary location for content
 2. Link to existing documentation rather than duplicating it
-3. Follow the structure outlined in [Phase Tracking](docs/PHASE_TRACKING.md)
+3. Check [DOCUMENTATION_ORGANIZATION.md](docs/DOCUMENTATION_ORGANIZATION.md) for where new docs should live
 4. **Run documentation linting locally** before pushing (see [Documentation Quality Checks](#documentation-quality-checks) below)
 
 Use the [documentation template](.github/ISSUE_TEMPLATE/documentation.md) when creating documentation-related issues.
@@ -113,29 +113,26 @@ npm install
 **Before Every Documentation Commit**:
 
 ```bash
-# Option 1: VS Code Task (Recommended)
-# Press Ctrl+Shift+P, type "Run Task", select "Docs: Full Check"
+# Check markdown formatting (style/syntax)
+npm run docs:lint
 
-# Option 2: npm script
-npm run docs:check
-
-# Option 3: PowerShell script
-.\scripts\lint-docs.ps1
-
-# To auto-fix formatting issues:
+# Auto-fix formatting issues
 npm run docs:fix
-# or
-.\scripts\lint-docs.ps1 --fix
+
+# Check for broken links (optional, but recommended)
+npx markdown-link-check your-file.md
 ```
 
-**What Gets Checked**:
+**What `npm run docs:lint` Checks**:
 
 - ✅ Heading hierarchy and style
 - ✅ List formatting consistency
 - ✅ Code block formatting
 - ✅ Line length (soft limit: 120 chars)
 - ✅ Trailing whitespace
-- ✅ Internal links (broken references)
+
+**Note:** Link checking is done automatically in CI, but you can check individual files locally with `markdown-link-check` if needed.
+
 - ✅ External links (with retries)
 
 **CI Integration**: These same checks run automatically on pull requests. Catching issues locally saves review time!
@@ -220,14 +217,39 @@ You should see "Hello from FerrisScript!" printed to the console.
 
 We use a **feature branch workflow** with **squash and merge** strategy.
 
+### Branch Naming Convention
+
+We use **branch name prefixes** to automatically apply the appropriate PR template:
+
+| Prefix | Use For | PR Template Applied |
+|--------|---------|---------------------|
+| `bugfix/` or `fix/` | Bug fixes | 🐛 Bug Fix Template |
+| `feature/` or `feat/` | New features | ✨ Feature Template |
+| `docs/` or `doc/` | Documentation | 📝 Documentation Template |
+
+**Examples:**
+
+```bash
+git checkout -b bugfix/parser-null-pointer
+git checkout -b feature/async-script-loading
+git checkout -b docs/add-api-examples
+```
+
+💡 **Tip:** When you create a PR, our automation will detect your branch name and automatically apply the appropriate template!
+
 ### Creating a Pull Request
 
-1. **Create a feature branch** with a descriptive name:
+1. **Create a feature branch** with the appropriate prefix:
 
    ```bash
+   # For bug fixes
+   git checkout -b bugfix/your-bug-description
+   
+   # For new features
    git checkout -b feature/your-feature-name
-   # or
-   git checkout -b fix/bug-description
+   
+   # For documentation
+   git checkout -b docs/your-doc-update
    ```
 
 2. **Make your changes** in small, logical commits:
@@ -253,10 +275,29 @@ We use a **feature branch workflow** with **squash and merge** strategy.
    ```
 
 5. **Open a Pull Request** via GitHub:
-   - Use a clear, descriptive title
-   - Fill out the [PR template](.github/PULL_REQUEST_TEMPLATE.md)
-   - Reference related issues (e.g., "Closes #42")
+   - Use a clear, descriptive title following [Conventional Commits](https://www.conventionalcommits.org/)
+   - The appropriate PR template will be **automatically applied** based on your branch name
+   - Fill out all sections marked with `<!-- ... -->` comments
+   - Reference related issues (e.g., "Closes #42", "Fixes #123")
    - Describe what changed and why
+
+### PR Templates
+
+We have specialized templates for different PR types:
+
+- **🐛 Bug Fix** ([bug_fix.md](.github/PULL_REQUEST_TEMPLATE/bug_fix.md))
+  - Focus: Root cause, regression testing, before/after comparison
+  - Auto-applied for: `bugfix/*` or `fix/*` branches
+
+- **✨ Feature** ([feature.md](.github/PULL_REQUEST_TEMPLATE/feature.md))
+  - Focus: Motivation, usage examples, breaking changes, performance
+  - Auto-applied for: `feature/*` or `feat/*` branches
+
+- **📝 Documentation** ([docs.md](.github/PULL_REQUEST_TEMPLATE/docs.md))
+  - Focus: Markdown linting, link checking, code example testing
+  - Auto-applied for: `docs/*` or `doc/*` branches
+
+**Manual Selection:** You can also manually choose a template when creating a PR via the GitHub dropdown menu.
 
 ### PR Requirements
 
@@ -388,6 +429,95 @@ We aim for high test coverage, especially for:
 - Parser and lexer (edge cases, error handling)
 - Type checker (all type rules, error messages)
 - Runtime (execution correctness, error recovery)
+
+#### Running Code Coverage
+
+FerrisScript uses two code coverage tools for different environments:
+
+- **cargo-llvm-cov** - Preferred for local development (Windows, macOS, Linux)
+- **cargo-tarpaulin** - Used in CI (Linux only, due to Windows file locking issues)
+
+**Quick Start - Running Coverage Locally**:
+
+```bash
+# PowerShell (Windows)
+.\scripts\coverage.ps1
+
+# Bash (Linux/macOS)
+./scripts/coverage.sh
+```
+
+The scripts will:
+
+1. Automatically install `cargo-llvm-cov` if not present
+2. Run coverage analysis across all workspace crates
+3. Generate both HTML and LCOV reports in `target/coverage/`
+
+**Viewing Coverage Reports**:
+
+```powershell
+# Windows - Open HTML report
+Invoke-Item target/coverage/html/index.html
+
+# Linux
+xdg-open target/coverage/html/index.html
+
+# macOS
+open target/coverage/html/index.html
+```
+
+**Manual Coverage Commands**:
+
+```bash
+# Install prerequisites (first time only)
+rustup component add llvm-tools-preview
+cargo install cargo-llvm-cov
+
+# Run coverage with HTML output
+cargo llvm-cov --workspace --html --output-dir target/coverage
+
+# Run coverage with LCOV output (for external tools)
+cargo llvm-cov --workspace --lcov --output-path target/coverage/lcov.info
+
+# Run coverage for specific crate
+cargo llvm-cov -p ferrisscript_compiler --html
+```
+
+**Understanding Coverage Results**:
+
+- **Green lines**: Covered by tests
+- **Red lines**: Not covered by tests
+- **Yellow lines**: Partially covered (branches)
+- **Coverage percentage**: Shown per file and overall
+
+**Coverage Goals**:
+
+- **Current baseline**: Established in test coverage analysis
+- **Target for new code**: 80%+ line coverage
+- **Critical paths**: Parser, type checker, runtime should have high coverage
+
+**Why Two Tools?**
+
+- **cargo-llvm-cov**: Cross-platform, native Rust tooling, no file locking issues on Windows
+- **cargo-tarpaulin**: More mature in CI environments, used in GitHub Actions (Linux runners)
+
+See [docs/COVERAGE_SETUP_NOTES.md](docs/COVERAGE_SETUP_NOTES.md) for technical details on the Windows file locking issue that led to this dual-tool approach.
+
+**Before Submitting a PR**:
+
+For significant code changes:
+
+1. Run coverage locally: `.\scripts\coverage.ps1` or `./scripts/coverage.sh`
+2. Check that your new code is covered by tests
+3. Aim for 80%+ coverage on modified files
+4. CI will also run coverage checks using tarpaulin
+
+**Troubleshooting Coverage Issues**:
+
+- **"cargo-llvm-cov not found"**: The script will auto-install it, or run `cargo install cargo-llvm-cov` manually
+- **Windows file locking errors**: Close VS Code and rust-analyzer, or use the provided scripts which avoid these issues
+- **Coverage seems low**: Ensure tests are actually executing your code paths; add `#[cfg(test)]` module tests
+- **CI coverage differs from local**: CI uses tarpaulin (Linux), local uses llvm-cov; minor differences are normal
 
 ### Testing with Godot (Deferred)
 

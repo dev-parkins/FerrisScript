@@ -1,0 +1,150 @@
+// Error Showcase Example
+// 
+// This example demonstrates FerrisScript's helpful error messages.
+// Uncomment sections below to see different types of errors with:
+// - Source context (±2 lines around the error)
+// - Visual pointer (^) showing exact error location
+// - Helpful hints explaining what's expected
+//
+// To see an error in action:
+// 1. Uncomment one of the error sections below
+// 2. Run: cargo run --example test_ferris -- examples/error_showcase.ferris
+// 3. See the helpful error message with source context!
+//
+// Or load this file in Godot with the FerrisScript GDExtension
+
+// ========================================
+// LEXER ERRORS
+// ========================================
+
+// --- Unterminated String Error ---
+// Uncomment to see: "String must be closed with ""
+// fn test_unterminated_string() {
+//     let message = "Hello, World!
+//     print(message);
+// }
+
+// --- Invalid Character Error ---
+// Uncomment to see: "This character is not valid in FerrisScript"
+// fn test_invalid_character() {
+//     let x = 5 @ 3;  // @ is not a valid operator
+// }
+
+// --- Invalid Escape Sequence Error ---
+// Uncomment to see: "Unknown escape '\x', valid escapes are \n \t \r \\ \""
+// fn test_invalid_escape() {
+//     let message = "Hello\xWorld";  // \x is not a valid escape
+//     print(message);
+// }
+
+// ========================================
+// PARSER ERRORS
+// ========================================
+
+// --- Missing Identifier Error ---
+// Uncomment to see: "Variable name must be an identifier"
+// fn test_missing_identifier() {
+//     let : i32 = 5;  // Missing variable name
+// }
+
+// --- Missing Type Annotation Error ---
+// Uncomment to see: "Type annotation must be a valid type name"
+// fn test_missing_type() {
+//     let x: = 5;  // Missing type after colon
+// }
+
+// --- Invalid Function Name Error ---
+// Uncomment to see: "Function name must be an identifier"
+// fn 123invalid() {  // Function names can't start with numbers
+//     print("test");
+// }
+
+// --- Missing Field Name Error ---
+// Uncomment to see: "Field name must be an identifier"
+// fn test_field_access() {
+//     let x = self.;  // Missing field name after dot
+// }
+
+// ========================================
+// TYPE CHECKER ERRORS
+// ========================================
+
+// --- Type Mismatch Error ---
+// Uncomment to see: "Value type bool cannot be coerced to i32"
+// fn test_type_mismatch() {
+//     let x: i32 = true;  // Can't assign bool to i32
+// }
+
+// --- Undefined Variable Error ---
+// Uncomment to see: "Variable must be declared before use"
+// fn test_undefined_variable() {
+//     let x = undefined_var;  // Variable not declared
+// }
+
+// --- If Condition Type Error ---
+// Uncomment to see: "Condition must evaluate to a boolean value"
+// fn test_if_condition() {
+//     if 5 {  // Condition must be bool, not i32
+//         print("This won't work");
+//     }
+// }
+
+// --- Binary Operation Type Error ---
+// Uncomment to see: "Arithmetic operations (+, -, *, /) require i32 or f32 types"
+// fn test_binary_operation() {
+//     let x = 5 + true;  // Can't add i32 and bool
+// }
+
+// --- Unary Operation Type Error ---
+// Uncomment to see: "Negation operator (-) requires i32 or f32 type"
+// fn test_unary_negation() {
+//     let x = -true;  // Can't negate a boolean
+// }
+
+// --- Function Call Error (Wrong Argument Count) ---
+// Uncomment to see: "Expected 1 argument(s)"
+// fn test_function_args() {
+//     print();  // print() expects 1 argument
+// }
+
+// --- Function Call Error (Wrong Argument Type) ---
+// Uncomment to see: "Argument 0 must be of type string"
+// fn test_function_arg_type() {
+//     print(42);  // print() expects string, not i32
+// }
+
+// --- Undefined Function Error ---
+// Uncomment to see: "Function must be declared before use"
+// fn test_undefined_function() {
+//     undefined_function();
+// }
+
+// ========================================
+// WORKING EXAMPLE
+// ========================================
+
+// This function demonstrates correct FerrisScript code
+fn _ready() {
+    print("Error Showcase Example");
+    print("=======================");
+    print("");
+    print("All error sections are commented out.");
+    print("Uncomment any section above to see helpful error messages!");
+    print("");
+    print("Error messages include:");
+    print("  - Source context (lines around the error)");
+    print("  - Visual pointer (^) at error location");
+    print("  - Helpful hints explaining the issue");
+}
+
+// ========================================
+// TIP: Start with Simple Errors
+// ========================================
+//
+// If you're new to FerrisScript, try uncommenting these in order:
+// 1. Type Mismatch - Shows basic type error
+// 2. Undefined Variable - Shows variable scoping
+// 3. If Condition - Shows control flow requirements
+// 4. Binary Operation - Shows operator type requirements
+//
+// Each error message will guide you toward the fix!
