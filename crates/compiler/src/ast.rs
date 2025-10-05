@@ -1,6 +1,44 @@
+//! Abstract Syntax Tree (AST) definitions for FerrisScript.
+//!
+//! This module defines all the node types that make up a FerrisScript program.
+//! The AST is built by the parser and consumed by the type checker and runtime.
+//!
+//! # Structure
+//!
+//! A FerrisScript program consists of:
+//! - Global variable declarations ([`GlobalVar`])
+//! - Function definitions ([`Function`])
+//!
+//! Functions contain:
+//! - Parameters ([`Param`])
+//! - Statements ([`Stmt`])
+//! - Expressions ([`Expr`])
+//!
+//! # Example
+//!
+//! ```no_run
+//! use ferrisscript_compiler::ast::{Program, Function, Param, Stmt, Expr};
+//!
+//! let program = Program::new();
+//! // program.functions.push(...);
+//! ```
+
 use std::fmt;
 
-/// Position in source code (line, column)
+/// Source code location (line and column numbers).
+///
+/// Used throughout the AST to track where each construct appears in the
+/// source code. This enables precise error messages with line/column info.
+///
+/// # Examples
+///
+/// ```
+/// use ferrisscript_compiler::ast::Span;
+///
+/// let span = Span::new(10, 15); // line 10, column 15
+/// assert_eq!(span.line, 10);
+/// assert_eq!(span.column, 15);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Span {
     pub line: usize,
@@ -23,9 +61,25 @@ impl fmt::Display for Span {
     }
 }
 
+/// Root node of a FerrisScript program.
+///
+/// Represents the complete program structure with global variables and functions.
+/// This is the output of the parser and input to the type checker.
+///
+/// # Examples
+///
+/// ```
+/// use ferrisscript_compiler::ast::Program;
+///
+/// let mut program = Program::new();
+/// // Add functions and global variables
+/// // program.functions.push(...);
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Program {
+    /// Global variable declarations (let and let mut)
     pub global_vars: Vec<GlobalVar>,
+    /// Function definitions
     pub functions: Vec<Function>,
 }
 
@@ -56,12 +110,28 @@ impl fmt::Display for Program {
     }
 }
 
+/// Global variable declaration.
+///
+/// Represents a variable declared at the program level (outside functions).
+/// Global variables can be mutable or immutable and must have an initializer.
+///
+/// # Examples
+///
+/// ```text
+/// let score: i32 = 0;           // immutable global
+/// let mut player_health: f32 = 100.0;  // mutable global
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct GlobalVar {
+    /// Variable name
     pub name: String,
+    /// Whether the variable can be reassigned
     pub mutable: bool,
+    /// Optional type annotation
     pub ty: Option<String>,
+    /// Initializer expression
     pub value: Expr,
+    /// Source location
     pub span: Span,
 }
 
@@ -79,12 +149,28 @@ impl fmt::Display for GlobalVar {
     }
 }
 
+/// Function definition.
+///
+/// Represents a named function with parameters, optional return type, and body.
+/// Functions are the primary unit of code organization in FerrisScript.
+///
+/// # Examples
+///
+/// ```text
+/// fn greet() { }                    // No parameters, no return
+/// fn add(a: i32, b: i32) -> i32 { } // With parameters and return type
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Function {
+    /// Function name
     pub name: String,
+    /// Function parameters
     pub params: Vec<Param>,
+    /// Optional return type annotation
     pub return_type: Option<String>,
+    /// Function body (list of statements)
     pub body: Vec<Stmt>,
+    /// Source location
     pub span: Span,
 }
 
@@ -109,8 +195,19 @@ impl fmt::Display for Function {
     }
 }
 
+/// Function parameter.
+///
+/// Represents a single parameter in a function signature, including its name
+/// and optional type annotation.
+///
+/// # Examples
+///
+/// ```text
+/// fn process(x: i32, y: f32) { }  // Two parameters with type annotations
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Param {
+    /// Parameter name
     pub name: String,
     pub ty: String,
     pub span: Span,
@@ -122,6 +219,30 @@ impl fmt::Display for Param {
     }
 }
 
+/// Statement node.
+///
+/// Represents executable statements that make up function bodies and control flow.
+/// Statements don't produce values (unlike expressions).
+///
+/// # Variants
+///
+/// - `Expr` - Expression statement (e.g., function call)
+/// - `Let` - Local variable declaration
+/// - `Assign` - Variable assignment
+/// - `If` - Conditional branching
+/// - `While` - Loop
+/// - `Return` - Early function return
+/// - `CompoundAssign` - Combined operation and assignment (+=, -=)
+///
+/// # Examples
+///
+/// ```text
+/// let x: i32 = 5;              // Let statement
+/// x = x + 1;                   // Assign statement
+/// if x > 10 { return x; }      // If + Return statements
+/// while x < 100 { x = x * 2; } // While statement
+/// x += 5;                      // CompoundAssign statement
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub enum Stmt {
     Expr(Expr),
@@ -216,6 +337,32 @@ impl fmt::Display for Stmt {
     }
 }
 
+/// Expression node.
+///
+/// Represents expressions that produce values. Expressions can be used as
+/// statement bodies, in assignments, as function arguments, etc.
+///
+/// # Variants
+///
+/// - `Literal` - Constant values (numbers, strings, booleans)
+/// - `Variable` - Variable reference
+/// - `Binary` - Binary operation (e.g., `a + b`, `x == y`)
+/// - `Unary` - Unary operation (e.g., `-x`, `!flag`)
+/// - `Call` - Function call
+/// - `FieldAccess` - Member access (e.g., `position.x`)
+/// - `Assign` - Assignment expression
+/// - `CompoundAssign` - Combined operation (e.g., `x += 5`)
+///
+/// # Examples
+///
+/// ```text
+/// 42                    // Literal
+/// x                     // Variable
+/// a + b * 2             // Binary (with precedence)
+/// -velocity.y           // Unary + FieldAccess
+/// sqrt(x * x + y * y)   // Call
+/// position.x            // FieldAccess
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
     Literal(Literal, Span),
