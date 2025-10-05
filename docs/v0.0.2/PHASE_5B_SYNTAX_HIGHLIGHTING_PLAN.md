@@ -96,31 +96,31 @@ A: TODO list via manage_todo_list tool
 
 ### Decisions Made
 
-**Decision 1: Use TextMate Grammar**  
+#### Decision 1: Use TextMate Grammar
 
 - Standard for VS Code syntax highlighting
 - Well-documented, declarative format
 - Easy to maintain and update
 
-**Decision 2: Start with Core Features Only**  
+#### Decision 2: Start with Core Features Only
 
 - Keywords, types, operators, comments, strings
 - Defer advanced features (semantic highlighting) to LSP phase
 - Focus on immediate value
 
-**Decision 3: Create Grammar Update Strategy**  
+#### Decision 3: Create Grammar Update Strategy
 
 - Document grammar audit process in CONTRIBUTING.md
 - Add checklist item: "Update syntax highlighting grammar" when adding language features
 - Create `docs/SYNTAX_HIGHLIGHTING_MAINTENANCE.md` guide
 
-**Trade-off 1: TextMate vs Semantic Highlighting**  
+#### Trade-off 1: TextMate vs Semantic Highlighting
 
 - Chose TextMate for simplicity and immediate availability
 - Semantic highlighting requires LSP (deferred to v0.0.5)
 - TextMate provides 80% of value for 20% of effort
 
-**Trade-off 2: Minimal Extension vs Full Features**  
+#### Trade-off 2: Minimal Extension vs Full Features
 
 - Starting with syntax highlighting only (no completion, hover, etc.)
 - Full language server features deferred to v0.0.5
