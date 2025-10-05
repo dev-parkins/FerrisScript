@@ -1,8 +1,54 @@
+//! Type checking and semantic analysis for FerrisScript.
+//!
+//! This module performs static type checking on the AST to ensure type safety.
+//! It verifies that all operations are valid, variables are declared before use,
+//! and function calls match their signatures.
+//!
+//! # Type System
+//!
+//! FerrisScript supports:
+//! - Primitive types: `i32`, `f32`, `bool`, `String`
+//! - Godot types: `Vector2`, `Node`
+//! - Void return type
+//! - Type coercion: `i32` → `f32` (implicit)
+//!
+//! # Scope Rules
+//!
+//! - Function parameters are scoped to the function body
+//! - Local variables are scoped to their enclosing block
+//! - Global variables are accessible everywhere
+//! - Shadowing is not allowed
+//!
+//! # Performance
+//!
+//! - Simple scripts: ~850ns
+//! - Complex scripts: ~3.6μs
+//! - Single-pass type checking with scope stack
+//!
+//! # Example
+//!
+//! ```no_run
+//! use ferrisscript_compiler::{lexer::tokenize, parser::parse, type_checker::check};
+//!
+//! let source = "fn add(a: i32, b: i32) -> i32 { return a + b; }";
+//! let tokens = tokenize(source).unwrap();
+//! let program = parse(&tokens, source).unwrap();
+//! check(&program, source).unwrap(); // Type checking passes
+//! ```
+
 use crate::ast::*;
 use crate::error_context::format_error_with_context;
 use std::collections::HashMap;
 
-/// Type representation for type checking
+/// Type representation for FerrisScript's type system.
+///
+/// Represents all supported types including primitives, Godot types,
+/// and special types like `Void` and `Unknown`.
+///
+/// # Type Coercion
+///
+/// The type checker supports implicit coercion from `i32` to `f32` in FerrisScript code.
+/// For example, passing an integer to a function expecting a float is allowed.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Type {
     I32,
@@ -623,6 +669,56 @@ impl<'a> TypeChecker<'a> {
     }
 }
 
+/// Perform type checking on a parsed program.
+///
+/// This is the main entry point for semantic analysis. It verifies:
+/// - All variables are declared before use
+/// - Types are compatible in operations and assignments
+/// - Function calls match declared signatures
+/// - Return statements match function return types
+/// - No invalid operations (e.g., field access on primitives)
+///
+/// # Arguments
+///
+/// * `program` - The parsed AST to type check
+/// * `source` - Original source code (for error messages)
+///
+/// # Returns
+///
+/// * `Ok(())` - Program is type-safe
+/// * `Err(String)` - Type error with location and context
+///
+/// # Examples
+///
+/// ```no_run
+/// use ferrisscript_compiler::{lexer::tokenize, parser::parse, type_checker::check};
+///
+/// let source = r#"
+///     let global_count: i32 = 0;
+///
+///     fn increment() {
+///         global_count = global_count + 1;
+///     }
+/// "#;
+/// let tokens = tokenize(source).unwrap();
+/// let program = parse(&tokens, source).unwrap();
+/// check(&program, source).unwrap();
+/// ```
+///
+/// # Type Errors
+///
+/// Returns `Err` if:
+/// - Variable used before declaration
+/// - Type mismatch in assignment or operation
+/// - Function called with wrong argument types
+/// - Return type doesn't match function signature
+/// - Invalid operations (e.g., adding strings and numbers)
+///
+/// # Performance
+///
+/// - Simple programs: ~850ns
+/// - Complex programs: ~3.6μs
+/// - O(n) complexity where n = number of AST nodes
 pub fn check(program: &Program, source: &str) -> Result<(), String> {
     let mut checker = TypeChecker::new(source);
     checker.check_program(program);

@@ -1,6 +1,64 @@
+//! FerrisScript Runtime
+//!
+//! This crate provides the execution environment for compiled FerrisScript programs.
+//! It evaluates the AST produced by the compiler and manages program state.
+//!
+//! # Overview
+//!
+//! The runtime provides:
+//! - Value representation ([`Value`])
+//! - Variable storage and scoping ([`Env`])
+//! - Expression evaluation
+//! - Statement execution
+//! - Integration with Godot engine (property access)
+//!
+//! # Performance
+//!
+//! - Function call: ~1.05μs per call
+//! - Loop iteration: ~180ns per iteration
+//! - 16K+ function calls per frame at 60 FPS
+//!
+//! # Example
+//!
+//! ```no_run
+//! use ferrisscript_runtime::{execute, call_function, Env, Value};
+//! use ferrisscript_compiler::compile;
+//!
+//! let source = "fn add(a: i32, b: i32) -> i32 { return a + b; }";
+//! let program = compile(source).unwrap();
+//!
+//! let mut env = Env::new();
+//! execute(&program, &mut env).unwrap();
+//!
+//! let result = call_function("add", &[Value::Int(5), Value::Int(3)], &mut env);
+//! assert_eq!(result, Ok(Value::Int(8)));
+//! ```
+
 use ferrisscript_compiler::ast::{self, BinaryOp, UnaryOp};
 use std::collections::HashMap;
 
+/// Runtime value representation.
+///
+/// Represents all possible values that can exist during program execution,
+/// including primitives, Godot types, and special values.
+///
+/// # Type Coercion
+///
+/// Values support implicit coercion via helper methods:
+/// - [`to_float()`](Value::to_float) - Converts `Int` to `Float`
+/// - [`to_bool()`](Value::to_bool) - Converts values to boolean
+///
+/// # Examples
+///
+/// ```
+/// use ferrisscript_runtime::Value;
+///
+/// let x = Value::Int(42);
+/// assert_eq!(x.to_float(), Some(42.0));
+///
+/// let v = Value::Vector2 { x: 1.0, y: 2.0 };
+/// assert!(v.to_bool()); // Non-nil values are truthy
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Int(i32),
@@ -53,6 +111,44 @@ struct VarInfo {
 // Type alias to simplify the complex builtin function type
 type BuiltinFn = fn(&[Value]) -> Result<Value, String>;
 
+/// Execution environment for FerrisScript programs.
+///
+/// `Env` manages program state including variables, functions, and integration
+/// with the Godot engine through property getter/setter callbacks.
+///
+/// # Structure
+///
+/// - **Scopes**: Stack of variable scopes (global, function, block)
+/// - **Functions**: User-defined function definitions
+/// - **Built-ins**: Built-in functions like `print()`
+/// - **Godot Integration**: Callbacks for `self.property` access
+///
+/// # Examples
+///
+/// ```no_run
+/// use ferrisscript_runtime::Env;
+/// use ferrisscript_compiler::compile;
+///
+/// let source = "fn greet() { print(\"Hello!\"); }";
+/// let program = compile(source).unwrap();
+///
+/// let mut env = Env::new();
+/// // Load and execute program...
+/// ```
+///
+/// # Godot Integration
+///
+/// Set property callbacks to enable `self.property` access from FerrisScript:
+///
+/// ```no_run
+/// use ferrisscript_runtime::{Env, Value};
+///
+/// let mut env = Env::new();
+/// env.set_property_getter(|prop| {
+///     // Return property value from Godot node
+///     Ok(Value::Float(100.0))
+/// });
+/// ```
 pub struct Env {
     scopes: Vec<HashMap<String, VarInfo>>,
     functions: HashMap<String, ast::Function>,
@@ -214,6 +310,48 @@ enum FlowControl {
     Return(Value),
 }
 
+/// Execute a FerrisScript program by initializing globals and registering functions.
+///
+/// This is the main entry point for program execution. It sets up the runtime
+/// environment by:
+/// 1. Evaluating and storing global variables
+/// 2. Registering all function definitions
+///
+/// Note: This does not automatically call any function. Use [`call_function`]
+/// to invoke specific functions after calling this.
+///
+/// # Arguments
+///
+/// * `program` - The compiled AST from the compiler
+/// * `env` - The execution environment
+///
+/// # Returns
+///
+/// * `Ok(())` - Program loaded successfully
+/// * `Err(String)` - Runtime error during global initialization
+///
+/// # Examples
+///
+/// ```no_run
+/// use ferrisscript_runtime::{execute, call_function, Env, Value};
+/// use ferrisscript_compiler::compile;
+///
+/// let source = r#"
+///     let score: i32 = 0;
+///     fn increment() { score = score + 1; }
+/// "#;
+/// let program = compile(source).unwrap();
+/// let mut env = Env::new();
+///
+/// execute(&program, &mut env).unwrap();
+/// call_function("increment", &[], &mut env).unwrap();
+/// ```
+///
+/// # Performance
+///
+/// - Function call overhead: ~1.05μs
+/// - Loop iteration: ~180ns
+/// - Supports 16K+ calls per frame at 60 FPS
 pub fn execute(program: &ast::Program, env: &mut Env) -> Result<(), String> {
     // Initialize global variables
     for global in &program.global_vars {
@@ -696,7 +834,52 @@ fn evaluate_expr(expr: &ast::Expr, env: &mut Env) -> Result<Value, String> {
     }
 }
 
-/// Execute a function by name (used for Godot callbacks)
+/// Call a FerrisScript function by name with arguments.
+///
+/// This is the primary way to invoke FerrisScript functions from external code,
+/// such as Godot engine callbacks (_ready, _process, etc.).
+///
+/// # Arguments
+///
+/// * `name` - Function name to call
+/// * `args` - Slice of argument values
+/// * `env` - Execution environment
+///
+/// # Returns
+///
+/// * `Ok(Value)` - Function return value (or `Value::Nil` if void)
+/// * `Err(String)` - Runtime error (undefined function, wrong arity, execution error)
+///
+/// # Examples
+///
+/// ```no_run
+/// use ferrisscript_runtime::{call_function, Env, Value};
+/// use ferrisscript_compiler::compile;
+///
+/// let source = r#"
+///     fn multiply(a: i32, b: i32) -> i32 {
+///         return a * b;
+///     }
+/// "#;
+/// let program = compile(source).unwrap();
+/// let mut env = Env::new();
+/// ferrisscript_runtime::execute(&program, &mut env).unwrap();
+///
+/// let result = call_function("multiply", &[Value::Int(6), Value::Int(7)], &mut env);
+/// assert_eq!(result, Ok(Value::Int(42)));
+/// ```
+///
+/// # Godot Integration
+///
+/// Typically used for Godot engine callbacks like `_ready()` and `_process(delta)`.
+/// The GDExtension binding layer calls this function to invoke FerrisScript code
+/// from the game engine.
+///
+/// # Performance
+///
+/// - Function call overhead: ~1.05μs
+/// - Suitable for real-time game loops
+/// - 16K+ calls/frame possible at 60 FPS
 pub fn call_function(name: &str, args: &[Value], env: &mut Env) -> Result<Value, String> {
     if env.is_builtin(name) {
         return env.call_builtin(name, args);
