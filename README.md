@@ -5,11 +5,12 @@
 
 A Rust-inspired scripting language for Godot 4.x
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
-[![Godot](https://img.shields.io/badge/godot-4.2%2B-blue.svg)](https://godotengine.org/)
-[![Tests](https://img.shields.io/badge/tests-182%20passing-success.svg)](https://github.com/dev-parkins/FerrisScript/actions)
-[![Coverage](https://img.shields.io/badge/coverage-70--75%25-yellow.svg)](docs/DEVELOPMENT.md#-code-coverage)
+![Version](https://img.shields.io/badge/version-0.0.1-blue)
+![Status](https://img.shields.io/badge/status-alpha-orange)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Rust](https://img.shields.io/badge/rust-1.70%2B-orange)
+![Godot](https://img.shields.io/badge/godot-4.2%2B-blue)
+![Stars](https://img.shields.io/github/stars/dev-parkins/FerrisScript?style=social)
 
 **Quick Links**: [📖 Docs](docs/) | [🐛 Issues](https://github.com/dev-parkins/FerrisScript/issues) | [💬 Discussions](https://github.com/dev-parkins/FerrisScript/discussions) | [❓ FAQ](docs/FAQ.md) | [🔧 Troubleshooting](docs/TROUBLESHOOTING.md)
 
