@@ -300,7 +300,7 @@ See individual example READMEs for specific setup instructions.
 ## Related Documentation
 
 - [EXAMPLE_UPDATE_OPPORTUNITIES.md](../docs/EXAMPLE_UPDATE_OPPORTUNITIES.md) - Planned example improvements
-- [EDGE_CASE_ERROR_HANDLING_PLAN.md](../docs/v0.0.2/EDGE_CASE_ERROR_HANDLING_PLAN.md) - Error handling system details
+- [EDGE_CASE_ERROR_HANDLING_PLAN.md](../docs/archive/v0.0.2/phases/EDGE_CASE_ERROR_HANDLING_PLAN.md) - Error handling system details
 - [v0.1.0-ROADMAP.md](../docs/v0.1.0-ROADMAP.md) - Upcoming features that will need examples
 
 ---

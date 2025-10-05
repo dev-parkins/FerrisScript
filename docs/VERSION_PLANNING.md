@@ -95,7 +95,7 @@ During v0.X.Y (pre-stable):
 
 **Estimated Timeline**: 10-15 days focused work
 
-📋 **Historical Checklist**: [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md) *(archived for reference)*
+📋 **Historical Checklist**: [archive/v0.0.2/v0.0.2-CHECKLIST.md](archive/v0.0.2/v0.0.2-CHECKLIST.md) *(archived for reference)*
 
 ---
 
@@ -242,7 +242,7 @@ During v0.X.Y (pre-stable):
 
 | Document | Purpose | Target Audience | Status |
 |----------|---------|-----------------|--------|
-| [v0.0.2/v0.0.2-CHECKLIST.md](v0.0.2/v0.0.2-CHECKLIST.md) | v0.0.2 release plan | Contributors | 📁 Archived |
+| [archive/v0.0.2/v0.0.2-CHECKLIST.md](archive/v0.0.2/v0.0.2-CHECKLIST.md) | v0.0.2 release plan | Contributors | 📁 Archived |
 | [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) | Feature roadmap for v0.1.0 | All stakeholders | 🎯 Active |
 | [DOCUMENTATION_INVENTORY.md](DOCUMENTATION_INVENTORY.md) | Documentation audit | Maintainers | 📋 Reference |
 | This file | High-level version strategy | Everyone | 📖 Living |
@@ -332,7 +332,7 @@ The roadmap is not set in stone! We welcome input:
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Technical design
 - [RELEASE_NOTES.md](../RELEASE_NOTES.md) - Release history
 - [RELEASING.md](../RELEASING.md) - How to create releases
-- [v0.0.2/](v0.0.2/) - v0.0.2 archived documentation
+- [archive/v0.0.2/](archive/v0.0.2/) - v0.0.2 archived documentation
 - [v0.1.0-ROADMAP.md](v0.1.0-ROADMAP.md) - Feature roadmap
 
 ---

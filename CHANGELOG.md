@@ -95,7 +95,7 @@ This release focuses on establishing a solid foundation for contributors and use
   - `scripts/coverage.ps1` - Windows coverage generation script
   - `.github/workflows/coverage.yml` - CI coverage reporting with cargo-tarpaulin
   - `docs/COVERAGE_SETUP_NOTES.md` - Platform-specific coverage tool setup
-  - `docs/v0.0.2/TEST_COVERAGE_ANALYSIS.md` - Detailed coverage analysis and gaps
+  - `docs/archive/v0.0.2/TEST_COVERAGE_ANALYSIS.md` - Detailed coverage analysis and gaps
 
 - **Benchmarking**
   - `BENCHMARK_BASELINE.md` - Performance baseline metrics
@@ -115,8 +115,8 @@ This release focuses on establishing a solid foundation for contributors and use
   - All doctests passing (0 warnings)
 
 - **Documentation Files**
-  - `docs/v0.0.2/PHASE_4A_COMPLETION_SUMMARY.md` - API documentation phase summary
-  - `docs/v0.0.2/PHASE_4B_RUSTDOC_SUMMARY.md` - Rustdoc implementation summary
+  - `docs/archive/v0.0.2/phases/PHASE_4A_COMPLETION_SUMMARY.md` - API documentation phase summary
+  - `docs/archive/v0.0.2/phases/PHASE_4B_RUSTDOC_SUMMARY.md` - Rustdoc implementation summary
 
 #### GitHub Project Setup (PR #17, Phase 5A)
 
@@ -153,8 +153,8 @@ This release focuses on establishing a solid foundation for contributors and use
 
 #### Documentation Polish (PR #19, Phase 5C)
 
-- **Testing Guide**
-  - `docs/v0.0.2/TESTING.md` - 655-line comprehensive testing guide
+- **Testing Guide** (Archived to `docs/archive/v0.0.2/`)
+  - 655-line comprehensive testing guide created for v0.0.2
   - Quick start commands
   - Test naming conventions and templates
   - Test coverage goals and generation methods
@@ -163,6 +163,7 @@ This release focuses on establishing a solid foundation for contributors and use
   - Testing workflows (before PR, during dev, after merge)
   - Troubleshooting common test issues
   - Future testing roadmap (v0.0.3-v0.1.0)
+  - Current testing practices now in `CONTRIBUTING.md`
 
 - **Godot Test Project Documentation**
   - `godot_test/README.md` - Enhanced with "Adding New Test Scripts" section
@@ -191,18 +192,18 @@ This release focuses on establishing a solid foundation for contributors and use
   - `docs/DOCUMENTATION_LINKING_GUIDELINES.md` - Cross-linking best practices
 
 - **Workflow Documentation**
-  - `docs/v0.0.2/v0.0.2-DOCUMENTATION-WORKFLOW.md` - 40+ page phase-by-phase guide
-  - `docs/v0.0.2/v0.0.2-QUICK-START.md` - Quick start for v0.0.2 work
-  - `docs/v0.0.2/v0.0.2-CHECKLIST.md` - Complete task checklist
+  - `docs/archive/v0.0.2/v0.0.2-DOCUMENTATION-WORKFLOW.md` - 40+ page phase-by-phase guide
+  - `docs/archive/v0.0.2/v0.0.2-QUICK-START.md` - Quick start for v0.0.2 work
+  - `docs/archive/v0.0.2/v0.0.2-CHECKLIST.md` - Complete task checklist
   - `.github/prompts/workstream-execution.prompt.md` - AI-assisted workstream execution template
 
 - **Phase Completion Reports**
-  - `docs/v0.0.2/PHASE_2_COMPLETION_REPORT.md` - Error handling phase 2 summary
-  - `docs/v0.0.2/PHASE_3_COMPLETION_REPORT.md` - Error handling phase 3 summary
-  - `docs/v0.0.2/PHASE_4_COMPLETION_REPORT.md` - Community docs phase summary
-  - `docs/v0.0.2/PHASE_5A_GITHUB_SETUP_SUMMARY.md` - GitHub setup phase summary
-  - `docs/v0.0.2/PHASE_5B_SYNTAX_HIGHLIGHTING_SUMMARY.md` - Syntax highlighting phase summary
-  - `docs/v0.0.2/PHASE_5C_DOCUMENTATION_POLISH_SUMMARY.md` - Documentation polish phase summary
+  - `docs/archive/v0.0.2/phases/PHASE_2_COMPLETION_REPORT.md` - Error handling phase 2 summary
+  - `docs/archive/v0.0.2/phases/PHASE_3_COMPLETION_REPORT.md` - Error handling phase 3 summary
+  - `docs/archive/v0.0.2/phases/PHASE_4_COMPLETION_REPORT.md` - Community docs phase summary
+  - `docs/archive/v0.0.2/phases/PHASE_5A_GITHUB_SETUP_SUMMARY.md` - GitHub setup phase summary
+  - `docs/archive/v0.0.2/phases/PHASE_5B_SYNTAX_HIGHLIGHTING_SUMMARY.md` - Syntax highlighting phase summary
+  - `docs/archive/v0.0.2/phases/PHASE_5C_DOCUMENTATION_POLISH_SUMMARY.md` - Documentation polish phase summary
 
 #### Tooling & Scripts
 
@@ -261,7 +262,7 @@ This release focuses on establishing a solid foundation for contributors and use
 
 ### Deferred to Future Versions
 
-See `docs/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md` for complete deferral analysis:
+See `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md` for complete deferral analysis:
 
 - **v0.0.3**: Enhanced error diagnostics, development scripts, VS Code marketplace, CI optimizations (17 items)
 - **v0.0.4**: GODOT_INTEGRATION.md, signal support docs, Godot screenshots (8 items)
@@ -279,14 +280,13 @@ See `docs/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md` for complete deferral analysis:
 
 - Improved error messages with source context
 - VS Code syntax highlighting (install from `extensions/vscode/`)
-- Comprehensive testing guide (`docs/v0.0.2/TESTING.md`)
+- Comprehensive testing practices documented in `CONTRIBUTING.md`
 - Enhanced example tutorials in `examples/*/README.md`
 
 **For Contributors**:
 
-- Read `CONTRIBUTING.md` before submitting PRs
+- Read `CONTRIBUTING.md` before submitting PRs (includes testing best practices)
 - Use `npm run docs:fix` before committing documentation changes
-- Review `docs/v0.0.2/TESTING.md` for testing best practices
 - Test coverage target: 70-75% (use `scripts/coverage.sh` or `scripts/coverage.ps1`)
 
 **Documentation Updates**:

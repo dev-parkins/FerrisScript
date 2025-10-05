@@ -248,7 +248,7 @@ v0.1.0 (Production Ready) 🚀
 ## 🔗 Related Documentation
 
 - [v0.1.0 Roadmap (Main)](../v0.1.0-ROADMAP.md) - Comprehensive feature roadmap
-- [v0.0.2 Checklist](../v0.0.2/v0.0.2-CHECKLIST.md) - Detailed task checklist
+- [v0.0.2 Checklist](../archive/v0.0.2/v0.0.2-CHECKLIST.md) - Detailed task checklist (archived)
 - [Version Planning](../VERSION_PLANNING.md) - High-level version strategy
 - [Architecture](../ARCHITECTURE.md) - Technical architecture
 - [Contributing](../../CONTRIBUTING.md) - How to contribute

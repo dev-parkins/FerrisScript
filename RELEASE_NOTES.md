@@ -102,10 +102,9 @@ error: Cannot assign to immutable variable 'x'
 
 #### For Contributors
 
-1. **Read CONTRIBUTING.md** before submitting PRs
-2. **Check new test structure** in docs/v0.0.2/TESTING.md
-3. **Review API docs** for compiler/runtime internals
-4. **Use issue templates** when reporting bugs or requesting features
+1. **Read CONTRIBUTING.md** before submitting PRs (includes testing best practices)
+2. **Review API docs** for compiler/runtime internals
+3. **Use issue templates** when reporting bugs or requesting features
 
 #### Installing VS Code Extension
 
@@ -128,7 +127,7 @@ code --install-extension vscode-ferrisscript-0.0.1.vsix
 
 - **Full Changelog**: [CHANGELOG.md v0.0.2](CHANGELOG.md#002---2025-10-05)
 - **Deferral Analysis**: See `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md` for incomplete items moved to future versions
-- **Testing Guide**: `docs/v0.0.2/TESTING.md`
+- **Testing Guide**: See `CONTRIBUTING.md` for testing practices and `cargo test` usage
 - **API Docs**: Run `cargo doc --open` for generated rustdoc
 - **Examples**: `/examples` and `/godot_test/scripts` directories
 

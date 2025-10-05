@@ -138,7 +138,7 @@ See `V0.0.2_DEFERRAL_ANALYSIS.md` for complete rationale.
 
 ### Current Documentation
 
-- **Testing Guide**: `docs/v0.0.2/TESTING.md` (evergreen reference)
+- **Testing Guide**: See `CONTRIBUTING.md` for testing practices and `cargo test` usage
 - **Changelog**: `CHANGELOG.md` v0.0.2 section
 - **Release Notes**: `RELEASE_NOTES.md` v0.0.2 section
 
