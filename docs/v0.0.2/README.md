@@ -39,10 +39,10 @@ Phase-specific documentation for v0.0.2 has been archived to maintain a clean re
 
 | File | Purpose |
 |------|---------|
-| [PHASE_2_COMPLETION_REPORT.md](PHASE_2_COMPLETION_REPORT.md) | Phase 2 completion report |
-| [PHASE_3_COMPLETION_REPORT.md](PHASE_3_COMPLETION_REPORT.md) | Phase 3 completion report |
-| [PHASE_4_COMPLETION_REPORT.md](PHASE_4_COMPLETION_REPORT.md) | Phase 4 completion report |
-| [PHASE_4_IMPLEMENTATION_PLAN.md](PHASE_4_IMPLEMENTATION_PLAN.md) | Phase 4 implementation plan |
+| [PHASE_2_COMPLETION_REPORT.md](../archive/v0.0.2/phases/PHASE_2_COMPLETION_REPORT.md) | Phase 2 completion report |
+| [PHASE_3_COMPLETION_REPORT.md](../archive/v0.0.2/phases/PHASE_3_COMPLETION_REPORT.md) | Phase 3 completion report |
+| [PHASE_4_COMPLETION_REPORT.md](../archive/v0.0.2/phases/PHASE_4_COMPLETION_REPORT.md) | Phase 4 completion report |
+| [PHASE_4_IMPLEMENTATION_PLAN.md](../archive/v0.0.2/phases/PHASE_4_IMPLEMENTATION_PLAN.md) | Phase 4 implementation plan |
 
 ---
 

@@ -7,6 +7,7 @@ This folder contains detailed roadmaps for each development version on the path 
 **Last Updated**: January 5, 2025
 
 **Current Status**:
+
 - ✅ v0.0.1: Released (October 2, 2025)
 - ✅ v0.0.2: Released (January 5, 2025)
 - 🔜 v0.0.3: Ready to Start (Editor Experience Alpha)
@@ -15,7 +16,7 @@ This folder contains detailed roadmaps for each development version on the path 
 
 ## 📚 Available Roadmaps
 
-### [v0.0.2 - Community Foundation](v0.0.2-roadmap.md) (ARCHIVED)
+### [v0.0.2 - Community Foundation](../archive/v0.0.2/planning/v0.0.2-roadmap.md) (ARCHIVED)
 
 **Released**: January 5, 2025  
 **Status**: ✅ **COMPLETE (100%)**  
@@ -32,6 +33,7 @@ This folder contains detailed roadmaps for each development version on the path 
 - ✅ Documentation polish (TESTING.md - 655 lines)
 
 **Final Metrics**:
+
 - 17 PRs merged (#3-19)
 - 116 tests (+20.8%)
 - 70-75% coverage (+5%)
