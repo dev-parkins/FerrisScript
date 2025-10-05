@@ -1,0 +1,58 @@
+{
+  "name": "ferrisscript",
+  "displayName": "FerrisScript",
+  "description": "Syntax highlighting and code snippets for FerrisScript - a Rust-inspired scripting language for Godot 4.x",
+  "version": "0.1.0",
+  "publisher": "ferrisscript",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dev-parkins/FerrisScript"
+  },
+  "bugs": {
+    "url": "https://github.com/dev-parkins/FerrisScript/issues"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "keywords": [
+    "ferrisscript",
+    "godot",
+    "rust",
+    "game development",
+    "scripting"
+  ],
+  "icon": "icon.png",
+  "contributes": {
+    "languages": [
+      {
+        "id": "ferrisscript",
+        "aliases": [
+          "FerrisScript",
+          "ferrisscript"
+        ],
+        "extensions": [
+          ".ferris"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "ferrisscript",
+        "scopeName": "source.ferrisscript",
+        "path": "./syntaxes/ferrisscript.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "ferrisscript",
+        "path": "./snippets/ferrisscript.json"
+      }
+    ]
+  }
+}

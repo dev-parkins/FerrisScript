@@ -1,0 +1,48 @@
+# VS Code Extension Ignore
+
+# Build outputs
+out/
+dist/
+*.vsix
+
+# Dependencies
+node_modules/
+
+# Development
+.vscode-test/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test files
+test/
+**/*.test.ts
+**/*.test.js
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# GitHub
+.github/
+
+# Source files (if using TypeScript)
+src/
+
+# Config files
+tsconfig.json
+tslint.json
+.eslintrc
+.prettierrc
+
+# Documentation (keep only README and CHANGELOG in package)
+docs/
+
+# Development scripts
+scripts/

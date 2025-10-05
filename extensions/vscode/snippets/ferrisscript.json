@@ -1,0 +1,95 @@
+{
+  "Godot Ready Function": {
+    "prefix": "_ready",
+    "body": [
+      "fn _ready() {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Godot _ready() function - called when the node enters the scene tree"
+  },
+  "Godot Process Function": {
+    "prefix": "_process",
+    "body": [
+      "fn _process(delta: f32) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Godot _process(delta) function - called every frame"
+  },
+  "Variable Declaration": {
+    "prefix": "let",
+    "body": [
+      "let ${1:name}: ${2:i32} = ${3:value};"
+    ],
+    "description": "Immutable variable declaration"
+  },
+  "Mutable Variable Declaration": {
+    "prefix": "letmut",
+    "body": [
+      "let mut ${1:name}: ${2:i32} = ${3:value};"
+    ],
+    "description": "Mutable variable declaration"
+  },
+  "Function Definition": {
+    "prefix": "fn",
+    "body": [
+      "fn ${1:name}(${2:params}) -> ${3:void} {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Function definition with return type"
+  },
+  "Function Definition (no return)": {
+    "prefix": "fnvoid",
+    "body": [
+      "fn ${1:name}(${2:params}) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Function definition without return type"
+  },
+  "If Statement": {
+    "prefix": "if",
+    "body": [
+      "if ${1:condition} {",
+      "\t$0",
+      "}"
+    ],
+    "description": "If conditional statement"
+  },
+  "If-Else Statement": {
+    "prefix": "ifelse",
+    "body": [
+      "if ${1:condition} {",
+      "\t$2",
+      "} else {",
+      "\t$3",
+      "}"
+    ],
+    "description": "If-else conditional statement"
+  },
+  "While Loop": {
+    "prefix": "while",
+    "body": [
+      "while ${1:condition} {",
+      "\t$0",
+      "}"
+    ],
+    "description": "While loop"
+  },
+  "Return Statement": {
+    "prefix": "ret",
+    "body": [
+      "return ${1:value};"
+    ],
+    "description": "Return statement"
+  },
+  "Print Statement": {
+    "prefix": "print",
+    "body": [
+      "print(${1:\"message\"});"
+    ],
+    "description": "Print to console"
+  }
+}

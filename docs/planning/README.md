@@ -21,10 +21,10 @@ This folder contains detailed roadmaps for each development version on the path 
 - ✅ Error handling improvements (context, hints, line numbers) **(COMPLETE)**
 - ✅ API Documentation with Rustdoc (100% coverage) **(COMPLETE)**
 - ✅ Code quality (benchmarks, coverage, clippy) **(COMPLETE)**
-- � Syntax highlighting for VS Code **(NEXT)**
+- ✅ Syntax highlighting for VS Code **(COMPLETE)**
 - 🔄 GitHub project setup (labels, milestones, badges) **(NEXT)**
 
-**Status**: � In Progress (~70% Complete)  
+**Status**: 🔄 In Progress (~80% Complete)  
 **Prerequisites**: v0.0.1 (released)
 
 ---
