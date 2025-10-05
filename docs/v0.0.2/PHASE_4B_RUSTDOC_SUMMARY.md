@@ -101,33 +101,33 @@ Add comprehensive rustdoc documentation to all public APIs in the FerrisScript c
 
 ### Key Examples Added
 
-1. **Compiler Pipeline** (lib.rs):
+**Compiler Pipeline** (lib.rs):
 
 ```rust
 let source = "fn greet() { print(\"Hello!\"); }";
 let program = compile(source).unwrap();
 ```
 
-2. **Tokenization** (lexer.rs):
+**Tokenization** (lexer.rs):
 
 ```rust
 let tokens = tokenize("let x = 5;").unwrap();
 // Returns: [Let, Ident("x"), Equals, Integer(5), Semicolon]
 ```
 
-3. **Parsing** (parser.rs):
+**Parsing** (parser.rs):
 
 ```rust
 let program = parse(&tokens, source).unwrap();
 ```
 
-4. **Type Checking** (type_checker.rs):
+**Type Checking** (type_checker.rs):
 
 ```rust
 check(&program).unwrap();
 ```
 
-5. **Runtime Execution** (runtime lib.rs):
+**Runtime Execution** (runtime lib.rs):
 
 ```rust
 let mut env = Env::new();
@@ -270,6 +270,7 @@ let result = call_function("add", &[Value::Int(5), Value::Int(3)], &mut env);
 ## References
 
 **Phase 4 Overview**: [v0.0.2-CHECKLIST.md](./v0.0.2-CHECKLIST.md)
+
 - **Generated Docs**: Run `cargo doc --open` to view
 - **Benchmarks**: [crates/compiler/benches/](../../crates/compiler/benches/)
 
