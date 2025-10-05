@@ -6,7 +6,7 @@
 
 ---
 
-## v0.0.2 - Foundation & Polish (January 5, 2025)
+## v0.0.2 - Foundation & Polish (October 5, 2025)
 
 **Status**: ✅ Complete  
 **Tag**: `v0.0.2`  
@@ -126,7 +126,7 @@ code --install-extension vscode-ferrisscript-0.0.1.vsix
 
 ### 🔗 Resources
 
-- **Full Changelog**: [CHANGELOG.md v0.0.2](CHANGELOG.md#002---2025-01-05)
+- **Full Changelog**: [CHANGELOG.md v0.0.2](CHANGELOG.md#002---2025-10-05)
 - **Deferral Analysis**: See `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md` for incomplete items moved to future versions
 - **Testing Guide**: `docs/v0.0.2/TESTING.md`
 - **API Docs**: Run `cargo doc --open` for generated rustdoc

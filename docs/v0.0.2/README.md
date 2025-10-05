@@ -1,7 +1,7 @@
 # FerrisScript v0.0.2 Reference Documentation
 
 **Version**: v0.0.2  
-**Released**: January 5, 2025  
+**Released**: October 5, 2025  
 **Status**: ✅ Complete
 
 ---

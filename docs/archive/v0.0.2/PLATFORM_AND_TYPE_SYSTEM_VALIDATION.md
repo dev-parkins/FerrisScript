@@ -1,7 +1,7 @@
 # Platform and Type System Validation
 
 **Version**: v0.0.2  
-**Date**: January 5, 2025  
+**Date**: October 5, 2025  
 **Validated By**: Phase 6 Release Preparation
 
 ## Executive Summary
@@ -197,6 +197,8 @@ fn complex_return(flag: bool) -> i32 {
 - Item: "Return Type Validation (type_checker.rs:407 TODO)"
 - Deferred to: v0.0.3 (Editor Experience)
 - Justification: Current validation sufficient for v0.0.2 feature set; comprehensive inference requires LSP integration planned for v0.0.3
+- Deferral Doc: `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md` (Bug Fixes & Edge Cases → v0.0.5)
+- Roadmap: `docs/planning/v0.0.3-roadmap.md` (Enhanced error diagnostics)
 
 ### Type System Strengths ✅
 
@@ -238,26 +240,61 @@ fn complex_return(flag: bool) -> i32 {
 
 ---
 
-## Recommendations for v0.0.3
+## Recommendations for Future Versions
 
 ### Type System Enhancements
 
-1. **Complete Return Type Validation**: Implement TODO at type_checker.rs:407
-2. **Type Inference**: Explore basic type inference for `let` without explicit type
-3. **Advanced Coercion Rules**: Document and test edge cases (e.g., Vector2 operations)
-4. **Error Recovery**: Improve type checker resilience to continue checking after errors
+1. **Complete Return Type Validation** → **v0.0.3**
+   - Implement TODO at type_checker.rs:407
+   - Tracked in: `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md`
+   - Roadmap: `docs/planning/v0.0.3-roadmap.md` (Enhanced error diagnostics)
+
+2. **Type Inference** → **v0.0.5**
+   - Explore basic type inference for `let` without explicit type
+   - Tracked in: `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md`
+   - Roadmap: `docs/planning/v0.0.5-roadmap.md` (Type system refinements)
+
+3. **Advanced Coercion Rules** → **v0.0.5**
+   - Document and test edge cases (e.g., Vector2 operations)
+   - Tracked in: `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md`
+   - Roadmap: `docs/planning/v0.0.5-roadmap.md` (Type system enhancements)
+
+4. **Error Recovery** → **v0.1.0**
+   - Improve type checker resilience to continue checking after errors
+   - Tracked in: `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md`
+   - Roadmap: `docs/v0.1.0-ROADMAP.md` (Advanced language features)
 
 ### Cross-Platform Testing
 
-1. **Local Multi-Platform Testing**: Set up WSL or Docker for Linux testing
-2. **CI Matrix Expansion**: Add explicit platform test matrix in GitHub Actions
-3. **Platform-Specific Tests**: Add tests for any platform-specific Godot integration
+1. **Local Multi-Platform Testing** → **v0.0.3**
+   - Set up WSL or Docker for Linux testing
+   - Roadmap: `docs/planning/v0.0.3-roadmap.md` (Development workflow improvements)
+
+2. **CI Matrix Expansion** → **v0.0.3**
+   - Add explicit platform test matrix in GitHub Actions
+   - Tracked in: `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md` (Cross-platform build tests)
+   - Roadmap: `docs/planning/v0.0.3-roadmap.md` (CI optimization)
+
+3. **Platform-Specific Tests** → **v0.0.4**
+   - Add tests for any platform-specific Godot integration
+   - Roadmap: `docs/planning/v0.0.4-roadmap.md` (Godot API expansion)
 
 ### Testing Improvements
 
-1. **Type Checker Fuzzing**: Add property-based tests for type checker
-2. **Integration Test Expansion**: Add more end-to-end Godot scenarios
-3. **Performance Testing**: Benchmark type checker on large scripts
+1. **Type Checker Fuzzing** → **v0.0.6**
+   - Add property-based tests for type checker
+   - Tracked in: `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md` (Property-based testing)
+   - Roadmap: `docs/planning/v0.0.6-7-roadmap.md` (Testing enhancements)
+
+2. **Integration Test Expansion** → **v0.0.5**
+   - Add more end-to-end Godot scenarios
+   - Tracked in: `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md` (Integration tests)
+   - Roadmap: `docs/planning/v0.0.5-roadmap.md` (After LSP, more components to integrate)
+
+3. **Performance Testing** → **v0.0.6**
+   - Benchmark type checker on large scripts
+   - Tracked in: `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md` (Performance profiling)
+   - Roadmap: `docs/planning/v0.0.6-7-roadmap.md` (Performance optimization)
 
 ---
 

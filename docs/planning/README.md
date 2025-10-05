@@ -4,12 +4,12 @@ This folder contains detailed roadmaps for each development version on the path 
 
 **Purpose**: Strategic planning documents that break down the reprioritized v0.1.0 roadmap into actionable patch releases.
 
-**Last Updated**: January 5, 2025
+**Last Updated**: October 5, 2025
 
 **Current Status**:
 
 - ✅ v0.0.1: Released (October 2, 2025)
-- ✅ v0.0.2: Released (January 5, 2025)
+- ✅ v0.0.2: Released (October 5, 2025)
 - 🔜 v0.0.3: Ready to Start (Editor Experience Alpha)
 
 ---
@@ -18,7 +18,7 @@ This folder contains detailed roadmaps for each development version on the path 
 
 ### [v0.0.2 - Community Foundation](../archive/v0.0.2/planning/v0.0.2-roadmap.md) (ARCHIVED)
 
-**Released**: January 5, 2025  
+**Released**: October 5, 2025  
 **Status**: ✅ **COMPLETE (100%)**  
 **Focus**: Community infrastructure, API documentation, error improvements, code quality
 
