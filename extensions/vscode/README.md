@@ -87,7 +87,7 @@ When adding new language features, update the syntax highlighting grammar:
 2. Test on example `.ferris` files
 3. Update `CHANGELOG.md`
 
-See [SYNTAX_HIGHLIGHTING_MAINTENANCE.md](https://github.com/dev-parkins/FerrisScript/blob/main/docs/SYNTAX_HIGHLIGHTING_MAINTENANCE.md) for detailed instructions.
+See [SYNTAX_HIGHLIGHTING_MAINTENANCE.md](../../docs/SYNTAX_HIGHLIGHTING_MAINTENANCE.md) for detailed instructions.
 
 ## License
 

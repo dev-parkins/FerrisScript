@@ -635,7 +635,7 @@ All affected documentation updated in this PR:
 
 ### Example Grammars
 
-- [Rust TextMate Grammar](https://github.com/rust-lang/vscode-rust/blob/master/syntaxes/rust.tmLanguage.json)
+- [Rust TextMate Grammar](https://github.com/microsoft/vscode/blob/main/extensions/rust/syntaxes/rust.tmLanguage.json)
 - [TypeScript TextMate Grammar](https://github.com/microsoft/vscode/blob/main/extensions/typescript-basics/syntaxes/TypeScript.tmLanguage.json)
 
 ### VS Code Extension Development

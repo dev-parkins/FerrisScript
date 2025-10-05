@@ -427,7 +427,7 @@ Use non-greedy quantifiers for multi-line matches:
 
 ### Example Grammars
 
-- [Rust TextMate Grammar](https://github.com/rust-lang/vscode-rust/blob/master/syntaxes/rust.tmLanguage.json)
+- [Rust TextMate Grammar](https://github.com/microsoft/vscode/blob/main/extensions/rust/syntaxes/rust.tmLanguage.json)
 - [TypeScript Grammar](https://github.com/microsoft/TypeScript-TmLanguage/blob/master/TypeScript.tmLanguage)
 - [Python Grammar](https://github.com/microsoft/vscode/blob/main/extensions/python/syntaxes/MagicPython.tmLanguage.json)
 
