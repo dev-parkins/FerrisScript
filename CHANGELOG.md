@@ -146,7 +146,7 @@ This release focuses on establishing a solid foundation for contributors and use
 
 - **Code Snippets** (11 total)
   - Common patterns: function, if, if-else, while, let, let mut, return
-  - Godot-specific: _ready(), _process(delta), print()
+  - Godot-specific: _ready(),_process(delta), print()
 
 - **Maintenance Guide**
   - `docs/SYNTAX_HIGHLIGHTING_MAINTENANCE.md` - 350+ lines covering grammar updates, quarterly audits, testing procedures

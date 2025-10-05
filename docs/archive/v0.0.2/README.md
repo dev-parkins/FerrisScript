@@ -39,6 +39,7 @@ This directory contains complete historical documentation for FerrisScript v0.0.
 | **Phase 5C** | `PHASE_5C_DOCUMENTATION_POLISH_SUMMARY.md` | Documentation polish |
 
 **Execution Plans**:
+
 - `ERROR_MESSAGES_PHASE2_EXECUTION_PLAN.md`
 - `ERROR_MESSAGES_PHASE3_EXECUTION_PLAN.md`
 - `EDGE_CASE_ERROR_HANDLING_PLAN.md`
@@ -124,6 +125,7 @@ This directory contains complete historical documentation for FerrisScript v0.0.
 ### Deferred Items
 
 **Total**: 47 items deferred to future versions
+
 - **v0.0.3**: 17 items (Editor Experience, CI optimization)
 - **v0.0.4**: 8 items (Godot API Expansion)
 - **v0.0.5+**: 27 items (Long-term improvements)
@@ -135,11 +137,13 @@ See `V0.0.2_DEFERRAL_ANALYSIS.md` for complete rationale.
 ## 🔗 Related Resources
 
 ### Current Documentation
+
 - **Testing Guide**: `docs/v0.0.2/TESTING.md` (evergreen reference)
 - **Changelog**: `CHANGELOG.md` v0.0.2 section
 - **Release Notes**: `RELEASE_NOTES.md` v0.0.2 section
 
 ### Future Planning
+
 - **v0.0.3 Roadmap**: `docs/planning/v0.0.3-roadmap.md`
 - **v0.0.4 Roadmap**: `docs/planning/v0.0.4-roadmap.md`
 - **v0.1.0 Plan**: `docs/planning/v0.1.0-release-plan.md`

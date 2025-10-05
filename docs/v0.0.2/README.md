@@ -27,6 +27,7 @@ Phase-specific documentation for v0.0.2 has been archived to maintain a clean re
 **Archive Location**: [`docs/archive/v0.0.2/`](../archive/v0.0.2/)
 
 **Archived Contents**:
+
 - Planning documents (roadmap, checklist, workflow, status reconciliation)
 - Phase completion reports and summaries (Phases 2-5)
 - Execution plans (error messages, edge cases, GitHub setup, syntax highlighting)
