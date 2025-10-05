@@ -19,6 +19,7 @@ FerrisScript v0.0.2 focuses on building a solid foundation for community contrib
 ### 🌟 What's New for Users
 
 #### Better Error Messages 🔍
+
 - **38 Enhanced Error Messages** with actionable context and hints
 - **"Did You Mean?" Suggestions** for typos in variable/function names
 - **Code Snippets** showing exactly where errors occur
@@ -26,6 +27,7 @@ FerrisScript v0.0.2 focuses on building a solid foundation for community contrib
 - **Helpful Hints** like "use `let mut` if you want to modify this variable"
 
 **Example**:
+
 ```
 error: Cannot assign to immutable variable 'x'
   ┌─ examples/assign.ferris:3:1
@@ -39,11 +41,13 @@ error: Cannot assign to immutable variable 'x'
 ```
 
 #### VS Code Syntax Highlighting ✨
+
 - **FerrisScript VS Code Extension** with syntax highlighting for `.ferris` files
 - **11 Code Snippets** for common patterns (`fn`, `let`, `if`, `while`, etc.)
 - **Installation**: Available in workspace (see `/crates/vscode-ferrisscript/`)
 
 #### Comprehensive Testing Guide 📚
+
 - **New TESTING.md** (655 lines) covering all 116 tests
 - **Test Organization** by module (parser, type checker, runtime, integration)
 - **Coverage Information** (70-75% overall, 80-85% core logic)
@@ -52,6 +56,7 @@ error: Cannot assign to immutable variable 'x'
 ### 🛠️ What's New for Contributors
 
 #### Community Infrastructure
+
 - **CONTRIBUTING.md**: Complete contribution guide with workflow, PR guidelines, code style
 - **CODE_OF_CONDUCT.md**: Community standards and enforcement process
 - **Issue Templates**: Bug reports, feature requests, documentation improvements
@@ -59,6 +64,7 @@ error: Cannot assign to immutable variable 'x'
 - **SECURITY.md**: Vulnerability reporting process
 
 #### Enhanced Documentation
+
 - **10,000+ Lines** of new documentation across project
 - **API Documentation**: 395+ lines of rustdoc covering compiler and runtime APIs
 - **Architecture Guide**: Complete system design documentation
@@ -66,11 +72,13 @@ error: Cannot assign to immutable variable 'x'
 - **Version Planning**: Strategic roadmaps for v0.0.3–v0.1.0
 
 #### GitHub Setup
+
 - **Custom Labels**: Organized by type, status, priority, area
 - **GitHub Badges**: Build status, test coverage, license, version
 - **Branch Protection**: Recommendations for main branch security
 
 #### Improved Testing & Quality
+
 - **96 → 116 Tests** (+20.8% growth)
 - **Test Coverage**: 65-70% → 70-75% (+5%)
 - **Edge Case Coverage**: Enhanced handling of error conditions
@@ -87,17 +95,20 @@ error: Cannot assign to immutable variable 'x'
 ### 🔄 Upgrade Guide
 
 #### For Script Authors
+
 1. **No changes required** - all v0.0.1 scripts work in v0.0.2
 2. **Optional**: Install VS Code extension for better editing experience
 3. **Optional**: Review new FAQ.md if you had questions about language behavior
 
 #### For Contributors
+
 1. **Read CONTRIBUTING.md** before submitting PRs
 2. **Check new test structure** in docs/v0.0.2/TESTING.md
 3. **Review API docs** for compiler/runtime internals
 4. **Use issue templates** when reporting bugs or requesting features
 
 #### Installing VS Code Extension
+
 ```bash
 # From project root
 cd crates/vscode-ferrisscript
@@ -124,6 +135,7 @@ code --install-extension vscode-ferrisscript-0.0.1.vsix
 ### 🚀 What's Next?
 
 **v0.0.3 "Editor Experience Alpha"** will focus on:
+
 - Enhanced VS Code language server with autocomplete and diagnostics
 - Improved development workflow with `develop` branch
 - CI optimization for faster feedback
