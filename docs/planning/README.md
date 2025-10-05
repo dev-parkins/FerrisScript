@@ -4,44 +4,61 @@ This folder contains detailed roadmaps for each development version on the path 
 
 **Purpose**: Strategic planning documents that break down the reprioritized v0.1.0 roadmap into actionable patch releases.
 
-**Last Updated**: October 2025
+**Last Updated**: October 5, 2025
+
+**Current Status**:
+
+- ✅ v0.0.1: Released (October 2, 2025)
+- ✅ v0.0.2: Released (October 5, 2025)
+- 🔜 v0.0.3: Ready to Start (Editor Experience Alpha)
 
 ---
 
 ## 📚 Available Roadmaps
 
-### [v0.0.2 - Foundation & Polish](v0.0.2-roadmap.md)
+### [v0.0.2 - Community Foundation](../archive/v0.0.2/planning/v0.0.2-roadmap.md) (ARCHIVED)
 
-**Timeline**: ~70% COMPLETE (15-20 hours remaining)  
+**Released**: October 5, 2025  
+**Status**: ✅ **COMPLETE (100%)**  
 **Focus**: Community infrastructure, API documentation, error improvements, code quality
 
 **Key Deliverables**:
 
-- ✅ Community infrastructure (CONTRIBUTING, CODE_OF_CONDUCT, FAQ, TROUBLESHOOTING, etc.) **(COMPLETE)**
-- ✅ Error handling improvements (context, hints, line numbers) **(COMPLETE)**
-- ✅ API Documentation with Rustdoc (100% coverage) **(COMPLETE)**
-- ✅ Code quality (benchmarks, coverage, clippy) **(COMPLETE)**
-- ✅ Syntax highlighting for VS Code **(COMPLETE)**
-- 🔄 GitHub project setup (labels, milestones, badges) **(NEXT)**
+- ✅ Community infrastructure (CONTRIBUTING, CODE_OF_CONDUCT, FAQ, TROUBLESHOOTING, SECURITY)
+- ✅ Enhanced error messages (38 errors with context, hints, "did you mean?")
+- ✅ API Documentation with Rustdoc (395+ lines, complete coverage)
+- ✅ Test expansion (96→116 tests, 70-75% coverage)
+- ✅ VS Code syntax highlighting extension
+- ✅ GitHub setup (labels, badges, branch protection guidance)
+- ✅ Documentation polish (TESTING.md - 655 lines)
 
-**Status**: 🔄 In Progress (~80% Complete)  
+**Final Metrics**:
+
+- 17 PRs merged (#3-19)
+- 116 tests (+20.8%)
+- 70-75% coverage (+5%)
+- 10,000+ lines documentation
+
+**Archive**: `docs/archive/v0.0.2/`  
 **Prerequisites**: v0.0.1 (released)
 
 ---
 
-### [v0.0.3 - Editor Experience Alpha](v0.0.3-roadmap.md)
+### [v0.0.3 - Editor Experience Alpha](v0.0.3-roadmap.md) 🔜 **NEXT**
 
 **Timeline**: 2-3 weeks  
 **Focus**: Enhanced editor support and diagnostics
 
 **Key Deliverables**:
 
-- 🔥 Enhanced error diagnostics (error codes, "did you mean?")
+- 🔥 Enhanced error diagnostics (error codes, "did you mean?" suggestions)
 - VS Code extension polish (completion, hover, problem panel)
 - Development scripts (test.sh, bench.sh, format.sh, etc.)
+- **NEW**: Staged branching workflow (feature → develop → main)
+- **NEW**: CI optimization (60-95% time savings)
 
-**Status**: 🟡 Planning  
-**Prerequisites**: v0.0.2 (syntax highlighting foundation)
+**Status**: 🟢 **READY TO START**  
+**Prerequisites**: ✅ v0.0.2 (completed)
 
 ---
 
@@ -231,7 +248,7 @@ v0.1.0 (Production Ready) 🚀
 ## 🔗 Related Documentation
 
 - [v0.1.0 Roadmap (Main)](../v0.1.0-ROADMAP.md) - Comprehensive feature roadmap
-- [v0.0.2 Checklist](../v0.0.2/v0.0.2-CHECKLIST.md) - Detailed task checklist
+- [v0.0.2 Checklist](../archive/v0.0.2/v0.0.2-CHECKLIST.md) - Detailed task checklist (archived)
 - [Version Planning](../VERSION_PLANNING.md) - High-level version strategy
 - [Architecture](../ARCHITECTURE.md) - Technical architecture
 - [Contributing](../../CONTRIBUTING.md) - How to contribute

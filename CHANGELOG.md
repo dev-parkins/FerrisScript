@@ -11,52 +11,289 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Comprehensive version planning documentation
-  - `docs/VERSION_PLANNING.md` - Version strategy overview
-  - `docs/v0.0.2/v0.0.2-CHECKLIST.md` - Patch release planning
-  - `docs/v0.1.0-ROADMAP.md` - Feature roadmap
-  - `docs/DOCUMENTATION_INVENTORY.md` - Documentation audit
-- v0.0.2 documentation workflow with phase-by-phase guide
-  - `docs/v0.0.2/v0.0.2-DOCUMENTATION-WORKFLOW.md` - Complete workflow
-  - `docs/v0.0.2/v0.0.2-QUICK-START.md` - Quick start guide
-  - `docs/v0.0.2/VALIDATION_REPORT.md` - Installation validation results
-  - `docs/SINGLE_SOURCE_OF_TRUTH.md` - Anti-duplication matrix
-  - `docs/v0.0.2/PHASE_TRACKING.md` - Action items for all phases
-  - `docs/FUTURE_AUTOMATION.md` - Godot CLI automation planning
-- **Community Documentation (Phase 2)**
-  - `CONTRIBUTING.md` - Comprehensive contribution guide with development setup, PR workflow, code style, and first-time contributor resources
-  - `CODE_OF_CONDUCT.md` - Contributor Covenant 2.1 code of conduct
-  - `.github/ISSUE_TEMPLATE/bug_report.md` - Bug report template with environment details
-  - `.github/ISSUE_TEMPLATE/feature_request.md` - Feature request template with use cases
-  - `.github/ISSUE_TEMPLATE/documentation.md` - Documentation improvement template
-  - `.github/ISSUE_TEMPLATE/config.yml` - Issue template configuration with links to Discussions and guides
-  - `.github/PULL_REQUEST_TEMPLATE.md` - PR template with checklist and type indicators
-- **FAQ and Troubleshooting (Phase 3)**
-  - `docs/FAQ.md` - Comprehensive FAQ covering 31 questions across installation, language features, Godot integration, performance, and project roadmap
-  - `docs/TROUBLESHOOTING.md` - Platform-specific troubleshooting for Windows (MSVC), macOS (Xcode), Linux (libclang), common build errors, Godot integration, and runtime issues
-- **GitHub Project Management Documentation**
-  - `docs/GITHUB_PROJECT_MANAGEMENT.md` - CI/CD optimization strategies, label system (20 labels), milestone planning, wiki decision matrix, and implementation roadmap
-  - `docs/GITHUB_INSIGHTS_DESCRIPTION.md` - Repository descriptions, topics, badges, and social preview guidance for improved discoverability
-- **Security and Architecture Documentation (Phase 4)**
-  - `SECURITY.md` - Vulnerability reporting policy with GitHub Security Advisories integration, 48-hour response time, coordinated disclosure process, and security best practices
-  - `docs/ARCHITECTURE.md` - Comprehensive system architecture documentation covering compiler pipeline (lexer→parser→type checker), runtime execution (tree-walking interpreter), Godot integration (GDExtension + thread-local storage), design decisions, extension points, and performance considerations
-  - `.github/workflows/docs-lint.yml` - Automated documentation linting CI with markdownlint and link checking
-  - `.markdownlint.json` - Markdown linting configuration with project-specific rules
-  - `.markdown-link-check.json` - Link checking configuration with retry logic and localhost ignoring
-- **Enhanced Example Documentation**
-  - `examples/hello/README.md` - Comprehensive hello world tutorial covering FerrisScript basics, `_ready()` lifecycle, `print()` function, running examples, common gotchas, and 4 variations
-  - `examples/move/README.md` - Movement tutorial explaining `_process(delta)`, framerate-independent movement, `self.position` access, delta time calculations, and 6 variations
-  - `examples/bounce/README.md` - Bouncing animation tutorial demonstrating global variables, mutability, conditionals, state management, boundary checks, and 6 variations
-  - `README.md` - Added dedicated Examples section with links to detailed example tutorials
+- None
 
 ### Changed
 
-- `.github/ISSUE_TEMPLATE/config.yml` - Updated Discussions link description to clarify available categories (Q&A, Ideas, Show and Tell)
+- None
 
 ### Fixed
 
-- Installation instructions: corrected `cd` command to match actual repository directory name (`FerrisScript` instead of `ferrisscript`) for case-sensitive file systems (Linux/macOS)
-- README.md: removed 255 lines of corrupted duplicate source code that was appended after closing message
+- None
+
+---
+
+## [0.0.2] - 2025-10-05
+
+**Codename**: "Foundation & Polish" 🦀✨
+
+This release focuses on establishing a solid foundation for contributors and users through comprehensive documentation, improved error messages, code quality enhancements, and basic editor support. No new language features were added (saving those for v0.1.0).
+
+### Added
+
+#### Community Infrastructure (PR #3, Phase 4)
+
+- **Contributing Guidelines**
+  - `CONTRIBUTING.md` - Complete contributor guide with development setup, PR workflow, code style guidelines, testing requirements, commit conventions, and first-time contributor resources
+  - `CODE_OF_CONDUCT.md` - Contributor Covenant 2.1 code of conduct with enforcement guidelines
+  - `.github/PULL_REQUEST_TEMPLATE.md` - PR checklist template linking to contributing guide
+  - `.github/ISSUE_TEMPLATE/bug_report.md` - Structured bug report with environment details
+  - `.github/ISSUE_TEMPLATE/feature_request.md` - Feature request template with use case section
+  - `.github/ISSUE_TEMPLATE/documentation.md` - Documentation improvement request template
+  - `.github/ISSUE_TEMPLATE/config.yml` - Template configuration with Discussions and guide links
+
+- **User Documentation**
+  - `docs/FAQ.md` - 31 frequently asked questions covering installation, language features, Godot integration, performance, and roadmap
+  - `docs/TROUBLESHOOTING.md` - Platform-specific troubleshooting for Windows (MSVC), macOS (Xcode), Linux (libclang), build errors, Godot integration, and debugging techniques
+
+- **Security Documentation**
+  - `SECURITY.md` - Vulnerability reporting policy with GitHub Security Advisories, 48-hour response time, coordinated disclosure, and security best practices
+
+- **Architecture Documentation**
+  - `docs/ARCHITECTURE.md` - 917 lines of comprehensive system design covering compiler pipeline (lexer→parser→type checker), runtime execution, Godot integration (GDExtension + TLS), design decisions, extension points, performance characteristics
+
+- **Enhanced Examples**
+  - `examples/hello/README.md` - Hello world tutorial with 4 variations covering FerrisScript basics, lifecycle, and common gotchas
+  - `examples/move/README.md` - Movement tutorial with 6 variations explaining framerate-independent movement, delta time, and property access
+  - `examples/bounce/README.md` - Bouncing animation tutorial with 6 variations demonstrating global variables, state management, and boundary checks
+
+- **Documentation Infrastructure**
+  - `.github/workflows/docs-lint.yml` - Automated documentation linting CI with markdownlint and link checking
+  - `.markdownlint.json` - Markdown linting rules (50+ configured)
+  - `.markdown-link-check.json` - Link validation configuration
+  - `package.json` - Documentation linting scripts (`docs:lint`, `docs:fix`)
+
+#### Error Handling Improvements (PR #12, #13, Phases 2-3)
+
+- **Enhanced Error Messages** (38 total: 6 lexer + 14 parser + 18 type checker)
+  - All errors now include line and column numbers
+  - Source context display with ±2 lines around error
+  - Visual indicators pointing to exact error location
+  - Helpful hints for common mistakes
+  - "did you mean?" suggestions for typos
+  - Example corrections showing proper syntax
+
+- **Error Message Testing**
+  - 17 new error context validation tests
+  - 11 error context module tests
+  - Error message quality verification in test suite
+
+#### Testing & Quality (PR #7, #11, Code Quality Improvements)
+
+- **Test Coverage Expansion**
+  - 96 → 116 tests (+20 tests, +20.8% growth)
+  - 65-70% → 70-75% line coverage (+5% improvement)
+  - 50-55% → 55-60% branch coverage (+5% improvement)
+
+- **Edge Case Testing** (15 new tests in 3 categories)
+  - Empty script files: 4 tests
+  - Comment-only scripts: 5 tests
+  - Long identifier names: 6 tests (up to 10,000 chars)
+
+- **Coverage Infrastructure**
+  - `scripts/coverage.sh` - Linux coverage generation script
+  - `scripts/coverage.ps1` - Windows coverage generation script
+  - `.github/workflows/coverage.yml` - CI coverage reporting with cargo-tarpaulin
+  - `docs/COVERAGE_SETUP_NOTES.md` - Platform-specific coverage tool setup
+  - `docs/archive/v0.0.2/TEST_COVERAGE_ANALYSIS.md` - Detailed coverage analysis and gaps
+
+- **Benchmarking**
+  - `BENCHMARK_BASELINE.md` - Performance baseline metrics
+  - Lexer benchmarks: 384 ns - 3.74 μs
+  - Parser benchmarks: 600 ns - 7.94 μs
+  - Type checker benchmarks: 851 ns - 3.58 μs
+  - Runtime execution: 1.05 μs per call, 180 ns per loop iteration
+  - Analysis: 16K+ function calls per frame at 60 FPS (excellent for game scripting)
+
+#### API Documentation (PR #15, #16, Phases 4A-4B)
+
+- **Rustdoc Comments** (395+ lines added)
+  - Compiler crate: Complete rustdoc for all public APIs (lexer, parser, type checker, AST, errors)
+  - Runtime crate: Complete rustdoc for Value, Env, execute, call_function
+  - Performance metrics documented throughout
+  - Code examples in doc comments
+  - All doctests passing (0 warnings)
+
+- **Documentation Files**
+  - `docs/archive/v0.0.2/phases/PHASE_4A_COMPLETION_SUMMARY.md` - API documentation phase summary
+  - `docs/archive/v0.0.2/phases/PHASE_4B_RUSTDOC_SUMMARY.md` - Rustdoc implementation summary
+
+#### GitHub Project Setup (PR #17, Phase 5A)
+
+- **GitHub Features**
+  - `docs/GITHUB_PROJECT_MANAGEMENT.md` - CI/CD optimization, label system (20 labels), milestone planning, wiki decisions
+  - `docs/GITHUB_INSIGHTS_DESCRIPTION.md` - Repository descriptions, topics, social preview guidance
+  - `docs/GITHUB_BADGES_GUIDE.md` - Badge selection and setup guide
+  - `docs/GITHUB_LABELS.md` - Complete label system with priorities, types, statuses, difficulties, components
+
+- **Branch Protection**
+  - `docs/BRANCH_PROTECTION.md` - Branch protection recommendations and rationale
+
+#### VS Code Extension (PR #18, Phase 5B)
+
+- **Syntax Highlighting Foundation**
+  - `extensions/vscode/syntaxes/ferrisscript.tmLanguage.json` - TextMate grammar for `.ferris` files
+  - Complete keyword highlighting (let, mut, fn, if, else, while, return, self, etc.)
+  - Type highlighting (i32, f32, bool, String, Vector2, Node)
+  - Operator highlighting (arithmetic, comparison, logical, assignment)
+  - String and comment support
+
+- **VS Code Extension Manifest**
+  - `extensions/vscode/package.json` - Extension metadata
+  - `extensions/vscode/README.md` - Extension documentation
+  - `extensions/vscode/CHANGELOG.md` - Extension changelog
+  - `extensions/vscode/language-configuration.json` - Auto-closing brackets, comments, folding
+
+- **Code Snippets** (11 total)
+  - Common patterns: function, if, if-else, while, let, let mut, return
+  - Godot-specific: _ready(),_process(delta), print()
+
+- **Maintenance Guide**
+  - `docs/SYNTAX_HIGHLIGHTING_MAINTENANCE.md` - 350+ lines covering grammar updates, quarterly audits, testing procedures
+
+#### Documentation Polish (PR #19, Phase 5C)
+
+- **Testing Guide** (Archived to `docs/archive/v0.0.2/`)
+  - 655-line comprehensive testing guide created for v0.0.2
+  - Quick start commands
+  - Test naming conventions and templates
+  - Test coverage goals and generation methods
+  - Error message testing framework
+  - Test categories (core, edge cases, errors, integration, performance)
+  - Testing workflows (before PR, during dev, after merge)
+  - Troubleshooting common test issues
+  - Future testing roadmap (v0.0.3-v0.1.0)
+  - Current testing practices now in `CONTRIBUTING.md`
+
+- **Godot Test Project Documentation**
+  - `godot_test/README.md` - Enhanced with "Adding New Test Scripts" section
+  - Step-by-step test script creation guide
+  - Reusable test script template
+  - Testing best practices (5 key principles)
+  - Common test patterns (position, state, conditionals)
+  - Updated version info (v0.0.2, October 5, 2025)
+
+#### Version Planning & Workflow (PR #6, #8, #9)
+
+- **Strategic Planning**
+  - `docs/VERSION_PLANNING.md` - Version strategy overview and semantic versioning
+  - `docs/planning/v0.0.2-roadmap.md` - v0.0.2 detailed roadmap
+  - `docs/planning/v0.0.3-roadmap.md` - v0.0.3 (Editor Experience Alpha)
+  - `docs/planning/v0.0.4-roadmap.md` - v0.0.4 (Godot API Expansion)
+  - `docs/planning/v0.0.5-roadmap.md` - v0.0.5 (LSP Alpha - CRITICAL)
+  - `docs/planning/v0.0.6-7-roadmap.md` - v0.0.6-7 (Language Features)
+  - `docs/planning/v0.1.0-release-plan.md` - v0.1.0 major release plan
+
+- **Documentation Organization**
+  - `docs/v0.0.2/` - Version-specific documentation folder
+  - `docs/DOCUMENTATION_INVENTORY.md` - Complete documentation audit
+  - `docs/DOCUMENTATION_ORGANIZATION.md` - Documentation structure guide
+  - `docs/SINGLE_SOURCE_OF_TRUTH.md` - Anti-duplication matrix
+  - `docs/DOCUMENTATION_LINKING_GUIDELINES.md` - Cross-linking best practices
+
+- **Workflow Documentation**
+  - `docs/archive/v0.0.2/v0.0.2-DOCUMENTATION-WORKFLOW.md` - 40+ page phase-by-phase guide
+  - `docs/archive/v0.0.2/v0.0.2-QUICK-START.md` - Quick start for v0.0.2 work
+  - `docs/archive/v0.0.2/v0.0.2-CHECKLIST.md` - Complete task checklist
+  - `.github/prompts/workstream-execution.prompt.md` - AI-assisted workstream execution template
+
+- **Phase Completion Reports**
+  - `docs/archive/v0.0.2/phases/PHASE_2_COMPLETION_REPORT.md` - Error handling phase 2 summary
+  - `docs/archive/v0.0.2/phases/PHASE_3_COMPLETION_REPORT.md` - Error handling phase 3 summary
+  - `docs/archive/v0.0.2/phases/PHASE_4_COMPLETION_REPORT.md` - Community docs phase summary
+  - `docs/archive/v0.0.2/phases/PHASE_5A_GITHUB_SETUP_SUMMARY.md` - GitHub setup phase summary
+  - `docs/archive/v0.0.2/phases/PHASE_5B_SYNTAX_HIGHLIGHTING_SUMMARY.md` - Syntax highlighting phase summary
+  - `docs/archive/v0.0.2/phases/PHASE_5C_DOCUMENTATION_POLISH_SUMMARY.md` - Documentation polish phase summary
+
+#### Tooling & Scripts
+
+- **Development Scripts**
+  - `scripts/README.md` - Script documentation and usage guide
+  - `scripts/coverage.sh` - Linux/macOS coverage generation
+  - `scripts/coverage.ps1` - Windows coverage generation (PowerShell)
+  - Cross-platform script support (Bash + PowerShell)
+
+### Changed
+
+- **Issue Template Configuration**
+  - `.github/ISSUE_TEMPLATE/config.yml` - Clarified Discussions categories (Q&A, Ideas, Show and Tell)
+
+- **README Updates**
+  - Added dedicated Examples section with links to detailed tutorials
+  - Updated test count from 96 to 116
+  - Added coverage metrics (70-75% line coverage)
+
+- **Clippy Compliance**
+  - Resolved `collapsible_match` warning in `runtime/src/lib.rs`
+  - All code now passes `clippy` with `-D warnings` (deny warnings mode)
+  - Zero clippy warnings across entire workspace
+
+### Fixed
+
+- **Installation Instructions**
+  - Corrected `cd` command to match repository directory name (`FerrisScript` vs `ferrisscript`) for case-sensitive file systems (Linux/macOS)
+
+- **README Corruption**
+  - Removed 255 lines of corrupted duplicate source code appended after closing message
+
+- **Documentation Linting**
+  - Fixed 100% of markdown formatting issues across entire repository
+  - Resolved dead links in documentation
+  - Updated Rust grammar URLs in syntax highlighting docs
+  - Fixed relative paths in extension documentation
+
+- **SonarCloud Integration**
+  - Added code quality analysis integration (PR #14)
+
+### Performance
+
+- **Benchmarks Established**
+  - Baseline metrics for lexer, parser, type checker, runtime documented
+  - Function call overhead: ~1 μs (excellent for game scripting)
+  - 16K+ function calls per frame possible at 60 FPS
+
+### Documentation
+
+- **Total Documentation Added**: 10,000+ lines across 50+ files
+- **Test Count**: 96 → 116 (+20 tests)
+- **Coverage**: 65-70% → 70-75% line coverage
+- **PRs Merged**: 17 PRs (PR #3-19)
+- **Clippy Warnings**: Resolved all warnings
+
+### Deferred to Future Versions
+
+See `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md` for complete deferral analysis:
+
+- **v0.0.3**: Enhanced error diagnostics, development scripts, VS Code marketplace, CI optimizations (17 items)
+- **v0.0.4**: GODOT_INTEGRATION.md, signal support docs, Godot screenshots (8 items)
+- **v0.0.5+**: Type system refinements, performance optimizations, LSP foundation (27 items)
+
+---
+
+## Upgrade Notes
+
+### From v0.0.1 to v0.0.2
+
+**No Breaking Changes** - v0.0.2 is fully backward compatible with v0.0.1.
+
+**New Features Available**:
+
+- Improved error messages with source context
+- VS Code syntax highlighting (install from `extensions/vscode/`)
+- Comprehensive testing practices documented in `CONTRIBUTING.md`
+- Enhanced example tutorials in `examples/*/README.md`
+
+**For Contributors**:
+
+- Read `CONTRIBUTING.md` before submitting PRs (includes testing best practices)
+- Use `npm run docs:fix` before committing documentation changes
+- Test coverage target: 70-75% (use `scripts/coverage.sh` or `scripts/coverage.ps1`)
+
+**Documentation Updates**:
+
+- All documentation now follows markdown linting rules
+- Documentation organized by version in `docs/v0.0.2/`
+- Strategic roadmap available in `docs/planning/`
 
 ---
 

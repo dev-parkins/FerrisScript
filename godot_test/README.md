@@ -227,7 +227,7 @@ fn _process(delta: f32) {
 ## 📚 Additional Resources
 
 - **Main Documentation**: See `../README.md`
-- **Testing Guide**: See `../docs/v0.0.2/TESTING.md`
+- **Testing Guide**: See `../CONTRIBUTING.md` for testing practices
 - **Example Scripts**: See `../examples/` directory
 - **Contributing**: See `../CONTRIBUTING.md`
 

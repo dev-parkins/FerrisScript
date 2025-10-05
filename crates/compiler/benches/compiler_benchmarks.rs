@@ -80,7 +80,7 @@ fn parser_benchmarks(c: &mut Criterion) {
         |b, input| {
             b.iter(|| {
                 let tokens = lexer::tokenize(input).unwrap();
-                let _ = parser::parse(black_box(&tokens));
+                let _ = parser::parse(black_box(&tokens), input);
             });
         },
     );
@@ -101,7 +101,7 @@ fn parser_benchmarks(c: &mut Criterion) {
         |b, input| {
             b.iter(|| {
                 let tokens = lexer::tokenize(input).unwrap();
-                let _ = parser::parse(black_box(&tokens));
+                let _ = parser::parse(black_box(&tokens), input);
             });
         },
     );
@@ -132,7 +132,7 @@ fn parser_benchmarks(c: &mut Criterion) {
         |b, input| {
             b.iter(|| {
                 let tokens = lexer::tokenize(input).unwrap();
-                let _ = parser::parse(black_box(&tokens));
+                let _ = parser::parse(black_box(&tokens), input);
             });
         },
     );
@@ -152,7 +152,7 @@ fn type_checker_benchmarks(c: &mut Criterion) {
             b.iter(|| {
                 let tokens = lexer::tokenize(input).unwrap();
                 let ast = parser::parse(&tokens, input).unwrap();
-                let _ = type_checker::check(black_box(&ast));
+                let _ = type_checker::check(black_box(&ast), input);
             });
         },
     );
@@ -174,7 +174,7 @@ fn type_checker_benchmarks(c: &mut Criterion) {
             b.iter(|| {
                 let tokens = lexer::tokenize(input).unwrap();
                 let ast = parser::parse(&tokens, input).unwrap();
-                let _ = type_checker::check(black_box(&ast));
+                let _ = type_checker::check(black_box(&ast), input);
             });
         },
     );
@@ -199,8 +199,8 @@ fn full_pipeline_benchmarks(c: &mut Criterion) {
     group.bench_function("lex_parse_check", |b| {
         b.iter(|| {
             let tokens = lexer::tokenize(black_box(input)).unwrap();
-            let ast = parser::parse(&tokens).unwrap();
-            let _ = type_checker::check(&ast);
+            let ast = parser::parse(&tokens, input).unwrap();
+            let _ = type_checker::check(&ast, input);
         });
     });
 

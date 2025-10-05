@@ -84,7 +84,7 @@ Runs performance benchmarks for the compiler.
 - Parser: 600 ns - 7.94 μs
 - Type Checker: 851 ns - 3.58 μs
 
-See [docs/v0.0.2/BENCHMARK_BASELINE.md](../docs/v0.0.2/BENCHMARK_BASELINE.md) for detailed analysis.
+See [docs/archive/v0.0.2/BENCHMARK_BASELINE.md](../docs/archive/v0.0.2/BENCHMARK_BASELINE.md) for detailed analysis.
 
 ---
 

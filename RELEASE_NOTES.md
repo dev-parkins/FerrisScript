@@ -6,6 +6,148 @@
 
 ---
 
+## v0.0.2 - Foundation & Polish (October 5, 2025)
+
+**Status**: ✅ Complete  
+**Tag**: `v0.0.2`  
+**Codename**: "Community Foundation"
+
+### 🎉 Highlights
+
+FerrisScript v0.0.2 focuses on building a solid foundation for community contribution and development. This release significantly improves error messages, adds comprehensive documentation, implements VS Code editor support, and expands test coverage—all while maintaining 100% backward compatibility with v0.0.1.
+
+### 🌟 What's New for Users
+
+#### Better Error Messages 🔍
+
+- **38 Enhanced Error Messages** with actionable context and hints
+- **"Did You Mean?" Suggestions** for typos in variable/function names
+- **Code Snippets** showing exactly where errors occur
+- **Multiple Related Locations** for complex errors (e.g., "variable declared here, used here")
+- **Helpful Hints** like "use `let mut` if you want to modify this variable"
+
+**Example**:
+
+```
+error: Cannot assign to immutable variable 'x'
+  ┌─ examples/assign.ferris:3:1
+  │
+2 │     let x = 10;
+  │         - variable declared as immutable here
+3 │     x = 20;
+  │     ^^^^^^ cannot assign to immutable variable
+  │
+  = help: use `let mut x = 10` if you want to modify this variable
+```
+
+#### VS Code Syntax Highlighting ✨
+
+- **FerrisScript VS Code Extension** with syntax highlighting for `.ferris` files
+- **11 Code Snippets** for common patterns (`fn`, `let`, `if`, `while`, etc.)
+- **Installation**: Available in workspace (see `/crates/vscode-ferrisscript/`)
+
+#### Comprehensive Testing Guide 📚
+
+- **New TESTING.md** (655 lines) covering all 116 tests
+- **Test Organization** by module (parser, type checker, runtime, integration)
+- **Coverage Information** (70-75% overall, 80-85% core logic)
+- **Running Tests** documentation for contributors
+
+### 🛠️ What's New for Contributors
+
+#### Community Infrastructure
+
+- **CONTRIBUTING.md**: Complete contribution guide with workflow, PR guidelines, code style
+- **CODE_OF_CONDUCT.md**: Community standards and enforcement process
+- **Issue Templates**: Bug reports, feature requests, documentation improvements
+- **FAQ.md**: Common questions about language design, Godot integration, troubleshooting
+- **SECURITY.md**: Vulnerability reporting process
+
+#### Enhanced Documentation
+
+- **10,000+ Lines** of new documentation across project
+- **API Documentation**: 395+ lines of rustdoc covering compiler and runtime APIs
+- **Architecture Guide**: Complete system design documentation
+- **Troubleshooting Guide**: Common issues and solutions
+- **Version Planning**: Strategic roadmaps for v0.0.3–v0.1.0
+
+#### GitHub Setup
+
+- **Custom Labels**: Organized by type, status, priority, area
+- **GitHub Badges**: Build status, test coverage, license, version
+- **Branch Protection**: Recommendations for main branch security
+
+#### Improved Testing & Quality
+
+- **96 → 116 Tests** (+20.8% growth)
+- **Test Coverage**: 65-70% → 70-75% (+5%)
+- **Edge Case Coverage**: Enhanced handling of error conditions
+- **Benchmarks**: Performance baselines for compiler and runtime
+- **CI Integration**: Automated testing on every PR
+
+### 📦 Dependencies & Compatibility
+
+- **Rust**: 1.70+ required (unchanged)
+- **Godot**: 4.2+ supported (unchanged)
+- **gdext**: 0.1.x (Godot Rust bindings, unchanged)
+- **No Breaking Changes**: 100% compatible with v0.0.1 scripts
+
+### 🔄 Upgrade Guide
+
+#### For Script Authors
+
+1. **No changes required** - all v0.0.1 scripts work in v0.0.2
+2. **Optional**: Install VS Code extension for better editing experience
+3. **Optional**: Review new FAQ.md if you had questions about language behavior
+
+#### For Contributors
+
+1. **Read CONTRIBUTING.md** before submitting PRs (includes testing best practices)
+2. **Review API docs** for compiler/runtime internals
+3. **Use issue templates** when reporting bugs or requesting features
+
+#### Installing VS Code Extension
+
+```bash
+# From project root
+cd crates/vscode-ferrisscript
+code --install-extension vscode-ferrisscript-0.0.1.vsix
+```
+
+### 📊 Metrics
+
+- **PRs Merged**: 17 (#3-19)
+- **Commits**: 150+ commits
+- **Documentation**: 10,000+ new lines
+- **Tests**: 116 total (20.8% increase)
+- **Coverage**: 70-75% overall
+- **Files**: 60+ new documentation and infrastructure files
+
+### 🔗 Resources
+
+- **Full Changelog**: [CHANGELOG.md v0.0.2](CHANGELOG.md#002---2025-10-05)
+- **Deferral Analysis**: See `docs/archive/v0.0.2/V0.0.2_DEFERRAL_ANALYSIS.md` for incomplete items moved to future versions
+- **Testing Guide**: See `CONTRIBUTING.md` for testing practices and `cargo test` usage
+- **API Docs**: Run `cargo doc --open` for generated rustdoc
+- **Examples**: `/examples` and `/godot_test/scripts` directories
+
+### 🚀 What's Next?
+
+**v0.0.3 "Editor Experience Alpha"** will focus on:
+
+- Enhanced VS Code language server with autocomplete and diagnostics
+- Improved development workflow with `develop` branch
+- CI optimization for faster feedback
+- Additional error message improvements
+
+See [v0.0.3-roadmap.md](docs/planning/v0.0.3-roadmap.md) for detailed plans.
+
+### 🙏 Acknowledgments
+
+Thanks to the Rust and Godot communities for inspiration and tooling support. Special thanks to contributors of documentation improvements and testing enhancements.
+
+---
+
 ## v0.0.1 - Initial Release (October 2, 2025)
 
 **Status**: ✅ Complete  
