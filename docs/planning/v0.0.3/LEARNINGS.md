@@ -76,26 +76,53 @@ This document captures key insights, discoveries, and lessons learned during v0.
 
 ---
 
-### Phase 2: Error Suggestions
+### Phase 2: Error Suggestions ✅
 
-**Date Started**: TBD  
-**Date Completed**: TBD
+**Date Started**: October 6, 2025  
+**Date Completed**: October 6, 2025  
+**PR**: *(To be filled after PR creation)*
 
 #### Technical Discoveries
 
-- *(To be filled during development)*
+- **Adaptive Thresholds Essential**: String similarity thresholds must adapt to identifier length. Short names (≤8 chars) need strict edit distance (≤2-3), while long names (>8 chars) work better with percentage similarity (≥70%). Using a single threshold produces too many false positives.
+
+- **Levenshtein Performance**: Dynamic programming implementation of Levenshtein distance is O(m×n) but still very fast for typical identifiers (<1ms overhead per error). No optimization needed for practical use cases.
+
+- **Suggestion Ranking**: Sorting candidates by edit distance alone is sufficient. More complex ranking schemes (scope proximity, type matching) would require significant infrastructure changes for minimal UX improvement.
+
+- **Format String Simplicity**: Rust-style "help: did you mean 'X'?" format is clearer and more concise than showing full code context. Users just need the corrected identifier name.
+
+- **Test Coverage Strategy**: Integration tests (full compiler pipeline) are more valuable than unit tests for suggestions, since the real question is "does the user see helpful suggestions?" not "is the algorithm mathematically correct?".
 
 #### Challenges Encountered
 
-- *(To be filled during development)*
+- **Initial Test Failures**: First test run had 3 failing tests due to threshold logic being too strict. Tests expected suggestions for 3-edit-distance typos on 8-char names, but thresholds rejected them.
+
+- **Format String Complexity**: Initial implementation tried to show full code context (like Rust compiler) but this required complex span tracking and multi-line formatting. Simpler "did you mean X?" format provided equal value with less code.
+
+- **Type Checker Scope Access**: Type checker needed new methods to list available variables, functions, and types for suggestion search. Required careful thinking about what's "in scope" at error time.
 
 #### Solutions Applied
 
-- *(To be filled during development)*
+- **Threshold Refinement**: Adjusted thresholds based on test results. Short names use `distance <= 2 || (len <= 4 && distance <= 1)`, long names use `similarity >= 70%`. This balanced precision vs recall.
+
+- **Simplified Format**: Used concise `\nhelp: did you mean '{suggestion}'?` format that's easy to parse and understand. Removed complex span highlighting and multi-line context.
+
+- **Generic Finder Function**: Created single `find_similar_identifiers()` function that works for variables, functions, and types. Accepts any iterator of candidate names, applies thresholds, sorts, and returns top 3. Reduced code duplication significantly.
+
+- **Scope Listing Methods**: Added helper functions to collect available identifiers at error time. For variables: walk scope chain. For functions: list global functions. For types: list built-in and user types.
 
 #### Best Practices Identified
 
-- *(To be filled during development)*
+- **Test-Driven Thresholds**: Don't guess at similarity thresholds. Write comprehensive tests first, then adjust thresholds until tests pass with good precision/recall balance.
+
+- **Integration Over Unit**: For user-facing features like error messages, integration tests (compile code, check output) are more valuable than unit tests (test algorithm internals).
+
+- **Defer Complex Features**: Original plan included keyword suggestions (e.g., `fnn` → `fn`) but this required lexer changes. Better to defer cross-component features until core functionality is solid.
+
+- **Generic Utilities**: When implementing similar features (variable/function/type suggestions), extract common logic into generic utilities. Reduces duplication and improves maintainability.
+
+- **Simple Formats Win**: Concise error hints (`did you mean X?`) are often better than elaborate multi-line explanations. Users want quick answers, not verbose documentation.
 
 ---
 
