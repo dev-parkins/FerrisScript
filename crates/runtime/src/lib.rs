@@ -248,13 +248,16 @@ impl Env {
         for scope in self.scopes.iter_mut().rev() {
             if let Some(var_info) = scope.get_mut(name) {
                 if !var_info.mutable {
-                    return Err(format!("Cannot assign to immutable variable '{}'", name));
+                    return Err(format!(
+                        "Error[E400]: Cannot assign to immutable variable '{}'",
+                        name
+                    ));
                 }
                 var_info.value = value;
                 return Ok(());
             }
         }
-        Err(format!("Undefined variable: {}", name))
+        Err(format!("Error[E401]: Undefined variable: {}", name))
     }
 
     pub fn define_function(&mut self, name: String, func: ast::Function) {
@@ -269,7 +272,7 @@ impl Env {
         if let Some(func) = self.builtin_fns.get(name) {
             func(args)
         } else {
-            Err(format!("Unknown built-in function: {}", name))
+            Err(format!("Error[E402]: Unknown built-in function: {}", name))
         }
     }
 
@@ -390,7 +393,7 @@ fn execute_stmt(stmt: &ast::Stmt, env: &mut Env) -> Result<FlowControl, String> 
                 // Use assign method which checks mutability
                 env.assign(name, val)?;
             } else {
-                return Err("Invalid assignment target".to_string());
+                return Err("Error[E403]: Invalid assignment target".to_string());
             }
 
             Ok(FlowControl::None)
@@ -473,7 +476,7 @@ fn assign_field(
                         return setter(field, value);
                     } else {
                         return Err(
-                            "Cannot set self properties: no property setter registered".to_string()
+                            "Error[E404]: Cannot set self properties: no property setter registered".to_string()
                         );
                     }
                 }
@@ -482,7 +485,7 @@ fn assign_field(
             // Regular variable field assignment - check mutability first
             if !env.is_mutable(name) {
                 return Err(format!(
-                    "Cannot assign to field of immutable variable '{}'",
+                    "Error[E405]: Cannot assign to field of immutable variable '{}'",
                     name
                 ));
             }
@@ -494,23 +497,34 @@ fn assign_field(
                             if let Some(f) = value.to_float() {
                                 *x = f;
                             } else {
-                                return Err(format!("Cannot assign {:?} to Vector2.x", value));
+                                return Err(format!(
+                                    "Error[E406]: Cannot assign {:?} to Vector2.x",
+                                    value
+                                ));
                             }
                         }
                         "y" => {
                             if let Some(f) = value.to_float() {
                                 *y = f;
                             } else {
-                                return Err(format!("Cannot assign {:?} to Vector2.y", value));
+                                return Err(format!(
+                                    "Error[E406]: Cannot assign {:?} to Vector2.y",
+                                    value
+                                ));
                             }
                         }
-                        _ => return Err(format!("Vector2 has no field '{}'", field)),
+                        _ => return Err(format!("Error[E407]: Vector2 has no field '{}'", field)),
                     },
-                    _ => return Err(format!("Cannot access field '{}' on {:?}", field, var)),
+                    _ => {
+                        return Err(format!(
+                            "Error[E408]: Cannot access field '{}' on {:?}",
+                            field, var
+                        ))
+                    }
                 }
                 Ok(())
             } else {
-                Err(format!("Undefined variable: {}", name))
+                Err(format!("Error[E401]: Undefined variable: {}", name))
             }
         }
 
@@ -532,7 +546,7 @@ fn assign_field(
                                             *x = f;
                                         } else {
                                             return Err(format!(
-                                                "Cannot assign {:?} to Vector2.x",
+                                                "Error[E406]: Cannot assign {:?} to Vector2.x",
                                                 value
                                             ));
                                         }
@@ -542,16 +556,21 @@ fn assign_field(
                                             *y = f;
                                         } else {
                                             return Err(format!(
-                                                "Cannot assign {:?} to Vector2.y",
+                                                "Error[E406]: Cannot assign {:?} to Vector2.y",
                                                 value
                                             ));
                                         }
                                     }
-                                    _ => return Err(format!("Vector2 has no field '{}'", field)),
+                                    _ => {
+                                        return Err(format!(
+                                            "Error[E407]: Vector2 has no field '{}'",
+                                            field
+                                        ))
+                                    }
                                 },
                                 _ => {
                                     return Err(format!(
-                                        "Property '{}' is not a Vector2",
+                                        "Error[E409]: Property '{}' is not a Vector2",
                                         parent_field
                                     ))
                                 }
@@ -562,13 +581,13 @@ fn assign_field(
                                 return setter(parent_field, prop_value);
                             } else {
                                 return Err(
-                                    "Cannot set self properties: no property setter registered"
+                                    "Error[E404]: Cannot set self properties: no property setter registered"
                                         .to_string(),
                                 );
                             }
                         } else {
                             return Err(
-                                "Cannot get self properties: no property getter registered"
+                                "Error[E410]: Cannot get self properties: no property getter registered"
                                     .to_string(),
                             );
                         }
@@ -578,15 +597,15 @@ fn assign_field(
                 // Regular variable nested field assignment (not implemented yet)
                 if let Some(Value::Vector2 { .. }) = env.get_mut(name) {
                     return Err(
-                        "Nested field assignment on regular variables not yet implemented"
+                        "Error[E411]: Nested field assignment on regular variables not yet implemented"
                             .to_string(),
                     );
                 }
             }
-            Err("Complex field assignment not yet implemented".to_string())
+            Err("Error[E412]: Complex field assignment not yet implemented".to_string())
         }
 
-        _ => Err("Invalid assignment target".to_string()),
+        _ => Err("Error[E403]: Invalid assignment target".to_string()),
     }
 }
 
@@ -649,7 +668,7 @@ fn evaluate_expr(expr: &ast::Expr, env: &mut Env) -> Result<Value, String> {
                 BinaryOp::Div => match (&left_val, &right_val) {
                     (Value::Int(a), Value::Int(b)) => {
                         if *b == 0 {
-                            return Err("Division by zero".to_string());
+                            return Err("Error[E413]: Division by zero".to_string());
                         }
                         Ok(Value::Int(a / b))
                     }
@@ -661,7 +680,7 @@ fn evaluate_expr(expr: &ast::Expr, env: &mut Env) -> Result<Value, String> {
                             .to_float()
                             .ok_or("Cannot divide non-numeric values")?;
                         if b == 0.0 {
-                            return Err("Division by zero".to_string());
+                            return Err("Error[E413]: Division by zero".to_string());
                         }
                         Ok(Value::Float(a / b))
                     }
@@ -743,7 +762,7 @@ fn evaluate_expr(expr: &ast::Expr, env: &mut Env) -> Result<Value, String> {
                 UnaryOp::Neg => match val {
                     Value::Int(i) => Ok(Value::Int(-i)),
                     Value::Float(f) => Ok(Value::Float(-f)),
-                    _ => Err("Cannot negate non-numeric value".to_string()),
+                    _ => Err("Error[E414]: Cannot negate non-numeric value".to_string()),
                 },
 
                 UnaryOp::Not => Ok(Value::Bool(!val.to_bool())),
@@ -764,13 +783,13 @@ fn evaluate_expr(expr: &ast::Expr, env: &mut Env) -> Result<Value, String> {
             // Look up user-defined function
             let func = env
                 .get_function(name)
-                .ok_or_else(|| format!("Undefined function: {}", name))?
+                .ok_or_else(|| format!("Error[E415]: Undefined function: {}", name))?
                 .clone();
 
             // Check arity
             if func.params.len() != arg_values.len() {
                 return Err(format!(
-                    "Function {} expects {} arguments, got {}",
+                    "Error[E416]: Function {} expects {} arguments, got {}",
                     name,
                     func.params.len(),
                     arg_values.len()
@@ -809,7 +828,7 @@ fn evaluate_expr(expr: &ast::Expr, env: &mut Env) -> Result<Value, String> {
                 Value::Vector2 { x, y } => match field.as_str() {
                     "x" => Ok(Value::Float(x)),
                     "y" => Ok(Value::Float(y)),
-                    _ => Err(format!("Vector2 has no field '{}'", field)),
+                    _ => Err(format!("Error[E407]: Vector2 has no field '{}'", field)),
                 },
                 Value::SelfObject => {
                     // Use property getter callback to get field from Godot node
@@ -817,19 +836,22 @@ fn evaluate_expr(expr: &ast::Expr, env: &mut Env) -> Result<Value, String> {
                         getter(field)
                     } else {
                         Err(
-                            "Cannot access self properties: no property getter registered"
+                            "Error[E417]: Cannot access self properties: no property getter registered"
                                 .to_string(),
                         )
                     }
                 }
-                _ => Err(format!("Cannot access field '{}' on {:?}", field, obj_val)),
+                _ => Err(format!(
+                    "Error[E408]: Cannot access field '{}' on {:?}",
+                    field, obj_val
+                )),
             }
         }
 
         // Compound assignment and regular assignment expressions not used in runtime
         // They are desugared to Stmt::Assign at parse time
         ast::Expr::Assign(_, _, _) | ast::Expr::CompoundAssign(_, _, _, _) => {
-            Err("Assignment expressions should be statements".to_string())
+            Err("Error[E418]: Assignment expressions should be statements".to_string())
         }
     }
 }
@@ -887,12 +909,12 @@ pub fn call_function(name: &str, args: &[Value], env: &mut Env) -> Result<Value,
 
     let func = env
         .get_function(name)
-        .ok_or_else(|| format!("Undefined function: {}", name))?
+        .ok_or_else(|| format!("Error[E415]: Undefined function: {}", name))?
         .clone();
 
     if func.params.len() != args.len() {
         return Err(format!(
-            "Function {} expects {} arguments, got {}",
+            "Error[E416]: Function {} expects {} arguments, got {}",
             name,
             func.params.len(),
             args.len()

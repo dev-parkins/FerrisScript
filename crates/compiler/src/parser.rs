@@ -31,7 +31,8 @@
 //! ```
 
 use crate::ast::*;
-use crate::error_context::format_error_with_context;
+use crate::error_code::ErrorCode;
+use crate::error_context::format_error_with_code;
 use crate::lexer::Token;
 
 struct Parser<'a> {
@@ -84,7 +85,8 @@ impl<'a> Parser<'a> {
                 self.current_line,
                 self.current_column
             );
-            Err(format_error_with_context(
+            Err(format_error_with_code(
+                ErrorCode::E100,
                 &base_msg,
                 self.source,
                 self.current_line,
@@ -114,7 +116,8 @@ impl<'a> Parser<'a> {
                     self.current_line,
                     self.current_column
                 );
-                return Err(format_error_with_context(
+                return Err(format_error_with_code(
+                    ErrorCode::E101,
                     &base_msg,
                     self.source,
                     self.current_line,
@@ -147,7 +150,8 @@ impl<'a> Parser<'a> {
                     self.current_line,
                     self.current_column
                 );
-                return Err(format_error_with_context(
+                return Err(format_error_with_code(
+                    ErrorCode::E109,
                     &base_msg,
                     self.source,
                     self.current_line,
@@ -168,7 +172,8 @@ impl<'a> Parser<'a> {
                         self.current_line,
                         self.current_column
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E110,
                         &base_msg,
                         self.source,
                         self.current_line,
@@ -207,7 +212,8 @@ impl<'a> Parser<'a> {
                     self.current_line,
                     self.current_column
                 );
-                return Err(format_error_with_context(
+                return Err(format_error_with_code(
+                    ErrorCode::E109,
                     &base_msg,
                     self.source,
                     self.current_line,
@@ -231,7 +237,8 @@ impl<'a> Parser<'a> {
                         self.current_line,
                         self.current_column
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E111,
                         &base_msg,
                         self.source,
                         self.current_line,
@@ -252,7 +259,8 @@ impl<'a> Parser<'a> {
                         self.current_line,
                         self.current_column
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E111,
                         &base_msg,
                         self.source,
                         self.current_line,
@@ -290,7 +298,8 @@ impl<'a> Parser<'a> {
                             self.current_line,
                             self.current_column
                         );
-                        return Err(format_error_with_context(
+                        return Err(format_error_with_code(
+                            ErrorCode::E112,
                             &base_msg,
                             self.source,
                             self.current_line,
@@ -304,7 +313,8 @@ impl<'a> Parser<'a> {
                     "Expected '>' after '-' in return type at line {}, column {}",
                     self.current_line, self.current_column
                 );
-                return Err(format_error_with_context(
+                return Err(format_error_with_code(
+                    ErrorCode::E112,
                     &base_msg,
                     self.source,
                     self.current_line,
@@ -407,7 +417,8 @@ impl<'a> Parser<'a> {
                     self.current_line,
                     self.current_column
                 );
-                return Err(format_error_with_context(
+                return Err(format_error_with_code(
+                    ErrorCode::E109,
                     &base_msg,
                     self.source,
                     self.current_line,
@@ -428,7 +439,8 @@ impl<'a> Parser<'a> {
                         self.current_line,
                         self.current_column
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E110,
                         &base_msg,
                         self.source,
                         self.current_line,
@@ -536,7 +548,8 @@ impl<'a> Parser<'a> {
                             self.current_line,
                             self.current_column
                         );
-                        return Err(format_error_with_context(
+                        return Err(format_error_with_code(
+                            ErrorCode::E103,
                             &base_msg,
                             self.source,
                             self.current_line,
@@ -636,7 +649,7 @@ impl<'a> Parser<'a> {
                 Ok(Expr::Unary(UnaryOp::Not, Box::new(expr), span))
             }
             t => Err(format!(
-                "Unexpected token in expression: {} at line {}, column {}",
+                "Error[E102]: Expected expression, found '{}' at line {}, column {}",
                 t.name(),
                 self.current_line,
                 self.current_column
@@ -678,7 +691,8 @@ impl<'a> Parser<'a> {
                     self.current_line,
                     self.current_column
                 );
-                Err(format_error_with_context(
+                Err(format_error_with_code(
+                    ErrorCode::E113,
                     &base_msg,
                     self.source,
                     self.current_line,
