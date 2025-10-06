@@ -343,6 +343,7 @@ fn format_suggestion_hint(typo: &str, suggestion: &str) -> String {
 **New File**: `crates/compiler/src/suggestions.rs`
 
 Contains:
+
 - `levenshtein()` - Edit distance calculation
 - `similarity()` - Percentage calculation  
 - `is_similar_identifier()` - Threshold logic
@@ -352,12 +353,14 @@ Contains:
 - `format_suggestion_hint()` - Display formatting
 
 **Modified Files**:
+
 - `crates/compiler/src/lib.rs` - Add `pub mod suggestions;`
 - `crates/compiler/src/type_checker.rs` - Use suggestion functions in E201, E202, E203 errors
 
 **Test File**: `crates/compiler/tests/error_suggestions.rs`
 
 Contains comprehensive tests for:
+
 - Levenshtein distance accuracy
 - Similarity threshold validation
 - Variable suggestion quality
@@ -432,18 +435,21 @@ Contains comprehensive tests for:
 ### Keyword Suggestions (Deferred to Phase 2B)
 
 **Why Deferred**:
+
 - Requires lexer/parser modifications (different component than type checker)
 - Need to handle unknown tokens early in pipeline
 - Risk of false positives without context-awareness
 - Different technical approach (token-level vs identifier-level)
 
 **Examples of Future Work**:
+
 - `fnn` → `fn` (1 edit distance)
 - `lett` → `let` (1 edit distance)
 - `mutl` → `mut` (1 edit distance, transposition)
 - `retrun` → `return` (1 edit distance, transposition)
 
 **Technical Requirements** (for future phase):
+
 - Modify lexer to collect unknown identifiers
 - Add keyword suggestion function with strict threshold (≤1 edit distance)
 - Integrate with parser error recovery
@@ -456,11 +462,13 @@ Contains comprehensive tests for:
 ## 📝 Dependencies
 
 **Requires from Phase 1**:
+
 - ✅ Error code system (E201, E202, E203)
 - ✅ `format_error_with_code()` function
 - ✅ Error context display infrastructure
 
 **Enables for Phase 3**:
+
 - Better error messages prepare ground for documentation links
 - Suggestion infrastructure could extend to multi-error scenarios
 
@@ -484,6 +492,7 @@ Based on research from industry best practices:
 4. **Swift**: Similar approach with type-aware suggestions
 
 **Key Takeaways Applied**:
+
 - Adaptive thresholds by identifier length
 - Limit suggestions to 1-3 candidates
 - Clear "help:" formatting
