@@ -417,11 +417,11 @@ cargo test --test <name>  # Does THIS test pass?
 ```bash
 # All tests
 cargo test --workspace
-# Report: "✅ All 111 tests passing"
+# Report: "✅ All 222 tests passing"
 
-# Code quality
-cargo clippy --workspace --tests
-# Report: "✅ No clippy warnings on new files" or list warnings
+# Code quality (strict mode - treats warnings as errors)
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+# Report: "✅ Clippy passed with zero warnings"
 
 # Formatting
 cargo fmt --all
@@ -707,8 +707,8 @@ Before marking work complete, ensure:
 ## ✅ Validation
 
 - [ ] All tests pass: `cargo test --workspace`
-- [ ] Code quality: `cargo clippy --workspace -- -D warnings`
-- [ ] Formatting: `cargo fmt -- --check`
+- [ ] Code quality: `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- [ ] Formatting: `cargo fmt --all` (then check with `cargo fmt --all -- --check`)
 - [ ] Documentation: `npm run docs:lint`
 - [ ] PR created and passing CI
 
