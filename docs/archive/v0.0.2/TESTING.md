@@ -325,7 +325,7 @@ These scripts:
 3. Generate HTML report in `target/coverage/html/index.html`
 4. Generate LCOV report in `target/coverage/lcov.info`
 
-See [scripts/README.md](../../scripts/README.md) for more details.
+See [scripts/README.md](../../../scripts/README.md) for more details.
 
 ### Coverage Goals by Module
 
@@ -579,7 +579,7 @@ Use this checklist when adding new features:
 
 ### Coverage Not Generating
 
-See [COVERAGE_SETUP_NOTES.md](../COVERAGE_SETUP_NOTES.md) for:
+See [COVERAGE_SETUP_NOTES.md](../../COVERAGE_SETUP_NOTES.md) for:
 
 - Platform-specific coverage setup
 - Troubleshooting cargo-llvm-cov
@@ -592,10 +592,10 @@ See [COVERAGE_SETUP_NOTES.md](../COVERAGE_SETUP_NOTES.md) for:
 
 ### Documentation
 
-- [CONTRIBUTING.md](../../CONTRIBUTING.md) - Contribution guidelines
+- [CONTRIBUTING.md](../../../CONTRIBUTING.md) - Contribution guidelines
 - [TEST_COVERAGE_ANALYSIS.md](TEST_COVERAGE_ANALYSIS.md) - Detailed coverage analysis
 - [BENCHMARK_BASELINE.md](BENCHMARK_BASELINE.md) - Performance benchmarks
-- [COVERAGE_SETUP_NOTES.md](../COVERAGE_SETUP_NOTES.md) - Coverage tool setup
+- [COVERAGE_SETUP_NOTES.md](../../COVERAGE_SETUP_NOTES.md) - Coverage tool setup
 
 ### Test Examples
 
@@ -649,6 +649,6 @@ Study existing tests for patterns:
 
 **Questions or Issues?**
 
-- See [FAQ.md](../FAQ.md) for common testing questions
-- See [TROUBLESHOOTING.md](../TROUBLESHOOTING.md) for debugging help
+- See [FAQ.md](../../FAQ.md) for common testing questions
+- See [TROUBLESHOOTING.md](../../TROUBLESHOOTING.md) for debugging help
 - Open an issue: [GitHub Issues](https://github.com/dev-parkins/FerrisScript/issues)
