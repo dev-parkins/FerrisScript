@@ -480,17 +480,48 @@ pub fn compile_with_options(source: &str, report_mode: ReportMode) -> Result<Pro
 
 ### Documentation Website (Deferred to Phase 9 or v0.0.4)
 
+**Status**: 🎯 Domain Acquired (`ferrisscript.dev`) ✅ - Infrastructure work can proceed in parallel
+
 **Why Deferred**:
 - ERROR_CODES.md is sufficient for v0.0.3
 - Full website (mdBook/Docusaurus) requires hosting setup
 - LSP integration is higher priority
 - Can build website from existing markdown later
 
-**Future Work**:
-- Set up mdBook or Docusaurus
-- Add search functionality
-- Host on GitHub Pages or Netlify
-- Add interactive examples
+**Infrastructure Checklist** (can work on between features):
+
+- [x] **1. Buy ferrisscript.dev domain** ✅
+  - Acquired via Namecheap/Cloudflare/Squarespace
+  - `.dev` TLD requires HTTPS (enforced by Chrome/browsers)
+
+- [ ] **2. Set up static host**
+  - Options: Netlify / Vercel / GitHub Pages
+  - Recommended: Netlify or Vercel (easy integration with GitHub)
+  - Auto-deploy from main branch
+
+- [ ] **3. Create CNAME for docs subdomain**
+  - Point `docs.ferrisscript.dev` to hosting provider
+  - Example: `docs.ferrisscript.dev` → Netlify CNAME
+  - DNS propagation: ~24-48 hours
+
+- [ ] **4. Deploy documentation site**
+  - Choose framework: Docusaurus / mdBook / VitePress
+  - Connect GitHub repo for automatic deployments
+  - Convert ERROR_CODES.md to site format
+  - Set up search functionality
+
+- [ ] **5. Verify HTTPS + test live docs**
+  - `.dev` requires HTTPS (automatic with Netlify/Vercel)
+  - Test error code links: `docs.ferrisscript.dev/errors/E001`
+  - Validate anchor links work correctly
+  - Test mobile responsiveness
+
+**Future Work** (after infrastructure is live):
+- Add interactive error examples
+- Implement error code search
+- Add "Copy to clipboard" for code snippets
+- Set up analytics (optional)
+- Add dark mode support
 
 ### Advanced Error Recovery
 

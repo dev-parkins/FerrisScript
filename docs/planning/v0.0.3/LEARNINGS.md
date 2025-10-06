@@ -399,6 +399,31 @@ This document captures key insights, discoveries, and lessons learned during v0.
 - Privacy considerations
 - Storage and analysis approach
 
+#### Documentation Website Infrastructure
+
+**Status**: 🎯 Domain Acquired (`ferrisscript.dev`) ✅ - Infrastructure work in progress
+
+**Discovery**: Phase 3A added documentation URLs to error messages with hybrid approach:
+- Default: GitHub URLs (work immediately)
+- Future: Custom site via `FERRIS_DOCS_BASE` env var
+
+**Opportunity**: Now that domain is acquired, can work on infrastructure between features:
+
+**Completed**:
+- ✅ Domain: `ferrisscript.dev` acquired
+- ✅ Code: Hybrid URL system implemented (GitHub → custom site seamless)
+
+**Remaining Work** (can proceed in parallel with feature development):
+1. Set up static hosting (Netlify/Vercel/GitHub Pages)
+2. Create `docs.ferrisscript.dev` CNAME subdomain
+3. Choose & set up documentation framework (Docusaurus/mdBook/VitePress)
+4. Deploy ERROR_CODES.md as searchable website
+5. Verify HTTPS (required for `.dev` TLD)
+
+**Benefit**: Professional documentation site improves project credibility and developer experience. No code changes needed in compiler thanks to env var approach.
+
+**Timeline**: Can be completed any time before v0.0.3 release, or after (GitHub URLs work fine).
+
 #### Error Code Localization
 
 **Discovery**: Error code enum provides a centralization point for all error messages.
