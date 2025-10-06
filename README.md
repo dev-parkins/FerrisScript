@@ -516,7 +516,7 @@ cargo test --workspace
 # - Total: 70+ tests
 ```
 
-## 📊 Current Status (v0.0.1)
+## 📊 Current Status (v0.0.2)
 
 ### ✅ Implemented Features
 
