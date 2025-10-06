@@ -11,13 +11,6 @@ on:
       - '.github/workflows/docs-lint.yml'
       - '.markdownlint.json'
       - '.markdown-link-check.json'
-  push:
-    branches: 
-      - main
-      - develop
-    paths:
-      - '**.md'
-      - 'docs/**'
 
 jobs:
   markdown-lint:
