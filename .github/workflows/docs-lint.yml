@@ -2,6 +2,9 @@ name: Documentation Linting
 
 on:
   pull_request:
+    branches:
+      - main
+      - develop
     paths:
       - '**.md'
       - 'docs/**'
@@ -9,7 +12,9 @@ on:
       - '.markdownlint.json'
       - '.markdown-link-check.json'
   push:
-    branches: [main]
+    branches: 
+      - main
+      - develop
     paths:
       - '**.md'
       - 'docs/**'

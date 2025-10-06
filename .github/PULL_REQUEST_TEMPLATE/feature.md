@@ -1,5 +1,10 @@
 ## ✨ New Feature
 
+<!-- 
+⚠️ IMPORTANT: This PR should target the 'develop' branch, not 'main'.
+Features go through develop for integration testing before reaching main.
+-->
+
 <!-- Provide a clear and concise description of the new feature -->
 
 ## Related Issues

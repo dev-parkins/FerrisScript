@@ -5,18 +5,70 @@ on:
     branches: 
       - main
       - develop
+      - 'feature/**'
     tags:
       - 'v*'
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
   pull_request:
     branches: 
       - main
+      - develop
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  # Quick checks for feature branches - Fast feedback (2-3 min)
+  quick-check:
+    name: Quick Check (Lint + Unit Tests)
+    if: |
+      github.ref != 'refs/heads/main' && 
+      github.ref != 'refs/heads/develop' &&
+      !startsWith(github.ref, 'refs/tags/') &&
+      (startsWith(github.ref, 'refs/heads/feature/') || github.event_name == 'pull_request')
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Cache cargo build
+      uses: actions/cache@v4
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-quick-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Check formatting
+      run: cargo fmt --all -- --check
+
+    - name: Run clippy
+      run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+    - name: Run unit tests (Ubuntu only)
+      run: cargo test --workspace --lib --bins --verbose
+
+  # Full test suite for main/develop branches - Comprehensive validation
   test:
-    name: Test
+    name: Full Test Suite
+    if: |
+      github.ref == 'refs/heads/main' || 
+      github.ref == 'refs/heads/develop' ||
+      startsWith(github.ref, 'refs/tags/')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -65,7 +117,11 @@ jobs:
   build:
     name: Build Release
     needs: test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    if: |
+      github.event_name == 'push' && 
+      (github.ref == 'refs/heads/main' || 
+       github.ref == 'refs/heads/develop' || 
+       startsWith(github.ref, 'refs/tags/v'))
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -131,7 +187,9 @@ jobs:
 
   coverage:
     name: Code Coverage
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: |
+      github.event_name == 'push' && 
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
