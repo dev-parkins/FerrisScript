@@ -255,6 +255,46 @@ impl ErrorCode {
         }
     }
 
+    /// Get documentation URL for this error code
+    ///
+    /// By default, links to GitHub repository. Set `FERRIS_DOCS_BASE` environment
+    /// variable to use a custom documentation site (e.g., when docs.ferrisscript.dev launches).
+    ///
+    /// # Examples
+    ///
+    /// Default (GitHub):
+    /// ```
+    /// use ferrisscript_compiler::error_code::ErrorCode;
+    /// let url = ErrorCode::E201.get_docs_url();
+    /// assert!(url.contains("github.com"));
+    /// assert!(url.contains("#e201"));
+    /// ```
+    ///
+    /// With custom docs site:
+    /// ```bash
+    /// export FERRIS_DOCS_BASE=https://docs.ferrisscript.dev
+    /// ```
+    /// ```ignore
+    /// use ferrisscript_compiler::error_code::ErrorCode;
+    /// let url = ErrorCode::E201.get_docs_url();
+    /// // Returns: "https://docs.ferrisscript.dev/errors/E201"
+    /// ```
+    pub fn get_docs_url(&self) -> String {
+        let code = self.as_str(); // "E201"
+        let anchor = code.to_lowercase(); // "e201"
+
+        // Check for custom docs base URL
+        if let Ok(base) = std::env::var("FERRIS_DOCS_BASE") {
+            format!("{}/errors/{}", base.trim_end_matches('/'), code)
+        } else {
+            // Default: GitHub main branch (works immediately, no infrastructure needed)
+            format!(
+                "https://github.com/dev-parkins/FerrisScript/blob/main/docs/ERROR_CODES.md#{}",
+                anchor
+            )
+        }
+    }
+
     /// Returns a human-readable description of the error
     pub fn description(&self) -> &'static str {
         match self {
@@ -536,5 +576,35 @@ mod tests {
             assert!(!code.as_str().is_empty());
             assert!(!code.description().is_empty());
         }
+    }
+
+    #[test]
+    fn test_get_docs_url_default() {
+        // Without FERRIS_DOCS_BASE env var, should return GitHub URL
+        // This test only checks the default behavior (no env var)
+        let url = ErrorCode::E001.get_docs_url();
+        // Should either be GitHub URL (if no env var) or custom URL (if env var is set globally)
+        // Just verify it contains the error code
+        assert!(url.contains("E001") || url.contains("e001"));
+
+        let url = ErrorCode::E201.get_docs_url();
+        assert!(url.contains("E201") || url.contains("e201"));
+    }
+
+    #[test]
+    fn test_get_docs_url_format() {
+        // Test URL format structure
+        let url = ErrorCode::E001.get_docs_url();
+        assert!(!url.is_empty());
+        assert!(url.starts_with("http"));
+
+        // Should contain the error code
+        assert!(url.contains("E001") || url.contains("e001"));
+
+        let url = ErrorCode::E100.get_docs_url();
+        assert!(url.contains("E100") || url.contains("e100"));
+
+        let url = ErrorCode::E201.get_docs_url();
+        assert!(url.contains("E201") || url.contains("e201"));
     }
 }

@@ -303,3 +303,43 @@ fn test_parser_invalid_binary_operator_context() {
     assert!(error.contains("^"));
     assert!(error.contains("2 |") || error.contains("3 |"));
 }
+
+#[test]
+fn test_error_includes_documentation_url() {
+    // Test that errors include a documentation URL
+    let source = r#"fn test() {
+    let x: i32 = true;
+}"#;
+
+    let result = compile(source);
+    assert!(result.is_err());
+    let error = result.unwrap_err();
+
+    // Should contain the documentation note
+    assert!(error.contains("= note: see"));
+    assert!(error.contains("for more information"));
+
+    // Should contain a URL
+    assert!(error.contains("http"));
+
+    // Should reference error code (case-insensitive)
+    assert!(error.contains("E2") || error.contains("e2")); // E200-range type errors
+}
+
+#[test]
+fn test_undefined_variable_includes_docs_url() {
+    let source = r#"fn test() {
+    let x: i32 = unknown;
+}"#;
+
+    let result = compile(source);
+    assert!(result.is_err());
+    let error = result.unwrap_err();
+
+    // Should contain error message
+    assert!(error.contains("Undefined variable"));
+
+    // Should contain documentation URL
+    assert!(error.contains("= note: see"));
+    assert!(error.contains("http"));
+}

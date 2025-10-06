@@ -178,13 +178,18 @@ pub fn format_error_with_code(
 
     let pointer = format_error_pointer(column, line_num_width, hint);
 
+    // Add documentation link
+    let docs_url = code.get_docs_url();
+    let docs_note = format!("   = note: see {} for more information\n", docs_url);
+
     format!(
-        "Error[{}]: {}\n{}\n\n{}{}",
+        "Error[{}]: {}\n{}\n\n{}{}{}",
         code.as_str(),
         code.description(),
         base_message,
         context,
-        pointer
+        pointer,
+        docs_note
     )
 }
 
