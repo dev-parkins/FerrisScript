@@ -13,4 +13,4 @@ authors = ["FerrisScript Contributors"]
 license = "MIT"
 
 [workspace.dependencies]
-criterion = "0.5"
+criterion = "0.7"

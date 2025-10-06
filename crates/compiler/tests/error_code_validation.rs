@@ -198,9 +198,9 @@ fn test_error_code_format() {
 #[test]
 fn test_error_code_enum_coverage() {
     // Verify all expected error codes exist
-    let lexical_codes = vec![ErrorCode::E001, ErrorCode::E002, ErrorCode::E003];
+    let lexical_codes = [ErrorCode::E001, ErrorCode::E002, ErrorCode::E003];
 
-    let syntax_codes = vec![
+    let syntax_codes = [
         ErrorCode::E100,
         ErrorCode::E101,
         ErrorCode::E102,
@@ -217,7 +217,7 @@ fn test_error_code_enum_coverage() {
         ErrorCode::E113,
     ];
 
-    let type_codes = vec![
+    let type_codes = [
         ErrorCode::E200,
         ErrorCode::E201,
         ErrorCode::E202,
