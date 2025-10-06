@@ -40,17 +40,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Find markdown files (excluding archive)
-        id: find-files
-        run: |
-          FILES=$(find . -name "*.md" -not -path "*/docs/archive/*" -not -path "*/target/*" -not -path "*/node_modules/*" | tr '\n' ',')
-          echo "files=${FILES%,}" >> $GITHUB_OUTPUT
-
-      - name: Check markdown links
-        if: steps.find-files.outputs.files != ''
-        uses: gaurav-nelson/github-action-markdown-link-check@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          config-file: '.markdown-link-check.json'
-          use-quiet-mode: 'yes'
-          use-verbose-mode: 'no'
-          file-path: ${{ steps.find-files.outputs.files }}
+          node-version: '20'
+
+      - name: Install markdown-link-check
+        run: npm install -g markdown-link-check
+
+      - name: Check markdown links (excluding archive)
+        run: |
+          find . -name "*.md" \
+            -not -path "*/docs/archive/*" \
+            -not -path "*/target/*" \
+            -not -path "*/node_modules/*" \
+            -exec markdown-link-check {} --config .markdown-link-check.json --quiet \;
