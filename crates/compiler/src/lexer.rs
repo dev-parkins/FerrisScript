@@ -608,12 +608,12 @@ mod tests {
 
     #[test]
     fn test_tokenize_numbers() {
-        let tokens = tokenize("42 3.14 0.5 100.0").unwrap();
+        let tokens = tokenize("42 3.5 0.5 100.0").unwrap();
         assert_eq!(
             tokens,
             vec![
                 Token::Number(42.0),
-                Token::Number(3.14),
+                Token::Number(3.5),
                 Token::Number(0.5),
                 Token::Number(100.0),
                 Token::Eof

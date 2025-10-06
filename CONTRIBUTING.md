@@ -12,6 +12,7 @@ First off, thank you for considering contributing to FerrisScript! 🦀 It's peo
   - [Contributing Documentation](#contributing-documentation)
   - [Contributing Code](#contributing-code)
 - [Development Environment Setup](#development-environment-setup)
+- [Development Workflow](#development-workflow)
 - [Pull Request Process](#pull-request-process)
 - [Code Style Guidelines](#code-style-guidelines)
 - [Testing Guidelines](#testing-guidelines)
@@ -299,6 +300,103 @@ cargo run --bin rustyscript_runtime examples/hello.ferris
 
 You should see "Hello from FerrisScript!" printed to the console.
 
+## Development Workflow
+
+**Starting with v0.0.3**, FerrisScript uses a **staged development workflow** with three branch types:
+
+### Branch Structure
+
+- **`main`**: Production-ready code, protected
+  - Only receives PRs from `develop`
+  - Requires code review and passing CI
+  - Triggers release workflows
+
+- **`develop`**: Integration/staging branch
+  - Accepts PRs from `feature/*` branches
+  - Full CI suite runs on every push
+  - Tests multiple features together before release
+
+- **`feature/*`**: Individual feature branches
+  - Created from `develop` (not `main`)
+  - Quick CI checks only (2-3 min feedback)
+  - One feature per branch
+
+### Creating a Feature Branch
+
+```bash
+# Start from develop
+git checkout develop
+git pull origin develop
+
+# Create your feature branch
+git checkout -b feature/your-feature-name
+
+# Work on your changes
+# ... make changes ...
+
+# Test locally (same checks as CI)
+cargo test --workspace
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+# Push and create PR to develop
+git push -u origin feature/your-feature-name
+gh pr create --base develop --title "feat: Your feature description"
+```
+
+### CI Behavior by Branch
+
+**Feature Branches** (`feature/*`):
+
+- ⚡ **Quick Check** (2-3 minutes):
+  - Code formatting (`cargo fmt`)
+  - Linting (`cargo clippy`)
+  - Unit tests only (Ubuntu)
+- 🎯 **Goal**: Fast feedback during development
+- 💰 **Savings**: ~60-70% CI time vs full suite
+
+**Develop Branch**:
+
+- 🔄 **Full Test Suite** (~10-15 minutes):
+  - Cross-platform tests (Linux, Windows, macOS)
+  - All tests (unit + integration)
+  - Code coverage reporting
+  - Release builds
+- 🎯 **Goal**: Integration testing before release
+
+**Main Branch**:
+
+- ✅ **Full Test Suite + Release**:
+  - Everything from develop
+  - Creates GitHub release on tags
+- 🎯 **Goal**: Production validation
+
+### Path Filters (Docs-Only Changes)
+
+If you only change documentation files, CI will be skipped entirely on feature branches:
+
+**Skipped paths**:
+
+- `docs/**`
+- `*.md` files
+- `LICENSE`
+- `.gitignore`
+
+This saves ~95% CI time for documentation PRs!
+
+### Release Flow
+
+```bash
+# Feature development
+feature/my-feature → develop (via PR)
+feature/another-feature → develop (via PR)
+
+# After multiple features tested on develop
+develop → main (via PR)
+
+# Creates release
+main → tagged release (v0.0.3)
+```
+
 ## Pull Request Process
 
 We use a **feature branch workflow** with **squash and merge** strategy.
@@ -325,9 +423,13 @@ git checkout -b docs/add-api-examples
 
 ### Creating a Pull Request
 
-1. **Create a feature branch** with the appropriate prefix:
+1. **Create a feature branch** from `develop` with the appropriate prefix:
 
    ```bash
+   # Start from develop
+   git checkout develop
+   git pull origin develop
+   
    # For bug fixes
    git checkout -b bugfix/your-bug-description
    
@@ -347,11 +449,11 @@ git checkout -b docs/add-api-examples
    git commit -m "fix: resolve issue with parser"
    ```
 
-3. **Keep your branch up to date**:
+3. **Keep your branch up to date** with `develop`:
 
    ```bash
-   git fetch upstream
-   git rebase upstream/main
+   git fetch origin
+   git rebase origin/develop
    ```
 
 4. **Push your branch**:
@@ -360,7 +462,8 @@ git checkout -b docs/add-api-examples
    git push origin feature/your-feature-name
    ```
 
-5. **Open a Pull Request** via GitHub:
+5. **Open a Pull Request** to `develop` (not `main`) via GitHub:
+   - **Base branch**: `develop` (important!)
    - Use a clear, descriptive title following [Conventional Commits](https://www.conventionalcommits.org/)
    - The appropriate PR template will be **automatically applied** based on your branch name
    - Fill out all sections marked with `<!-- ... -->` comments
