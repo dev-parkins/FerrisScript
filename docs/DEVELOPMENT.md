@@ -45,8 +45,8 @@ cargo test --workspace -- --show-output
 # Check code formatting
 cargo fmt --all -- --check
 
-# Run clippy linter
-cargo clippy --workspace -- -D warnings
+# Run clippy linter (strict - treats warnings as errors)
+cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 # Generate documentation
 cargo doc --workspace --open
@@ -139,7 +139,7 @@ cargo test test_compile_hello
 
 # Check formatting and linting
 cargo fmt --all
-cargo clippy --workspace
+cargo clippy --workspace --all-targets --all-features -- -D warnings
 ```
 
 ### 4.5. Validate Documentation Changes
@@ -790,8 +790,9 @@ Before submitting a PR:
 
 - [ ] All tests pass (`cargo test --workspace`)
 - [ ] Code is formatted (`cargo fmt --all`)
-- [ ] No clippy warnings (`cargo clippy --workspace`)
+- [ ] No clippy warnings (strict mode: `cargo clippy --workspace --all-targets --all-features -- -D warnings`)
 - [ ] Documentation updated if needed
+- [ ] Documentation linting passes (`npm run docs:lint`)
 - [ ] Commit messages follow convention
 - [ ] PR description explains the change
 

@@ -229,7 +229,7 @@ Code contributions are welcome for:
 
 1. **Open an issue** (or comment on an existing one) to discuss your approach
 2. **Wait for feedback** from maintainers to ensure alignment
-3. **Create a feature branch** from `main` for your work
+3. **Create a feature branch** from `develop` for your work (e.g., `feature/my-feature`)
 
 #### Maintaining Syntax Highlighting
 
@@ -492,16 +492,18 @@ We have specialized templates for different PR types:
 
 Before your PR can be merged:
 
-- ✅ All tests must pass (`cargo test`)
-- ✅ Code must be formatted (`cargo fmt`)
-- ✅ Code must pass linting (`cargo clippy`)
+- ✅ All tests must pass (`cargo test --workspace`)
+- ✅ Code must be formatted (`cargo fmt --all`)
+- ✅ Code must pass strict linting (`cargo clippy --workspace --all-targets --all-features -- -D warnings`)
+- ✅ Documentation linting passes (`npm run docs:lint`)
 - ✅ Documentation must be updated (if applicable)
 - ✅ CHANGELOG.md must be updated (see below)
 - ✅ At least one maintainer approval
 
 ### Merge Strategy
 
-- **Feature branches**: We use **squash and merge** to keep main branch history clean
+- **Feature branches → develop**: We use **squash and merge** to keep develop branch history clean
+- **develop → main**: Merge commits for releases to preserve version history
 - **Hotfix branches**: We use **merge commit** to preserve context
 - **Branch deletion**: Branches are automatically deleted after merge (enable in your fork's settings)
 
