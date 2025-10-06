@@ -42,6 +42,7 @@ pub mod error_code;
 pub mod error_context;
 pub mod lexer;
 pub mod parser;
+pub mod suggestions;
 pub mod type_checker;
 
 /// Compile FerrisScript source code to an Abstract Syntax Tree (AST).
