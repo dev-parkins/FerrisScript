@@ -798,7 +798,7 @@ mod tests {
                 name, mutable, ty, ..
             } => {
                 assert_eq!(name, "x");
-                assert_eq!(*mutable, false);
+                assert!(!(*mutable));
                 assert_eq!(*ty, None);
             }
             _ => panic!("Expected Let statement"),
@@ -816,7 +816,7 @@ mod tests {
                 name, mutable, ty, ..
             } => {
                 assert_eq!(name, "x");
-                assert_eq!(*mutable, true);
+                assert!(*mutable);
                 assert_eq!(ty.as_ref().unwrap(), "i32");
             }
             _ => panic!("Expected Let statement"),
@@ -1004,7 +1004,7 @@ mod tests {
         assert_eq!(program.global_vars.len(), 1);
         let var = &program.global_vars[0];
         assert_eq!(var.name, "dir");
-        assert_eq!(var.mutable, true);
+        assert!(var.mutable);
         assert_eq!(var.ty.as_ref().unwrap(), "f32");
     }
 

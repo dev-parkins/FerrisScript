@@ -949,7 +949,7 @@ mod tests {
     #[test]
     fn test_value_coercion() {
         assert_eq!(Value::Int(42).to_float(), Some(42.0));
-        assert_eq!(Value::Float(3.14).to_float(), Some(3.14));
+        assert_eq!(Value::Float(3.5).to_float(), Some(3.5));
         assert_eq!(Value::Bool(true).to_float(), None);
 
         assert!(Value::Bool(true).to_bool());
