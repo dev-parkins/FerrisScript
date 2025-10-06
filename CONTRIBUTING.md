@@ -334,9 +334,9 @@ git checkout -b feature/your-feature-name
 # Work on your changes
 # ... make changes ...
 
-# Test locally
+# Test locally (same checks as CI)
 cargo test --workspace
-cargo clippy --workspace -- -D warnings
+cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 # Push and create PR to develop
 git push -u origin feature/your-feature-name
