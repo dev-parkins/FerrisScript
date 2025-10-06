@@ -346,6 +346,7 @@ gh pr create --base develop --title "feat: Your feature description"
 ### CI Behavior by Branch
 
 **Feature Branches** (`feature/*`):
+
 - ⚡ **Quick Check** (2-3 minutes):
   - Code formatting (`cargo fmt`)
   - Linting (`cargo clippy`)
@@ -354,6 +355,7 @@ gh pr create --base develop --title "feat: Your feature description"
 - 💰 **Savings**: ~60-70% CI time vs full suite
 
 **Develop Branch**:
+
 - 🔄 **Full Test Suite** (~10-15 minutes):
   - Cross-platform tests (Linux, Windows, macOS)
   - All tests (unit + integration)
@@ -362,6 +364,7 @@ gh pr create --base develop --title "feat: Your feature description"
 - 🎯 **Goal**: Integration testing before release
 
 **Main Branch**:
+
 - ✅ **Full Test Suite + Release**:
   - Everything from develop
   - Creates GitHub release on tags
@@ -372,6 +375,7 @@ gh pr create --base develop --title "feat: Your feature description"
 If you only change documentation files, CI will be skipped entirely on feature branches:
 
 **Skipped paths**:
+
 - `docs/**`
 - `*.md` files
 - `LICENSE`
