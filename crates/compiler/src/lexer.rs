@@ -18,7 +18,8 @@
 //! let tokens = tokenize(source).unwrap();
 //! ```
 
-use crate::error_context::format_error_with_context;
+use crate::error_code::ErrorCode;
+use crate::error_context::format_error_with_code;
 
 /// Token representation for FerrisScript.
 ///
@@ -214,7 +215,7 @@ impl<'a> Lexer<'a> {
 
         num_str.parse::<f32>().map(Token::Number).map_err(|_| {
             format!(
-                "Invalid number '{}' at line {}, column {}",
+                "Error[E003]: Invalid number '{}' at line {}, column {}",
                 num_str, start_line, start_col
             )
         })
@@ -234,7 +235,8 @@ impl<'a> Lexer<'a> {
                         "Unterminated string at line {}, column {}",
                         start_line, start_col
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E002,
                         &base_msg,
                         self.source,
                         start_line,
@@ -274,7 +276,8 @@ impl<'a> Lexer<'a> {
                                 "Invalid escape sequence '\\{}' at line {}, column {}",
                                 ch, self.line, self.column
                             );
-                            return Err(format_error_with_context(
+                            return Err(format_error_with_code(
+                                ErrorCode::E003,
                                 &base_msg,
                                 self.source,
                                 self.line,
@@ -287,7 +290,8 @@ impl<'a> Lexer<'a> {
                                 "Unterminated string at line {}, column {}",
                                 start_line, start_col
                             );
-                            return Err(format_error_with_context(
+                            return Err(format_error_with_code(
+                                ErrorCode::E002,
                                 &base_msg,
                                 self.source,
                                 start_line,
@@ -419,7 +423,8 @@ impl<'a> Lexer<'a> {
                         "Unexpected character '&' at line {}, column {}",
                         error_line, error_col
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E001,
                         &base_msg,
                         self.source,
                         error_line,
@@ -440,7 +445,8 @@ impl<'a> Lexer<'a> {
                         "Unexpected character '|' at line {}, column {}",
                         error_line, error_col
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E001,
                         &base_msg,
                         self.source,
                         error_line,
@@ -486,7 +492,8 @@ impl<'a> Lexer<'a> {
                     "Unexpected character '{}' at line {}, column {}",
                     ch, self.line, self.column
                 );
-                return Err(format_error_with_context(
+                return Err(format_error_with_code(
+                    ErrorCode::E001,
                     &base_msg,
                     self.source,
                     self.line,

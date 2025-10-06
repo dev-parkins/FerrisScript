@@ -1,6 +1,7 @@
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use ferrisscript_compiler::compile;
 use ferrisscript_runtime::{call_function, execute, Env, Value};
+use std::hint::black_box;
 
 fn compilation_benchmarks(c: &mut Criterion) {
     let mut group = c.benchmark_group("compilation");

@@ -37,7 +37,8 @@
 //! ```
 
 use crate::ast::*;
-use crate::error_context::format_error_with_context;
+use crate::error_code::ErrorCode;
+use crate::error_context::format_error_with_code;
 use std::collections::HashMap;
 
 /// Type representation for FerrisScript's type system.
@@ -180,7 +181,8 @@ impl<'a> TypeChecker<'a> {
                     "Cannot infer type for global variable '{}' at {}",
                     var.name, var.span
                 );
-                self.error(format_error_with_context(
+                self.error(format_error_with_code(
+                    ErrorCode::E218,
                     &base_msg,
                     self.source,
                     var.span.line,
@@ -201,7 +203,8 @@ impl<'a> TypeChecker<'a> {
                     init_ty.name(),
                     var.span
                 );
-                self.error(format_error_with_context(
+                self.error(format_error_with_code(
+                    ErrorCode::E200,
                     &base_msg,
                     self.source,
                     var.span.line,
@@ -281,7 +284,8 @@ impl<'a> TypeChecker<'a> {
 
                 if declared_ty == Type::Unknown {
                     let base_msg = format!("Cannot infer type for variable '{}' at {}", name, span);
-                    self.error(format_error_with_context(
+                    self.error(format_error_with_code(
+                        ErrorCode::E218,
                         &base_msg,
                         self.source,
                         span.line,
@@ -299,7 +303,8 @@ impl<'a> TypeChecker<'a> {
                         value_ty.name(),
                         span
                     );
-                    self.error(format_error_with_context(
+                    self.error(format_error_with_code(
+                        ErrorCode::E200,
                         &base_msg,
                         self.source,
                         span.line,
@@ -329,7 +334,8 @@ impl<'a> TypeChecker<'a> {
                         value_ty.name(),
                         span
                     );
-                    self.error(format_error_with_context(
+                    self.error(format_error_with_code(
+                        ErrorCode::E219,
                         &base_msg,
                         self.source,
                         span.line,
@@ -355,7 +361,8 @@ impl<'a> TypeChecker<'a> {
                         cond_ty.name(),
                         span
                     );
-                    self.error(format_error_with_context(
+                    self.error(format_error_with_code(
+                        ErrorCode::E211,
                         &base_msg,
                         self.source,
                         span.line,
@@ -386,7 +393,8 @@ impl<'a> TypeChecker<'a> {
                         cond_ty.name(),
                         span
                     );
-                    self.error(format_error_with_context(
+                    self.error(format_error_with_code(
+                        ErrorCode::E211,
                         &base_msg,
                         self.source,
                         span.line,
@@ -425,7 +433,8 @@ impl<'a> TypeChecker<'a> {
                     ty
                 } else {
                     let base_msg = format!("Undefined variable '{}' at {}", name, span);
-                    self.error(format_error_with_context(
+                    self.error(format_error_with_code(
+                        ErrorCode::E201,
                         &base_msg,
                         self.source,
                         span.line,
@@ -459,7 +468,8 @@ impl<'a> TypeChecker<'a> {
                                 right_ty.name(),
                                 span
                             );
-                            self.error(format_error_with_context(
+                            self.error(format_error_with_code(
+                                ErrorCode::E212,
                                 &base_msg,
                                 self.source,
                                 span.line,
@@ -487,7 +497,8 @@ impl<'a> TypeChecker<'a> {
                                 right_ty.name(),
                                 span
                             );
-                            self.error(format_error_with_context(
+                            self.error(format_error_with_code(
+                                ErrorCode::E212,
                                 &base_msg,
                                 self.source,
                                 span.line,
@@ -507,7 +518,8 @@ impl<'a> TypeChecker<'a> {
                                 right_ty.name(),
                                 span
                             );
-                            self.error(format_error_with_context(
+                            self.error(format_error_with_code(
+                                ErrorCode::E212,
                                 &base_msg,
                                 self.source,
                                 span.line,
@@ -529,7 +541,8 @@ impl<'a> TypeChecker<'a> {
                                 expr_ty.name(),
                                 span
                             );
-                            self.error(format_error_with_context(
+                            self.error(format_error_with_code(
+                                ErrorCode::E213,
                                 &base_msg,
                                 self.source,
                                 span.line,
@@ -546,7 +559,8 @@ impl<'a> TypeChecker<'a> {
                                 expr_ty.name(),
                                 span
                             );
-                            self.error(format_error_with_context(
+                            self.error(format_error_with_code(
+                                ErrorCode::E213,
                                 &base_msg,
                                 self.source,
                                 span.line,
@@ -568,7 +582,8 @@ impl<'a> TypeChecker<'a> {
                             args.len(),
                             span
                         );
-                        self.error(format_error_with_context(
+                        self.error(format_error_with_code(
+                            ErrorCode::E204,
                             &base_msg,
                             self.source,
                             span.line,
@@ -589,7 +604,8 @@ impl<'a> TypeChecker<'a> {
                                     arg_ty.name(),
                                     span
                                 );
-                                self.error(format_error_with_context(
+                                self.error(format_error_with_code(
+                                    ErrorCode::E205,
                                     &base_msg,
                                     self.source,
                                     span.line,
@@ -606,7 +622,8 @@ impl<'a> TypeChecker<'a> {
                     sig.return_type
                 } else {
                     let base_msg = format!("Undefined function '{}' at {}", name, span);
-                    self.error(format_error_with_context(
+                    self.error(format_error_with_code(
+                        ErrorCode::E202,
                         &base_msg,
                         self.source,
                         span.line,
@@ -624,7 +641,8 @@ impl<'a> TypeChecker<'a> {
                             Type::F32
                         } else {
                             let base_msg = format!("Vector2 has no field '{}' at {}", field, span);
-                            self.error(format_error_with_context(
+                            self.error(format_error_with_code(
+                                ErrorCode::E215,
                                 &base_msg,
                                 self.source,
                                 span.line,
@@ -645,7 +663,8 @@ impl<'a> TypeChecker<'a> {
                     }
                     _ => {
                         let base_msg = format!("Type {} has no fields at {}", obj_ty.name(), span);
-                        self.error(format_error_with_context(
+                        self.error(format_error_with_code(
+                            ErrorCode::E209,
                             &base_msg,
                             self.source,
                             span.line,
