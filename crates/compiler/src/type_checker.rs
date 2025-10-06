@@ -39,6 +39,7 @@
 use crate::ast::*;
 use crate::error_code::ErrorCode;
 use crate::error_context::format_error_with_code;
+use crate::suggestions::find_similar_identifiers;
 use std::collections::HashMap;
 
 /// Type representation for FerrisScript's type system.
@@ -163,6 +164,27 @@ impl<'a> TypeChecker<'a> {
         None
     }
 
+    /// Get all variable names in scope (for suggestion purposes)
+    fn list_variables(&self) -> Vec<&str> {
+        let mut vars = Vec::new();
+        for scope in self.scopes.iter().rev() {
+            for name in scope.keys() {
+                vars.push(name.as_str());
+            }
+        }
+        vars
+    }
+
+    /// Get all function names (for suggestion purposes)
+    fn list_functions(&self) -> Vec<&str> {
+        self.functions.keys().map(|s| s.as_str()).collect()
+    }
+
+    /// Get all known type names (for suggestion purposes)
+    fn list_types() -> Vec<&'static str> {
+        vec!["i32", "f32", "bool", "String", "Vector2", "Node"]
+    }
+
     fn error(&mut self, message: String) {
         self.errors.push(message);
     }
@@ -171,25 +193,54 @@ impl<'a> TypeChecker<'a> {
         // Register global variables
         for var in &program.global_vars {
             let ty = if let Some(type_name) = &var.ty {
-                Type::from_string(type_name)
-            } else {
-                self.infer_expr(&var.value)
-            };
+                let parsed_ty = Type::from_string(type_name);
 
-            if ty == Type::Unknown {
-                let base_msg = format!(
-                    "Cannot infer type for global variable '{}' at {}",
-                    var.name, var.span
-                );
-                self.error(format_error_with_code(
-                    ErrorCode::E218,
-                    &base_msg,
-                    self.source,
-                    var.span.line,
-                    var.span.column,
-                    "Add an explicit type annotation (e.g., let name: type = value)",
-                ));
-            }
+                // If type is unknown and a type annotation was provided, report E203
+                if parsed_ty == Type::Unknown {
+                    let base_msg = format!("Unknown type '{}' at {}", type_name, var.span);
+
+                    // Find similar type names
+                    let candidates = Self::list_types();
+                    let suggestions = find_similar_identifiers(type_name, &candidates);
+
+                    let hint = if !suggestions.is_empty() {
+                        format!("Type not recognized. Did you mean '{}'?", suggestions[0])
+                    } else {
+                        "Type not recognized. Available types: i32, f32, bool, String, Vector2, Node".to_string()
+                    };
+
+                    self.error(format_error_with_code(
+                        ErrorCode::E203,
+                        &base_msg,
+                        self.source,
+                        var.span.line,
+                        var.span.column,
+                        &hint,
+                    ));
+                }
+
+                parsed_ty
+            } else {
+                let inferred = self.infer_expr(&var.value);
+
+                // Only report E218 if type inference failed AND no annotation was provided
+                if inferred == Type::Unknown {
+                    let base_msg = format!(
+                        "Cannot infer type for global variable '{}' at {}",
+                        var.name, var.span
+                    );
+                    self.error(format_error_with_code(
+                        ErrorCode::E218,
+                        &base_msg,
+                        self.source,
+                        var.span.line,
+                        var.span.column,
+                        "Add an explicit type annotation (e.g., let name: type = value)",
+                    ));
+                }
+
+                inferred
+            };
 
             self.declare_variable(var.name.clone(), ty.clone());
 
@@ -220,16 +271,76 @@ impl<'a> TypeChecker<'a> {
 
         // Register all functions first
         for func in &program.functions {
-            let param_types = func
+            let param_types: Vec<Type> = func
                 .params
                 .iter()
-                .map(|p| Type::from_string(&p.ty))
+                .map(|p| {
+                    let ty = Type::from_string(&p.ty);
+
+                    // Check for unknown parameter types
+                    if ty == Type::Unknown {
+                        let base_msg = format!(
+                            "Unknown type '{}' for parameter '{}' at {}",
+                            p.ty, p.name, func.span
+                        );
+
+                        let candidates = Self::list_types();
+                        let suggestions = find_similar_identifiers(&p.ty, &candidates);
+
+                        let hint = if !suggestions.is_empty() {
+                            format!("Type not recognized. Did you mean '{}'?", suggestions[0])
+                        } else {
+                            "Type not recognized. Available types: i32, f32, bool, String, Vector2, Node".to_string()
+                        };
+
+                        self.error(format_error_with_code(
+                            ErrorCode::E203,
+                            &base_msg,
+                            self.source,
+                            func.span.line,
+                            func.span.column,
+                            &hint,
+                        ));
+                    }
+
+                    ty
+                })
                 .collect();
 
             let return_type = func
                 .return_type
                 .as_ref()
-                .map(|s| Type::from_string(s))
+                .map(|s| {
+                    let ty = Type::from_string(s);
+
+                    // Check for unknown return types
+                    if ty == Type::Unknown {
+                        let base_msg = format!(
+                            "Unknown return type '{}' for function '{}' at {}",
+                            s, func.name, func.span
+                        );
+
+                        let candidates = Self::list_types();
+                        let suggestions = find_similar_identifiers(s, &candidates);
+
+                        let hint = if !suggestions.is_empty() {
+                            format!("Type not recognized. Did you mean '{}'?", suggestions[0])
+                        } else {
+                            "Type not recognized. Available types: i32, f32, bool, String, Vector2, Node".to_string()
+                        };
+
+                        self.error(format_error_with_code(
+                            ErrorCode::E203,
+                            &base_msg,
+                            self.source,
+                            func.span.line,
+                            func.span.column,
+                            &hint,
+                        ));
+                    }
+
+                    ty
+                })
                 .unwrap_or(Type::Void);
 
             self.functions.insert(
@@ -277,22 +388,52 @@ impl<'a> TypeChecker<'a> {
                 ..
             } => {
                 let declared_ty = if let Some(type_name) = ty {
-                    Type::from_string(type_name)
-                } else {
-                    self.infer_expr(value)
-                };
+                    let parsed_ty = Type::from_string(type_name);
 
-                if declared_ty == Type::Unknown {
-                    let base_msg = format!("Cannot infer type for variable '{}' at {}", name, span);
-                    self.error(format_error_with_code(
-                        ErrorCode::E218,
-                        &base_msg,
-                        self.source,
-                        span.line,
-                        span.column,
-                        "Add an explicit type annotation (e.g., let name: type = value)",
-                    ));
-                }
+                    // If type is unknown and a type annotation was provided, report E203
+                    if parsed_ty == Type::Unknown {
+                        let base_msg = format!("Unknown type '{}' at {}", type_name, span);
+
+                        // Find similar type names
+                        let candidates = Self::list_types();
+                        let suggestions = find_similar_identifiers(type_name, &candidates);
+
+                        let hint = if !suggestions.is_empty() {
+                            format!("Type not recognized. Did you mean '{}'?", suggestions[0])
+                        } else {
+                            "Type not recognized. Available types: i32, f32, bool, String, Vector2, Node".to_string()
+                        };
+
+                        self.error(format_error_with_code(
+                            ErrorCode::E203,
+                            &base_msg,
+                            self.source,
+                            span.line,
+                            span.column,
+                            &hint,
+                        ));
+                    }
+
+                    parsed_ty
+                } else {
+                    let inferred = self.infer_expr(value);
+
+                    // Only report E218 if type inference failed AND no annotation was provided
+                    if inferred == Type::Unknown {
+                        let base_msg =
+                            format!("Cannot infer type for variable '{}' at {}", name, span);
+                        self.error(format_error_with_code(
+                            ErrorCode::E218,
+                            &base_msg,
+                            self.source,
+                            span.line,
+                            span.column,
+                            "Add an explicit type annotation (e.g., let name: type = value)",
+                        ));
+                    }
+
+                    inferred
+                };
 
                 let value_ty = self.check_expr(value);
                 if !value_ty.can_coerce_to(&declared_ty) {
@@ -433,13 +574,27 @@ impl<'a> TypeChecker<'a> {
                     ty
                 } else {
                     let base_msg = format!("Undefined variable '{}' at {}", name, span);
+
+                    // Find similar variable names
+                    let candidates = self.list_variables();
+                    let suggestions = find_similar_identifiers(name, &candidates);
+
+                    let hint = if !suggestions.is_empty() {
+                        format!(
+                            "Variable must be declared before use. Did you mean '{}'?",
+                            suggestions[0]
+                        )
+                    } else {
+                        "Variable must be declared before use".to_string()
+                    };
+
                     self.error(format_error_with_code(
                         ErrorCode::E201,
                         &base_msg,
                         self.source,
                         span.line,
                         span.column,
-                        "Variable must be declared before use",
+                        &hint,
                     ));
                     Type::Unknown
                 }
@@ -622,13 +777,27 @@ impl<'a> TypeChecker<'a> {
                     sig.return_type
                 } else {
                     let base_msg = format!("Undefined function '{}' at {}", name, span);
+
+                    // Find similar function names
+                    let candidates = self.list_functions();
+                    let suggestions = find_similar_identifiers(name, &candidates);
+
+                    let hint = if !suggestions.is_empty() {
+                        format!(
+                            "Function must be declared before use. Did you mean '{}'?",
+                            suggestions[0]
+                        )
+                    } else {
+                        "Function must be declared before use".to_string()
+                    };
+
                     self.error(format_error_with_code(
                         ErrorCode::E202,
                         &base_msg,
                         self.source,
                         span.line,
                         span.column,
-                        "Function must be declared before use",
+                        &hint,
                     ));
                     Type::Unknown
                 }
