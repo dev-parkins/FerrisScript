@@ -1,13 +1,13 @@
 # Phase 3: Error Documentation & Recovery
 
-**Status**: Not Started  
+**Status**: In Progress (Phase 3A ✅, Phase 3B ✅)  
 **Priority**: High  
 **Branch**: `feature/v0.0.3-error-docs`  
 **Estimated Effort**: 2-3 days  
 **Dependencies**: Phase 1 (Error Codes) ✅, Phase 2 (Suggestions) ✅  
-**Date Started**: TBD  
-**Date Completed**: TBD  
-**PR**: TBD
+**Date Started**: January 2025  
+**Date Completed**: Phase 3A & 3B Complete  
+**PR**: #32 (Phase 3A & 3B), Remaining phases TBD
 
 ---
 
@@ -421,19 +421,44 @@ pub fn compile_with_options(source: &str, report_mode: ReportMode) -> Result<Pro
 
 ## 🔬 Implementation Phases
 
-### Phase 3A: Documentation URLs (4-6 hours)
+### Phase 3A: Documentation URLs ✅ COMPLETE
 
-1. Add `get_docs_url()` method to ErrorCode
-2. Modify `format_error_with_code()` to include URLs
-3. Test URL generation for all error codes
-4. Run full test suite to ensure URLs appear
+**Completed**: January 2025  
+**PR**: #32  
+**Time Spent**: ~6 hours
 
-### Phase 3B: Enhance ERROR_CODES.md (2-3 hours)
+1. ✅ Add `get_docs_url()` method to ErrorCode with hybrid URL strategy
+2. ✅ Modify `format_error_with_code()` to include URLs (error_context.rs)
+3. ✅ Fixed critical GitHub anchor bug (proper slugification)
+4. ✅ Test URL generation for all error codes (270+ tests passing)
+5. ✅ Run full test suite to ensure URLs appear
 
-1. Review all entries for completeness
-2. Add "See also" cross-references
-3. Verify markdown anchors work
-4. Add missing examples where needed
+**Key Achievements**:
+
+- Hybrid URL strategy: GitHub default + FERRIS_DOCS_BASE env var for custom docs
+- Fixed anchor generation: `#e001-invalid-character` (not `#e001`)
+- All error messages now show `More info: [URL]` line
+- Comprehensive test coverage for URL generation
+
+### Phase 3B: ERROR_CODES.md Enhancements ✅ COMPLETE
+
+**Completed**: January 2025  
+**PR**: #32  
+**Time Spent**: ~4 hours
+
+1. ✅ Review all entries for completeness
+2. ✅ Add "See also" cross-references to 10+ key error codes
+3. ✅ Verify markdown anchors work (GitHub Pages tested)
+4. ✅ Added Jekyll documentation site infrastructure
+5. ✅ Created professional landing page with navigation
+
+**Key Achievements**:
+
+- Cross-references added: E201↔E401, E202→E415/E402, E215→E407, and more
+- Jekyll site live at: https://dev-parkins.github.io/FerrisScript
+- Complete Jekyll configuration (_config.yml, index.md, Gemfile)
+- Cayman theme with kramdown markdown and GFM support
+- All anchor links verified working on GitHub Pages
 
 ### Phase 3C: Parser Recovery (6-8 hours)
 

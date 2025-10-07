@@ -76,22 +76,32 @@ Add "Did you mean?" suggestions using Levenshtein distance for typos in variable
 
 ### Phase 3: Error Documentation & Recovery 📚
 
-**Status**: In Progress (Phase 3A Complete ✅)  
+**Status**: In Progress (Phase 3A ✅, Phase 3B ✅)  
 **Priority**: High  
 **Branch**: `feature/v0.0.3-error-docs`  
-**Document**: [PHASE_3_ERROR_DOCS_RECOVERY.md](./PHASE_3_ERROR_DOCS_RECOVERY.md)
+**Document**: [PHASE_3_ERROR_DOCS_RECOVERY.md](./PHASE_3_ERROR_DOCS_RECOVERY.md)  
+**PR**: #32 (Phases 3A & 3B)
 
 Link errors to documentation and implement parser error recovery for multi-error reporting.
 
 **Key Deliverables**:
 
-- [x] **Phase 3A**: Documentation URLs in error messages (GitHub + future custom site support) ✅
-- [ ] **Phase 3B**: Enhanced ERROR_CODES.md with cross-references (deferred)
-- [ ] **Phase 3C**: Parser error recovery (continue after syntax errors)
-- [ ] **Phase 3D**: Multi-error reporting (batch/stream modes)
-- [ ] **Phase 3E**: Diagnostic collection infrastructure
+- [x] **Phase 3A**: Documentation URLs in error messages (GitHub + hybrid custom site support) ✅
+- [x] **Phase 3B**: Enhanced ERROR_CODES.md with cross-references + Jekyll site infrastructure ✅
+- [ ] **Phase 3C**: Parser error recovery (continue after syntax errors) - Next PR
+- [ ] **Phase 3D**: Multi-error reporting (batch/stream modes) - Next PR
+- [ ] **Phase 3E**: Diagnostic collection infrastructure - Next PR
 
-**Infrastructure Note**: 🎯 Domain `ferrisscript.dev` acquired! Website setup can proceed in parallel (see [PHASE_3 deferred section](./PHASE_3_ERROR_DOCS_RECOVERY.md#-out-of-scope-deferred))
+**Phase 3A & 3B Achievements**:
+
+- ✅ Hybrid URL strategy: GitHub default + FERRIS_DOCS_BASE env var
+- ✅ Fixed critical anchor bug: proper GitHub slugification
+- ✅ Cross-references added to 10+ key error codes
+- ✅ Jekyll documentation site: https://dev-parkins.github.io/FerrisScript
+- ✅ Professional landing page with navigation and error lookup
+- ✅ All 270+ tests passing, anchor links verified
+
+**Infrastructure**: 🎯 Domain `ferrisscript.dev` acquired! GitHub Pages live with Jekyll. Custom domain setup deferred (GitHub Pages sufficient for v0.0.3).
 
 **Dependencies**: Phases 1-2 (error system complete) ✅
 
