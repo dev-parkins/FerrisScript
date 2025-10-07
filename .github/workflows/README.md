@@ -594,7 +594,7 @@ runs-on: ubuntu-latest
 **Check:**
 
 1. Branch matches trigger pattern (main, develop, or PR to those branches)
-2. File paths match (CI skips docs/**,**.md, LICENSE, .gitignore on push)
+2. File paths match (CI skips docs/**, **.md, LICENSE, .gitignore on push)
 3. Workflow file has no YAML syntax errors
 4. Feature branches should NOT trigger push events (PRs only)
 
