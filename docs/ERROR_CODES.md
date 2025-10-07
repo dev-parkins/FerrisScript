@@ -80,6 +80,8 @@ Error[E001]: Invalid character
 - Remove or replace invalid characters
 - Ensure proper file encoding (UTF-8)
 
+**See Also**: [E002](#e002-unterminated-string), [E003](#e003-invalid-number-format)
+
 **Related Codes**: E002, E003
 
 ---
@@ -114,6 +116,8 @@ Error[E002]: Unterminated string
 - Add the missing closing quote: `"Hello world"`
 - For multi-line text, use multiple string concatenations
 - Escape internal quotes if needed
+
+**See Also**: [E001](#e001-invalid-character)
 
 **Related Codes**: E001
 
@@ -189,6 +193,8 @@ Error[E100]: Unexpected token
 - Add missing punctuation (semicolons, commas, braces)
 - Check syntax against FerrisScript grammar
 - Ensure proper statement and expression formatting
+
+**See Also**: [E101](#e101-invalid-top-level-item), [E102](#e102-expected-expression)
 
 **Related Codes**: E101, E102
 
@@ -697,6 +703,8 @@ Error[E200]: Type mismatch
 - Convert value to correct type if needed
 - Ensure type annotations match actual types
 
+**See Also**: [E219](#e219-incompatible-types-in-assignment), [E205](#e205-incorrect-argument-type), [E211](#e211-condition-must-be-boolean)
+
 **Related Codes**: E219, E205
 
 ---
@@ -734,6 +742,8 @@ Error[E201]: Undefined variable 'y'
 - Check for typos in variable name
 - Ensure variable is in scope
 
+**See Also**: [E401](#e401-undefined-variable) (runtime version)
+
 **Related Codes**: E401
 
 ---
@@ -770,6 +780,8 @@ Error[E202]: Undefined function 'add'
 - Define the function before calling
 - Check for typos in function name
 - Ensure function is declared at top level
+
+**See Also**: [E415](#e415-undefined-function) (runtime version), [E402](#e402-unknown-built-in-function)
 
 **Related Codes**: E415
 
@@ -1040,6 +1052,8 @@ Error[E215]: Field not found
 - Use valid fields for type
 - For Vector2: only `x` and `y` are valid
 
+**See Also**: [E407](#e407-vector2-has-no-field) (runtime version), [E103](#e103-expected-field-name), [E209](#e209-invalid-field-access)
+
 **Related Codes**: E407, E103
 
 ---
@@ -1150,6 +1164,8 @@ Error[E400]: Cannot assign to immutable variable 'x'
 - Or don't reassign: use a new variable
 - Check if mutation is necessary
 
+**See Also**: [E405](#e405-cannot-assign-to-field-of-immutable-variable)
+
 **Related Codes**: E405
 
 ---
@@ -1183,6 +1199,8 @@ Error[E401]: Undefined variable: undefined_var
 - Define the variable first
 - Check variable scope
 - Verify variable name spelling
+
+**See Also**: [E201](#e201-undefined-variable) (compile-time version)
 
 **Related Codes**: E201
 
@@ -1384,6 +1402,8 @@ Error[E407]: Vector2 has no field 'z'
 - Use valid fields: `x` or `y`
 - Check field name spelling
 - Refer to Vector2 documentation
+
+**See Also**: [E215](#e215-field-not-found) (compile-time version), [E406](#e406-cannot-assign-value-to-vector2-field)
 
 **Related Codes**: E215
 

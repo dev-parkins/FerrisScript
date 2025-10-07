@@ -1,0 +1,55 @@
+# Cross-reference additions for ERROR_CODES.md
+
+## Suggested cross-references:
+
+E001 (Invalid Character) → E002, E003
+E002 (Unterminated String) → E001  
+E003 (Invalid Number Format) → E001
+
+E100 (Unexpected Token) → E101, E102
+E101 (Invalid Top-Level Item) → E100, E102
+E102 (Expected Expression) → E100, E103
+E103 (Expected Field Name) → E102, E215
+E104 (Expected Statement) → E100, E102
+E105 (Expected Type) → E110, E218
+E106 (Expected Identifier) → E109
+E107 (Expected Block) → E100
+E108 (Expected Parameter) → E111
+E109 (Invalid Identifier) → E106
+E110 (Invalid Type) → E105, E218
+E111 (Invalid Parameter) → E108
+E112 (Invalid Return Type) → E110
+E113 (Invalid Operator) → E100
+
+E200 (Type Mismatch) → E219, E205
+E201 (Undefined Variable) → E401
+E202 (Undefined Function) → E415
+E204 (Wrong Number of Arguments) → E416
+E205 (Incorrect Argument Type) → E200
+E209 (Invalid Field Access) → E215, E408
+E211 (Condition Must Be Boolean) → E200
+E212 (Binary Operation Type Error) → E200
+E213 (Unary Operation Type Error) → E414
+E215 (Field Not Found) → E407, E103
+E218 (Type Annotation Required) → E105, E110
+E219 (Incompatible Types in Assignment) → E200
+
+E400 (Cannot Assign to Immutable Variable) → E405
+E401 (Undefined Variable) → E201
+E402 (Unknown Built-in Function) → E202, E415
+E403 (Invalid Assignment Target)
+E404 (Cannot Set Self Properties) → E410, E417
+E405 (Cannot Assign to Field of Immutable Variable) → E400
+E406 (Cannot Assign Value to Vector2 Field) → E200, E407
+E407 (Vector2 Has No Field) → E215
+E408 (Cannot Access Field on Non-Object) → E209
+E409 (Property Is Not a Vector2) → E200
+E410 (Cannot Get Self Properties) → E404, E417
+E411 (Nested Field Assignment Not Yet Implemented) → E412
+E412 (Complex Field Assignment Not Yet Implemented) → E411
+E413 (Division by Zero)
+E414 (Cannot Negate Non-Numeric Value) → E213
+E415 (Undefined Function) → E202, E402
+E416 (Wrong Number of Arguments) → E204
+E417 (Cannot Access Self Properties) → E404, E410
+E418 (Assignment Expressions Should Be Statements)
