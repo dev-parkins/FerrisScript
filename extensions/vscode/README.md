@@ -4,6 +4,22 @@ Syntax highlighting and code snippets for FerrisScript - a Rust-inspired scripti
 
 ## Features
 
+### Code Completion ✨ NEW in v0.0.3
+
+- **Keyword Completion**: Auto-complete FerrisScript keywords as you type
+  - Control flow: `if`, `else`, `while`, `return`
+  - Declarations: `fn`, `let`, `mut`
+  - Literals: `true`, `false`
+- **Type Completion**: Auto-complete type names in type positions
+  - Primitives: `i32`, `f32`, `bool`, `String`
+  - Godot types: `Vector2`, `Node`, `void`
+- **Function Completion**: Auto-complete built-in functions
+  - `print(message: String)` with parameter hints
+- **Context-Aware**: Shows relevant completions based on cursor position
+  - After `:` → shows type completions
+  - At statement start → shows statement-level keywords
+  - In expressions → shows all keywords and functions
+
 ### Syntax Highlighting
 
 - **Keywords**: `fn`, `let`, `mut`, `if`, `else`, `while`, `return`, `true`, `false`
@@ -42,9 +58,25 @@ The extension will be available on the VS Code Marketplace after v0.0.2 release.
 
 1. Create a file with `.ferris` extension
 2. Start typing FerrisScript code
-3. Use snippets by typing the prefix and pressing Tab
+3. Use code completion (Ctrl+Space) or snippets (type prefix and press Tab)
 
-### Example
+### Example: Code Completion
+
+```ferrisscript
+// Type 'let' and press Tab - completion expands to full declaration
+let speed: f32 = 100.0;
+
+// Type 'fn' and press Tab - completion creates function template
+fn update(delta: f32) {
+    // Type 'print' - completion shows function signature
+    print("Delta: " + delta);
+}
+
+// After ':' in type position - only types are suggested
+let position: Vector2 = Vector2(0.0, 0.0);
+```
+
+### Example: Snippets
 
 ```ferrisscript
 // Type '_ready' and press Tab
@@ -64,15 +96,19 @@ fn _process(delta: f32) {
 
 ## Known Limitations
 
-- **No IntelliSense yet**: Completion, hover, and go-to-definition coming in v0.0.5 with LSP
-- **No real-time error checking**: Syntax errors shown after compilation only
+- **Basic completion only**: Completion limited to keywords, types, and built-in functions (no symbol resolution yet)
+- **No hover tooltips yet**: Type information and documentation on hover coming in Phase 5
+- **No real-time error checking**: Syntax errors shown after compilation only (problem panel integration coming in Phase 5)
+- **No go-to-definition**: Full IntelliSense features coming in v0.0.5 with LSP
 - **Basic highlighting only**: Semantic highlighting (context-aware colors) coming with LSP
 
 ## Roadmap
 
-- **v0.0.2** (Current): Basic syntax highlighting and snippets ✅
-- **v0.0.3**: Enhanced diagnostics, error codes
-- **v0.0.5**: Language Server Protocol (LSP) with IntelliSense
+- **v0.0.2**: Basic syntax highlighting and snippets ✅
+- **v0.0.3** (Current): Enhanced diagnostics, code completion, hover tooltips ⏳
+  - Phase 4: Code completion ✅
+  - Phase 5: Hover tooltips and problem panel (in progress)
+- **v0.0.5**: Language Server Protocol (LSP) with full IntelliSense
 - **v0.1.0**: Full editor integration with debugging support
 
 ## Contributing

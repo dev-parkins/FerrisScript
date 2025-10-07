@@ -27,6 +27,10 @@
     "scripting"
   ],
   "icon": "icon.png",
+  "activationEvents": [
+    "onLanguage:ferrisscript"
+  ],
+  "main": "./out/extension.js",
   "contributes": {
     "languages": [
       {
@@ -54,5 +58,19 @@
         "path": "./snippets/ferrisscript.json"
       }
     ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "^18.19.0",
+    "typescript": "^5.3.0",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0"
   }
 }

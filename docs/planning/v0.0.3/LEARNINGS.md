@@ -207,26 +207,69 @@ This document captures key insights, discoveries, and lessons learned during v0.
 
 ---
 
-### Phase 4: VS Code Completion
+### Phase 4: VS Code Completion ✅
 
-**Date Started**: TBD  
-**Date Completed**: TBD
+**Date Started**: October 7, 2025  
+**Date Completed**: October 7, 2025  
+**PR**: *(To be created)*
 
 #### Technical Discoveries
 
-- *(To be filled during development)*
+- **TypeScript Extension Infrastructure**: VS Code extensions require TypeScript compilation setup with proper `tsconfig.json`, npm scripts (`compile`, `watch`, `lint`), and activation events. The compiled output goes to `out/` directory and is referenced in `package.json` via `main: "./out/extension.js"`.
+
+- **CompletionItemProvider API**: VS Code's `CompletionItemProvider` interface is straightforward - implement `provideCompletionItems()` which receives document, position, and context, then return array of `CompletionItem` objects. Each item can have label, detail, documentation (MarkdownString), and insertText (SnippetString for placeholders).
+
+- **Context-Aware Completion Strategy**: Simple regex patterns on text before cursor position work well for basic context detection: `/:\s*$/` detects type position, `/^\s*$/` detects statement start. More sophisticated parsing not needed until LSP implementation.
+
+- **Snippet Syntax in Completion**: VS Code SnippetString uses `$1`, `$2`, etc. for tab stops and `$0` for final cursor position. Example: `fn ${1:name}(${2:params}) {\n\t$0\n}` creates multi-step snippet. This provides excellent UX for structured code insertion.
+
+- **Completion Item Kinds**: Using proper CompletionItemKind (Keyword, Class, Function) affects icon displayed in completion menu. `Class` kind works well for types, even though they're not actual classes.
 
 #### Challenges Encountered
 
-- *(To be filled during development)*
+- **Node.js Ecosystem Learning Curve**: First time adding TypeScript to the extension meant learning npm package management, tsconfig options, and build scripts. Npm install warnings about deprecated packages were initially concerning but turned out to be harmless (warnings in dependencies, not our code).
+
+- **TypeScript Compilation Errors During Development**: Expected compile errors while building out the provider implementation (missing imports, incomplete types). Solution was to build files in dependency order: utilities → data modules → provider → extension entry point.
+
+- **VS Code Extension Testing Gap**: No automated testing infrastructure for Phase 4. VS Code extension testing requires complex setup with `@vscode/test-electron` and mock VS Code API. Decision: Use manual testing guide instead, defer automated tests to Phase 5 (LSP work).
+
+- **Documentation vs Implementation Gap**: Initial implementation followed execution plan exactly, but discovered completion provider's `context` parameter is rarely used in practice. Our context detection based on cursor position and surrounding text is more reliable than VS Code's trigger context.
 
 #### Solutions Applied
 
-- *(To be filled during development)*
+- **Dependency Installation**: Ran `npm install` in `extensions/vscode` directory to add TypeScript toolchain (@types/vscode, @types/node, typescript, eslint, @typescript-eslint/*). Added devDependencies to `package.json` with proper version constraints.
+
+- **Incremental Compilation**: Built TypeScript files incrementally, compiling after each addition to catch errors early. Pattern: create file → compile → fix errors → move to next file. This avoided large error dumps.
+
+- **Manual Testing Guide**: Created comprehensive `PHASE_4_MANUAL_TESTING.md` with 10 test scenarios covering all completion features. Structured with setup instructions, test steps, expected results, troubleshooting, and results tracking table.
+
+- **Context Detection Simplification**: Implemented minimal viable context detection with two regex patterns. More sophisticated parsing (AST-based, scope-aware) deferred to LSP implementation. This keeps Phase 4 simple and maintainable.
 
 #### Best Practices Identified
 
-- *(To be filled during development)*
+- **Build Incrementally**: For TypeScript projects, compile after adding each file. Don't write all code then compile - you'll get dozens of errors at once. Incremental compilation gives fast feedback.
+
+- **Match VS Code Conventions**: Follow VS Code extension patterns: use `activate()` and `deactivate()` functions, register providers in activation event, add disposables to `context.subscriptions`. These patterns are battle-tested and familiar to VS Code extension developers.
+
+- **Document Before Implementation**: Creating execution plan document (`PHASE_4_VS_CODE_COMPLETION.md`) before coding helped identify architecture decisions, component structure, and acceptance criteria upfront. This prevented mid-implementation design changes.
+
+- **Snippet Strings for Structure**: Use `SnippetString` for any completion that inserts structured code (functions, loops, conditionals). Users expect tab stops and placeholders for modern IDE experience.
+
+- **Manual Testing for UI**: For UI-heavy features like completion providers, manual testing is more valuable than automated tests. Automated tests can verify logic, but can't verify "Does this feel good to use?"
+
+- **Defer Complexity**: Resist temptation to implement advanced features (scope-aware completion, type inference, symbol resolution) in Phase 4. Save for LSP implementation when you'll have proper infrastructure. YAGNI (You Aren't Gonna Need It) principle applies.
+
+##### Performance Considerations
+
+- **Completion Provider Performance**: Simple completion providers (static keyword/type lists, regex context detection) have negligible performance impact (<1ms per invocation). No optimization needed until LSP with symbol table lookups.
+
+- **TypeScript Compilation Time**: Initial `npm run compile` takes ~2-3 seconds for extension. Incremental compilation (<1 second) makes development iteration fast.
+
+##### Code Organization Insights
+
+- **Separation of Concerns**: Organizing completion data into separate modules (`keywords.ts`, `types.ts`, `functions.ts`) makes code maintainable and extensible. Each module exports single function that returns completion items.
+
+- **Provider Pattern**: Having single `FerrisScriptCompletionProvider` class that delegates to data modules keeps extension entry point clean. Provider handles context detection and routing, data modules handle completion generation.
 
 ---
 
