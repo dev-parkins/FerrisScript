@@ -50,17 +50,20 @@ New-Item -ItemType File -Path "test_completion.ferris" -Force
 ### Test 1: Keyword Completion at Statement Start
 
 **Steps**:
+
 1. Open `test_completion.ferris`
 2. Type `l` at the start of a line
 3. Press `Ctrl+Space` to trigger completion
 
 **Expected Results**:
+
 - [ ] Completion menu appears
 - [ ] `let` appears in suggestions
 - [ ] `let` has detail text: "immutable variable declaration"
 - [ ] Documentation shows example usage
 
 **Test Code**:
+
 ```ferrisscript
 l
 ```
@@ -70,15 +73,18 @@ l
 ### Test 2: Function Declaration Snippet
 
 **Steps**:
+
 1. Type `fn` at statement start
 2. Select `fn` from completion menu or press Tab
 
 **Expected Results**:
+
 - [ ] Snippet expands to: `fn name(params) { ... }`
 - [ ] Cursor is at `name` placeholder
 - [ ] Pressing Tab moves to `params` placeholder
 
 **Test Code**:
+
 ```ferrisscript
 fn
 ```
@@ -88,15 +94,18 @@ fn
 ### Test 3: Type Completion After Colon
 
 **Steps**:
-1. Type `let x: `
+
+1. Type `let x:`
 2. Press `Ctrl+Space` or just type
 
 **Expected Results**:
+
 - [ ] Only type completions appear (no keywords)
 - [ ] Shows: `i32`, `f32`, `bool`, `String`, `Vector2`, `Node`, `void`
 - [ ] Each type has helpful documentation
 
 **Test Code**:
+
 ```ferrisscript
 let x: 
 ```
@@ -106,15 +115,18 @@ let x:
 ### Test 4: Function Completion in Expression
 
 **Steps**:
+
 1. Type `pr` inside a function body
 2. Press `Ctrl+Space`
 
 **Expected Results**:
+
 - [ ] `print` appears in suggestions
 - [ ] Detail shows: `print(message: String) -> void`
 - [ ] Selecting `print` expands to: `print($0)` with cursor inside parentheses
 
 **Test Code**:
+
 ```ferrisscript
 fn test() {
     pr
@@ -126,19 +138,23 @@ fn test() {
 ### Test 5: Context-Aware Completion (Statement vs Expression)
 
 **Steps**:
+
 1. Type `i` at statement start
 2. Note suggestions
-3. Type `i` inside an expression (e.g., after `let x = `)
+3. Type `i` inside an expression (e.g., after `let x =`)
 4. Note suggestions
 
 **Expected Results - Statement Start**:
+
 - [ ] Shows: `if`, `while`, `return` (statement-level keywords)
 
 **Expected Results - Expression Context**:
+
 - [ ] Shows: `if`, `true`, `false` (expression keywords)
 - [ ] Does NOT show `fn`, `let` (statement-only)
 
 **Test Code**:
+
 ```ferrisscript
 i
 
@@ -152,15 +168,18 @@ fn test() {
 ### Test 6: Mut Keyword Completion
 
 **Steps**:
+
 1. Type `let mu` at statement start
 2. Press `Ctrl+Space`
 
 **Expected Results**:
+
 - [ ] `mut` appears in suggestions
 - [ ] Detail shows: "mutable variable modifier"
 - [ ] Documentation explains mutable variables
 
 **Test Code**:
+
 ```ferrisscript
 let mu
 ```
@@ -170,15 +189,18 @@ let mu
 ### Test 7: Boolean Literal Completion
 
 **Steps**:
+
 1. Type `let is_ready: bool = tr` in a file
 2. Press `Ctrl+Space`
 
 **Expected Results**:
+
 - [ ] `true` appears in suggestions
 - [ ] `false` also available
 - [ ] Both have documentation
 
 **Test Code**:
+
 ```ferrisscript
 let is_ready: bool = tr
 ```
@@ -188,15 +210,18 @@ let is_ready: bool = tr
 ### Test 8: While Loop Snippet
 
 **Steps**:
+
 1. Type `wh` at statement start
 2. Select `while` from completion
 
 **Expected Results**:
+
 - [ ] Snippet expands to: `while condition { ... }`
 - [ ] Cursor is at `condition` placeholder
 - [ ] Pressing Tab moves inside loop body
 
 **Test Code**:
+
 ```ferrisscript
 wh
 ```
@@ -206,15 +231,18 @@ wh
 ### Test 9: Return Statement Completion
 
 **Steps**:
+
 1. Inside a function, type `ret`
 2. Press `Ctrl+Space`
 
 **Expected Results**:
+
 - [ ] `return` appears in suggestions
 - [ ] Snippet expands to: `return $0;`
-- [ ] Cursor is positioned after `return `
+- [ ] Cursor is positioned after `return`
 
 **Test Code**:
+
 ```ferrisscript
 fn get_value() -> i32 {
     ret
@@ -226,15 +254,18 @@ fn get_value() -> i32 {
 ### Test 10: Godot Type Completion
 
 **Steps**:
+
 1. Type `let pos: V` after a colon
 2. Press `Ctrl+Space`
 
 **Expected Results**:
+
 - [ ] `Vector2` appears in suggestions
 - [ ] Detail shows: "Godot 2D vector type"
 - [ ] Documentation mentions `x` and `y` fields
 
 **Test Code**:
+
 ```ferrisscript
 let pos: V
 ```
@@ -246,6 +277,7 @@ let pos: V
 ### Issue: Completion Not Triggering
 
 **Solution**:
+
 - Verify extension is activated: Check "Output" → "Extension Host" for errors
 - Reload VS Code window: `Ctrl+Shift+P` → "Reload Window"
 - Ensure file has `.ferris` extension
@@ -253,6 +285,7 @@ let pos: V
 ### Issue: No Type Completions After Colon
 
 **Solution**:
+
 - Check context detection logic in `src/utils/context.ts`
 - Verify regex pattern `/:\s*$/` matches your cursor position
 - Add space after colon if needed
@@ -260,6 +293,7 @@ let pos: V
 ### Issue: Extension Not Found
 
 **Solution**:
+
 - Verify extension copied to correct folder:
   - Windows: `%USERPROFILE%\.vscode\extensions\ferrisscript-0.1.0`
   - Linux/macOS: `~/.vscode/extensions/ferrisscript-0.1.0`
@@ -306,6 +340,7 @@ let pos: V
 ---
 
 **Next Steps After Testing**:
+
 1. If all tests pass → Proceed to create PR
 2. If issues found → Document in GitHub issue, fix, retest
 3. Update Phase 4 status in `docs/planning/v0.0.3/README.md`
