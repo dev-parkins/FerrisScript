@@ -22,6 +22,7 @@ When typing in an expression context (e.g., `let x = i`), statement-level keywor
 **Root Cause**:
 
 In `src/completion/provider.ts`, the Expression context case returns:
+
 ```typescript
 return [
     ...getKeywordCompletions(false),  // false = include ALL keywords
@@ -34,6 +35,7 @@ The `statementLevelOnly` parameter only filters when `true`. When `false`, it in
 **Language Semantics**:
 
 In FerrisScript, `fn` and `let` are **only valid at statement level**. They cannot appear in expression contexts. For example:
+
 - ❌ Invalid: `let x = fn test() {}`
 - ❌ Invalid: `let y = let z`
 - ✅ Valid: `if true { ... }` (if can be used in expressions for ternary-like behavior)
@@ -43,6 +45,7 @@ In FerrisScript, `fn` and `let` are **only valid at statement level**. They cann
 **FIX** - Filter out statement-only keywords in expression context:
 
 1. **Option A**: Add filtering logic in `provider.ts`:
+
 ```typescript
 case CompletionContext.Expression:
     const keywordItems = getKeywordCompletions(false);
@@ -57,6 +60,7 @@ case CompletionContext.Expression:
 ```
 
 2. **Option B**: Add new parameter to `getKeywordCompletions()`:
+
 ```typescript
 // In keywords.ts
 export function getKeywordCompletions(
@@ -90,6 +94,7 @@ When typing `let is_ready: bool = tr`, only `true` appears in completions. User 
 This is **NOT a bug** - it's correct VS Code behavior. The completion provider correctly returns both `true` and `false`. However, VS Code's built-in completion filtering automatically filters suggestions based on the prefix typed.
 
 When user types `tr`:
+
 - ✅ `true` matches prefix "tr" → shown
 - ❌ `false` does NOT match prefix "tr" → hidden
 
@@ -104,6 +109,7 @@ When user types `tr`:
 **NO FIX NEEDED** - Update testing documentation to clarify this is expected behavior.
 
 Update `PHASE_4_MANUAL_TESTING.md`:
+
 ```markdown
 **Expected Results**:
 
@@ -139,6 +145,7 @@ if (/:\s*$/.test(beforeCursor)) {
 This regex `/:\s*$/` only matches if the line **ends with** colon + optional whitespace. When user types `let pos: V`, the line is `let pos: V`, which does NOT match because there's a "V" after the colon.
 
 **Flow**:
+
 1. User types `let pos: V`
 2. Regex test fails (line doesn't end with colon)
 3. Falls through to Expression context
@@ -164,6 +171,7 @@ if (/:\s*\w*$/.test(beforeCursor)) {
 ```
 
 **Explanation**:
+
 - `\w*` matches zero or more word characters (letters, digits, underscore)
 - This will match:
   - `let x: |` (colon + space + cursor)
@@ -173,6 +181,7 @@ if (/:\s*\w*$/.test(beforeCursor)) {
 
 **Testing**:
 After fix, test:
+
 1. `let pos: |` → shows types ✅
 2. `let pos: V|` → shows Vector2 ✅
 3. `let pos: i|` → shows i32 ✅
@@ -245,6 +254,7 @@ Copy-Item -Recurse out $dest\out
 ```
 
 Then retest:
+
 - Test 5: Verify `fn`/`let` don't appear in expression context
 - Test 7: Update test documentation (no code changes needed)
 - Test 10: Verify `Vector2` appears when typing `let pos: V`
@@ -258,14 +268,17 @@ Then retest:
 Do you want to:
 
 **Option A**: Fix all issues before merging Phase 4 (~20 minutes)
+
 - Pros: Clean, complete implementation
 - Cons: Slight delay
 
 **Option B**: Fix only Issue #3, defer Issue #1
+
 - Pros: Faster merge (5 minutes)
 - Cons: Statement keywords still pollute expression completions
 
 **Option C**: Merge as-is, fix in Phase 5
+
 - Pros: Immediate merge
 - Cons: Type completion broken (Issue #3 is critical)
 

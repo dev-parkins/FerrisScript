@@ -146,14 +146,14 @@ fn test() {
 
 **Expected Results - Statement Start**:
 
-- [X] Shows: `if`, `ifelse` 
+- [X] Shows: `if`, `ifelse`
   - (currently only these are shown; `while`, `return` are missing)
 
 **Expected Results - Expression Context**:
 
 - [X] Shows: `if`, `else`, `mut`, `true`, `false` (expression keywords)
 - [X] Does NOT show `fn`, `let`, `while`, `return` (statement-only keywords filtered out)
-- [X] Shows functions like `print` 
+- [X] Shows functions like `print`
 
 **Note**: Statement-only keywords (`fn`, `let`, `while`, `return`) are now correctly filtered out in expression context since they are syntactically invalid in expressions.
 
@@ -205,6 +205,7 @@ let mu
 - [X] Both have documentation
 
 **Note**: VS Code automatically filters completions by prefix. This is expected behavior:
+
 - Type `tr` → only `true` shows (matches prefix)
 - Type `f` or `fa` → only `false` shows (matches prefix)
 - Type nothing or `Ctrl+Space` → both show
