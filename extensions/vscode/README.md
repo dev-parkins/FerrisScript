@@ -151,7 +151,7 @@ When adding new types to the FerrisScript language, update the VS Code completio
 3. Rebuild extension: `npm run compile`
 4. Test completion in VS Code
 
-**Important**: VS Code completion types must stay synchronized with compiler types. See [TYPE_SYNC.md](./TYPE_SYNC.md) for:
+**Important**: VS Code completion types must stay synchronized with compiler types. See [VSCODE_TYPE_SYNCHRONIZATION.md](../../docs/planning/v0.0.3/VSCODE_TYPE_SYNCHRONIZATION.md) for:
 
 - Current synchronization requirements
 - Manual update process
@@ -162,6 +162,30 @@ When adding new types to the FerrisScript language, update the VS Code completio
 **Activation**: The extension auto-activates when a `.ferris` file is opened. VS Code generates activation events from the `contributes.languages` section in `package.json`, so no explicit `activationEvents` array is needed (as of VS Code 1.75+).
 
 **Build Process**: TypeScript code in `src/` compiles to JavaScript in `out/`. The extension entry point is `out/extension.js`.
+
+### Best Practices (As-of October 2025, VS Code 1.75+)
+
+**Note**: VS Code extension development practices evolve with new releases. The recommendations below are current as of **VS Code 1.75.0** (October 2025). Always check the [VS Code Extension API documentation](https://code.visualstudio.com/api) for the latest best practices.
+
+**Current Recommendations**:
+
+- **No Explicit `activationEvents`**: VS Code 1.75+ auto-generates activation events from `contributes` declarations. Explicit `activationEvents` arrays are redundant and trigger deprecation warnings.
+
+- **Use `@vscode/vsce` for Packaging**: The new scoped package `@vscode/vsce` replaces the legacy `vsce` package for extension packaging and publishing.
+
+- **TypeScript 5.x+**: Use TypeScript 5.0 or later for modern language features and improved type checking. Target ES2020 or later for broad compatibility.
+
+- **ESLint with TypeScript**: Use `@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser` for consistent code quality.
+
+- **Extension Testing**: Use `@vscode/test-electron` for automated extension testing (as of 1.70+). The legacy `vscode-test` package is deprecated.
+
+**Version-Specific Notes**:
+
+- **VS Code 1.75+**: Auto-activation from `contributes` (removes need for explicit `activationEvents`)
+- **VS Code 1.70+**: New testing framework (`@vscode/test-electron`)
+- **VS Code 1.60+**: Native support for TypeScript 4.4+ decorators
+
+**Future Changes**: Monitor VS Code release notes for deprecations and new APIs. Major version updates (e.g., 1.75 → 1.80) may introduce breaking changes or new best practices.
 
 ## License
 

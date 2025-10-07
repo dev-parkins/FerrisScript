@@ -12,12 +12,14 @@ When using GitHub CLI (`gh pr create`) to create pull requests with markdown-for
 ### Example Failure
 
 **Intended Markdown**:
+
 ```markdown
 - Type completion: `i32`, `f32`, `bool`, `String`
 - Function: `print` with parameter hints
 ```
 
 **Actual PR Output**:
+
 ```markdown
 - Type completion: \i32\, \32\, \ool\, \String\
 - Function: \print\ with parameter hints
@@ -51,20 +53,26 @@ Implements context-aware code completion with `keyword`, `type`, and `function` 
 See `docs/PHASE_4_COMPLETION.md` for details.
 "@
 
-# Write to temporary file
-$prBody | Out-File -FilePath ".\pr-body.txt" -Encoding UTF8
+# Ensure temp directory exists (gitignored)
+if (-not (Test-Path "temp")) { New-Item -ItemType Directory -Path "temp" | Out-Null }
+
+# Write to temporary file in temp/ directory
+$prBody | Out-File -FilePath "temp\pr-body.txt" -Encoding UTF8
 
 # Create PR using file
-gh pr create --base develop --title "feat(vscode): Phase 4 Completion" --body-file ".\pr-body.txt"
+gh pr create --base develop --title "feat(vscode): Phase 4 Completion" --body-file "temp\pr-body.txt"
 
-# Clean up
-Remove-Item ".\pr-body.txt"
+# Note: No cleanup needed - temp/ directory is gitignored
 ```
 
 **Bash Equivalent**:
+
 ```bash
 # Bash
-cat > pr-body.txt << 'EOF'
+# Ensure temp directory exists (gitignored)
+mkdir -p temp
+
+cat > temp/pr-body.txt << 'EOF'
 ## Phase 4 Complete: Code Completion Provider
 
 ### Summary
@@ -78,18 +86,20 @@ Implements context-aware code completion with `keyword`, `type`, and `function` 
 See `docs/PHASE_4_COMPLETION.md` for details.
 EOF
 
-gh pr create --base develop --title "feat(vscode): Phase 4 Completion" --body-file pr-body.txt
+gh pr create --base develop --title "feat(vscode): Phase 4 Completion" --body-file temp/pr-body.txt
 
-rm pr-body.txt
+# Note: No cleanup needed - temp/ directory is gitignored
 ```
 
 **Advantages**:
+
 - ✅ No escaping needed - backticks work naturally
 - ✅ Supports multi-line content easily
 - ✅ Works identically in PowerShell and Bash
 - ✅ Can be version controlled (optional)
 
 **Disadvantages**:
+
 - ⚠️ Requires file I/O
 - ⚠️ Need to handle cleanup
 
@@ -100,6 +110,7 @@ rm pr-body.txt
 **Approach**: Properly escape backticks for the target shell.
 
 **PowerShell Implementation**:
+
 ```powershell
 # PowerShell: Double-escape backticks
 $prBody = "## Summary`n`nFeatures:`n- Type: ``i32``, ``f32``"
@@ -107,6 +118,7 @@ gh pr create --base develop --title "Title" --body $prBody
 ```
 
 **Bash Implementation**:
+
 ```bash
 # Bash: Use single quotes to prevent interpretation
 gh pr create --base develop --title "Title" --body 'Features:
@@ -115,9 +127,11 @@ gh pr create --base develop --title "Title" --body 'Features:
 ```
 
 **Advantages**:
+
 - ✅ No temporary files needed
 
 **Disadvantages**:
+
 - ❌ Shell-specific escaping rules (not portable)
 - ❌ Complex multi-line strings
 - ❌ Error-prone for large PR bodies
@@ -129,6 +143,7 @@ gh pr create --base develop --title "Title" --body 'Features:
 **Approach**: Bypass `gh` CLI and use GitHub REST API with proper JSON encoding.
 
 **Implementation**:
+
 ```powershell
 # PowerShell with Invoke-RestMethod
 $prBody = @"
@@ -159,11 +174,13 @@ Invoke-RestMethod -Uri "https://api.github.com/repos/dev-parkins/FerrisScript/pu
 ```
 
 **Advantages**:
+
 - ✅ JSON encoding handles all special characters
 - ✅ Full API control
 - ✅ Programmatic access to PR metadata
 
 **Disadvantages**:
+
 - ❌ More complex
 - ❌ Requires token management
 - ❌ Less readable than `gh` CLI
@@ -186,16 +203,18 @@ Full markdown content here with `backticks`, **bold**, and [links](url).
 No escaping needed!
 "@
 
-# Write to file
-$prBody | Out-File -FilePath ".pr-body-temp.txt" -Encoding UTF8
+# Ensure temp directory exists (gitignored)
+if (-not (Test-Path "temp")) { New-Item -ItemType Directory -Path "temp" | Out-Null }
+
+# Write to file in temp/ directory
+$prBody | Out-File -FilePath "temp\pr-body.txt" -Encoding UTF8
 
 # Create PR
 gh pr create --base develop `
     --title "feat: Your Feature Title" `
-    --body-file ".pr-body-temp.txt"
+    --body-file "temp\pr-body.txt"
 
-# Cleanup
-Remove-Item ".pr-body-temp.txt"
+# Note: No cleanup needed - temp/ directory is gitignored
 ```
 
 ### Template for Phase PRs
@@ -239,15 +258,18 @@ Create reusable template in `docs/templates/PR_TEMPLATE_PHASE.md`:
 ```
 
 **Usage**:
+
 ```powershell
 # Copy template, replace placeholders
 $template = Get-Content "docs/templates/PR_TEMPLATE_PHASE.md" -Raw
 $prBody = $template -replace "{N}", "4" -replace "{Feature Name}", "Code Completion"
 
+# Ensure temp directory exists
+if (-not (Test-Path "temp")) { New-Item -ItemType Directory -Path "temp" | Out-Null }
+
 # Create PR from processed template
-$prBody | Out-File -FilePath ".pr-body-temp.txt" -Encoding UTF8
-gh pr create --base develop --title "Title" --body-file ".pr-body-temp.txt"
-Remove-Item ".pr-body-temp.txt"
+$prBody | Out-File -FilePath "temp\pr-body.txt" -Encoding UTF8
+gh pr create --base develop --title "Title" --body-file "temp\pr-body.txt"
 ```
 
 ---
@@ -267,6 +289,7 @@ Remove-Item ".pr-body-temp.txt"
 ### Potential Enhancements for Copilot Automation
 
 1. **Create `scripts/create-pr.ps1` helper script**:
+
    ```powershell
    # Usage: .\scripts\create-pr.ps1 -Title "Title" -BodyFile "pr-body.md"
    param(
@@ -299,6 +322,7 @@ Remove-Item ".pr-body-temp.txt"
 ---
 
 **References**:
+
 - GitHub CLI PR creation: https://cli.github.com/manual/gh_pr_create
 - PowerShell here-strings: https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_quoting_rules
 - GitHub API: https://docs.github.com/en/rest/pulls/pulls#create-a-pull-request

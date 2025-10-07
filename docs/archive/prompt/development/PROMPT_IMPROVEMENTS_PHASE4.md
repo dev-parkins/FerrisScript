@@ -22,7 +22,7 @@
 1. **GitHub CLI Backtick Escaping**: PR body with backticks corrupted by shell interpretation
    - **Impact**: PR description unreadable, required manual fix
    - **Root Cause**: Used inline string instead of --body-file approach
-   
+
 2. **Version Number Misalignment**: Initially set to 0.1.0 instead of 0.0.3
    - **Impact**: Version didn't match completed work (v0.0.3 Phase 4)
    - **Root Cause**: Didn't check current version context before setting
@@ -59,16 +59,18 @@
 When creating PRs with `gh pr create`, ALWAYS use `--body-file` for markdown-formatted descriptions:
 
 ```powershell
-# ✅ CORRECT: Use temporary file
+# ✅ CORRECT: Use temporary file in temp/ directory (gitignored)
 $prBody = @"
 PR description with `backticks`, **bold**, and code blocks
 "@
-$prBody | Out-File -FilePath ".pr-body-temp.txt" -Encoding UTF8
-gh pr create --base develop --title "Title" --body-file ".pr-body-temp.txt"
-Remove-Item ".pr-body-temp.txt"
+if (-not (Test-Path "temp")) { New-Item -ItemType Directory -Path "temp" | Out-Null }
+$prBody | Out-File -FilePath "temp\pr-body.txt" -Encoding UTF8
+gh pr create --base develop --title "Title" --body-file "temp\pr-body.txt"
+# No cleanup needed - temp/ is gitignored
 ```
 
 **NEVER** pass markdown inline to --body parameter:
+
 ```powershell
 # ❌ WRONG: Backticks will be corrupted by shell
 gh pr create --base develop --title "Title" --body "Description with `code`"
@@ -77,6 +79,7 @@ gh pr create --base develop --title "Title" --body "Description with `code`"
 **Rationale**: Backticks (`` ` ``) are escape characters in PowerShell and special in Bash. Inline strings corrupt markdown formatting.
 
 **Reference**: See `docs/archive/prompt/development/GITHUB_CLI_PR_CREATION.md` for detailed solutions.
+
 ```
 
 ### 2. Version Alignment Verification
@@ -159,7 +162,7 @@ If feature introduces data that duplicates existing data (types, commands, confi
 2. **Add to Roadmap**: Include sync automation in future version recommendations
 
 **Example**: VS Code completion types must sync with compiler type system
-→ Create `TYPE_SYNC.md` documenting manual process and proposing validation scripts
+→ Create `VSCODE_TYPE_SYNCHRONIZATION.md` in planning docs documenting manual process and proposing validation scripts
 
 #### Build Automation Needs
 
@@ -278,8 +281,10 @@ vsce package
 ```
 
 **References**:
+
 - VS Code Extension API: https://code.visualstudio.com/api
 - Publishing: https://code.visualstudio.com/api/working-with-extensions/publishing-extension
+
 ```
 
 ### 6. Discrepancy Investigation Protocol
@@ -322,6 +327,7 @@ When user reports errors that don't match your verification results:
 #### Test Failure vs Local Success
 
 When tests fail in CI but pass locally:
+
 - Check for environment differences (OS, Node/Rust version)
 - Check for non-deterministic tests (timing, randomness)
 - Check for missing files in git (test fixtures, config)
@@ -329,9 +335,11 @@ When tests fail in CI but pass locally:
 #### Linting Discrepancies
 
 When linter shows different results:
+
 - Check which linter version (local vs CI)
 - Check which config file is active (.eslintrc location)
 - Check if linter cache needs clearing
+
 ```
 
 ### 7. Automation Decision Framework
@@ -401,6 +409,7 @@ Apply these improvements:
 ### For Prompt File Update
 
 Add these sections to main prompt file:
+
 - GitHub CLI best practices (section 1)
 - Version alignment verification (section 2)
 - Standard files checklist (section 3)
@@ -412,28 +421,36 @@ Add these sections to main prompt file:
 ### Validation
 
 After applying improvements, evaluate Phase 5 execution:
+
 - Were issues caught proactively?
 - Did documentation anticipate user questions?
 - Did PR creation work smoothly?
 - Were standard files created upfront?
 
+**Note**: These metrics measure **Phase 5 workstream execution quality**, not the prompt improvement work itself. The goal is to compare Phase 5 (with improvements applied) against the Phase 4 baseline to validate that the prompt improvements actually reduce rework and user feedback cycles.
+
 ---
 
 ## 🎯 Success Metrics
 
+**Purpose**: These metrics compare workstream execution quality (commits, feedback, issues) to validate whether prompt improvements reduce rework. They measure **implementation execution**, not prompt documentation work.
+
 **Phase 4 Baseline** (before improvements):
+
 - 3 commits needed (initial + linting + feedback fixes)
 - 6 items required user feedback to address
 - 1 PR creation failure (backtick issue)
 - 8 items documented reactively (after user request)
 
-**Phase 5 Target** (after improvements):
+**Phase 5 Target** (after improvements applied):
+
 - 2 commits (initial + final validation)
 - ≤2 items requiring user feedback
 - 0 PR creation failures
 - ≥80% of maintenance needs documented proactively
 
 **Phase 6+ Goals**:
+
 - 1 commit (complete on first try)
 - 0 user corrections needed
 - 100% smooth PR creation
@@ -442,6 +459,7 @@ After applying improvements, evaluate Phase 5 execution:
 ---
 
 **References**:
+
 - GitHub CLI PR Creation: `docs/archive/prompt/development/GITHUB_CLI_PR_CREATION.md`
 - Phase 4 Learnings: `docs/planning/v0.0.3/LEARNINGS.md` (Phase 4 section)
 - VS Code Extension Guide: https://code.visualstudio.com/api

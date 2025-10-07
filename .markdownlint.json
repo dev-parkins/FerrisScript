@@ -7,6 +7,7 @@
   "MD024": {
     "siblings_only": true
   },
+  "MD036": false,
   "MD037": false,
   "MD004": {
     "style": "dash"
@@ -14,9 +15,7 @@
   "MD007": {
     "indent": 2
   },
-  "MD029": {
-    "style": "ordered"
-  },
+  "MD029": false,
   "MD034": false,
   "MD040": false
 }
