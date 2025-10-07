@@ -614,13 +614,13 @@ fn _ready() {
 
 ### Scenario 2: "I'm using GitHub Pages (Jekyll)" → **Rouge Lexer OR Client-Side**
 
-**Option A: Rouge Lexer (server-side, official)**
+#### Option A: Rouge Lexer (server-side, official)
 
 - **Pros**: Native Jekyll support, no JavaScript needed
 - **Cons**: Requires Ruby code, 1-2 month timeline, GitHub deployment wait
 - **Use when**: Long-term solution, want server-side rendering
 
-**Option B: Highlight.js (client-side, fast)**
+#### Option B: Highlight.js (client-side, fast)
 
 - **Pros**: Works immediately (add script tags), no PR needed
 - **Cons**: Requires JavaScript, client-side processing
