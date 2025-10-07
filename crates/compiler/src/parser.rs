@@ -41,6 +41,9 @@ struct Parser<'a> {
     position: usize,
     current_line: usize,
     current_column: usize,
+    // Error recovery fields (Phase 3C)
+    panic_mode: bool,        // Track if currently recovering from error
+    errors: Vec<String>,     // Collect all errors during parsing
 }
 
 impl<'a> Parser<'a> {
@@ -51,6 +54,8 @@ impl<'a> Parser<'a> {
             position: 0,
             current_line: 1,
             current_column: 1,
+            panic_mode: false,
+            errors: Vec::new(),
         }
     }
 
@@ -98,6 +103,62 @@ impl<'a> Parser<'a> {
 
     fn span(&self) -> Span {
         Span::new(self.current_line, self.current_column)
+    }
+
+    /// Synchronize parser to next safe recovery point after error.
+    ///
+    /// This implements panic-mode error recovery by skipping tokens until
+    /// reaching a statement boundary or safe keyword. Sync points are:
+    /// - `;` (semicolon) - end of statement
+    /// - `}` (right brace) - end of block
+    /// - `fn` - start of function
+    /// - `let` - start of variable declaration
+    ///
+    /// When a sync point is found, clears panic mode so parsing can resume.
+    fn synchronize(&mut self) {
+        self.panic_mode = true;
+
+        while !matches!(self.current(), Token::Eof) {
+            // Check if previous token was a statement boundary
+            if self.position > 0 {
+                let prev_idx = self.position - 1;
+                if matches!(self.tokens.get(prev_idx), Some(Token::Semicolon)) {
+                    self.panic_mode = false;
+                    return;
+                }
+            }
+
+            // Check if current token is a safe recovery point
+            match self.current() {
+                Token::Fn | Token::Let | Token::RBrace => {
+                    self.panic_mode = false;
+                    return;
+                }
+                _ => {
+                    self.advance();
+                }
+            }
+        }
+
+        // Reached EOF
+        self.panic_mode = false;
+    }
+
+    /// Record an error without immediately returning.
+    ///
+    /// This allows the parser to continue after errors and collect multiple
+    /// diagnostics in a single pass. Errors are suppressed while in panic
+    /// mode to prevent cascading false positives.
+    ///
+    /// # Arguments
+    /// * `error` - The formatted error message to record
+    fn record_error(&mut self, error: String) {
+        // Only record errors when not already in panic mode
+        // This prevents cascading false positives
+        if !self.panic_mode {
+            self.errors.push(error);
+            self.panic_mode = true;
+        }
     }
 
     fn parse_program(&mut self) -> Result<Program, String> {
