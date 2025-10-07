@@ -47,6 +47,7 @@
   - Target: Hosting provider CNAME (e.g., `ferrisscript.netlify.app`)
   
   - **Example Netlify Setup**:
+
     ```
     Type: CNAME
     Name: docs
@@ -89,6 +90,7 @@
   - Preserve error code anchors (e.g., `#e001`)
 
 - [ ] **Set up documentation structure**
+
   ```
   docs/
   ├── errors/           # Error code documentation
@@ -149,11 +151,13 @@
 ### Current (Phase 3A Implementation)
 
 **Without env var** (default):
+
 ```
 https://github.com/dev-parkins/FerrisScript/blob/main/docs/ERROR_CODES.md#e001
 ```
 
 **With env var** (`FERRIS_DOCS_BASE=https://docs.ferrisscript.dev`):
+
 ```
 https://docs.ferrisscript.dev/errors/E001
 ```
@@ -206,21 +210,25 @@ npm run preview
 ## 📚 Resources
 
 ### Domain & DNS
+
 - Domain Registrar: Namecheap / Cloudflare / Squarespace
 - DNS Management: Registrar dashboard
 - DNS Propagation Check: https://www.whatsmydns.net/
 
 ### Hosting Providers
+
 - Netlify: https://www.netlify.com/
 - Vercel: https://vercel.com/
 - GitHub Pages: https://pages.github.com/
 
 ### Documentation Frameworks
+
 - Docusaurus: https://docusaurus.io/
 - mdBook: https://rust-lang.github.io/mdBook/
 - VitePress: https://vitepress.dev/
 
 ### SSL/HTTPS
+
 - Let's Encrypt: https://letsencrypt.org/ (automatic with Netlify/Vercel)
 - `.dev` TLD Requirements: https://get.dev/
 

@@ -45,6 +45,7 @@ This phase focuses on **developer experience** — improving clarity, discoverab
 **Example Enhancement**:
 
 **Before**:
+
 ```
 Error[E201]: Undefined variable
 Undefined variable 'velocty' at line 5, column 10
@@ -57,6 +58,7 @@ help: did you mean 'velocity'?
 ```
 
 **After**:
+
 ```
 Error[E201]: Undefined variable
 Undefined variable 'velocty' at line 5, column 10
@@ -91,6 +93,7 @@ help: did you mean 'velocity'?
 **Example Recovery**:
 
 **Before** (stops at first error):
+
 ```rust
 let x = 5  // Missing semicolon
 let y = 10;
@@ -98,12 +101,14 @@ let z = unknown_var;  // Never reported
 ```
 
 Shows only:
+
 ```
 Error[E100]: Unexpected token
 Expected ';', found 'let'
 ```
 
 **After** (continues and reports all):
+
 ```
 Error[E100]: Unexpected token
 Expected ';' after expression at line 1
@@ -195,6 +200,7 @@ impl ErrorCode {
 ```
 
 **Rationale for Hybrid Approach**:
+
 - ✅ **Works NOW**: GitHub URLs are immediately functional, clickable, and searchable
 - ✅ **No Infrastructure**: No need to build/host documentation site for v0.0.3
 - ✅ **Future-Proof**: Easy migration when `docs.ferrisscript.dev` launches (just set env var)
@@ -202,6 +208,7 @@ impl ErrorCode {
 - ✅ **Flexible**: Can test different doc sites or use self-hosted docs
 
 **Deferred Items**:
+
 - Documentation website (`docs.ferrisscript.dev`) → **Phase 9 or v0.0.4**
   - Use mdBook, Docusaurus, or similar
   - Host on GitHub Pages, Netlify, or Vercel
@@ -483,6 +490,7 @@ pub fn compile_with_options(source: &str, report_mode: ReportMode) -> Result<Pro
 **Status**: 🎯 Domain Acquired (`ferrisscript.dev`) ✅ - Infrastructure work can proceed in parallel
 
 **Why Deferred**:
+
 - ERROR_CODES.md is sufficient for v0.0.3
 - Full website (mdBook/Docusaurus) requires hosting setup
 - LSP integration is higher priority
@@ -517,6 +525,7 @@ pub fn compile_with_options(source: &str, report_mode: ReportMode) -> Result<Pro
   - Test mobile responsiveness
 
 **Future Work** (after infrastructure is live):
+
 - Add interactive error examples
 - Implement error code search
 - Add "Copy to clipboard" for code snippets
@@ -526,11 +535,13 @@ pub fn compile_with_options(source: &str, report_mode: ReportMode) -> Result<Pro
 ### Advanced Error Recovery
 
 **Why Deferred**:
+
 - Basic synchronization is sufficient for v0.0.3
 - Advanced strategies (speculative parsing, etc.) are complex
 - Can improve incrementally in future versions
 
 **Future Work**:
+
 - Context-sensitive recovery strategies
 - Better expected token suggestions
 - Recovery confidence scoring
@@ -538,6 +549,7 @@ pub fn compile_with_options(source: &str, report_mode: ReportMode) -> Result<Pro
 ### JSON Diagnostic Export
 
 **Why Deferred**:
+
 - LSP will handle structured diagnostics
 - CLI users don't need JSON format yet
 - Can add later if tools ecosystem develops
@@ -547,11 +559,13 @@ pub fn compile_with_options(source: &str, report_mode: ReportMode) -> Result<Pro
 ## 📝 Dependencies
 
 **Requires from Previous Phases**:
+
 - ✅ Phase 1: Error code system (E001-E499)
 - ✅ Phase 2: Error suggestions (for testing integration)
 - ✅ ERROR_CODES.md exists with comprehensive content
 
 **Enables for Future Phases**:
+
 - Phase 4-5: VS Code extension can link to documentation
 - Phase 5: LSP can use streaming diagnostic mode
 - Phase 6+: Better developer experience for all tooling

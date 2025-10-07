@@ -404,16 +404,19 @@ This document captures key insights, discoveries, and lessons learned during v0.
 **Status**: 🎯 Domain Acquired (`ferrisscript.dev`) ✅ - Infrastructure work in progress
 
 **Discovery**: Phase 3A added documentation URLs to error messages with hybrid approach:
+
 - Default: GitHub URLs (work immediately)
 - Future: Custom site via `FERRIS_DOCS_BASE` env var
 
 **Opportunity**: Now that domain is acquired, can work on infrastructure between features:
 
 **Completed**:
+
 - ✅ Domain: `ferrisscript.dev` acquired
 - ✅ Code: Hybrid URL system implemented (GitHub → custom site seamless)
 
 **Remaining Work** (can proceed in parallel with feature development):
+
 1. Set up static hosting (Netlify/Vercel/GitHub Pages)
 2. Create `docs.ferrisscript.dev` CNAME subdomain
 3. Choose & set up documentation framework (Docusaurus/mdBook/VitePress)
