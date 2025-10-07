@@ -1,0 +1,156 @@
+# FerrisScript Documentation Site Configuration
+# Jekyll configuration for GitHub Pages
+
+# Site Settings
+title: FerrisScript Documentation
+description: A Rust-inspired scripting language for Godot game engine
+author: dev-parkins
+email: your-email@example.com
+baseurl: "/FerrisScript" # GitHub Pages project URL
+url: "https://dev-parkins.github.io" # GitHub Pages base URL
+
+# Repository
+repository: dev-parkins/FerrisScript
+
+# Theme
+# Using GitHub Pages supported themes
+# Options: minima, cayman, minimal, slate, time-machine, leap-day, etc.
+theme: cayman
+# Alternative for more features (requires gem):
+# remote_theme: just-the-docs/just-the-docs
+
+# Markdown Processing
+markdown: kramdown
+kramdown:
+  input: GFM # GitHub Flavored Markdown
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+  auto_ids: true # Generate IDs for headings
+  toc_levels: 1..3 # Table of contents depth
+
+# Plugins (GitHub Pages safe plugins)
+plugins:
+  - jekyll-relative-links
+  - jekyll-optional-front-matter
+  - jekyll-readme-index
+  - jekyll-default-layout
+  - jekyll-titles-from-headings
+
+# Plugin Configuration
+relative_links:
+  enabled: true
+  collections: false
+
+optional_front_matter:
+  remove_originals: false
+
+readme_index:
+  enabled: true
+  remove_originals: false
+
+titles_from_headings:
+  enabled: true
+  strip_title: false
+  collections: false
+
+# Collections
+collections:
+  planning:
+    output: true
+    permalink: /planning/:path/
+
+# Default Front Matter
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+  - scope:
+      path: "planning"
+    values:
+      layout: default
+  - scope:
+      path: "*.md"
+    values:
+      layout: default
+
+# Navigation
+# Header pages shown in site navigation
+header_pages:
+  - ERROR_CODES.md
+  - ARCHITECTURE.md
+  - FAQ.md
+  - DEVELOPMENT.md
+  - planning/v0.0.3/README.md
+
+# Build Settings
+show_downloads: true
+github:
+  is_project_page: true
+  repository_url: https://github.com/dev-parkins/FerrisScript
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .bundle
+  - .git
+  - .gitignore
+  - README.md # Don't process root README
+  - archive # Don't process archived docs
+  - planning/v0.0.3/v0.0.3-roadmap.md # Duplicate of README
+
+# Include hidden files if needed
+include:
+  - .htaccess
+
+# Syntax Highlighting
+highlighter: rouge
+
+# Permalinks
+permalink: pretty
+
+# Compression (improves load times)
+sass:
+  style: compressed
+
+# SEO and Social
+twitter:
+  username: ferrisscript # Update if you have one
+  card: summary
+
+social:
+  name: FerrisScript
+  links:
+    - https://github.com/dev-parkins/FerrisScript
+
+# Google Analytics (optional)
+# google_analytics: UA-XXXXXXXX-X
+
+# Search (if using just-the-docs theme)
+# search_enabled: true
+# search:
+#   heading_level: 2
+#   previews: 3
+#   preview_words_before: 5
+#   preview_words_after: 10
+#   tokenizer_separator: /[\s/]+/
+#   rel_url: true
+#   button: false
+
+# Footer
+footer_content: "Copyright &copy; 2025 FerrisScript. Distributed under the MIT License."
+
+# Last updated timestamp
+last_edit_timestamp: true
+last_edit_time_format: "%b %e %Y at %I:%M %p"
+
+# Logo (optional - add to docs/ folder)
+# logo: "/assets/ferrisscript-logo.png"
+
+# Favicon (optional - add to docs/ folder)
+# favicon: "/assets/favicon.ico"
