@@ -11,7 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- None
+- **Parser Error Recovery (Phase 3C)**: Panic-mode error recovery enabling parser to continue after syntax errors and collect multiple diagnostics in a single pass
+  - Added `panic_mode` flag and `errors` collection to Parser struct
+  - Implemented `synchronize()` method with sync points: `;`, `}`, `fn`, `let`
+  - Implemented `record_error()` method with cascading error prevention
+  - Added `get_errors()` public API for accessing collected errors
+  - 23 new recovery-specific tests (13 unit + 10 integration)
+  - Foundation for multi-error reporting (Phase 3D)
 
 ### Changed
 
@@ -19,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- None
+- **Critical Parser Bug**: Fixed infinite loop in error recovery that consumed all RAM when encountering unexpected top-level tokens. Parser now always advances past problematic tokens before synchronizing to recovery points.
 
 ---
 
