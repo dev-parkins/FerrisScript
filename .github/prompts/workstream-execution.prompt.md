@@ -105,6 +105,108 @@ When encountering ambiguity during context gathering or execution:
 
 ## �📋 How This Works
 
+## 🎛️ Execution Modes (Optional User Control)
+
+**Modes can be specified in user prompt**: `/prompt #file:workstream-execution.prompt.md mode=[mode]`
+
+### Available Modes
+
+#### Mode: `full` (Default ⭐)
+
+**Description**: Plan + Execute + Document + Test in one pass
+
+**Use When**:
+
+- Ready to implement feature completely
+- Requirements are clear from context
+- Want complete implementation in 1 request
+
+**Behavior**:
+
+1. Generate brief plan (≤5 bullets)
+2. Implement all code changes
+3. Write/update tests
+4. Update documentation
+5. Run all validations
+6. Output complete with ✅ marker
+
+**Cost**: 1 premium request  
+**Output**: Complete, production-ready implementation
+
+---
+
+#### Mode: `plan`
+
+**Description**: Only create detailed execution plan (no implementation)
+
+**Use When**:
+
+- Exploring different approaches
+- Want to review plan before implementation
+- Not ready to implement yet
+- Need cost estimate or effort breakdown
+
+**Behavior**:
+
+1. Analyze requirements thoroughly
+2. Create detailed execution plan document
+3. Define phases, tasks, acceptance criteria
+4. Estimate effort and complexity
+5. Stop after planning (no code generation)
+
+**Cost**: 1 premium request (but faster than full)  
+**Output**: Detailed plan document only
+
+---
+
+#### Mode: `execute`
+
+**Description**: Assume plan exists, proceed directly to implementation
+
+**Use When**:
+
+- Plan already reviewed and approved
+- Returning to continue after planning-only mode
+- Want to skip re-planning overhead
+
+**Behavior**:
+
+1. Skip planning phase (assume already done)
+2. Proceed directly to implementation
+3. Complete all code, tests, docs
+4. Run all validations
+5. Output complete with ✅ marker
+
+**Cost**: 1 premium request  
+**Output**: Complete implementation (no plan section)
+
+---
+
+### Mode Detection & Defaults
+
+**If no mode specified**:
+
+- User says "**plan this**" → Auto-detect `mode=plan`
+- User says "**implement [feature]**" → Auto-detect `mode=full`
+- User provides context + no explicit instruction → **Default to `mode=full`**
+
+**Explicit mode specification**:
+
+```
+/prompt #file:workstream-execution.prompt.md mode=plan
+Feature: Add error recovery to parser
+
+/prompt #file:workstream-execution.prompt.md mode=full
+Feature: Add error recovery to parser (proceed with implementation)
+
+/prompt #file:workstream-execution.prompt.md mode=execute
+[Assumes plan already exists from previous planning-only session]
+```
+
+**Recommendation**: Use `mode=full` (default) for most work. Only use `mode=plan` for complex features requiring design discussion.
+
+---
+
 ### Step 1: Context Gathering (You Start Here)
 
 When invoked with `/prompt #file:workstream-execution.prompt.md`, you will:
@@ -268,7 +370,183 @@ Before declaring work complete:
 
 ---
 
-## 🔬 Code Structure Discovery (Check BEFORE Asking Questions)
+## � Required Output Structure (Hierarchical)
+
+**All workstream executions MUST follow this standardized structure for clarity:**
+
+### 1. Executive Summary (Top of Output)
+
+```markdown
+## 🎯 Workstream Summary
+
+**Goal**: [One-line description of what was implemented]
+**Context**: [Where this fits in roadmap/version planning]
+**Approach**: [Key strategy/decisions made during implementation]
+**Assumptions Made**: [List any assumptions with ⚠️ markers, or "None"]
+```
+
+**Purpose**: Give user immediate context without reading entire output.
+
+### 2. Implementation Section
+
+```markdown
+## 💻 Implementation
+
+### Files Created
+- `path/to/file1.rs` - [Brief description of what this file does]
+- `path/to/file2.rs` - [Brief description]
+
+### Files Modified
+- `path/to/file3.rs` - [What changed and why]
+- `Cargo.toml` - [Dependencies added/updated]
+
+### Key Changes
+1. [Major change 1 with rationale]
+2. [Major change 2 with rationale]
+3. [Major change 3 with rationale]
+
+### Code Highlights
+[Optional: Show key code snippets if important for review]
+```
+
+**Purpose**: Show exactly what code was changed and why.
+
+### 3. Documentation Section
+
+```markdown
+## 📚 Documentation Updates
+
+### Created
+- `docs/planning/technical/NEW_DOC.md` - [Purpose and content summary]
+
+### Updated
+- `README.md` - [Which section was updated]
+- `docs/LEARNINGS.md` - [What insights were added]
+- `CHANGELOG.md` - [Version entry added]
+
+### Link Validation Results
+✅ All links verified in [N] files:
+- README.md (23 links checked, 0 broken)
+- docs/LEARNINGS.md (12 links checked, 0 broken)
+- docs/planning/technical/NEW_DOC.md (5 links checked, 0 broken)
+```
+
+**Purpose**: Show documentation was properly updated and validated.
+
+### 4. Testing Section
+
+```markdown
+## 🧪 Testing Results
+
+### Tests Added
+- `tests/integration/feature_test.rs` - [Coverage description]
+- `crates/compiler/src/parser/tests.rs` - [12 new test cases covering edge cases]
+
+### Test Execution
+```
+cargo test --workspace
+✅ 234 tests passed (0 failed, 0 ignored)
+Test run completed in 3.4s
+```
+
+### Coverage Impact (if applicable)
+- **Previous**: 78.5%
+- **Current**: 79.2%
+- **Delta**: +0.7%
+```
+
+**Purpose**: Prove all tests pass and show test coverage.
+
+### 5. Validation Section
+
+```markdown
+## ✅ Validation Results
+
+### Build Status
+```
+cargo build --workspace
+✅ Compilation successful (0 errors, 0 warnings)
+```
+
+### Linting Status
+```
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+✅ All linting passed (0 warnings)
+
+cargo fmt --all -- --check
+✅ Code formatting verified
+
+npm run docs:lint
+✅ Markdown linting passed (0 errors)
+```
+
+### Acceptance Criteria
+- [x] **Criterion 1**: [Evidence of completion]
+- [x] **Criterion 2**: [Evidence of completion]
+- [x] **Criterion 3**: [Evidence of completion]
+
+All original acceptance criteria verified ✅
+```
+
+**Purpose**: Show all quality checks passed.
+
+### 6. Post-Execution Notes
+
+```markdown
+## 📝 Post-Execution Notes
+
+### Decisions Made
+1. **Decision**: [What was decided]
+   - **Rationale**: [Why this approach was chosen]
+   - **Alternatives Considered**: [Other options and why not chosen]
+
+### Assumptions (if any)
+⚠️ **ASSUMPTION 1**: [What was assumed] based on [reasoning]
+⚠️ **ASSUMPTION 2**: [What was assumed] based on [reasoning]
+
+### Recommendations & Deferred Work
+
+#### High Priority (Next Version)
+1. [Deferred item] - [Why deferred, when to revisit]
+
+#### Future Enhancements
+2. [Future idea] - [Context for future consideration]
+
+### Known Limitations
+- [Limitation 1]: [What doesn't work yet and why]
+- [Limitation 2]: [Context for limitation]
+```
+
+**Purpose**: Document decisions, assumptions, and future work.
+
+### 7. Completion Marker (Required)
+
+```markdown
+## ✅ Workstream Execution Complete
+
+**Deliverables**: [N] code files, [M] doc files, [K] tests
+**All Validations**: ✅ Build | ✅ Tests | ✅ Linting | ✅ Links
+**Status**: Ready for PR creation and human review
+**Next Action**: User reviews changes, creates PR, and merges after approval
+```
+
+**Purpose**: Clear signal that work is complete and ready for review.
+
+---
+
+**Benefits of This Structure**:
+
+- ✅ Easy to scan and review (hierarchical sections)
+- ✅ No ambiguity about what was delivered
+- ✅ All validation evidence provided upfront
+- ✅ Assumptions explicitly documented for review
+- ✅ Reduces follow-up questions (saves premium requests)
+
+**This structure MUST be followed for all workstream completions.**
+
+---
+
+## �🔬 Code Structure Discovery (Check BEFORE Asking Questions)
 
 **If you'll be writing code/tests, discover structure FIRST to avoid rework:**
 
