@@ -27,6 +27,7 @@
 **Status**: ✅ **KEEP** - This is the core artifact
 
 **Completeness Check**:
+
 - ✅ Pre-flight checks
 - ✅ Context gathering questions (5 categories, 25 questions)
 - ✅ Execution methodology
@@ -46,6 +47,7 @@
 **Used by Copilot**: ❌ No (not loaded unless explicitly attached)
 
 **Content Analysis**:
+
 - Overview of prompts directory
 - When to use workstream prompts (✅ vs ❌ examples)
 - Usage examples (how to invoke)
@@ -53,12 +55,14 @@
 - Expected flow diagrams
 
 **Unique Value**:
+
 - ✅ When/when not to use (helps users decide)
 - ✅ Usage examples (onboarding for new contributors)
 - ❌ Best practices (duplicates main prompt's "Common Pitfalls")
 - ❌ Expected flow (duplicates main prompt's methodology)
 
-**Recommendation**: 
+**Recommendation**:
+
 - **SIMPLIFY** to ~100 lines: Overview + when to use + usage examples only
 - Remove duplicated best practices (refer to main prompt)
 - Remove duplicated flow diagrams (refer to main prompt)
@@ -72,6 +76,7 @@
 **Used by Copilot**: ❌ No (not loaded)
 
 **Content Analysis**:
+
 - Quick start (how to invoke) - duplicates README
 - What happens next (phase overview) - duplicates main prompt
 - Questions Copilot will ask - duplicates main prompt Section 2
@@ -79,11 +84,13 @@
 - Pro tips - some unique, some duplicate
 
 **Unique Value**:
+
 - ⚠️ Pro Tip: "Attach context files" - useful but should be in main prompt
 - ⚠️ Pro Tip: "Highlight specific text" - useful but should be in main prompt
 - ❌ Everything else duplicates main prompt or README
 
-**Recommendation**: 
+**Recommendation**:
+
 - **REMOVE** - Fully redundant with main prompt
 - Extract 2-3 "Pro Tips" and add to main prompt if not already there
 - Users can read the main prompt directly (it's well-structured)
@@ -97,6 +104,7 @@
 **Used by Copilot**: ⚠️ Only if user attaches it or it's added to main prompt
 
 **Content Analysis**:
+
 - Branch naming conventions: `bugfix/*`, `feature/*`, `docs/*`
 - How PR templates auto-apply (GitHub automation)
 - Examples for creating branches/PRs
@@ -104,11 +112,13 @@
 - Quick commands reference
 
 **Unique Value**:
+
 - ✅ Specific branch naming conventions (missing from main prompt!)
 - ✅ PR template automation explanation
 - ⚠️ Examples and troubleshooting (useful for humans, not Copilot)
 
-**Recommendation**: 
+**Recommendation**:
+
 - **EXTRACT** branch naming conventions → add to main prompt
 - **KEEP** as reference documentation (useful for humans)
 - **SIMPLIFY** to ~150 lines: Conventions + quick commands only
@@ -121,6 +131,7 @@
 ### Option A: Aggressive Consolidation (Simplest for Copilot)
 
 **Changes**:
+
 1. ✅ Keep `workstream-execution.prompt.md` (1,046 lines)
 2. ➕ Add branch naming conventions to main prompt (~20 lines)
 3. ➕ Add commit message format to main prompt (~20 lines)
@@ -129,17 +140,20 @@
 6. ✂️ Simplify `PR_TEMPLATE_SYSTEM.md` to ~150 lines (conventions + quick commands)
 
 **Result**:
+
 - Copilot has everything in one file (1,086 lines - still manageable)
 - Users have lightweight reference docs
 - Reduced fragmentation (4 files → 3 files)
 - Reduced duplication (~800 lines → ~250 lines of supplementary docs)
 
-**Pros**: 
+**Pros**:
+
 - ✅ Single source of truth for Copilot
 - ✅ Easier maintenance
 - ✅ Less confusion
 
 **Cons**:
+
 - ⚠️ Main prompt slightly longer (1,046 → 1,086 lines)
 
 ---
@@ -147,6 +161,7 @@
 ### Option B: Minimal Changes (Keep Reference Docs)
 
 **Changes**:
+
 1. ✅ Keep `workstream-execution.prompt.md` (1,046 lines)
 2. ➕ Add branch naming conventions to main prompt (~20 lines)
 3. ➕ Add commit message format to main prompt (~20 lines)
@@ -155,15 +170,18 @@
 6. ✅ Keep `PR_TEMPLATE_SYSTEM.md` as-is (process reference)
 
 **Result**:
+
 - Copilot has everything in main prompt
 - Users have full reference documentation
 - Duplication remains
 
-**Pros**: 
+**Pros**:
+
 - ✅ Least disruptive
 - ✅ Users have quick references
 
 **Cons**:
+
 - ❌ Maintenance burden continues
 - ❌ Fragmentation remains
 - ❌ Duplication across files
@@ -173,6 +191,7 @@
 ### Option C: Single File Approach (Most Aggressive)
 
 **Changes**:
+
 1. ✅ Keep `workstream-execution.prompt.md` (1,046 lines)
 2. ➕ Add branch naming conventions to main prompt (~20 lines)
 3. ➕ Add commit message format to main prompt (~20 lines)
@@ -181,17 +200,20 @@
 6. ➕ Add brief note in directory: "See workstream-execution.prompt.md for all documentation"
 
 **Result**:
+
 - Single file (1,136 lines - still reasonable)
 - Zero fragmentation
 - Zero duplication
 - Main prompt becomes self-documenting
 
-**Pros**: 
+**Pros**:
+
 - ✅ Absolute simplicity
 - ✅ Zero maintenance burden for supplementary docs
 - ✅ Copilot and humans read same file
 
 **Cons**:
+
 - ⚠️ Main prompt is both execution guide AND usage documentation
 - ⚠️ No separate "quick start" for users (but prompt is well-structured)
 
@@ -239,16 +261,19 @@ Add to "About Contribution Workflow" section (~line 197):
 #### README.md: Simplify to ~100 lines
 
 Keep:
+
 - Purpose (what this directory is)
 - When to use (✅ vs ❌ examples)
 - Quick start (usage examples)
 
 Remove:
+
 - Best practices (refer to main prompt)
 - Expected flow (refer to main prompt)
 - Detailed examples (refer to main prompt)
 
 New structure (~100 lines):
+
 ```markdown
 # GitHub Copilot Workstream Prompts
 
@@ -272,11 +297,13 @@ See workstream-execution.prompt.md for complete methodology, questions, best pra
 #### PR_TEMPLATE_SYSTEM.md: Simplify to ~150 lines
 
 Keep:
+
 - Branch naming table
 - Quick commands reference
 - Link to CONTRIBUTING.md for details
 
 Remove:
+
 - Detailed examples (they're in CONTRIBUTING.md)
 - Troubleshooting (GitHub docs cover this)
 - Long explanations (keep it reference-style)
@@ -338,10 +365,12 @@ Fully redundant. Users can read the main prompt (it's well-structured with clear
 ### Future Additions
 
 If you want to add new execution guidance:
+
 1. ✅ Add to main prompt (Copilot sees it)
 2. ❌ Don't add to README (Copilot doesn't see it)
 
 If you want to add new process documentation:
+
 1. ✅ Add to CONTRIBUTING.md (primary process docs)
 2. ⚠️ Add to reference card only if frequently referenced
 
@@ -366,12 +395,14 @@ If you want to add new process documentation:
 **Recommendation**: Implement **Option A** (Aggressive Consolidation)
 
 **Why**:
+
 - Copilot gets everything in one place
 - Reduced maintenance burden (69% reduction in supplementary docs)
 - Clearer for both Copilot and humans
 - Minimal increase to main prompt size (+40 lines = 4%)
 
 **Next Steps**:
+
 1. Review this analysis
 2. Approve Option A (or request alternative)
 3. Implement changes

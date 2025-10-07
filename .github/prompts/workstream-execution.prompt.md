@@ -195,17 +195,17 @@ Before declaring work complete:
 ### About Contribution Workflow
 
 1. **What branch should I create?**
-   
+
    **FerrisScript Convention** (determines PR template):
    - Bug fixes: `bugfix/issue-description` or `fix/issue-description`
    - Features: `feature/feature-name` or `feat/feature-name`
    - Documentation: `docs/doc-update` or `doc/doc-update`
    - Other: Use descriptive name (e.g., `refactor/parser-cleanup`)
-   
+
    **Why**: Branch name prefix auto-applies appropriate PR template via GitHub Actions
 
 2. **What's the commit message format?**
-   
+
    **FerrisScript Convention**: Conventional Commits
    - Format: `type(scope): description`
    - Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`, `ci`
@@ -214,7 +214,7 @@ Before declaring work complete:
      - `fix(runtime): handle null pointer in expression evaluation`
      - `docs: update LEARNINGS.md with Phase 3C insights`
      - `refactor(lexer): simplify token matching logic`
-   
+
 3. **Where should files go?** (directory structure, file naming)
 
 4. **What documents need updating?** (CHANGELOG, README, version-specific docs)
@@ -541,6 +541,7 @@ You are a **senior software engineer** with:
 **For ALL phases**, update `docs/LEARNINGS.md` with a phase-specific post-mortem entry.
 
 ### When to Update
+
 - **During workstream**: As you discover important insights
 - **End of phase**: Before creating PR/summary document
 
@@ -1005,24 +1006,28 @@ When completing a workstream, **consider and document deferred work**:
 Use this framework when recommending deferred work:
 
 **High Priority (Next 1-2 versions)**:
+
 - Blockers for major features
 - Quality/reliability issues
 - High-value, low-effort improvements
 - Required for next milestone
 
 **Medium Priority (2-3 versions out)**:
+
 - Nice-to-have enhancements
 - Moderate effort improvements
 - Dependencies on other work
 - Process improvements
 
 **Low Priority (Future versions)**:
+
 - Speculative optimizations
 - Low-frequency issues
 - Nice-to-haves with unclear value
 - Requires significant data/research
 
 **Future Investigation**:
+
 - Emerging technologies (watch for GA/stable release)
 - Depends on external factors
 - Exploratory work

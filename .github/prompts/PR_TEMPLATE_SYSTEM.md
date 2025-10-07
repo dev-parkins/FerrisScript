@@ -80,6 +80,7 @@ Examples:
 5. Adds comment explaining which template was applied
 
 **Automation Behavior**:
+
 - Only runs on PR opened (not edits)
 - Skips if PR body >50 characters
 - Adds helpful comment
@@ -95,6 +96,7 @@ If you need to manually choose a template:
 3. Select: `bug_fix.md`, `feature.md`, or `docs.md`
 
 **Useful when**:
+
 - Forgot branch naming convention
 - Want different template
 - Creating PR from GitHub UI
