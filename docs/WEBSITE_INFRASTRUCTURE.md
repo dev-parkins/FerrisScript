@@ -18,25 +18,23 @@
 
 ---
 
-### 2. ⏳ Static Hosting Setup
+### 2. ✅ Static Hosting Setup
 
-- [ ] **Choose hosting provider**
-  - **Recommended Options**:
-    - ✨ **Netlify** - Free tier, easy GitHub integration, auto-SSL
-    - ✨ **Vercel** - Fast, great DX, auto-deployments
-    - **GitHub Pages** - Free, simple, but limited features
-  
-  - **Recommended**: Netlify or Vercel for best developer experience
+- [x] **Choose hosting provider**
+  - **Selected**: GitHub Pages (free, integrated with GitHub)
+  - Currently running at: `https://dev-parkins.github.io/FerrisScript`
+  - Uses Jekyll static site generator (built-in GitHub Pages support)
 
-- [ ] **Connect GitHub repository**
-  - Branch: `main` (auto-deploy on push)
-  - Build command: TBD (depends on framework choice)
-  - Publish directory: TBD
+- [x] **Connect GitHub repository**
+  - Branch: `develop` (currently active)
+  - Build: Automatic Jekyll builds by GitHub Pages
+  - Configuration: `docs/_config.yml`
 
-- [ ] **Configure build settings**
-  - Set up automatic deployments
-  - Configure preview deployments for PRs (optional)
-  - Set up build notifications
+- [x] **Configure build settings**
+  - Jekyll configuration complete (`_config.yml`)
+  - Landing page created (`docs/index.md`)
+  - Theme: Cayman (GitHub Pages supported)
+  - Automatic deployments on push to develop
 
 ---
 
@@ -65,41 +63,50 @@
 
 ---
 
-### 4. ⏳ Documentation Site Deployment
+### 4. ✅ Documentation Site Deployment (Phase 1 - Jekyll)
 
-- [ ] **Choose documentation framework**
+**Current Status**: Basic Jekyll site running at `https://dev-parkins.github.io/FerrisScript`
+
+- [x] **Choose documentation framework**
+  - **Selected**: Jekyll (GitHub Pages native, zero-config deployment)
+  - Theme: Cayman (clean, professional, GitHub-supported)
+  - Markdown processor: kramdown with GitHub Flavored Markdown (GFM)
   
-  **Option A: Docusaurus** (Recommended)
-  - Pros: Modern, React-based, excellent search, versioning support
-  - Cons: Heavier, requires Node.js build
-  - Setup: `npx create-docusaurus@latest docs classic`
+  **Future Upgrade Path** (for v1.0+):
+  - **Option A: Docusaurus** (Recommended)
+    - Pros: Modern, React-based, excellent search, versioning support
+    - Cons: Heavier, requires Node.js build
+    - Setup: `npx create-docusaurus@latest docs classic`
   
-  **Option B: mdBook**
-  - Pros: Rust-native, lightweight, simple
-  - Cons: Less features, basic search
-  - Setup: `cargo install mdbook && mdbook init docs`
+  - **Option B: mdBook**
+    - Pros: Rust-native, lightweight, simple
+    - Cons: Less features, basic search
+    - Setup: `cargo install mdbook && mdbook init docs`
   
-  **Option C: VitePress**
-  - Pros: Fast, Vue-based, good DX
-  - Cons: Vue ecosystem (not Rust-native)
-  - Setup: `npm init vitepress`
+  - **Option C: VitePress**
+    - Pros: Fast, Vue-based, good DX
+    - Cons: Vue ecosystem (not Rust-native)
+    - Setup: `npm init vitepress`
 
-- [ ] **Convert ERROR_CODES.md to site format**
-  - Create searchable error code index
-  - Add navigation structure
-  - Preserve error code anchors (e.g., `#e001`)
+- [x] **ERROR_CODES.md accessible on site**
+  - Direct link: `https://dev-parkins.github.io/FerrisScript/ERROR_CODES`
+  - Anchor links working: `#e001-invalid-character`, `#e201-undefined-variable`, etc.
+  - Navigation added via `docs/index.md` landing page
+  - Cross-references working between related errors
 
-- [ ] **Set up documentation structure**
+- [x] **Set up documentation structure** (Jekyll-based)
 
+  **Current Structure**:
   ```
   docs/
-  ├── errors/           # Error code documentation
-  │   ├── index.md      # Error codes overview
-  │   ├── lexical.md    # E001-E099
-  │   ├── syntax.md     # E100-E199
-  │   ├── type.md       # E200-E299
-  │   └── runtime.md    # E400-E499
-  ├── guides/           # User guides
+  ├── _config.yml           # Jekyll configuration
+  ├── index.md              # Landing page with navigation
+  ├── Gemfile               # Ruby dependencies for local testing
+  ├── .gitignore            # Exclude Jekyll build artifacts
+  ├── ERROR_CODES.md        # Comprehensive error reference (1770+ lines)
+  ├── ARCHITECTURE.md       # System architecture
+  ├── FAQ.md                # Frequently asked questions
+  ├── DEVELOPMENT.md        # Development guide
   │   ├── getting-started.md
   │   ├── godot-integration.md
   │   └── examples.md
