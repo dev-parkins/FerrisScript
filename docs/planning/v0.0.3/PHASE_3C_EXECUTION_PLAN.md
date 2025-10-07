@@ -37,6 +37,7 @@ A: `docs/planning/v0.0.3/PHASE_3_ERROR_DOCS_RECOVERY.md` - comprehensive plannin
 
 **Q6: Has similar work been done before?**  
 A: Phases 1-2-3A-3B complete:
+
 - Phase 1: Error code system (E001-E499)
 - Phase 2: Error suggestions ("did you mean?")
 - Phase 3A: Documentation URLs in errors
@@ -157,6 +158,7 @@ A: Existing parser behavior for valid syntax. Current `parse()` API signature. E
 ### Phase 1: Add Recovery Infrastructure (1-2h)
 
 **Tasks**:
+
 1. Create new branch `feature/v0.0.3-phase-3c-recovery`
 2. Add `panic_mode: bool` field to `Parser` struct
 3. Add `errors: Vec<String>` field to `Parser` struct
@@ -165,10 +167,12 @@ A: Existing parser behavior for valid syntax. Current `parse()` API signature. E
 6. Implement `record_error()` helper method
 
 **Deliverables**:
+
 - Modified `crates/compiler/src/parser.rs`
 - Code compiles, existing tests still pass
 
 **Validation**:
+
 ```bash
 cargo build --workspace
 cargo test --package ferrisscript_compiler
@@ -177,6 +181,7 @@ cargo test --package ferrisscript_compiler
 ### Phase 2: Modify Error Handling (2-3h)
 
 **Tasks**:
+
 1. Update `parse_program()` to use recovery
 2. Update `parse_statement()` to use recovery
 3. Update individual statement parsing methods
@@ -184,11 +189,13 @@ cargo test --package ferrisscript_compiler
 5. Verify first error still returned for API compatibility
 
 **Deliverables**:
+
 - Modified error handling in parser methods
 - Parser collects multiple errors
 - Existing API maintained
 
 **Validation**:
+
 ```bash
 cargo test --package ferrisscript_compiler
 cargo clippy --package ferrisscript_compiler
@@ -197,6 +204,7 @@ cargo clippy --package ferrisscript_compiler
 ### Phase 3: Write Recovery Tests (2-3h)
 
 **Tasks**:
+
 1. Write unit tests for `synchronize()`
 2. Write integration tests for common errors
 3. Write tests for cascading error prevention
@@ -204,11 +212,13 @@ cargo clippy --package ferrisscript_compiler
 5. Verify 80%+ coverage of new code
 
 **Deliverables**:
+
 - New test module or expanded existing tests
 - All tests pass
 - Edge cases covered
 
 **Validation**:
+
 ```bash
 cargo test --workspace
 # Check specific test output
@@ -218,6 +228,7 @@ cargo test --package ferrisscript_compiler recovery -- --nocapture
 ### Phase 4: Quality Assurance (1h)
 
 **Tasks**:
+
 1. Run full test suite
 2. Run clippy with strict mode
 3. Run formatter
@@ -226,11 +237,13 @@ cargo test --package ferrisscript_compiler recovery -- --nocapture
 6. Run parser benchmarks (ensure no regression)
 
 **Deliverables**:
+
 - All quality checks pass
 - No performance regression
 - Clean git diff
 
 **Validation**:
+
 ```bash
 cargo test --workspace
 cargo clippy --workspace --all-targets --all-features -- -D warnings
@@ -242,6 +255,7 @@ cargo bench --package ferrisscript_compiler -- parser
 ### Phase 5: Documentation & PR (1h)
 
 **Tasks**:
+
 1. Update `LEARNINGS.md` with Phase 3C discoveries
 2. Update phase tracking in `README.md`
 3. Create summary document
@@ -249,12 +263,14 @@ cargo bench --package ferrisscript_compiler -- parser
 5. Create PR with comprehensive description
 
 **Deliverables**:
+
 - Updated `docs/planning/v0.0.3/LEARNINGS.md`
 - Updated `docs/planning/v0.0.3/README.md`
 - New `PHASE_3C_SUMMARY.md`
 - PR ready for review
 
 **Validation**:
+
 - All documentation links work
 - PR description is comprehensive
 - Summary document follows template
@@ -264,12 +280,14 @@ cargo bench --package ferrisscript_compiler -- parser
 ## 📦 Deliverables
 
 ### Code Changes
+
 - **Modified**: `crates/compiler/src/parser.rs`
   - New fields: `panic_mode`, `errors`
   - New methods: `synchronize()`, `record_error()`
   - Modified: `parse_program()`, `parse_statement()`, statement parsing methods
 
 ### Tests
+
 - **New tests in `parser.rs`**:
   - `test_synchronize_on_semicolon()`
   - `test_synchronize_on_brace()`
@@ -281,6 +299,7 @@ cargo bench --package ferrisscript_compiler -- parser
   - (8-12 new test functions)
 
 ### Documentation
+
 - **Updated**: `docs/planning/v0.0.3/LEARNINGS.md`
 - **Updated**: `docs/planning/v0.0.3/README.md`
 - **Updated**: `docs/planning/v0.0.3/PHASE_3_ERROR_DOCS_RECOVERY.md`
@@ -333,6 +352,7 @@ impl<'a> Parser<'a> {
 ### Modified Error Handling Pattern
 
 **Before** (immediate return):
+
 ```rust
 fn parse_statement(&mut self) -> Result<Stmt, String> {
     match self.current() {
@@ -343,6 +363,7 @@ fn parse_statement(&mut self) -> Result<Stmt, String> {
 ```
 
 **After** (recover and continue):
+
 ```rust
 fn parse_statement(&mut self) -> Option<Stmt> {
     match self.current() {
@@ -370,18 +391,21 @@ fn parse_statement(&mut self) -> Option<Stmt> {
 ## 🚫 Out of Scope (Deferred)
 
 ### Deferred to Phase 3D
+
 - Multi-error reporting with `Diagnostic` struct
 - Batch vs stream reporting modes
 - CLI flags for error reporting control
 - Proper multi-error API (`Vec<Diagnostic>`)
 
 ### Deferred to Future Work
+
 - Expression-level recovery (complex)
 - Advanced recovery strategies (context-sensitive)
 - Recovery confidence scoring
 - Speculative parsing
 
 ### Explicitly NOT Changing
+
 - Error formatting (from Phase 1-2-3A)
 - Documentation URLs (from Phase 3A)
 - Error suggestions (from Phase 2)
@@ -392,6 +416,7 @@ fn parse_statement(&mut self) -> Option<Stmt> {
 ## 📊 Success Metrics
 
 ### Quantitative
+
 - ✅ All existing tests pass (270+ tests)
 - ✅ 8-12 new tests added
 - ✅ 80%+ coverage of new recovery code
@@ -400,6 +425,7 @@ fn parse_statement(&mut self) -> Option<Stmt> {
 - ✅ No performance regression (< 5% slowdown)
 
 ### Qualitative
+
 - ✅ Parser continues after syntax errors
 - ✅ Multiple errors collected correctly
 - ✅ No cascading false positives
