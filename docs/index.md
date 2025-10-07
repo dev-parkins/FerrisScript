@@ -21,25 +21,25 @@ FerrisScript brings Rust's syntax clarity and safety concepts to Godot game deve
 <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
 <h3>📖 Error Codes</h3>
 <p>Comprehensive reference for all compiler errors with examples and fixes.</p>
-<a href="ERROR_CODES.html">Browse Error Codes →</a>
+<a href="ERROR_CODES">Browse Error Codes →</a>
 </div>
 
 <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
 <h3>🏗️ Architecture</h3>
 <p>Learn about FerrisScript's compiler architecture and design decisions.</p>
-<a href="ARCHITECTURE.html">View Architecture →</a>
+<a href="ARCHITECTURE">View Architecture →</a>
 </div>
 
 <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
 <h3>❓ FAQ</h3>
 <p>Frequently asked questions about FerrisScript usage and features.</p>
-<a href="FAQ.html">Read FAQ →</a>
+<a href="FAQ">Read FAQ →</a>
 </div>
 
 <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
 <h3>👨‍💻 Development</h3>
 <p>Contributing guide and development workflow documentation.</p>
-<a href="DEVELOPMENT.html">Development Guide →</a>
+<a href="DEVELOPMENT">Development Guide →</a>
 </div>
 
 </div>
@@ -57,23 +57,23 @@ FerrisScript provides comprehensive error documentation with:
 - **Cross-references** to related errors
 - **Direct links** from compiler error messages
 
-[**→ Browse All Error Codes**](ERROR_CODES.html)
+[**→ Browse All Error Codes**](ERROR_CODES)
 
 ### Planning & Roadmap
 
 Current development planning for v0.0.3:
 
-- [v0.0.3 Overview](planning/v0.0.3/README.html)
-- [Phase 1: Error Codes](planning/v0.0.3/PHASE_1_ERROR_CODES.html)
-- [Phase 2: Error Suggestions](planning/v0.0.3/PHASE_2_ERROR_SUGGESTIONS.html)
-- [Phase 3: Error Documentation](planning/v0.0.3/PHASE_3_ERROR_DOCS_RECOVERY.html)
+- [v0.0.3 Overview](planning/v0.0.3/README)
+- [Phase 1: Error Codes](planning/v0.0.3/PHASE_1_ERROR_CODES)
+- [Phase 2: Error Suggestions](planning/v0.0.3/PHASE_2_ERROR_SUGGESTIONS)
+- [Phase 3: Error Documentation](planning/v0.0.3/PHASE_3_ERROR_DOCS_RECOVERY)
 
 ### Development Resources
 
-- [Architecture Overview](ARCHITECTURE.html) - System design and component interaction
-- [Development Guide](DEVELOPMENT.html) - Setup, building, and testing
-- [FAQ](FAQ.html) - Common questions and answers
-- [Troubleshooting](TROUBLESHOOTING.html) - Common issues and solutions
+- [Architecture Overview](ARCHITECTURE) - System design and component interaction
+- [Development Guide](DEVELOPMENT) - Setup, building, and testing
+- [FAQ](FAQ) - Common questions and answers
+- [Troubleshooting](TROUBLESHOOTING) - Common issues and solutions
 
 ---
 
@@ -92,7 +92,7 @@ Current development planning for v0.0.3:
 - ⏳ **Phase 3D**: Multi-error reporting
 - ⏳ **Phase 3E**: Integration and testing
 
-[View detailed roadmap →](planning/v0.0.3/README.html)
+[View detailed roadmap →](planning/v0.0.3/README)
 
 ---
 
@@ -102,29 +102,29 @@ Common error codes by category:
 
 ### Lexical Errors (E001-E099)
 
-- [E001: Invalid Character](ERROR_CODES.html#e001-invalid-character)
-- [E002: Unterminated String](ERROR_CODES.html#e002-unterminated-string)
-- [E003: Invalid Number Format](ERROR_CODES.html#e003-invalid-number-format)
+- [E001: Invalid Character](ERROR_CODES#e001-invalid-character)
+- [E002: Unterminated String](ERROR_CODES#e002-unterminated-string)
+- [E003: Invalid Number Format](ERROR_CODES#e003-invalid-number-format)
 
 ### Syntax Errors (E100-E199)
 
-- [E100: Unexpected Token](ERROR_CODES.html#e100-unexpected-token)
-- [E101: Invalid Top-Level Item](ERROR_CODES.html#e101-invalid-top-level-item)
-- [E102: Expected Expression](ERROR_CODES.html#e102-expected-expression)
+- [E100: Unexpected Token](ERROR_CODES#e100-unexpected-token)
+- [E101: Invalid Top-Level Item](ERROR_CODES#e101-invalid-top-level-item)
+- [E102: Expected Expression](ERROR_CODES#e102-expected-expression)
 
 ### Type Errors (E200-E299)
 
-- [E200: Type Mismatch](ERROR_CODES.html#e200-type-mismatch)
-- [E201: Undefined Variable](ERROR_CODES.html#e201-undefined-variable)
-- [E202: Undefined Function](ERROR_CODES.html#e202-undefined-function)
+- [E200: Type Mismatch](ERROR_CODES#e200-type-mismatch)
+- [E201: Undefined Variable](ERROR_CODES#e201-undefined-variable)
+- [E202: Undefined Function](ERROR_CODES#e202-undefined-function)
 
 ### Runtime Errors (E400-E499)
 
-- [E400: Cannot Assign to Immutable Variable](ERROR_CODES.html#e400-cannot-assign-to-immutable-variable)
-- [E401: Undefined Variable (Runtime)](ERROR_CODES.html#e401-undefined-variable)
-- [E413: Division by Zero](ERROR_CODES.html#e413-division-by-zero)
+- [E400: Cannot Assign to Immutable Variable](ERROR_CODES#e400-cannot-assign-to-immutable-variable)
+- [E401: Undefined Variable (Runtime)](ERROR_CODES#e401-undefined-variable)
+- [E413: Division by Zero](ERROR_CODES#e413-division-by-zero)
 
-[**→ View All Error Codes**](ERROR_CODES.html)
+[**→ View All Error Codes**](ERROR_CODES)
 
 ---
 
@@ -175,7 +175,7 @@ help: did you mean 'velocity'?
 We welcome contributions! Check out:
 
 - [Contributing Guide](https://github.com/dev-parkins/FerrisScript/blob/main/CONTRIBUTING.md)
-- [Development Setup](DEVELOPMENT.html)
+- [Development Setup](DEVELOPMENT)
 - [Open Issues](https://github.com/dev-parkins/FerrisScript/issues)
 
 ---

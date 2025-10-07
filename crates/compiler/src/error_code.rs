@@ -257,16 +257,16 @@ impl ErrorCode {
 
     /// Get documentation URL for this error code
     ///
-    /// By default, links to GitHub repository. Set `FERRIS_DOCS_BASE` environment
+    /// By default, links to GitHub Pages documentation. Set `FERRIS_DOCS_BASE` environment
     /// variable to use a custom documentation site (e.g., when docs.ferrisscript.dev launches).
     ///
     /// # Examples
     ///
-    /// Default (GitHub):
+    /// Default (GitHub Pages):
     /// ```
     /// use ferrisscript_compiler::error_code::ErrorCode;
     /// let url = ErrorCode::E201.get_docs_url();
-    /// assert!(url.contains("github.com"));
+    /// assert!(url.contains("github.io"));
     /// assert!(url.contains("#e201"));
     /// ```
     ///
@@ -286,8 +286,8 @@ impl ErrorCode {
         if let Ok(base) = std::env::var("FERRIS_DOCS_BASE") {
             format!("{}/errors/{}", base.trim_end_matches('/'), code)
         } else {
-            // Default: GitHub main branch
-            // Generate proper GitHub anchor from error code and description
+            // Default: GitHub Pages documentation site
+            // Generate proper GitHub Pages anchor from error code and description
             // Example: E201 "Undefined variable" → #e201-undefined-variable
             let description = self.description();
             let slug = description
@@ -299,7 +299,7 @@ impl ErrorCode {
             let anchor = format!("{}-{}", code.to_lowercase(), slug);
 
             format!(
-                "https://github.com/dev-parkins/FerrisScript/blob/main/docs/ERROR_CODES.md#{}",
+                "https://dev-parkins.github.io/FerrisScript/ERROR_CODES/#{}",
                 anchor
             )
         }
@@ -590,28 +590,28 @@ mod tests {
 
     #[test]
     fn test_get_docs_url_default() {
-        // Without FERRIS_DOCS_BASE env var, should return GitHub URL with proper anchors
+        // Without FERRIS_DOCS_BASE env var, should return GitHub Pages URL with proper anchors
         std::env::remove_var("FERRIS_DOCS_BASE");
 
         let url = ErrorCode::E001.get_docs_url();
-        assert!(url.contains("github.com"));
+        assert!(url.contains("github.io"));
         assert!(url.contains("#e001-invalid-character"));
 
         let url = ErrorCode::E201.get_docs_url();
-        assert!(url.contains("github.com"));
+        assert!(url.contains("github.io"));
         assert!(url.contains("#e201-undefined-variable"));
     }
 
     #[test]
     fn test_get_docs_url_format() {
-        // Test URL format structure with proper GitHub slugification
+        // Test URL format structure with proper GitHub Pages slugification
         std::env::remove_var("FERRIS_DOCS_BASE");
 
         // Test that URLs are well-formed
         let url = ErrorCode::E001.get_docs_url();
         assert!(!url.is_empty());
         assert!(url.starts_with("http"));
-        assert!(url.contains("ERROR_CODES.md#"));
+        assert!(url.contains("ERROR_CODES/#"));
         assert!(url.contains("e001-")); // Lowercase code with hyphen
 
         // Test a few specific codes to ensure slugification works

@@ -14,8 +14,8 @@ repository: dev-parkins/FerrisScript
 
 # Theme
 # Using GitHub Pages supported themes
-# Options: minima, cayman, minimal, slate, time-machine, leap-day, etc.
-remote-theme: pages-themes/cayman@v0.2.0
+# Options: minima, cayman, minimal, slate, time-machine, leap-day, hacker, etc.
+remote-theme: pages-themes/hacker@v0.2.0
 # Alternative for more features (requires gem):
 # remote_theme: just-the-docs/just-the-docs
 
