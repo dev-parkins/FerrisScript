@@ -379,7 +379,160 @@ fn _ready() {
 
 ---
 
-### Option 5: Fallback Strategy (Use Rust Highlighting)
+### Option 5: Rouge Lexer (GitHub Pages / Jekyll Support)
+
+**What is Rouge?**
+
+- Syntax highlighter used by GitHub Pages and Jekyll
+- Written in Ruby (not JavaScript)
+- Powers server-side highlighting on GitHub Pages
+- Alternative to GitHub Linguist for GitHub Pages sites
+
+**Rouge Project**: https://github.com/rouge-ruby/rouge
+
+#### How GitHub Pages Highlighting Works
+
+**Server-Side Processing**:
+
+- GitHub Pages uses Jekyll + Rouge for markdown rendering
+- Syntax highlighting happens **server-side**, not in browser
+- Rouge only supports languages with Ruby lexers
+- Cannot use TextMate grammars (`.tmLanguage`) directly
+
+**Example**:
+
+````markdown
+```python
+print("hello")
+```
+````
+
+→ Rendered via Rouge's built-in Python lexer (server-side)
+
+**Current Problem**:
+
+````markdown
+```ferrisscript
+let x: i32 = 42;
+```
+````
+
+→ Renders as **plain text** (no `ferrisscript` lexer in Rouge)
+
+#### How to Add a Language to Rouge
+
+**Implementation**:
+
+1. **Write Ruby lexer** (`lib/rouge/lexers/ferrisscript.rb`):
+
+   ```ruby
+   module Rouge
+     module Lexers
+       class FerrisScript < RegexLexer
+         title "FerrisScript"
+         desc "The FerrisScript programming language for Godot"
+         tag 'ferrisscript'
+         aliases 'ferris'
+         filenames '*.ferris'
+         
+         def self.keywords
+           @keywords ||= %w(
+             fn let mut if else while return self
+             i32 f32 i64 f64 bool String
+           )
+         end
+         
+         state :root do
+           rule %r/\s+/, Text
+           rule %r(//.*$), Comment::Single
+           rule %r(/\*.*?\*/), Comment::Multiline
+           
+           rule %r/"[^"]*"/, Str::Double
+           rule %r/\b\d+\.?\d*\b/, Num
+           
+           rule %r/\b(#{keywords.join('|')})\b/, Keyword
+           rule %r/[A-Za-z_]\w*/, Name
+           rule %r/[+\-*\/%=!<>]=?|&&|\|\|/, Operator
+           rule %r/[{}()\[\];,.]/, Punctuation
+         end
+       end
+     end
+   end
+   ```
+
+2. **Add tests** (required by Rouge):
+
+   ```ruby
+   # spec/lexers/ferrisscript_spec.rb
+   describe Rouge::Lexers::FerrisScript do
+     let(:subject) { Rouge::Lexers::FerrisScript.new }
+     
+     it 'tokenizes keywords' do
+       tokens = subject.lex('fn main() { let x = 42; }').to_a
+       # assertions...
+     end
+   end
+   ```
+
+3. **Submit PR to Rouge**:
+   - Fork https://github.com/rouge-ruby/rouge
+   - Add lexer and tests
+   - Submit PR with documentation
+   - Wait for review and merge
+
+4. **Wait for GitHub Pages deployment**:
+   - Rouge must be updated on GitHub Pages servers
+   - Can take weeks/months after merge
+   - No control over deployment timeline
+
+**Effort**:
+
+- Lexer implementation: 1-2 days (Ruby knowledge required)
+- Tests: 1 day
+- PR submission & review: 2-6 weeks (depends on maintainers)
+- **Total**: ~1-2 months from start to GitHub Pages deployment
+
+**Benefits**:
+
+- ✅ Works on GitHub Pages (Jekyll sites)
+- ✅ Server-side highlighting (no JavaScript needed)
+- ✅ Consistent with GitHub.com (if Linguist also submitted)
+- ✅ Zero maintenance after merge (Rouge maintains it)
+
+**Drawbacks**:
+
+- ⚠️ Requires Ruby programming knowledge
+- ⚠️ External dependency (Rouge maintainers must approve)
+- ⚠️ Can be rejected or delayed
+- ⚠️ GitHub Pages deployment delay (weeks/months)
+- ⚠️ Only helps GitHub Pages (not other platforms)
+- ⚠️ Separate from VS Code grammar (duplicate work)
+
+**Comparison to GitHub Linguist**:
+
+- **Linguist**: Affects github.com repo pages and markdown
+- **Rouge**: Affects GitHub Pages (Jekyll) sites
+- **Overlap**: Both needed for complete GitHub coverage
+- **Effort**: Similar (both require PR + review)
+
+**Use Cases**:
+
+- GitHub Pages documentation site
+- Jekyll-based project sites
+- GitHub Pages blog with code examples
+
+**Recommendation**: **Consider for v0.4.0+ IF using GitHub Pages**
+
+- Only needed if building docs on GitHub Pages
+- If using Netlify/Vercel/custom hosting, use Shiki instead
+- If submitting to Linguist, consider Rouge too (double coverage)
+- Not recommended if no GitHub Pages usage planned
+
+**Reference**: https://github.com/rouge-ruby/rouge/wiki/List-of-tokens
+
+---
+
+### Option 6: Fallback Strategy (Use Rust Highlighting)
 
 **Short-Term Workaround**:
 Since FerrisScript syntax is heavily inspired by Rust, we can use Rust highlighting as a fallback.
@@ -428,13 +581,114 @@ fn _ready() {
 
 ## 📊 Comparison Matrix
 
-| Option | GitHub Support | Docs Site Support | Effort | Maintenance | Accuracy | Timeline |
-|--------|----------------|-------------------|--------|-------------|----------|----------|
-| **GitHub Linguist** | ✅ Official | ❌ No | Medium (1 month) | ✅ GitHub maintains | ✅ High | v0.1.0-v0.2.0 |
-| **Prism.js** | ❌ No | ✅ Yes | Low (3-4 days) | ⚠️ We maintain | ✅ High | v0.4.0+ |
-| **Highlight.js** | ❌ No | ✅ Yes | Low (3-4 days) | ⚠️ We maintain | ✅ High | v0.4.0+ |
-| **Shiki** | ❌ No | ✅ Yes | Very Low (2 days) | ✅ Reuses grammar | ✅ Very High | v0.4.0+ |
-| **Rust Fallback** | ✅ Works | ✅ Works | Zero | Zero | ⚠️ Medium | Now |
+| Option | GitHub.com | GitHub Pages | Docs Site | Effort | Maintenance | Accuracy | Timeline |
+|--------|------------|--------------|-----------|--------|-------------|----------|----------|
+| **GitHub Linguist** | ✅ Official | ❌ No | ❌ No | Medium (1 month) | ✅ GitHub maintains | ✅ High | v0.1.0-v0.2.0 |
+| **Rouge Lexer** | ❌ No | ✅ Jekyll | ❌ No | Medium (1-2 months) | ✅ Rouge maintains | ✅ High | v0.4.0+ (if Pages) |
+| **Prism.js** | ❌ No | ✅ Client-side | ✅ Yes | Low (3-4 days) | ⚠️ We maintain | ✅ High | v0.4.0+ |
+| **Highlight.js** | ❌ No | ✅ Client-side | ✅ Yes | Low (3-4 days) | ⚠️ We maintain | ✅ High | v0.4.0+ |
+| **Shiki** | ❌ No | ✅ Build-time | ✅ Yes | Very Low (2 days) | ✅ Reuses grammar | ✅ Very High | v0.4.0+ |
+| **Rust Fallback** | ✅ Works | ✅ Works | ✅ Works | Zero | Zero | ⚠️ Medium | Now |
+
+**Key**:
+
+- **GitHub.com**: Syntax highlighting on repository pages, markdown files
+- **GitHub Pages**: Jekyll-based GitHub Pages sites (server-side)
+- **Docs Site**: Custom documentation sites (VitePress, Docusaurus, etc.)
+- **Client-side**: Requires JavaScript in browser
+- **Build-time**: Highlighting during site build (no client JS needed)
+- **Server-side**: Highlighting on GitHub's servers
+
+---
+
+## 🧭 Decision Guide: Which Solution to Use?
+
+### Scenario 1: "I just want GitHub markdown to work" → **GitHub Linguist**
+
+**Use Case**: README.md, docs/ folder, GitHub repos
+**Solution**: Submit to GitHub Linguist (v0.1.0-v0.2.0)
+**Effort**: 1-2 days packaging + 2-4 weeks review
+**Covers**: All GitHub.com markdown, repo pages, gists
+
+---
+
+### Scenario 2: "I'm using GitHub Pages (Jekyll)" → **Rouge Lexer OR Client-Side**
+
+**Option A: Rouge Lexer (server-side, official)**
+
+- **Pros**: Native Jekyll support, no JavaScript needed
+- **Cons**: Requires Ruby code, 1-2 month timeline, GitHub deployment wait
+- **Use when**: Long-term solution, want server-side rendering
+
+**Option B: Highlight.js (client-side, fast)**
+
+- **Pros**: Works immediately (add script tags), no PR needed
+- **Cons**: Requires JavaScript, client-side processing
+- **Use when**: Quick fix, okay with JavaScript dependency
+
+**Recommendation**:
+
+- **Now**: Use Highlight.js (immediate)
+- **Later**: Submit Rouge lexer (v0.4.0+) if staying with GitHub Pages long-term
+
+---
+
+### Scenario 3: "I'm building a custom docs site" → **Shiki (Recommended)**
+
+**Use Case**: VitePress, Astro, Docusaurus, custom static site
+**Solution**: Shiki with TextMate grammar
+**Effort**: 2 days
+**Benefits**:
+
+- ✅ Reuses VS Code grammar (zero duplication)
+- ✅ Perfect editor/docs consistency
+- ✅ Build-time highlighting (fast, no client JS)
+- ✅ Modern tooling
+
+**Alternative**: Prism.js or Highlight.js if Shiki doesn't fit framework
+
+---
+
+### Scenario 4: "I need something now" → **Rust Fallback**
+
+**Use Case**: Early documentation, quick examples
+**Solution**: Use ` ```rust ` in code blocks
+**Effort**: Zero
+**Benefits**: Works everywhere immediately
+**Temporary**: Replace with proper solution in v0.4.0+
+
+---
+
+### Scenario 5: "I want complete GitHub coverage" → **Linguist + Rouge**
+
+**Use Case**: GitHub.com repos + GitHub Pages docs site
+**Solution**: Submit to both Linguist and Rouge
+**Effort**: 2-4 days total (can do in parallel)
+**Timeline**: v0.1.0-v0.2.0 (Linguist), v0.4.0+ (Rouge)
+**Covers**: All GitHub platforms
+
+---
+
+### Scenario 6: "I'm hosting docs myself (not GitHub)" → **Shiki or Prism.js**
+
+**Use Case**: Netlify, Vercel, custom hosting
+**Solution**: Shiki (if modern framework) or Prism.js/Highlight.js
+**Effort**: 2-4 days
+**Benefits**: Full control, no external approval needed
+
+---
+
+## 📋 Quick Decision Table
+
+| Your Situation | Best Solution | Timeline |
+|----------------|---------------|----------|
+| **GitHub markdown (README, docs/)** | GitHub Linguist | v0.1.0-v0.2.0 |
+| **GitHub Pages (Jekyll), want official** | Rouge Lexer | v0.4.0+ |
+| **GitHub Pages (Jekyll), want quick fix** | Highlight.js (client-side) | Now |
+| **Custom docs site (VitePress, etc.)** | Shiki | v0.4.0+ |
+| **Need it immediately** | Rust fallback | Now |
+| **Complete GitHub coverage** | Linguist + Rouge | v0.1.0-v0.4.0 |
+| **Self-hosted docs (Netlify, etc.)** | Shiki or Prism.js | v0.4.0+ |
 
 ---
 
@@ -512,23 +766,37 @@ fn _ready() {
 
 **Actions**:
 
-1. **Set up Shiki integration** (2 days):
+1. **Decide on hosting platform**:
+   - **GitHub Pages (Jekyll)**: Consider Rouge lexer OR Highlight.js client-side
+   - **Netlify/Vercel/Custom**: Use Shiki (recommended)
+   - **VitePress/Astro/Docusaurus**: Use Shiki (native support)
+
+2. **Set up Shiki integration** (if not GitHub Pages):
    - Install Shiki in docs site build
    - Configure to load FerrisScript TextMate grammar
    - Test with various code examples
    - Verify theme compatibility
 
-2. **Package for distribution**:
+3. **Package for distribution**:
    - Include in docs site repository
    - Document for contributors
    - Add to docs build pipeline
 
-3. **Update documentation**:
+4. **Update documentation**:
    - Switch all code blocks to `ferrisscript`
    - Showcase syntax highlighting in README
    - Add highlighting examples to docs
 
-**Alternative**: Prism.js or Highlight.js (if Shiki doesn't fit docs framework)
+**GitHub Pages Option** (if using Jekyll):
+
+- **Option A**: Submit Rouge lexer (1-2 months, server-side, official)
+- **Option B**: Use Highlight.js (2 days, client-side, immediate)
+- **Recommendation**: Start with Option B, consider Option A for v0.5.0+
+
+**Alternative Frameworks**:
+
+- **Prism.js**: If framework requires it (3-4 days)
+- **Highlight.js**: If framework recommends it (3-4 days)
 
 **Rationale**:
 
@@ -536,8 +804,13 @@ fn _ready() {
 - Shiki reuses existing VS Code work (minimal effort)
 - Perfect consistency between editor and docs
 - Modern, well-maintained tool
+- GitHub Pages requires special consideration (Rouge vs client-side)
 
-**Effort**: 2 days (Shiki) or 3-4 days (Prism.js/Highlight.js)
+**Effort**:
+
+- **Shiki**: 2 days
+- **Prism.js/Highlight.js**: 3-4 days
+- **Rouge Lexer**: 1-2 months (if GitHub Pages + long-term)
 
 ---
 
