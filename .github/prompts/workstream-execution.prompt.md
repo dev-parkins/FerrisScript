@@ -60,6 +60,7 @@ When encountering ambiguity during context gathering or execution:
    - Use common best practices
 
 3. **Document Assumption**: Note inline with clear format:
+
    ```
    ⚠️ ASSUMPTION: [What was assumed] based on [reasoning/evidence]
    ```
@@ -223,6 +224,7 @@ When invoked with `/prompt #file:workstream-execution.prompt.md`, you will:
 When requirements are clear from attached context:
 
 1. **Generate Brief Plan** (≤5 bullets, inline in output):
+
    ```markdown
    ## Execution Summary
    1. [Phase 1 goal - e.g., "Add parser error recovery"]
@@ -359,7 +361,7 @@ Before declaring work complete:
 
 1. **Complete, validated implementation** (all code working and tested)
 2. **Clear completion marker**: `✅ Workstream Execution Complete`
-3. **Deliverables summary**: 
+3. **Deliverables summary**:
    - X code files created/modified
    - Y test files created/modified
    - Z documentation files updated
@@ -444,9 +446,11 @@ Before declaring work complete:
 
 ### Test Execution
 ```
+
 cargo test --workspace
 ✅ 234 tests passed (0 failed, 0 ignored)
 Test run completed in 3.4s
+
 ```
 
 ### Coverage Impact (if applicable)
@@ -464,12 +468,15 @@ Test run completed in 3.4s
 
 ### Build Status
 ```
+
 cargo build --workspace
 ✅ Compilation successful (0 errors, 0 warnings)
+
 ```
 
 ### Linting Status
 ```
+
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 ✅ All linting passed (0 warnings)
 
@@ -478,6 +485,7 @@ cargo fmt --all -- --check
 
 npm run docs:lint
 ✅ Markdown linting passed (0 errors)
+
 ```
 
 ### Acceptance Criteria
@@ -983,12 +991,14 @@ npx markdown-link-check <file.md>
 **Discover current version state dynamically**:
 
 - **Current Version**: Check `CHANGELOG.md` (latest entry) or `Cargo.toml` (version field)
-- **Roadmaps**: Review `docs/planning/v*-roadmap.md` files for version-specific goals
-- **Latest Roadmap**: Find highest version number roadmap (e.g., v0.4.0-roadmap.md = most recent planning)
+- **Active Roadmap**: Find **lowest** version number roadmap in `docs/planning/v*-roadmap.md` (e.g., v0.2.0 is being worked on before v0.3.0, v0.4.0)
+  - **Why lowest**: Roadmaps are built outwards - we plan future versions while working on the earliest incomplete version
+  - Example: If you see v0.2.0, v0.3.0, v0.4.0 roadmaps, the **active work** is on v0.2.0 (lowest = current)
 - **Version Strategy**: Look for version planning documents in `docs/planning/` or `docs/VERSION_PLANNING.md`
-- **Upcoming Features**: Read the latest roadmap document for priorities and planned work
+- **Upcoming Features**: Read the lowest-numbered roadmap document for current priorities and planned work
+- **Future Planning**: Higher-numbered roadmaps (v0.3.0, v0.4.0, etc.) are forward planning, not current work
 
-**Don't assume versions** - always discover from current documentation state.
+**Don't assume versions** - always discover from current documentation state and identify the lowest (earliest) incomplete roadmap.
 
 ### File Discovery (If User Doesn't Provide Context)
 
@@ -1049,6 +1059,7 @@ cargo build --workspace
 6. **Tool failure limit**: If `cargo build` command itself crashes/hangs 3 times, report tool issue
 
 **Key**: You have full license to fix compilation errors. Only stop if:
+
 - Code compiles successfully ✅
 - You've tried all reasonable fixes and need user input (e.g., missing dependency, platform-specific issue)
 - The build tool itself is broken (not the code)
@@ -1072,6 +1083,7 @@ cargo test --workspace
 6. **Tool failure limit**: If `cargo test` command itself crashes/hangs 3 times, report tool issue
 
 **Key**: You have full license to fix test failures. Only stop if:
+
 - All tests pass ✅
 - You've tried all reasonable fixes and need user input (e.g., test expectations unclear, environmental issue)
 - The test tool itself is broken (not the code)
@@ -1102,6 +1114,7 @@ npm run docs:lint
 7. **Tool failure limit**: If lint commands crash/hang 3 times, report tool issue
 
 **Key**: You have full license to fix linting issues. Only stop if:
+
 - All linting passes ✅
 - You've tried all reasonable fixes and need user input (e.g., clippy suggests refactoring that changes API)
 - The lint tools themselves are broken (not the code)
@@ -1131,6 +1144,7 @@ npx markdown-link-check docs/LEARNINGS.md
 7. **Tool failure limit**: If link checker crashes/hangs 3 times, report tool issue
 
 **Key**: You have full license to fix broken links. Only stop if:
+
 - All links pass validation ✅
 - You've tried all reasonable fixes and need user input (e.g., don't know correct URL for external resource)
 - The link checker tool itself is broken (not the links)
@@ -1154,7 +1168,9 @@ Report ONLY if:
 
 **Error Output**:
 ```
+
 [Paste relevant error messages]
+
 ```
 
 **Attempted Fixes** (all approaches tried):
@@ -1292,6 +1308,7 @@ Let me know if you need me to make any adjustments!"
    - Similar features already implemented
 
 2. **Document the assumption** inline with clear format:
+
    ```markdown
    ⚠️ ASSUMPTION: [What was assumed] based on [reasoning/evidence]
    Example: "Using snake_case naming (mirroring existing test helpers)"
@@ -1303,6 +1320,7 @@ Let me know if you need me to make any adjustments!"
    - Complete the implementation using your best judgment
 
 4. **Note alternatives** in "Recommendations" section:
+
    ```markdown
    ## Alternative Approaches Considered
    - Option A: [What you chose] (selected because...)
