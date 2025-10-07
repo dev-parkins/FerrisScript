@@ -37,9 +37,16 @@ export class FerrisScriptCompletionProvider implements vscode.CompletionItemProv
                 return getKeywordCompletions(true);
 
             case CompletionContext.Expression:
-                // In expression context - show all keywords and functions
+                // In expression context - show expression keywords and functions
+                // Filter out statement-only keywords (fn, let, while, return)
+                const statementOnlyKeywords = ['fn', 'let', 'while', 'return'];
+                const allKeywords = getKeywordCompletions(false);
+                const expressionKeywords = allKeywords.filter(item => {
+                    const label = typeof item.label === 'string' ? item.label : item.label.label;
+                    return !statementOnlyKeywords.includes(label);
+                });
                 return [
-                    ...getKeywordCompletions(false),
+                    ...expressionKeywords,
                     ...getFunctionCompletions()
                 ];
 

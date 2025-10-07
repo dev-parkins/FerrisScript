@@ -28,8 +28,9 @@ export function detectContext(
     const beforeCursor = line.substring(0, position.character);
 
     // Type position: "let x: |" or "fn foo(param: |" or "fn bar() -> |"
-    // Match colon followed by optional whitespace at end of string
-    if (/:\s*$/.test(beforeCursor)) {
+    // Match colon followed by optional whitespace and word characters (for partial types)
+    // This handles: "let x: " and "let x: V" and "let x: Vec" etc.
+    if (/:\s*\w*$/.test(beforeCursor)) {
         return CompletionContext.TypePosition;
     }
 
