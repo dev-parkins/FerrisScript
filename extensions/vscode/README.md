@@ -46,8 +46,25 @@ Syntax highlighting and code snippets for FerrisScript - a Rust-inspired scripti
 
 1. Clone the FerrisScript repository
 2. Copy the `extensions/vscode` directory to your VS Code extensions folder:
-   - **Windows**: `%USERPROFILE%\.vscode\extensions\ferrisscript-0.1.0`
-   - **macOS/Linux**: `~/.vscode/extensions/ferrisscript-0.1.0`
+   - **Windows**: `%USERPROFILE%\.vscode\extensions\ferrisscript-0.0.3`
+   - **macOS/Linux**: `~/.vscode/extensions/ferrisscript-0.0.3`
+3. Reload VS Code
+
+### From VSIX Package (Recommended)
+
+1. Build the VSIX package:
+
+   ```bash
+   cd extensions/vscode
+   npm install -g @vscode/vsce
+   vsce package
+   ```
+
+2. Install the generated `.vsix` file:
+   - Open VS Code
+   - Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS)
+   - Type "Install from VSIX" and select the command
+   - Choose the `ferrisscript-0.0.3.vsix` file
 3. Reload VS Code
 
 ### From Marketplace (Coming Soon)
@@ -124,6 +141,27 @@ When adding new language features, update the syntax highlighting grammar:
 3. Update `CHANGELOG.md`
 
 See [SYNTAX_HIGHLIGHTING_MAINTENANCE.md](../../docs/SYNTAX_HIGHLIGHTING_MAINTENANCE.md) for detailed instructions.
+
+### Type Completion Maintenance
+
+When adding new types to the FerrisScript language, update the VS Code completion provider:
+
+1. Edit `src/completion/types.ts` - add type to `TYPES` array
+2. Edit `syntaxes/ferrisscript.tmLanguage.json` - add to type highlighting
+3. Rebuild extension: `npm run compile`
+4. Test completion in VS Code
+
+**Important**: VS Code completion types must stay synchronized with compiler types. See [TYPE_SYNC.md](./TYPE_SYNC.md) for:
+
+- Current synchronization requirements
+- Manual update process
+- Future automation recommendations (validation scripts, type generation, LSP integration)
+
+### Extension Architecture Notes
+
+**Activation**: The extension auto-activates when a `.ferris` file is opened. VS Code generates activation events from the `contributes.languages` section in `package.json`, so no explicit `activationEvents` array is needed (as of VS Code 1.75+).
+
+**Build Process**: TypeScript code in `src/` compiles to JavaScript in `out/`. The extension entry point is `out/extension.js`.
 
 ## License
 
