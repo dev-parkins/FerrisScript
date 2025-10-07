@@ -51,6 +51,7 @@ FerrisScript brings Rust's syntax clarity and safety concepts to Godot game deve
 ### Error Documentation
 
 FerrisScript provides comprehensive error documentation with:
+
 - **Structured error codes** (E001-E499) organized by category
 - **Detailed explanations** with common causes and examples
 - **Cross-references** to related errors
@@ -61,6 +62,7 @@ FerrisScript provides comprehensive error documentation with:
 ### Planning & Roadmap
 
 Current development planning for v0.0.3:
+
 - [v0.0.3 Overview](planning/v0.0.3/README.html)
 - [Phase 1: Error Codes](planning/v0.0.3/PHASE_1_ERROR_CODES.html)
 - [Phase 2: Error Suggestions](planning/v0.0.3/PHASE_2_ERROR_SUGGESTIONS.html)
@@ -99,21 +101,25 @@ Current development planning for v0.0.3:
 Common error codes by category:
 
 ### Lexical Errors (E001-E099)
+
 - [E001: Invalid Character](ERROR_CODES.html#e001-invalid-character)
 - [E002: Unterminated String](ERROR_CODES.html#e002-unterminated-string)
 - [E003: Invalid Number Format](ERROR_CODES.html#e003-invalid-number-format)
 
 ### Syntax Errors (E100-E199)
+
 - [E100: Unexpected Token](ERROR_CODES.html#e100-unexpected-token)
 - [E101: Invalid Top-Level Item](ERROR_CODES.html#e101-invalid-top-level-item)
 - [E102: Expected Expression](ERROR_CODES.html#e102-expected-expression)
 
 ### Type Errors (E200-E299)
+
 - [E200: Type Mismatch](ERROR_CODES.html#e200-type-mismatch)
 - [E201: Undefined Variable](ERROR_CODES.html#e201-undefined-variable)
 - [E202: Undefined Function](ERROR_CODES.html#e202-undefined-function)
 
 ### Runtime Errors (E400-E499)
+
 - [E400: Cannot Assign to Immutable Variable](ERROR_CODES.html#e400-cannot-assign-to-immutable-variable)
 - [E401: Undefined Variable (Runtime)](ERROR_CODES.html#e401-undefined-variable)
 - [E413: Division by Zero](ERROR_CODES.html#e413-division-by-zero)
@@ -167,6 +173,7 @@ help: did you mean 'velocity'?
 ## 🤝 Contributing
 
 We welcome contributions! Check out:
+
 - [Contributing Guide](https://github.com/dev-parkins/FerrisScript/blob/main/CONTRIBUTING.md)
 - [Development Setup](DEVELOPMENT.html)
 - [Open Issues](https://github.com/dev-parkins/FerrisScript/issues)

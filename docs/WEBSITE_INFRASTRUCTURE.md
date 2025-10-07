@@ -97,6 +97,7 @@
 - [x] **Set up documentation structure** (Jekyll-based)
 
   **Current Structure**:
+
   ```
   docs/
   ├── _config.yml           # Jekyll configuration
