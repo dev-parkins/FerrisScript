@@ -1868,4 +1868,313 @@ mod tests {
             "Should handle many sequential statements"
         );
     }
+
+    #[test]
+    fn test_runtime_unknown_builtin_function_error() {
+        // Test calling a non-existent builtin function
+        let env = Env::new();
+        let result = env.call_builtin("nonexistent_func", &[]);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .contains("Unknown built-in function: nonexistent_func"));
+    }
+
+    #[test]
+    fn test_runtime_property_setter_without_callback() {
+        // Test self.property = value without property setter callback (runtime error)
+        let mut env = Env::new();
+        env.set("self".to_string(), Value::SelfObject);
+        // Set getter but not setter - this will pass compile time but fail at runtime
+        env.set_property_getter(|prop| {
+            if prop == "position" {
+                Ok(Value::Vector2 { x: 1.0, y: 2.0 })
+            } else {
+                Err(format!("Unknown property: {}", prop))
+            }
+        });
+
+        let source = r#"
+            fn set_prop() {
+                self.position = self.position;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("set_prop", &[], &mut env);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(
+            err.contains("no property setter registered"),
+            "Expected 'no property setter registered', got: {}",
+            err
+        );
+    }
+
+    #[test]
+    fn test_runtime_property_getter_without_callback() {
+        // Test accessing self.property without property getter callback
+        let mut env = Env::new();
+        env.set("self".to_string(), Value::SelfObject);
+
+        let source = r#"
+            fn get_prop() -> f32 {
+                return self.position.x;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("get_prop", &[], &mut env);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .contains("no property getter registered"));
+    }
+
+    #[test]
+    fn test_runtime_string_value_operations() {
+        // Test string value coercion and operations
+        let mut env = Env::new();
+
+        let source = r#"
+            fn test_strings() -> i32 {
+                let s: String = "hello";
+                return 42;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("test_strings", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Int(42));
+
+        // Test that string Value prints correctly
+        let print_result = builtin_print(&[Value::String("test".to_string())]);
+        assert!(print_result.is_ok());
+    }
+
+    #[test]
+    fn test_runtime_nil_value_operations() {
+        // Test Nil value coercion
+        let nil = Value::Nil;
+        assert!(!nil.to_bool());
+        assert_eq!(nil.to_float(), None);
+
+        // Test Nil in print
+        let print_result = builtin_print(&[Value::Nil]);
+        assert!(print_result.is_ok());
+    }
+
+    #[test]
+    fn test_runtime_selfobject_value_operations() {
+        // Test SelfObject value operations
+        let self_val = Value::SelfObject;
+        assert!(self_val.to_bool());
+        assert_eq!(self_val.to_float(), None);
+
+        // Test SelfObject in print
+        let print_result = builtin_print(&[Value::SelfObject]);
+        assert!(print_result.is_ok());
+    }
+
+    #[test]
+    fn test_runtime_vector2_value_operations() {
+        // Test Vector2 value operations
+        let v2 = Value::Vector2 { x: 1.5, y: 2.5 };
+        assert!(v2.to_bool());
+        assert_eq!(v2.to_float(), None);
+
+        // Test Vector2 in print
+        let print_result = builtin_print(&[Value::Vector2 { x: 1.0, y: 2.0 }]);
+        assert!(print_result.is_ok());
+    }
+
+    #[test]
+    fn test_runtime_multiple_scopes() {
+        // Test environment scope management
+        let mut env = Env::new();
+
+        env.set("outer".to_string(), Value::Int(1));
+        env.push_scope();
+        env.set("inner".to_string(), Value::Int(2));
+
+        assert_eq!(env.get("outer"), Some(&Value::Int(1)));
+        assert_eq!(env.get("inner"), Some(&Value::Int(2)));
+
+        env.pop_scope();
+        assert_eq!(env.get("outer"), Some(&Value::Int(1)));
+        assert_eq!(env.get("inner"), None);
+    }
+
+    #[test]
+    fn test_runtime_pop_scope_protection() {
+        // Test that pop_scope doesn't remove the global scope
+        let mut env = Env::new();
+        env.set("global".to_string(), Value::Int(1));
+
+        // Try to pop beyond the global scope
+        env.pop_scope(); // Should not remove global scope
+
+        // Global variable should still exist
+        assert_eq!(env.get("global"), Some(&Value::Int(1)));
+    }
+
+    #[test]
+    fn test_runtime_register_custom_builtin() {
+        // Test registering a custom builtin function
+        fn custom_func(args: &[Value]) -> Result<Value, String> {
+            if args.is_empty() {
+                Ok(Value::Int(42))
+            } else {
+                Err("Custom error".to_string())
+            }
+        }
+
+        let mut env = Env::new();
+        env.register_builtin("custom".to_string(), custom_func);
+
+        assert!(env.is_builtin("custom"));
+        let result = env.call_builtin("custom", &[]).unwrap();
+        assert_eq!(result, Value::Int(42));
+
+        let err = env.call_builtin("custom", &[Value::Int(1)]);
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn test_runtime_int_to_float_coercion_edge_cases() {
+        // Test edge cases in int-to-float coercion
+        let zero = Value::Int(0);
+        let negative = Value::Int(-100);
+        let large = Value::Int(i32::MAX);
+
+        assert_eq!(zero.to_float(), Some(0.0));
+        assert_eq!(negative.to_float(), Some(-100.0));
+        assert_eq!(large.to_float(), Some(i32::MAX as f32));
+    }
+
+    #[test]
+    fn test_runtime_comparison_with_mixed_types() {
+        // Test comparison operators with mixed int/float types
+        let mut env = Env::new();
+
+        let source = r#"
+            fn mixed_comparison() -> bool {
+                let a: i32 = 10;
+                let b: f32 = 5.5;
+                return a > b;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("mixed_comparison", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Bool(true));
+    }
+
+    #[test]
+    fn test_runtime_equality_with_mixed_types() {
+        // Test equality comparison with coercion
+        let mut env = Env::new();
+
+        let source = r#"
+            fn equality_check() -> bool {
+                let a: i32 = 5;
+                let b: f32 = 5.0;
+                return a == b;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("equality_check", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Bool(true));
+    }
+
+    #[test]
+    fn test_runtime_inequality_with_mixed_types() {
+        // Test inequality comparison with coercion
+        let mut env = Env::new();
+
+        let source = r#"
+            fn inequality_check() -> bool {
+                let a: i32 = 5;
+                let b: f32 = 5.1;
+                return a != b;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("inequality_check", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Bool(true));
+    }
+
+    #[test]
+    fn test_runtime_less_than_equal_with_coercion() {
+        // Test <= comparison with coercion
+        let mut env = Env::new();
+
+        let source = r#"
+            fn lte_check() -> bool {
+                let a: i32 = 5;
+                let b: f32 = 5.0;
+                return a <= b;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("lte_check", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Bool(true));
+    }
+
+    #[test]
+    fn test_runtime_greater_than_equal_with_coercion() {
+        // Test >= comparison with coercion
+        let mut env = Env::new();
+
+        let source = r#"
+            fn gte_check() -> bool {
+                let a: i32 = 5;
+                let b: f32 = 4.9;
+                return a >= b;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("gte_check", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Bool(true));
+    }
+
+    #[test]
+    fn test_runtime_less_than_with_coercion() {
+        // Test < comparison with coercion
+        let mut env = Env::new();
+
+        let source = r#"
+            fn lt_check() -> bool {
+                let a: i32 = 5;
+                let b: f32 = 5.1;
+                return a < b;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("lt_check", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Bool(true));
+    }
 }

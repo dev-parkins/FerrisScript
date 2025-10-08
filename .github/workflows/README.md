@@ -82,24 +82,36 @@ See [Performance Metrics](#performance-metrics) for detailed savings analysis.
 
 **Jobs:**
 
-1. **sonarqube** - Quality analysis
-   - Static code analysis (quality, security hotspots)
-   - Code smells and technical debt tracking
-   - **Note:** Coverage reporting disabled (handled by Codecov job)
-   - Runs on all PRs and pushes (~5-8 minutes)
-
-2. **codecov** - Code coverage (main/develop only)
-   - Generates coverage with `cargo-tarpaulin`
-   - Uploads to Codecov for tracking
-   - Only runs on push to main/develop (~3-5 minutes)
+1. **coverage** - Code coverage (all branches - UPDATED v0.0.3)
+   - Generates Rust coverage with `cargo-tarpaulin`
+   - Runs TypeScript tests with coverage (`npm run test:ci`)
+   - Uploads both Rust and TypeScript coverage to Codecov
+   - **Runs on:** ALL events (PRs, main, develop) (~3-5 minutes)
+   - **Branch visibility:** Codecov tracks coverage trends across all branches
+   - **Flags:** `rust` and `typescript` for separate tracking
    - **Consolidated:** Moved from ci.yml (Oct 8, 2025)
 
-**Rationale for Consolidation:**
+2. **sonarqube** - Quality analysis (main only - UPDATED v0.0.3)
+   - Static code analysis (quality, security hotspots, code smells)
+   - Consumes TypeScript coverage from coverage job
+   - **Runs on:** Push to `main` ONLY (~5-8 minutes)
+   - **Limitation:** SonarCloud only provides quality analysis for main branch
+   - **Note:** Rust not supported by SonarCloud (coverage handled by Codecov)
 
-- Groups all security/quality scanning tools in one workflow
-- Separates build/test (ci.yml) from analysis (code-scanning.yml)
-- Easier to add future tools (e.g., CodeQL) without cluttering ci.yml
-- SonarQube no longer reports coverage (avoids redundancy with Codecov)
+**Rationale for Main-Only SonarCloud:**
+
+- SonarCloud analysis only available on main branch in free tier
+- PRs and feature branches don't get SonarCloud reports
+- Codecov provides coverage feedback for all branches (PRs included)
+- Reduces CI time by ~5-8 minutes per PR
+- Consolidates quality gates to main branch merge
+
+**Rationale for All-Branch Codecov:**
+
+- Developers need coverage feedback during PR review
+- Codecov shows coverage delta on PRs (what changed)
+- No tier limitations - works for all branches
+- Enables data-driven decisions before merge
 
 See [`docs/infrastructure/README.md`](../../docs/infrastructure/README.md) for detailed infrastructure documentation.
 
@@ -162,64 +174,65 @@ See [`docs/infrastructure/README.md`](../../docs/infrastructure/README.md) for d
 flowchart TD
     Start([Event Triggered]) --> CheckEvent{Event Type?}
     
-    CheckEvent -->|Pull Request to main| PR[Pull Request Flow]
+    CheckEvent -->|Pull Request| PR[Pull Request Flow]
     CheckEvent -->|Push to main| MainPush[Main Push Flow]
     CheckEvent -->|Push to develop| DevPush[Develop Push Flow]
     CheckEvent -->|Push tag v*| TagPush[Release Tag Flow]
     
-    %% Pull Request Flow
-    PR --> TestPR[✅ Test Job<br/>3 OS: Ubuntu, Windows, macOS]
-    TestPR --> BuildCheck1{Build Condition:<br/>Push to main OR tag?}
-    BuildCheck1 -->|No - PR| BuildSkipPR[❌ Build Job SKIPPED<br/>Not on PR]
-    BuildSkipPR --> CovCheck1{Coverage Condition:<br/>Push to main?}
-    CovCheck1 -->|No - PR| CovSkipPR[❌ Coverage Job SKIPPED<br/>Not on PR]
-    CovSkipPR --> PREnd([PR Complete<br/>~15 minutes])
+    %% Pull Request Flow - NEW: Coverage runs on PRs
+    PR --> QuickCheckPR[✅ Quick Check Job<br/>Ubuntu only<br/>Format, Clippy, Unit Tests]
+    QuickCheckPR --> CovPR[✅ Coverage Job<br/>Rust + TypeScript<br/>Upload to Codecov]
+    CovPR --> SonarPR[❌ SonarQube SKIPPED<br/>Main branch only]
+    SonarPR --> TestSkipPR[❌ Full Test SKIPPED<br/>Quick check ran instead]
+    TestSkipPR --> BuildSkipPR[❌ Build Job SKIPPED<br/>PRs don't need artifacts]
+    BuildSkipPR --> PREnd([PR Complete<br/>~5-8 minutes])
     
-    %% Main Push Flow
-    MainPush --> TestMain[✅ Test Job<br/>3 OS: Ubuntu, Windows, macOS]
-    TestMain --> BuildCheck2{Build Condition:<br/>Push to main OR tag?}
-    BuildCheck2 -->|Yes - main| BuildMain[✅ Build Job<br/>3 OS: Ubuntu, Windows, macOS]
-    BuildMain --> ReleaseCheck1{Release Condition:<br/>Tag v*?}
-    ReleaseCheck1 -->|No - main push| ReleaseSkipMain[❌ Release Job SKIPPED<br/>No tag]
-    ReleaseSkipMain --> CovCheck2{Coverage Condition:<br/>Push to main?}
-    CovCheck2 -->|Yes - main| CovMain[✅ Coverage Job<br/>Ubuntu only]
-    CovMain --> MainEnd([Main Push Complete<br/>~33 minutes])
+    %% Main Push Flow - NEW: SonarQube runs here
+    MainPush --> CovMain[✅ Coverage Job<br/>Rust + TypeScript<br/>Upload to Codecov]
+    CovMain --> SonarMain[✅ SonarQube Job<br/>Quality analysis<br/>TypeScript coverage]
+    SonarMain --> TestMain[✅ Full Test Suite<br/>3 OS: Ubuntu, Windows, macOS]
+    TestMain --> BuildMain[✅ Build Job<br/>3 OS: Ubuntu, Windows, macOS]
+    BuildMain --> ReleaseSkipMain[❌ Release Job SKIPPED<br/>No tag]
+    ReleaseSkipMain --> MainEnd([Main Push Complete<br/>~33-41 minutes])
     
-    %% Develop Push Flow
-    DevPush --> TestDev[✅ Test Job<br/>3 OS: Ubuntu, Windows, macOS]
-    TestDev --> BuildCheck3{Build Condition:<br/>Push to main OR tag?}
-    BuildCheck3 -->|No - develop| BuildSkipDev[❌ Build Job SKIPPED<br/>Not main/tag]
-    BuildSkipDev --> CovCheck3{Coverage Condition:<br/>Push to main?}
-    CovCheck3 -->|No - develop| CovSkipDev[❌ Coverage Job SKIPPED<br/>Not main]
-    CovSkipDev --> DevEnd([Develop Push Complete<br/>~15 minutes])
+    %% Develop Push Flow - Coverage but no SonarQube
+    DevPush --> CovDev[✅ Coverage Job<br/>Rust + TypeScript<br/>Upload to Codecov]
+    CovDev --> SonarSkipDev[❌ SonarQube SKIPPED<br/>Main branch only]
+    SonarSkipDev --> TestDev[✅ Full Test Suite<br/>3 OS: Ubuntu, Windows, macOS]
+    TestDev --> BuildDev[✅ Build Job<br/>3 OS: Ubuntu, Windows, macOS]
+    BuildDev --> DevEnd([Develop Push Complete<br/>~28-33 minutes])
     
-    %% Release Tag Flow
-    TagPush --> TestTag[✅ Test Job<br/>3 OS: Ubuntu, Windows, macOS]
-    TestTag --> BuildCheck4{Build Condition:<br/>Push to main OR tag?}
-    BuildCheck4 -->|Yes - tag| BuildTag[✅ Build Job<br/>3 OS: Ubuntu, Windows, macOS]
-    BuildTag --> ReleaseCheck2{Release Condition:<br/>Tag v*?}
-    ReleaseCheck2 -->|Yes - tag| ReleaseTag[✅ Release Job<br/>Creates GitHub Release<br/>Uploads artifacts]
-    ReleaseTag --> CovCheck4{Coverage Condition:<br/>Push to main?}
-    CovCheck4 -->|Yes - tag on main| CovTag[✅ Coverage Job<br/>Ubuntu only]
-    CovTag --> TagEnd([Release Complete<br/>~35 minutes])
+    %% Release Tag Flow - Coverage but no SonarQube
+    TagPush --> CovTag[✅ Coverage Job<br/>Rust + TypeScript<br/>Upload to Codecov]
+    CovTag --> SonarSkipTag[❌ SonarQube SKIPPED<br/>Main branch only]
+    SonarSkipTag --> TestTag[✅ Full Test Suite<br/>3 OS: Ubuntu, Windows, macOS]
+    TestTag --> BuildTag[✅ Build Job<br/>3 OS: Ubuntu, Windows, macOS]
+    BuildTag --> ReleaseTag[✅ Release Job<br/>Creates GitHub Release<br/>Uploads artifacts]
+    ReleaseTag --> TagEnd([Release Complete<br/>~30-35 minutes])
     
-    style TestPR fill:#228B22,color:#FFFFFF
+    style QuickCheckPR fill:#228B22,color:#FFFFFF
+    style CovPR fill:#228B22,color:#FFFFFF
+    style CovMain fill:#228B22,color:#FFFFFF
+    style CovDev fill:#228B22,color:#FFFFFF
+    style CovTag fill:#228B22,color:#FFFFFF
+    
+    style SonarMain fill:#228B22,color:#FFFFFF
+    style SonarPR fill:#DC143C,color:#FFFFFF
+    style SonarSkipDev fill:#DC143C,color:#FFFFFF
+    style SonarSkipTag fill:#DC143C,color:#FFFFFF
+    
     style TestMain fill:#228B22,color:#FFFFFF
     style TestDev fill:#228B22,color:#FFFFFF
     style TestTag fill:#228B22,color:#FFFFFF
+    style TestSkipPR fill:#DC143C,color:#FFFFFF
     
     style BuildMain fill:#228B22,color:#FFFFFF
+    style BuildDev fill:#228B22,color:#FFFFFF
     style BuildTag fill:#228B22,color:#FFFFFF
     style BuildSkipPR fill:#DC143C,color:#FFFFFF
-    style BuildSkipDev fill:#DC143C,color:#FFFFFF
     
     style ReleaseTag fill:#228B22,color:#FFFFFF
     style ReleaseSkipMain fill:#DC143C,color:#FFFFFF
-    
-    style CovMain fill:#228B22,color:#FFFFFF
-    style CovTag fill:#228B22,color:#FFFFFF
-    style CovSkipPR fill:#DC143C,color:#FFFFFF
-    style CovSkipDev fill:#DC143C,color:#FFFFFF
     
     style PREnd fill:#1E90FF,color:#FFFFFF
     style MainEnd fill:#1E90FF,color:#FFFFFF
@@ -367,11 +380,77 @@ runs-on: ubuntu-latest
 
 ---
 
-### Coverage Job (MOVED to code-scanning.yml)
+### Coverage Job (code-scanning.yml)
 
-> **Note**: As of October 8, 2025, code coverage has been moved to `code-scanning.yml` for consolidation with other security/quality scanning tools (SonarQube, future CodeQL).
+**Condition:** All events (PRs, pushes to main/develop)
 
-See [Code Scanning & Coverage](#code-scanning--coverage) workflow for current implementation.
+```yaml
+name: Generate Coverage Report
+runs-on: ubuntu-latest
+```
+
+**When it runs:**
+
+- ✅ Pull requests to main or develop
+- ✅ Push to main
+- ✅ Push to develop
+- ✅ Push tag v*
+
+**Steps:**
+
+- Checkout code
+- Install Rust toolchain and tarpaulin
+- Generate Rust coverage with `cargo tarpaulin`
+- Install Node.js and TypeScript dependencies
+- Run TypeScript tests with coverage (`npm run test:ci`)
+- Upload coverage reports as artifacts
+- Upload Rust coverage to Codecov (flag: `rust`)
+- Upload TypeScript coverage to Codecov (flag: `typescript`)
+
+**Why run on all branches?**
+
+- Provides coverage feedback during PR review
+- Shows coverage delta for proposed changes
+- Helps developers maintain quality standards
+- No tier limitations (unlike SonarCloud)
+
+---
+
+### SonarQube Job (code-scanning.yml)
+
+**Condition:** Push to main ONLY
+
+```yaml
+name: SonarQube Quality Scan
+if: |
+  github.event_name == 'push' && 
+  github.ref == 'refs/heads/main'
+needs: coverage
+runs-on: ubuntu-latest
+```
+
+**When it runs:**
+
+- ❌ Pull requests (SKIPPED - SonarCloud limitation)
+- ✅ Push to main
+- ❌ Push to develop (SKIPPED - main only)
+- ❌ Push tag v* (SKIPPED - main only)
+
+**Steps:**
+
+- Checkout code with full history
+- Download coverage reports from coverage job
+- Move TypeScript coverage to expected location
+- Run SonarQube scan with TypeScript coverage
+
+**Why main only?**
+
+- SonarCloud free tier only provides analysis for main branch
+- Running on PRs wastes CI time with no actionable feedback
+- Quality gates enforced at main branch merge
+- Codecov provides coverage feedback for PRs
+
+> **Note**: As of October 8, 2025, code coverage has been moved to `code-scanning.yml` for consolidation with other security/quality scanning tools. SonarCloud analysis is restricted to main branch only due to platform limitations.
 
 ---
 
@@ -389,19 +468,25 @@ See [Code Scanning & Coverage](#code-scanning--coverage) workflow for current im
    ├─ cargo clippy --workspace --all-targets --all-features
    └─ cargo test --workspace --lib --bins (unit tests)
    ↓
-4. Full Test Suite: ❌ Skipped (only for main/develop/tags)
+4. Coverage Job: ✅ Runs (NEW in v0.0.3)
+   ├─ cargo tarpaulin (Rust coverage)
+   ├─ npm run test:ci (TypeScript coverage)
+   ├─ Upload to Codecov (rust flag)
+   └─ Upload to Codecov (typescript flag)
    ↓
-5. Build Job: ❌ Skipped (only for push events)
+5. SonarQube Job: ❌ Skipped (main branch only)
    ↓
-6. Coverage Job: ❌ Skipped (only for push to main/develop)
+6. Full Test Suite: ❌ Skipped (only for main/develop/tags)
    ↓
-7. Docs Lint: ✅ Runs if markdown files changed
+7. Build Job: ❌ Skipped (only for push events)
+   ↓
+8. Docs Lint: ✅ Runs if markdown files changed
    ├─ markdownlint
    └─ markdown-link-check (excludes archive/)
    ↓
-8. PR Template: ✅ Applied based on branch name
+9. PR Template: ✅ Applied based on branch name
    ↓
-9. Result: PR validated in ~2-3 minutes ⚡
+10. Result: PR validated with coverage feedback in ~5-8 minutes ⚡
 ```
 
 ### Example 2: Documentation-Only Pull Request
@@ -414,19 +499,21 @@ See [Code Scanning & Coverage](#code-scanning--coverage) workflow for current im
    ↓
 3. Quick Check Job: ❌ Skipped (path filter: **.md)
    ↓
-4. Full Test Suite: ❌ Skipped (only for main/develop/tags)
+4. Coverage Job: ❌ Skipped (no code changes to measure)
    ↓
-5. Build Job: ❌ Skipped (only for push events)
+5. SonarQube Job: ❌ Skipped (main branch only)
    ↓
-6. Coverage Job: ❌ Skipped (only for push to main/develop)
+6. Full Test Suite: ❌ Skipped (only for main/develop/tags)
    ↓
-7. Docs Lint: ✅ Runs
+7. Build Job: ❌ Skipped (only for push events)
+   ↓
+8. Docs Lint: ✅ Runs
    ├─ markdownlint
    └─ markdown-link-check
    ↓
-8. PR Template: ✅ Applied (docs template)
+9. PR Template: ✅ Applied (docs template)
    ↓
-9. Result: PR validated in ~1 minute 📝
+10. Result: PR validated in ~1 minute 📝
    (95% savings vs code changes!)
 ```
 
@@ -439,24 +526,27 @@ See [Code Scanning & Coverage](#code-scanning--coverage) workflow for current im
    ↓
 3. Quick Check Job: ❌ Skipped (only for PRs)
    ↓
-4. Full Test Suite: ✅ Runs (Ubuntu, Windows, macOS)
+4. Coverage Job: ✅ Runs (Ubuntu)
+   ├─ cargo tarpaulin (Rust)
+   ├─ npm run test:ci (TypeScript)
+   └─ Upload to Codecov (both flags)
+   ↓
+5. SonarQube Job: ❌ Skipped (main branch only)
+   ↓
+6. Full Test Suite: ✅ Runs (Ubuntu, Windows, macOS)
    ├─ cargo test --workspace --verbose (all tests)
    ├─ cargo clippy --workspace --all-targets
    └─ cargo fmt --all -- --check
    ↓
-5. Build Job: ✅ Runs (Ubuntu, Windows, macOS)
+7. Build Job: ✅ Runs (Ubuntu, Windows, macOS)
    ├─ Builds release binaries for all platforms
    └─ Uploads artifacts
    ↓
-6. Coverage Job: ✅ Runs (Ubuntu)
-   ├─ cargo tarpaulin
-   └─ Upload to Codecov
+8. Release Job: ❌ Skipped (no tag)
    ↓
-7. Release Job: ❌ Skipped (no tag)
+9. Docs Lint: ✅ Runs if markdown files changed
    ↓
-8. Docs Lint: ✅ Runs if markdown files changed
-   ↓
-9. Result: Develop branch fully validated in ~28-33 minutes
+10. Result: Develop branch fully validated in ~28-33 minutes
 ```
 
 ### Example 4: Merging Develop to Main
@@ -468,21 +558,28 @@ See [Code Scanning & Coverage](#code-scanning--coverage) workflow for current im
    ↓
 3. Quick Check Job: ❌ Skipped (only for PRs)
    ↓
-4. Full Test Suite: ✅ Runs (Ubuntu, Windows, macOS)
+4. Coverage Job: ✅ Runs (Ubuntu)
+   ├─ cargo tarpaulin (Rust)
+   ├─ npm run test:ci (TypeScript)
+   └─ Upload to Codecov (both flags)
+   ↓
+5. SonarQube Job: ✅ Runs (MAIN BRANCH ONLY)
+   ├─ Download coverage reports
+   ├─ TypeScript coverage analysis
+   ├─ Quality gates validation
+   └─ Security hotspots detection
+   ↓
+6. Full Test Suite: ✅ Runs (Ubuntu, Windows, macOS)
    ├─ All tests across all platforms
    └─ Ensures production readiness
    ↓
-5. Build Job: ✅ Runs (Ubuntu, Windows, macOS)
+7. Build Job: ✅ Runs (Ubuntu, Windows, macOS)
    ├─ Builds release binaries
    └─ Uploads artifacts
    ↓
-6. Coverage Job: ✅ Runs (Ubuntu)
-   ├─ cargo tarpaulin
-   └─ Upload to Codecov
+8. Release Job: ❌ Skipped (no tag yet)
    ↓
-7. Release Job: ❌ Skipped (no tag yet)
-   ↓
-8. Result: Main branch fully validated in ~28-33 minutes
+9. Result: Main branch fully validated with quality scan in ~33-41 minutes
 ```
 
 ### Example 5: Creating a Release
@@ -494,21 +591,28 @@ See [Code Scanning & Coverage](#code-scanning--coverage) workflow for current im
    ↓
 3. Quick Check Job: ❌ Skipped (only for PRs)
    ↓
-4. Full Test Suite: ✅ Runs (Ubuntu, Windows, macOS)
+4. Coverage Job: ✅ Runs (Ubuntu)
+   ├─ cargo tarpaulin (Rust)
+   ├─ npm run test:ci (TypeScript)
+   └─ Upload to Codecov (both flags)
+   ↓
+5. SonarQube Job: ❌ Skipped (main push only, not tags)
+   ↓
+6. Full Test Suite: ✅ Runs (Ubuntu, Windows, macOS)
    ├─ Final validation of release
    └─ All tests across all platforms
    ↓
-5. Build Job: ✅ Runs (Ubuntu, Windows, macOS)
+7. Build Job: ✅ Runs (Ubuntu, Windows, macOS)
    ├─ Builds release binaries for all platforms
    └─ Uploads artifacts
    ↓
-6. Release Job: ✅ Runs (Ubuntu)
+8. Release Job: ✅ Runs (Ubuntu)
    ├─ Downloads all artifacts
    ├─ Creates GitHub Release v0.1.0
    ├─ Attaches binaries + gdextension
    └─ Includes RELEASE_NOTES.md
    ↓
-7. Coverage Job: ✅ Runs (Ubuntu)
+9. Coverage Job (artifact): Coverage reports available for analysis
    ├─ cargo tarpaulin
    └─ Upload to Codecov
    ↓
@@ -519,30 +623,45 @@ See [Code Scanning & Coverage](#code-scanning--coverage) workflow for current im
 
 ## Performance Metrics
 
-### Timing Breakdown (v0.0.3 Optimized)
+### Timing Breakdown (v0.0.3 Optimized - Updated Oct 8, 2025)
 
-| Event | Quick Check | Full Test | Build | Release | Coverage | Total Time |
-|-------|-------------|-----------|-------|---------|----------|------------|
-| **PR to main/develop** | ~2-3m (1 OS) | ❌ Skip | ❌ Skip | ❌ Skip | ❌ Skip | **~2-3 min** ✨ |
-| **Push to main** | ❌ Skip | ~10-15m (3 OS) | ~15m (3 OS) | ❌ Skip | ~3m | **~28-33 min** |
-| **Push to develop** | ❌ Skip | ~10-15m (3 OS) | ~15m (3 OS) | ❌ Skip | ~3m | **~28-33 min** |
-| **Push tag v*** | ❌ Skip | ~10-15m (3 OS) | ~15m (3 OS) | ~2m | ~3m | **~30-35 min** |
-| **Docs-only PR** | ❌ Skipped (path filter) | ❌ Skip | ❌ Skip | ❌ Skip | ❌ Skip | **~0 min** 🎉 |
+| Event | Quick Check | Coverage | SonarQube | Full Test | Build | Release | Total Time |
+|-------|-------------|----------|-----------|-----------|-------|---------|------------|
+| **PR to main/develop** | ~2-3m | ~3-5m | ❌ Skip | ❌ Skip | ❌ Skip | ❌ Skip | **~5-8 min** ✨ |
+| **Push to main** | ❌ Skip | ~3-5m | ~5-8m | ~10-15m (3 OS) | ~15m (3 OS) | ❌ Skip | **~33-43 min** |
+| **Push to develop** | ❌ Skip | ~3-5m | ❌ Skip | ~10-15m (3 OS) | ~15m (3 OS) | ❌ Skip | **~28-35 min** |
+| **Push tag v*** | ❌ Skip | ~3-5m | ❌ Skip | ~10-15m (3 OS) | ~15m (3 OS) | ~2m | **~30-37 min** |
+| **Docs-only PR** | ❌ Skip | ❌ Skip | ❌ Skip | ❌ Skip | ❌ Skip | ❌ Skip | **~1 min** 🎉 |
 
 ### Cost Savings Analysis
 
 #### Before v0.0.3 Optimization
 
-- Every PR: Full Test (15m × 3 OS) = ~15 minutes
-- Every push to main: Test + Build + Coverage = ~33 minutes
-- **Total for feature PR → merge: ~48 minutes**
+- Every PR: Full Test (15m × 3 OS) + Coverage (3m) + SonarQube (5-8m) = ~23-26 minutes
+- Every push to main: Test + Build + Coverage + SonarQube = ~38-46 minutes
+- **Total for feature PR → merge: ~61-72 minutes**
 
-#### After v0.0.3 Optimization
+#### After v0.0.3 Optimization (Updated Oct 8, 2025)
 
-- Feature PR: Quick Check (2-3m × 1 OS) = ~2-3 minutes
-- Push to main/develop: Full Test + Build + Coverage = ~28-33 minutes
-- **Total for feature PR → merge: ~30-36 minutes**
-- **Savings: 12-18 minutes per feature (25-37% reduction)** 🚀
+- Feature PR: Quick Check (2-3m) + Coverage (3-5m) = ~5-8 minutes
+  - **Removed:** SonarQube on PRs (saves 5-8 minutes)
+- Push to main: Full Test + Build + Coverage + SonarQube = ~33-43 minutes
+- Push to develop: Full Test + Build + Coverage (no SonarQube) = ~28-35 minutes
+- **Total for feature PR → merge to main: ~38-51 minutes**
+- **Savings: 23-21 minutes per feature (38-29% reduction)** 🚀
+
+#### Key Optimizations (Oct 8, 2025)
+
+1. **SonarQube main-only** (NEW)
+   - Removed SonarQube from PRs and develop branch
+   - Rationale: SonarCloud only provides analysis on main branch
+   - Savings: ~5-8 minutes per PR
+
+2. **Codecov all-branches** (NEW)
+   - Coverage now runs on PRs, main, develop, and tags
+   - Rationale: Provides coverage feedback during PR review
+   - Cost: +3-5 minutes per PR (but provides actionable data)
+   - Net benefit: Coverage feedback without SonarQube overhead
 
 #### Docs-Only Changes
 
