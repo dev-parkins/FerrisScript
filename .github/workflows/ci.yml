@@ -148,6 +148,8 @@ jobs:
         toolchain: ${{ matrix.rust }}
         components: rustfmt, clippy
 
+    - name: Install target
+      run: rustup target add ${{ matrix.target }}
 
     - name: Build release
       run: cargo build --workspace --release --target ${{ matrix.target }}

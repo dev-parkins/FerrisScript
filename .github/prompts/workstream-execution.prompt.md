@@ -1233,6 +1233,10 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo fmt --all
 # Report: "✅ Code formatted"
 
+# Release build (if Rust code modified - catches compilation issues early)
+cargo build --workspace --release
+# Report: "✅ Release build successful"
+
 # Documentation linting (ALWAYS RUN - FerrisScript Specific)
 npm run docs:fix
 # Report: "✅ Documentation linting issues auto-fixed"
@@ -1596,8 +1600,11 @@ Before marking work complete, ensure:
 - [ ] All tests pass: `[test command]`
 - [ ] All linting passes: `[lint command]`
 - [ ] All formatting passes: `[format command]`
+- [ ] Native release build succeeds: `cargo build --workspace --release`
 - [ ] Code review checklist items addressed
 - [ ] No unintended changes in git diff
+
+**Note on Cross-Platform Builds**: If modifying Rust code that affects compilation (e.g., adding dependencies, changing features, modifying Cargo.toml), verify native release build works before pushing. Cross-platform CI builds will catch platform-specific issues, but ensuring local build succeeds prevents common errors.
 
 ### Summary Document
 

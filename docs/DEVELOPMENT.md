@@ -52,6 +52,42 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo doc --workspace --open
 ```
 
+### Cross-Platform Builds
+
+FerrisScript supports building for multiple platforms. The CI automatically builds native binaries for Linux, macOS, and Windows.
+
+**Native Build (Recommended)**:
+
+```bash
+# Build for your current platform (always works)
+cargo build --workspace --release
+```
+
+**Cross-Compilation Setup**:
+
+⚠️ **Note**: Cross-compilation from Windows requires platform-specific linkers and is complex to set up. For most development, use native builds or rely on CI for multi-platform builds.
+
+If you need to verify target compatibility locally:
+
+```bash
+# Install target platform support
+rustup target add x86_64-unknown-linux-gnu
+rustup target add aarch64-unknown-linux-gnu
+rustup target add x86_64-apple-darwin
+rustup target add aarch64-apple-darwin
+
+# Verify compilation (may fail at linking stage without proper linkers)
+cargo build --workspace --release --target x86_64-unknown-linux-gnu
+```
+
+**CI Builds**: The GitHub Actions workflow automatically builds native binaries for:
+
+- Linux x86_64 (`x86_64-unknown-linux-gnu`)
+- Windows x86_64 (`x86_64-pc-windows-msvc`)
+- macOS x86_64 (`x86_64-apple-darwin`)
+
+See `.github/workflows/ci.yml` for the full build matrix.
+
 ---
 
 ## 📁 Project Structure
