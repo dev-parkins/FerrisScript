@@ -290,7 +290,7 @@ We use different coverage tools for different environments:
 - **cargo-llvm-cov**: Native LLVM-based coverage, no file locking issues on Windows, faster local execution
 - **cargo-tarpaulin**: Mature CI integration, generates Codecov-compatible reports, but has Windows file locking issues
 
-See [COVERAGE_SETUP_NOTES.md](COVERAGE_SETUP_NOTES.md) for the technical investigation that led to this approach.
+See [infrastructure/COVERAGE_SETUP_NOTES.md](infrastructure/COVERAGE_SETUP_NOTES.md) for the technical investigation that led to this approach.
 
 ### Running Coverage Locally
 

@@ -65,10 +65,43 @@ See [Performance Metrics](#performance-metrics) for detailed savings analysis.
    - Creates GitHub Release
    - Attaches platform-specific binaries (~2 minutes)
 
-5. **coverage** - Main/Develop branches
-   - Only on push to `main` or `develop`
-   - Generates code coverage with tarpaulin
-   - Uploads to Codecov (~3 minutes)
+5. **coverage** - Moved to code-scanning.yml (as of Oct 8, 2025)
+   - See [Code Scanning & Coverage](#code-scanning--coverage) workflow
+   - Consolidated with other security/quality scanning tools
+
+---
+
+### Code Scanning & Coverage
+
+**File:** [`code-scanning.yml`](code-scanning.yml)  
+**Name:** Code Scanning & Coverage  
+**Triggers:**
+
+- Pull requests to `main` or `develop`
+- Pushes to `main` or `develop` branches
+
+**Jobs:**
+
+1. **sonarqube** - Quality analysis
+   - Static code analysis (quality, security hotspots)
+   - Code smells and technical debt tracking
+   - **Note:** Coverage reporting disabled (handled by Codecov job)
+   - Runs on all PRs and pushes (~5-8 minutes)
+
+2. **codecov** - Code coverage (main/develop only)
+   - Generates coverage with `cargo-tarpaulin`
+   - Uploads to Codecov for tracking
+   - Only runs on push to main/develop (~3-5 minutes)
+   - **Consolidated:** Moved from ci.yml (Oct 8, 2025)
+
+**Rationale for Consolidation:**
+
+- Groups all security/quality scanning tools in one workflow
+- Separates build/test (ci.yml) from analysis (code-scanning.yml)
+- Easier to add future tools (e.g., CodeQL) without cluttering ci.yml
+- SonarQube no longer reports coverage (avoids redundancy with Codecov)
+
+See [`docs/infrastructure/README.md`](../../docs/infrastructure/README.md) for detailed infrastructure documentation.
 
 ---
 
@@ -334,29 +367,11 @@ runs-on: ubuntu-latest
 
 ---
 
-### Coverage Job (ci.yml)
+### Coverage Job (MOVED to code-scanning.yml)
 
-**Condition:** Push to main or develop
+> **Note**: As of October 8, 2025, code coverage has been moved to `code-scanning.yml` for consolidation with other security/quality scanning tools (SonarQube, future CodeQL).
 
-```yaml
-name: Code Coverage
-if: |
-  github.event_name == 'push' && 
-  (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
-runs-on: ubuntu-latest
-```
-
-**When it runs:**
-
-- ❌ Pull requests (SKIPPED)
-- ✅ Push to main
-- ✅ Push to develop (NEW in v0.0.3)
-- ✅ Push tag v* (if tagged on main/develop)
-
-**Tools:**
-
-- `cargo-tarpaulin` for coverage generation
-- Codecov for reporting
+See [Code Scanning & Coverage](#code-scanning--coverage) workflow for current implementation.
 
 ---
 
