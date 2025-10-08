@@ -28,15 +28,17 @@ export class FerrisScriptCompletionProvider implements vscode.CompletionItemProv
 
         // Return appropriate completions based on context
         switch (ctx) {
-            case CompletionContext.TypePosition:
+            case CompletionContext.TypePosition: {
                 // After ':' in type annotations - show only types
                 return getTypeCompletions();
+            }
 
-            case CompletionContext.StatementStart:
+            case CompletionContext.StatementStart: {
                 // At statement start - show statement-level keywords only
                 return getKeywordCompletions(true);
+            }
 
-            case CompletionContext.Expression:
+            case CompletionContext.Expression: {
                 // In expression context - show expression keywords and functions
                 // Filter out statement-only keywords (fn, let, while, return)
                 const statementOnlyKeywords = ['fn', 'let', 'while', 'return'];
@@ -49,14 +51,16 @@ export class FerrisScriptCompletionProvider implements vscode.CompletionItemProv
                     ...expressionKeywords,
                     ...getFunctionCompletions()
                 ];
+            }
 
-            default:
+            default: {
                 // Unknown context - show everything
                 return [
                     ...getKeywordCompletions(false),
                     ...getTypeCompletions(),
                     ...getFunctionCompletions()
                 ];
+            }
         }
     }
 }

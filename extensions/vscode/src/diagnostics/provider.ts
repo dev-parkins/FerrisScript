@@ -10,17 +10,24 @@ import { parseCompilerErrors } from './parser';
  * in VS Code's problem panel and as inline squiggles.
  */
 export class FerrisScriptDiagnosticProvider {
-    private diagnosticCollection: vscode.DiagnosticCollection;
-    private compilerPath: string | undefined;
+    private readonly diagnosticCollection: vscode.DiagnosticCollection;
+    private readonly compilerPath: string | undefined;
 
     constructor() {
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection('ferrisscript');
         this.compilerPath = this.findCompiler();
         
-        // Notify user about compiler status
+        // Notify user about compiler status asynchronously
+        this.notifyCompilerStatus();
+    }
+
+    /**
+     * Notify user about compiler status (async operation moved out of constructor)
+     */
+    private notifyCompilerStatus(): void {
         if (this.compilerPath) {
             console.log(`FerrisScript: Diagnostics enabled (compiler: ${this.compilerPath})`);
-            vscode.window.showInformationMessage(
+            void vscode.window.showInformationMessage(
                 `FerrisScript: Diagnostics enabled using compiler at ${this.compilerPath}`
             );
         } else {
@@ -40,56 +47,102 @@ export class FerrisScriptDiagnosticProvider {
      */
     private findCompiler(): string | undefined {
         // 1. Check user configuration (most secure - absolute path)
-        const config = vscode.workspace.getConfiguration('ferrisscript');
-        const configuredPath = config.get<string>('compilerPath');
-        if (configuredPath && configuredPath.trim() !== '') {
-            try {
-                const fs = require('fs');
-                if (fs.existsSync(configuredPath)) {
-                    console.log(`Using configured FerrisScript compiler: ${configuredPath}`);
-                    return configuredPath;
-                } else {
-                    console.warn(`Configured compiler path not found: ${configuredPath}`);
-                }
-            } catch (e) {
-                console.error('Error checking configured compiler path:', e);
-            }
+        const configuredCompiler = this.tryConfiguredCompiler();
+        if (configuredCompiler) {
+            return configuredCompiler;
         }
 
         // 2. Try to find compiler in workspace
-        const workspaceFolders = vscode.workspace.workspaceFolders;
-        if (workspaceFolders) {
-            const workspacePath = workspaceFolders[0].uri.fsPath;
-            
-            // Check common locations
-            const possiblePaths = [
-                path.join(workspacePath, 'target', 'debug', 'ferrisscript.exe'),
-                path.join(workspacePath, 'target', 'debug', 'ferrisscript'),
-                path.join(workspacePath, 'target', 'release', 'ferrisscript.exe'),
-                path.join(workspacePath, 'target', 'release', 'ferrisscript'),
-            ];
+        const workspaceCompiler = this.tryWorkspaceCompiler();
+        if (workspaceCompiler) {
+            return workspaceCompiler;
+        }
 
-            for (const compilerPath of possiblePaths) {
-                try {
-                    const fs = require('fs');
-                    if (fs.existsSync(compilerPath)) {
-                        console.log(`Found FerrisScript compiler at: ${compilerPath}`);
-                        return compilerPath;
-                    }
-                } catch (e) {
-                    // Continue searching
-                }
+        // 3. Try to find in PATH
+        const pathCompiler = this.tryPathCompiler();
+        if (pathCompiler) {
+            return pathCompiler;
+        }
+
+        console.warn('FerrisScript compiler not found. Diagnostics will be disabled.');
+        return undefined;
+    }
+
+    /**
+     * Try to use configured compiler path from settings
+     */
+    private tryConfiguredCompiler(): string | undefined {
+        const config = vscode.workspace.getConfiguration('ferrisscript');
+        const configuredPath = config.get<string>('compilerPath');
+        
+        if (!configuredPath || configuredPath.trim() === '') {
+            return undefined;
+        }
+
+        try {
+            const fs = require('fs');
+            if (fs.existsSync(configuredPath)) {
+                console.log(`Using configured FerrisScript compiler: ${configuredPath}`);
+                return configuredPath;
+            }
+            console.warn(`Configured compiler path not found: ${configuredPath}`);
+        } catch (error: unknown) {
+            console.error('Error checking configured compiler path:', error instanceof Error ? error.message : String(error));
+        }
+        
+        return undefined;
+    }
+
+    /**
+     * Try to find compiler in workspace cargo target directories
+     */
+    private tryWorkspaceCompiler(): string | undefined {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders) {
+            return undefined;
+        }
+
+        const workspacePath = workspaceFolders[0].uri.fsPath;
+        const possiblePaths = [
+            path.join(workspacePath, 'target', 'debug', 'ferrisscript.exe'),
+            path.join(workspacePath, 'target', 'debug', 'ferrisscript'),
+            path.join(workspacePath, 'target', 'release', 'ferrisscript.exe'),
+            path.join(workspacePath, 'target', 'release', 'ferrisscript'),
+        ];
+
+        for (const compilerPath of possiblePaths) {
+            if (this.fileExists(compilerPath)) {
+                console.log(`Found FerrisScript compiler at: ${compilerPath}`);
+                return compilerPath;
             }
         }
 
-        // Try to find in PATH
-        // Security Note: Using PATH to find compiler is a legitimate use case for
-        // CLI tool discovery. The risk is mitigated by:
-        // 1. Using spawnSync with shell:false (no command injection)
-        // 2. Only executing with validated arguments (--version, file paths)
-        // 3. Timeout protection (prevents hanging)
-        // 4. User notification when compiler is found (transparency)
-        // Alternative: Require absolute path in settings, but reduces UX
+        return undefined;
+    }
+
+    /**
+     * Check if file exists safely
+     */
+    private fileExists(filePath: string): boolean {
+        try {
+            const fs = require('fs');
+            return fs.existsSync(filePath);
+        } catch (error: unknown) {
+            console.error(`Error checking file existence for ${filePath}:`, error instanceof Error ? error.message : String(error));
+            return false;
+        }
+    }
+
+    /**
+     * Try to find compiler in system PATH
+     * Security Note: Using PATH to find compiler is a legitimate use case for
+     * CLI tool discovery. The risk is mitigated by:
+     * 1. Using spawnSync with shell:false (no command injection)
+     * 2. Only executing with validated arguments (--version, file paths)
+     * 3. Timeout protection (prevents hanging)
+     * 4. User notification when compiler is found (transparency)
+     */
+    private tryPathCompiler(): string | undefined {
         try {
             const result = cp.spawnSync('ferrisscript', ['--version'], { 
                 encoding: 'utf-8',
@@ -98,15 +151,12 @@ export class FerrisScriptDiagnosticProvider {
             });
             if (result.status === 0) {
                 console.log('Found FerrisScript compiler in PATH');
-                // Note: Returns 'ferrisscript' which will be resolved via PATH
-                // when actually executed. This is standard practice for CLI tools.
                 return 'ferrisscript';
             }
-        } catch (e) {
-            // Not in PATH
+        } catch (error: unknown) {
+            console.debug('Compiler not in PATH:', error instanceof Error ? error.message : String(error));
         }
-
-        console.warn('FerrisScript compiler not found. Diagnostics will be disabled.');
+        
         return undefined;
     }
 
@@ -173,8 +223,16 @@ export class FerrisScriptDiagnosticProvider {
             }
             
             return undefined;
-        } catch (error: any) {
-            console.error('FerrisScript compiler execution error:', error);
+        } catch (error: unknown) {
+            // Log error and return undefined to gracefully handle compiler execution failures
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error('FerrisScript compiler execution error:', errorMessage);
+            
+            // Notify user if compiler execution failed (could be permissions, missing dependencies, etc.)
+            void vscode.window.showWarningMessage(
+                `FerrisScript: Failed to run compiler at ${this.compilerPath}. Check output for details.`
+            );
+            
             return undefined;
         }
     }
