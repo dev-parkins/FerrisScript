@@ -36,7 +36,7 @@ export PATH="/malicious/path:$PATH"
 # ferrisscript could be a malicious script executing arbitrary code
 ```
 
-**Fixed Code**:
+**Fixed Code** (Initial):
 
 ```typescript
 const result = cp.spawnSync('ferrisscript', ['--version'], { 
@@ -49,12 +49,54 @@ if (result.status === 0) {
 }
 ```
 
+**Further Hardening** (Added configuration option):
+
+```typescript
+// 1. Check user configuration (most secure - absolute path)
+const config = vscode.workspace.getConfiguration('ferrisscript');
+const configuredPath = config.get<string>('compilerPath');
+if (configuredPath && configuredPath.trim() !== '') {
+    // Validate absolute path exists
+    if (fs.existsSync(configuredPath)) {
+        return configuredPath;  // Trusted absolute path
+    }
+}
+
+// 2. Fall back to PATH search (with timeout protection)
+const result = cp.spawnSync('ferrisscript', ['--version'], { 
+    encoding: 'utf-8',
+    shell: false,
+    timeout: 3000  // Prevent hanging
+});
+```
+
 **Why This Is Secure**:
 
-- `spawnSync` executes binary directly (no shell)
-- Arguments passed as array (cannot be interpreted as commands)
-- `shell: false` explicitly prevents shell spawning
-- Only checks exit code, doesn't execute arbitrary commands
+- **Primary Defense**: User can specify absolute path via `ferrisscript.compilerPath` setting
+  - Bypasses PATH entirely
+  - Points to trusted, verified compiler location
+  - Recommended for security-sensitive environments
+- **Secondary Defense**: `spawnSync` with `shell: false`
+  - Executes binary directly (no shell)
+  - Arguments passed as array (cannot be interpreted as commands)
+  - Timeout prevents hanging on malicious binary
+- **Tertiary Defense**: User notification when compiler found
+  - Transparency allows users to verify correct compiler is used
+
+**Residual Risk**: Low
+
+If user does not configure absolute path, PATH is still checked. While `spawnSync` with `shell: false` prevents command injection, a malicious binary in PATH could still execute. Mitigations:
+- User control over PATH environment
+- Timeout protection (3 seconds)
+- User notification when compiler found
+- Standard practice for CLI tool discovery (npm, cargo, python all use PATH)
+
+**Recommendation**: For maximum security, configure absolute path:
+```json
+{
+  "ferrisscript.compilerPath": "/usr/local/bin/ferrisscript"
+}
+```
 
 ---
 

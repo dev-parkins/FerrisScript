@@ -58,7 +58,18 @@
         "language": "ferrisscript",
         "path": "./snippets/ferrisscript.json"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "FerrisScript",
+      "properties": {
+        "ferrisscript.compilerPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the FerrisScript compiler executable. If empty, searches workspace and PATH. For security, use absolute path to trusted compiler location.",
+          "scope": "machine-overridable"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

@@ -33,10 +33,30 @@ export class FerrisScriptDiagnosticProvider {
 
     /**
      * Find the FerrisScript compiler executable
-     * Checks: workspace, PATH, cargo target dir
+     * Checks: user configuration, workspace, PATH, cargo target dir
+     * 
+     * Security: For maximum security, users should set an absolute path
+     * via ferrisscript.compilerPath setting to avoid PATH-based attacks.
      */
     private findCompiler(): string | undefined {
-        // Try to find compiler in workspace
+        // 1. Check user configuration (most secure - absolute path)
+        const config = vscode.workspace.getConfiguration('ferrisscript');
+        const configuredPath = config.get<string>('compilerPath');
+        if (configuredPath && configuredPath.trim() !== '') {
+            try {
+                const fs = require('fs');
+                if (fs.existsSync(configuredPath)) {
+                    console.log(`Using configured FerrisScript compiler: ${configuredPath}`);
+                    return configuredPath;
+                } else {
+                    console.warn(`Configured compiler path not found: ${configuredPath}`);
+                }
+            } catch (e) {
+                console.error('Error checking configured compiler path:', e);
+            }
+        }
+
+        // 2. Try to find compiler in workspace
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (workspaceFolders) {
             const workspacePath = workspaceFolders[0].uri.fsPath;
@@ -63,14 +83,23 @@ export class FerrisScriptDiagnosticProvider {
         }
 
         // Try to find in PATH
+        // Security Note: Using PATH to find compiler is a legitimate use case for
+        // CLI tool discovery. The risk is mitigated by:
+        // 1. Using spawnSync with shell:false (no command injection)
+        // 2. Only executing with validated arguments (--version, file paths)
+        // 3. Timeout protection (prevents hanging)
+        // 4. User notification when compiler is found (transparency)
+        // Alternative: Require absolute path in settings, but reduces UX
         try {
-            // Security: Use spawnSync without shell to avoid command injection
             const result = cp.spawnSync('ferrisscript', ['--version'], { 
                 encoding: 'utf-8',
-                shell: false  // Don't spawn a shell - prevents command injection
+                shell: false,  // No shell - prevents command injection
+                timeout: 3000  // Prevent hanging if malicious binary
             });
             if (result.status === 0) {
                 console.log('Found FerrisScript compiler in PATH');
+                // Note: Returns 'ferrisscript' which will be resolved via PATH
+                // when actually executed. This is standard practice for CLI tools.
                 return 'ferrisscript';
             }
         } catch (e) {
