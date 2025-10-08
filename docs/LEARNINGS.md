@@ -1,3 +1,159 @@
+# Version Management & Branching Strategy Research - Planning
+
+**Date**: October 8, 2025  
+**Phase**: Research & Feasibility Analysis  
+**Topic**: Centralized version management and simplified branching strategy  
+
+## 🎯 Context
+
+User request to simplify release management by:
+
+- Centralizing version tracking (potentially in `.env`)
+- Eliminating long-lived `develop` branch (39 commits for v0.0.3)
+- Automating version synchronization across cargo/npm/docs
+- Supporting independent versioning for components (cargo, VSCode extension, docs)
+
+## 📊 What We Discovered
+
+### Version Management Pain Points
+
+- **7+ locations** require manual version updates (Cargo.toml, package.json, _config.yml, etc.)
+- **Desynchronization risk**: package-lock.json still showed 0.0.2 in v0.0.3
+- **No validation**: No automated check for version consistency
+- **Manual overhead**: ~15-20 minutes per release for version bumping
+
+### Branching Strategy Issues
+
+- **Long-lived integration branch**: `develop` accumulates 24+ commits between releases
+- **History management**: No clear strategy for "resetting" develop to match main
+- **CI complexity**: Branch-specific logic (quick-check on PR, full suite on develop/main)
+- **Contributor confusion**: Two target branches (when to use develop vs main?)
+
+### Recommended Solutions
+
+**Version Management**: Centralized `.version` file + sync scripts + CI validation
+
+- ✅ Simple text file as source of truth
+- ✅ PowerShell + Bash sync scripts propagate to all target files
+- ✅ CI validation prevents desync (fails PR if versions mismatch)
+- ✅ Optional pre-commit hook for auto-sync
+- ❌ **NOT .env**: Not standard in Rust ecosystem, requires build-time substitution
+
+**Branching Strategy**: GitHub Flow + Release Branches
+
+- ✅ Single long-lived branch (`main`)
+- ✅ Features branch directly from `main` (no develop)
+- ✅ Release branches (`release/vX.Y.Z`) for stabilization
+- ✅ Squash merge develop → main for v0.0.3 (clean break)
+- ❌ **NOT trunk-based**: Requires feature flags, too complex for alpha
+
+## 💡 Key Insights
+
+### Why NOT `.env` for Versioning?
+
+- `.env` is Node.js/web convention, not Rust standard
+- Cargo doesn't natively support environment variable substitution
+- Requires build-time templating (adds complexity)
+- Git merge conflicts on single-line changes
+- Better alternatives exist (simple text file + scripts)
+
+### Why Delete `develop` Branch?
+
+- Eliminates maintenance overhead (no branch synchronization)
+- Simplifies contributor workflow (always target `main`)
+- Reduces CI complexity (no branch-specific logic)
+- Industry standard (GitHub Flow used by most OSS projects)
+- Clean history on `main` (squash merge releases)
+
+### Alternatives Considered
+
+1. **cargo-release**: Automated version bumping (defer to v0.1.0+, too complex for alpha)
+2. **semantic-release**: Full automation via conventional commits (defer to v1.0+, requires strict discipline)
+3. **Trunk-based development**: Continuous deployment (not suitable for alpha, requires feature flags)
+4. **Git Flow (keep develop)**: Two long-lived branches (decided against, too much overhead)
+
+## 🛠️ Implementation Plan
+
+### Phase 1: Centralized Version Management (v0.0.4)
+
+- Create `.version` file (source of truth)
+- Create `scripts/sync-versions.{ps1,sh}` (propagate to targets)
+- Add `.github/workflows/version-check.yml` (CI validation)
+- Update `RELEASING.md` (new process documentation)
+- **Estimated**: 2-3 hours
+
+### Phase 2: Branching Strategy Migration (Post-v0.0.3)
+
+- Squash merge `develop` → `main` (release v0.0.3)
+- Tag `v0.0.3` on `main`
+- Delete `develop` branch (permanent)
+- Update all workflows (remove develop triggers)
+- Update documentation (CONTRIBUTING.md, prompts)
+- **Estimated**: 3-4 hours
+
+### Phase 3: Release Branch Workflow (v0.0.4+)
+
+- Create `release/vX.Y.Z` when feature-complete
+- Only bugfixes merge to release branch
+- Tag from release branch (not `main`)
+- Cherry-pick hotfixes back to `main`
+- **Estimated**: Part of normal release (no overhead)
+
+## 🎓 Lessons Learned
+
+### Research Best Practices
+
+1. **Industry research**: Studied Git Flow, GitHub Flow, trunk-based development
+2. **Tool evaluation**: cargo-release, semantic-release, release-plz
+3. **Risk assessment**: Breaking changes, rollback plans, backward compatibility
+4. **Phased approach**: Incremental migration reduces risk
+
+### Documentation Quality
+
+- Created **comprehensive 50-page research document**
+- Included **decision matrices** for each approach
+- Provided **example scripts** (PowerShell + Bash)
+- Documented **migration checklists** and rollback plans
+- **Link validated**: All external references checked
+
+### Key Tradeoffs
+
+| Approach | Pros | Cons | Decision |
+|----------|------|------|----------|
+| `.env` versioning | Simple config | Not Rust standard | ❌ Rejected |
+| `.version` + scripts | Rust-friendly, scriptable | Manual sync required | ✅ Recommended |
+| GitHub Flow | Simple, industry standard | No staging branch | ✅ Recommended |
+| Git Flow (current) | Integration testing | Long-lived branches | ❌ Migrate away |
+| Automated tools | Full automation | Complex setup, alpha overkill | ⏸️ Defer to v1.0+ |
+
+## 📚 Recommendations for Future Work
+
+### Immediate (v0.0.4)
+
+- ✅ Implement `.version` + sync scripts
+- ✅ Add CI validation for version consistency
+- ✅ Migrate to GitHub Flow (delete develop)
+
+### Medium-Term (v0.0.5-0.1.0)
+
+- ⚙️ Test release branches (evaluate if needed)
+- ⚙️ Document lessons learned from new workflow
+
+### Long-Term (v1.0+)
+
+- ⏸️ Consider cargo-release for automation
+- ⏸️ Evaluate semantic-release for CHANGELOG generation
+- ⏸️ Component-specific versioning (if cargo/vscode/docs diverge)
+
+## 📖 References
+
+- Research document: `docs/planning/technical/VERSION_AND_BRANCHING_STRATEGY_RESEARCH.md`
+- Current workflow: `docs/planning/v0.0.3/v0.0.3-roadmap.md` (lines 416-490)
+- Release process: `RELEASING.md`
+- Contributor guide: `CONTRIBUTING.md`
+
+---
+
 # Icon Theme Lesson Learned - Phase 5
 
 **Date**: October 8, 2025  
