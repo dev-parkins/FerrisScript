@@ -79,6 +79,8 @@ impl fmt::Display for Span {
 pub struct Program {
     /// Global variable declarations (let and let mut)
     pub global_vars: Vec<GlobalVar>,
+    /// Signal declarations
+    pub signals: Vec<Signal>,
     /// Function definitions
     pub functions: Vec<Function>,
 }
@@ -93,6 +95,7 @@ impl Program {
     pub fn new() -> Self {
         Program {
             global_vars: Vec::new(),
+            signals: Vec::new(),
             functions: Vec::new(),
         }
     }
@@ -102,6 +105,9 @@ impl fmt::Display for Program {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for var in &self.global_vars {
             writeln!(f, "{}", var)?;
+        }
+        for signal in &self.signals {
+            writeln!(f, "{}", signal)?;
         }
         for func in &self.functions {
             writeln!(f, "{}", func)?;
@@ -273,6 +279,40 @@ pub enum Stmt {
         value: Option<Expr>,
         span: Span,
     },
+}
+
+/// Signal declaration (top-level only).
+///
+/// Signals are event declarations that can be emitted and connected to methods.
+/// They must be declared at the module level (not inside functions).
+///
+/// # Examples
+///
+/// ```text
+/// signal health_changed(old: i32, new: i32);
+/// signal player_died;
+/// ```
+#[derive(Debug, Clone, PartialEq)]
+pub struct Signal {
+    /// Signal name
+    pub name: String,
+    /// Signal parameters (name, type)
+    pub parameters: Vec<(String, String)>,
+    /// Source location
+    pub span: Span,
+}
+
+impl fmt::Display for Signal {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "signal {}(", self.name)?;
+        for (i, (param_name, param_type)) in self.parameters.iter().enumerate() {
+            if i > 0 {
+                write!(f, ", ")?;
+            }
+            write!(f, "{}: {}", param_name, param_type)?;
+        }
+        write!(f, ");")
+    }
 }
 
 impl fmt::Display for Stmt {

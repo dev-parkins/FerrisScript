@@ -46,6 +46,7 @@ pub enum Token {
     Return,
     True,
     False,
+    Signal,
 
     // Literals
     Ident(String),
@@ -97,6 +98,7 @@ impl Token {
             Token::Return => "return",
             Token::True => "true",
             Token::False => "false",
+            Token::Signal => "signal",
             Token::Ident(_) => "identifier",
             Token::Number(_) => "number",
             Token::StringLit(_) => "string",
@@ -332,6 +334,7 @@ impl<'a> Lexer<'a> {
                 "return" => Token::Return,
                 "true" => Token::True,
                 "false" => Token::False,
+                "signal" => Token::Signal,
                 _ => Token::Ident(ident),
             };
             return Ok(token);
@@ -610,6 +613,41 @@ mod tests {
                 Token::Ident("self".to_string()),
                 Token::Eof
             ]
+        );
+    }
+
+    #[test]
+    fn test_tokenize_signal_keyword() {
+        let tokens = tokenize("signal health_changed;").unwrap();
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Signal,
+                Token::Ident("health_changed".to_string()),
+                Token::Semicolon,
+                Token::Eof
+            ]
+        );
+    }
+
+    #[test]
+    fn test_signal_vs_identifier_case_sensitivity() {
+        // "signal" (lowercase) should be keyword
+        let tokens_keyword = tokenize("signal").unwrap();
+        assert_eq!(tokens_keyword, vec![Token::Signal, Token::Eof]);
+
+        // "Signal" (capitalized) should be identifier
+        let tokens_ident = tokenize("Signal").unwrap();
+        assert_eq!(
+            tokens_ident,
+            vec![Token::Ident("Signal".to_string()), Token::Eof]
+        );
+
+        // "SIGNAL" (uppercase) should be identifier
+        let tokens_upper = tokenize("SIGNAL").unwrap();
+        assert_eq!(
+            tokens_upper,
+            vec![Token::Ident("SIGNAL".to_string()), Token::Eof]
         );
     }
 
