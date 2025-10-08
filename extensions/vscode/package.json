@@ -1,7 +1,7 @@
 {
   "name": "ferrisscript",
   "displayName": "FerrisScript",
-  "description": "Syntax highlighting and code snippets for FerrisScript - a Rust-inspired scripting language for Godot 4.x",
+  "description": "Full IDE support for FerrisScript: completion, hover tooltips, error diagnostics, and syntax highlighting for Rust-inspired scripting in Godot 4.x",
   "version": "0.0.3",
   "publisher": "ferrisscript",
   "repository": {
@@ -17,7 +17,8 @@
   },
   "categories": [
     "Programming Languages",
-    "Snippets"
+    "Snippets",
+    "Linters"
   ],
   "keywords": [
     "ferrisscript",
@@ -53,6 +54,13 @@
       {
         "language": "ferrisscript",
         "path": "./snippets/ferrisscript.json"
+      }
+    ],
+    "iconThemes": [
+      {
+        "id": "ferrisscript-icons",
+        "label": "FerrisScript Icons",
+        "path": "./resources/icons/ferrisscript-icon-theme.json"
       }
     ]
   },

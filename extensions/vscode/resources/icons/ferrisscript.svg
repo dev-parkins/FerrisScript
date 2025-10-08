@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- FerrisScript file icon - Rust-inspired crab silhouette with Godot blue accent -->
+  <defs>
+    <linearGradient id="ferrGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#CE422B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF5722;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background rounded rectangle -->
+  <rect x="2" y="2" width="28" height="28" rx="3" fill="url(#ferrGrad)"/>
+  
+  <!-- Simplified crab/ferris shape -->
+  <!-- Body -->
+  <ellipse cx="16" cy="18" rx="8" ry="6" fill="#FFF"/>
+  
+  <!-- Left claw -->
+  <path d="M 8 16 L 6 14 L 7 12 L 9 14 Z" fill="#FFF"/>
+  
+  <!-- Right claw -->
+  <path d="M 24 16 L 26 14 L 25 12 L 23 14 Z" fill="#FFF"/>
+  
+  <!-- Eyes -->
+  <circle cx="13" cy="17" r="1.5" fill="#CE422B"/>
+  <circle cx="19" cy="17" r="1.5" fill="#CE422B"/>
+  
+  <!-- Legs (left side) -->
+  <line x1="11" y1="22" x2="9" y2="26" stroke="#FFF" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="13" y1="23" x2="11" y2="27" stroke="#FFF" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Legs (right side) -->
+  <line x1="21" y1="22" x2="23" y2="26" stroke="#FFF" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="19" y1="23" x2="21" y2="27" stroke="#FFF" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Godot accent - small blue dot/badge -->
+  <circle cx="26" cy="8" r="3" fill="#478CBF" stroke="#FFF" stroke-width="1"/>
+</svg>

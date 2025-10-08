@@ -1,10 +1,29 @@
 # FerrisScript for Visual Studio Code
 
-Syntax highlighting and code snippets for FerrisScript - a Rust-inspired scripting language for Godot 4.x.
+Full IDE support for FerrisScript - a Rust-inspired scripting language for Godot 4.x. Features code completion, hover tooltips, error diagnostics, and syntax highlighting.
 
 ## Features
 
-### Code Completion ✨ NEW in v0.0.3
+### Hover Tooltips ✨ NEW in v0.0.3 Phase 5
+
+- **Keyword Documentation**: Hover over keywords to see descriptions, syntax, and examples
+  - `let`, `fn`, `if`, `else`, `while`, `return`, `mut`, `true`, `false`
+- **Type Information**: Hover over types to see descriptions and usage
+  - Primitives: `i32`, `f32`, `bool`, `String`
+  - Godot types: `Vector2`, `Node`, `void`
+- **Function Signatures**: Hover over functions to see parameters and return types
+  - `print(message: String) -> void`
+- **Formatted with Examples**: All hover content includes syntax-highlighted code examples
+
+### Error Diagnostics ✨ NEW in v0.0.3 Phase 5
+
+- **Real-time Error Detection**: Compiler errors shown inline as you save
+- **Problem Panel Integration**: All errors and warnings appear in VS Code's Problems panel
+- **Inline Squiggles**: Red underlines highlight error locations
+- **Error Codes**: Each error includes FerrisScript error code (E001-E499)
+- **Quick Access**: Click on error in Problems panel to jump to location
+
+### Code Completion (Phase 4)
 
 - **Keyword Completion**: Auto-complete FerrisScript keywords as you type
   - Control flow: `if`, `else`, `while`, `return`
@@ -113,18 +132,19 @@ fn _process(delta: f32) {
 
 ## Known Limitations
 
-- **Basic completion only**: Completion limited to keywords, types, and built-in functions (no symbol resolution yet)
-- **No hover tooltips yet**: Type information and documentation on hover coming in Phase 5
-- **No real-time error checking**: Syntax errors shown after compilation only (problem panel integration coming in Phase 5)
+- **Static completion only**: Completion limited to keywords, types, and built-in functions (no symbol resolution from code yet)
+- **Static hover content**: Hover shows pre-defined documentation (no type inference from code yet)
+- **Compiler must be available**: Error diagnostics require FerrisScript compiler in PATH or workspace
+- **Save-triggered diagnostics**: Errors update on file save (not real-time as you type)
 - **No go-to-definition**: Full IntelliSense features coming in v0.0.5 with LSP
 - **Basic highlighting only**: Semantic highlighting (context-aware colors) coming with LSP
 
 ## Roadmap
 
 - **v0.0.2**: Basic syntax highlighting and snippets ✅
-- **v0.0.3** (Current): Enhanced diagnostics, code completion, hover tooltips ⏳
+- **v0.0.3** (Current): Enhanced diagnostics, code completion, hover tooltips ✅
   - Phase 4: Code completion ✅
-  - Phase 5: Hover tooltips and problem panel (in progress)
+  - Phase 5: Hover tooltips and problem panel ✅
 - **v0.0.5**: Language Server Protocol (LSP) with full IntelliSense
 - **v0.1.0**: Full editor integration with debugging support
 
