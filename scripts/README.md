@@ -10,8 +10,11 @@ This directory contains helper scripts for development workflows.
 | `bench.sh` / `bench.ps1` | Run benchmarks | All |
 | `format.sh` / `format.ps1` | Format code | All |
 | `coverage.sh` / `coverage.ps1` | Generate coverage | All |
+| `lint.sh` / `lint.ps1` | Run linting checks | All |
 | `lint-docs.sh` / `lint-docs.ps1` | Lint documentation | All |
 | `pre-push.sh` / `pre-push.ps1` | Pre-push validation | All |
+| `install-git-hooks.sh` / `install-git-hooks.ps1` | Install Git hooks | All |
+| `uninstall-git-hooks.sh` / `uninstall-git-hooks.ps1` | Uninstall Git hooks | All |
 
 **Tip**: All scripts have both `.sh` (Bash) and `.ps1` (PowerShell) versions for cross-platform support.
 
@@ -369,18 +372,37 @@ The pre-commit hook runs quick tests only (`cargo test --lib`). For WIP commits,
 
 #### Uninstalling Hooks
 
-**PowerShell**:
+**PowerShell (Windows)**:
 
 ```powershell
-Remove-Item .git/hooks/pre-commit
-Remove-Item .git/hooks/pre-push
+.\scripts\uninstall-git-hooks.ps1
 ```
 
-**Bash**:
+**Bash (Linux/macOS)**:
 
 ```bash
-rm .git/hooks/pre-commit
-rm .git/hooks/pre-push
+./scripts/uninstall-git-hooks.sh
+```
+
+**What It Does**:
+
+- Removes `.git/hooks/pre-commit` hook
+- Removes `.git/hooks/pre-push` hook
+- Shows confirmation for each hook removed
+- Safe to run even if hooks aren't installed
+
+**Manual Removal** (alternative):
+
+```powershell
+# PowerShell
+Remove-Item .git/hooks/pre-commit -ErrorAction SilentlyContinue
+Remove-Item .git/hooks/pre-push -ErrorAction SilentlyContinue
+```
+
+```bash
+# Bash
+rm -f .git/hooks/pre-commit
+rm -f .git/hooks/pre-push
 ```
 
 #### "Module not found"
