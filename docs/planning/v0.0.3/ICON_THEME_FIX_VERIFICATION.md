@@ -43,20 +43,20 @@ The icon theme JSON is correctly configured:
 If Option 1 doesn't work:
 
 1. **Uninstall Extension**:
-   ```bash
-   # Find where extension is installed
-   cd %USERPROFILE%\.vscode\extensions
-   dir ferrisscript*
-   
-   # Remove directory
-   rmdir /s ferrisscript-0.0.3
-   ```
+   - Use the Extensions panel in VS Code to uninstall "FerrisScript".
+   - **Important:** After uninstalling, manually check for and delete any remaining extension folders:
+     ```bash
+     cd %USERPROFILE%\.vscode\extensions
+     dir ferrisscript*
+     rmdir /s ferrisscript-0.0.3
+     ```
+   - This ensures no cached files remain.
 
 2. **Rebuild and Reinstall**:
    ```bash
    cd Y:\cpark\Projects\FerrisScript\extensions\vscode
    npm run compile
-   
+
    # Copy to extensions folder
    xcopy /E /I . %USERPROFILE%\.vscode\extensions\ferrisscript-0.0.3
    ```
@@ -65,6 +65,14 @@ If Option 1 doesn't work:
    - Close all VS Code windows
    - Reopen workspace
    - Set icon theme: "FerrisScript"
+
+#### ⚠️ Troubleshooting: Extension Not Showing as "Installing"
+
+- If the extension does not appear as "installing" or does not show up in the Extensions panel:
+  - Double-check the folder name in `%USERPROFILE%\.vscode\extensions` matches the expected format (`ferrisscript-0.0.3`).
+  - Ensure `package.json` in the extension folder is valid and includes the correct `publisher`, `name`, and `version`.
+  - Try running `Developer: Reload Window` from the Command Palette.
+  - If still not detected, try packaging the extension (`vsce package`) and installing via VSIX.
 
 ---
 
