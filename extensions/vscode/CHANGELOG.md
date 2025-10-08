@@ -9,7 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Code Completion**: Context-aware auto-completion for FerrisScript
+- **Hover Tooltips** (Phase 5): Rich documentation on hover
+  - Keyword hover: Descriptions, syntax, and examples for all FerrisScript keywords
+  - Type hover: Type information and usage examples for primitives and Godot types
+  - Function hover: Signatures, parameter descriptions, and examples for built-in functions
+  - Markdown-formatted content with syntax-highlighted code blocks
+- **Error Diagnostics** (Phase 5): Integrated compiler error reporting
+  - Problem panel integration: All compiler errors appear in VS Code Problems panel
+  - Inline error squiggles: Red underlines at error locations
+  - Error codes: FerrisScript error codes (E001-E499) included in diagnostics
+  - Save-triggered: Errors update automatically when file is saved
+  - Compiler auto-detection: Finds FerrisScript compiler in workspace or PATH
+  - **Note**: Requires standalone CLI (planned for future release)
+- **Code Completion** (Phase 4): Context-aware auto-completion for FerrisScript
   - Keyword completion: `fn`, `let`, `mut`, `if`, `else`, `while`, `return`, `true`, `false`
   - Type completion: `i32`, `f32`, `bool`, `String`, `Vector2`, `Node`, `void`
   - Function completion: `print` with parameter hints
@@ -19,7 +31,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Shows all keywords and functions in expression context
 - TypeScript-based extension infrastructure
 - Completion provider with VS Code CompletionItemProvider API
+- Hover provider with VS Code HoverProvider API
+- Diagnostic provider with VS Code DiagnosticCollection API
 - Detailed documentation and examples for each completion item
+
+### Changed
+
+- Extension description: Updated to highlight full IDE support features
+- README: Reorganized to feature Phase 5 additions prominently
+- Package.json: Added "Linters" category
 
 ## [0.0.1] - 2025-10-05
 

@@ -628,6 +628,71 @@ This document captures key insights, discoveries, and lessons learned during v0.
 
 ---
 
+### Phase 5: VS Code Hover & Problem Panel ✅
+
+**Date Started**: October 7, 2025  
+**Date Completed**: October 7, 2025  
+**PR**: *(To be created)*
+
+#### Technical Discoveries
+
+- **Hover Provider Simplicity**: VS Code HoverProvider API is remarkably simple - just return MarkdownString for hover content. No complex protocol needed.
+
+- **Markdown Support**: VS Code hover supports full Markdown with code blocks, bold, inline code, and syntax highlighting via `appendCodeblock(code, 'ferrisscript')`.
+
+- **Diagnostic Collection**: VS Code's DiagnosticCollection API provides native problem panel integration. No need to manually render errors - VS Code handles visualization.
+
+- **Error Parsing Regex**: FerrisScript error format (`Error[E201]: message --> file:line:col`) is easily parsed with regex: `/Error\[(\w+)\]: ([^\n]+)\n\s*--> [^:]+:(\d+):(\d+)/g`
+
+- **Compiler Detection**: Simple file existence checks in common locations (`target/debug/`, `target/release/`) work well for finding compiler in workspace.
+
+- **Icon Theme Structure**: VS Code icon themes require two files:
+  1. SVG icon file (`resources/icons/ferrisscript.svg`)
+  2. Icon theme JSON mapping extensions to icons (`ferrisscript-icon-theme.json`)
+
+#### Challenges Encountered
+
+- **No Real Testing Yet**: Extension testing requires launching VS Code Extension Development Host and manual verification. Automated testing deferred to LSP phase.
+
+- **Compiler Integration**: Diagnostics require FerrisScript compiler to be available. Need to handle gracefully when compiler not found.
+
+- **Error Position Accuracy**: Compiler error positions are exact, but need to estimate error length for squiggle rendering (used word boundary detection).
+
+#### Solutions Applied
+
+- **Comprehensive Manual Testing Guide**: Created 15-test manual testing checklist covering all Phase 5 features systematically.
+
+- **Graceful Degradation**: Diagnostic provider checks for compiler availability and disables silently if not found. Other features (hover, completion) still work.
+
+- **Word Boundary Detection**: Parser uses regex `/\w/` to find end of word at error position for accurate squiggle length.
+
+- **Structured Hover Content**: Created separate modules for keywords, types, and functions with consistent data structures for easy extension.
+
+#### Best Practices Identified
+
+- **Reuse Phase 4 Patterns**: Manual testing guide followed Phase 4 structure (setup, test cases, results table, acceptance criteria).
+
+- **Apply Phase 4 Learnings**: Used context detection testing principles and documented VS Code behavior patterns.
+
+- **Separate Concerns**: Hover provider, diagnostic provider, and completion provider are independent modules - easy to test and extend separately.
+
+- **Rich Hover Content**: Include syntax, examples, and descriptions in hover tooltips - don't just show raw signatures.
+
+- **User-Friendly Icons**: Custom file icons significantly improve professional appearance in file explorer.
+
+#### Time Efficiency
+
+- **Actual Implementation**: ~4 hours (vs estimated 2-3 days)
+- **Breakdown**:
+  - Hover provider: ~1 hour (3 files: provider, keywords, types, functions)
+  - Diagnostic provider: ~1.5 hours (2 files: provider, parser)
+  - File icons: ~30 minutes (SVG + icon theme JSON)
+  - Documentation updates: ~1 hour (README, CHANGELOG, testing guide)
+  
+**Key Factor**: Well-defined execution plan and Phase 4 learnings made implementation faster.
+
+---
+
 ## 🔮 Recommendations for Future Versions
 
 ### v0.0.4 and Beyond
