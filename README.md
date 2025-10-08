@@ -56,7 +56,7 @@ FerrisScript (named after [Ferris 🦀](https://rustacean.net/), the Rust mascot
 | **Refactoring Safety** | High (type checker catches breaks) | Medium (manual testing needed) |
 | **Godot Integration** | Via GDExtension | Native |
 | **Hot Reload** | Planned (v0.1.0) | Yes |
-| **Maturity** | Alpha (v0.0.2) | Production-ready |
+| **Maturity** | Alpha (v0.0.3) | Production-ready |
 
 \* Performance comparison is preliminary and varies by use case. Detailed benchmarks are documented in version-specific documentation.
 
@@ -100,17 +100,24 @@ FerrisScript has syntax highlighting and code snippets for Visual Studio Code:
 
 ```bash
 # Windows
-cp -r extensions/vscode ~/.vscode/extensions/ferrisscript-0.1.0
+cp -r extensions/vscode ~/.vscode/extensions/ferrisscript-0.0.3
 
 # Or use a symbolic link for development
-mklink /D "%USERPROFILE%\.vscode\extensions\ferrisscript-0.1.0" "path\to\FerrisScript\extensions\vscode"
+mklink /D "%USERPROFILE%\.vscode\extensions\ferrisscript-0.0.3" "path\to\FerrisScript\extensions\vscode"
 ```
 
 **Reload VS Code**: Press `Ctrl+Shift+P` → "Developer: Reload Window"
 
+### New in v0.0.3: IntelliSense Features ✨
+
+- **Code Completion** (Ctrl+Space): Keywords, types, built-in functions with context awareness
+- **Hover Tooltips**: Documentation and examples for keywords, types, and functions
+- **Problem Panel**: Real-time compiler errors with inline diagnostics and error codes
+- **File Icons**: Custom `.ferris` file icons in Explorer
+
 See [extensions/vscode/README.md](extensions/vscode/README.md) for full features, snippet reference, and known limitations.
 
-**Future**: IntelliSense (completion, hover, go-to-definition) coming in v0.0.5 with LSP implementation.
+**Future**: Full LSP with go-to-definition, find references, and rename coming in v0.0.5.
 
 ## 🚀 Quick Start
 
