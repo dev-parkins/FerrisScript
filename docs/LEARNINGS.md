@@ -231,3 +231,280 @@ Language extensions don't ship icon themes. Instead:
 ---
 
 **Status**: Issue resolved. Extension now follows VS Code best practices. Testing updated.
+
+---
+
+# Test Coverage Improvements - v0.0.3 Phase
+
+**Date**: October 8, 2025  
+**Branch**: `feature/test-coverage-improvements-v0.0.3`  
+**Result**: +1.97% overall coverage (64.54% → 66.51%, 1311/1971 lines)
+
+---
+
+## 🎯 Systematic Approach
+
+### Four-Phase Strategy
+
+1. **Phase 1: Type Checker** - High-value tests (+0.66% overall)
+2. **Phase 2: Runtime** - Error path coverage (+1.26% overall)
+3. **Phase 3: Parser** - Error recovery mechanisms (+0.05% overall)
+4. **Phase 4: Lexer** - Edge case validation (stable coverage)
+
+### Key Principle
+
+**Measure → Test → Validate → Measure**
+
+- Run tarpaulin to identify coverage gaps
+- Add targeted tests for uncovered lines
+- Validate tests pass
+- Re-measure to quantify improvement
+
+---
+
+## 🎓 What We Learned
+
+### 1. Runtime vs Compile-Time Error Testing
+
+**Challenge**: Initial Phase 2 tests (11/17 failed) because they targeted compile-time errors caught by the type checker, not runtime errors.
+
+**Examples of Mistakes**:
+
+```rust
+// ❌ WRONG - Type checker catches this at compile time
+let input = "fn test() { let x: Vector2 = true; }";
+// Type checker: "Cannot assign Bool to Vector2"
+
+// ✅ RIGHT - Runtime error (property callback missing)
+env.set_property_getter(|prop| { Ok(Value::Vector2 { x: 1.0, y: 2.0 }) });
+// No setter registered → runtime error
+```
+
+**Solution**: Focus runtime tests on:
+
+- Value type operations (`to_float()`, `to_bool()`, printing)
+- Environment management (scope push/pop, builtin registration)
+- Property getter/setter callback errors
+- Comparison operations with mixed types
+
+### 2. Error Recovery Testing Patterns
+
+**Pattern**: Parser error recovery tests validate sync points and panic mode.
+
+**Effective Tests**:
+
+```rust
+// Test sync to semicolon
+"fn test() { let x = 5 let y = 10; }" // Missing ; after x
+
+// Test sync to rbrace
+"fn broken() { let x = 5; fn other() {}" // Missing } for broken
+
+// Test cascading suppression
+parser.record_error("First error");  // Records
+parser.record_error("Second error"); // Suppressed (panic mode)
+```
+
+**Learning**: Error recovery should:
+
+- Suppress cascading false positives
+- Sync at statement boundaries (`;`, `}`, `fn`, `let`)
+- Clear panic mode at sync points
+
+### 3. Lexer Edge Case Prioritization
+
+**Insight**: Phase 4 lexer tests provided validation but minimal coverage improvement because existing tests already covered core tokenization paths.
+
+**High-Value Edge Cases**:
+
+- Unterminated strings
+- Invalid characters (`@`, `#`, `$`)
+- Unicode handling (emoji, combining characters)
+- Operator sequences (`===`, `!==`)
+- Numeric edge cases (leading zeros, trailing dots)
+
+**Learning**: Edge case tests provide:
+
+- Regression protection
+- Documentation of behavior
+- Error message validation
+
+Even if coverage doesn't increase, they prevent future breakage.
+
+### 4. Clippy Best Practices
+
+**Issues Encountered**:
+
+```rust
+// ❌ Clippy error: bool_assert_comparison
+assert_eq!(value.to_bool(), false);
+
+// ✅ Fix: Use assert! directly
+assert!(!value.to_bool());
+
+// ❌ Clippy error: single_match
+match result {
+    Ok(tokens) => { /* ... */ }
+    Err(_) => {}
+}
+
+// ✅ Fix: Use if let
+if let Ok(tokens) = result {
+    /* ... */
+}
+```
+
+**Learning**: Run `cargo clippy` before PR to catch style issues early.
+
+### 5. Test Organization Strategy
+
+**Pattern**: Group tests by functionality with clear comments:
+
+```rust
+// ========================================
+// Error Recovery Tests (Phase 3C)
+// ========================================
+
+#[test]
+fn test_recovery_missing_semicolon() { /* ... */ }
+
+#[test]
+fn test_recovery_sync_on_fn_keyword() { /* ... */ }
+```
+
+**Benefits**:
+
+- Easy to navigate
+- Clear purpose
+- Supports incremental additions
+
+---
+
+## 📊 Coverage Impact Summary
+
+| Phase | Module        | Tests Added | Module Impact | Overall Impact       |
+|-------|---------------|-------------|---------------|----------------------|
+| 1     | Type Checker  | 18          | +2.64%        | +0.66% (64.54→65.20%)|
+| 2     | Runtime       | 17          | N/A           | +1.26% (65.20→66.46%)|
+| 3     | Parser        | 25          | N/A           | +0.05% (66.46→66.51%)|
+| 4     | Lexer         | 25          | N/A           | +0.00% (stable)      |
+| **Total** | **All**    | **85**      | **-**         | **+1.97% (64.54→66.51%)**|
+
+**Final Stats**:
+
+- **Total Lines**: 1,971
+- **Covered Lines**: 1,311
+- **Coverage**: 66.51%
+- **Total Tests**: 379 (204 compiler + 53 runtime + 20 integration + others)
+
+---
+
+## 🔧 Tools & Workflow
+
+### Coverage Measurement
+
+```powershell
+# Full coverage report with HTML output
+cargo tarpaulin --verbose --all-features --workspace --timeout 300 --out Html --out Xml
+
+# Quick coverage check
+cargo tarpaulin --workspace --timeout 300 2>&1 | Select-String -Pattern "coverage"
+```
+
+### Test Validation
+
+```powershell
+# Run all tests
+cargo test --workspace --quiet
+
+# Run specific module tests
+cargo test -p ferrisscript_runtime --quiet
+cargo test -p ferrisscript_compiler --lib parser --quiet
+
+# Run with output
+cargo test test_name -- --nocapture
+```
+
+### Quality Checks
+
+```powershell
+# Lint check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+# Format check
+cargo fmt --all --check
+
+# Format auto-fix
+cargo fmt --all
+```
+
+---
+
+## 🚀 Recommendations for Future Test Coverage Work
+
+### 1. Target High-Impact Modules First
+
+- Type checker improvements have biggest overall impact
+- Runtime tests cover error paths effectively
+- Parser/lexer tests provide stability but smaller gains
+
+### 2. Focus on Uncovered Error Paths
+
+Use tarpaulin HTML report to identify:
+
+- Uncovered `Err` branches
+- Unreached `panic!` statements
+- Edge case handling code
+
+### 3. Test Strategy by Module
+
+**Type Checker**:
+
+- Type coercion scenarios
+- Field access validation
+- Function signature matching
+
+**Runtime**:
+
+- Value operation edge cases
+- Environment state management
+- Builtin function registration
+
+**Parser**:
+
+- Error recovery synchronization
+- Multi-error collection
+- Statement boundary detection
+
+**Lexer**:
+
+- Invalid character handling
+- String literal edge cases
+- Operator sequence disambiguation
+
+### 4. Maintain Test Quality
+
+- Clear test names describing what's being tested
+- Separate tests for success and error cases
+- Document non-obvious test scenarios
+- Group related tests with section comments
+
+---
+
+## 📝 Conclusion
+
+This coverage improvement workstream demonstrated:
+
+1. **Systematic testing** with measurable targets works
+2. **Understanding code layers** (compile-time vs runtime) is critical
+3. **Error recovery testing** requires specific patterns
+4. **Edge case tests** provide value beyond coverage metrics
+5. **Tool integration** (tarpaulin, clippy, fmt) streamlines quality
+
+**Next Steps for 75-80% Coverage**:
+
+- Add more type checker tests (implicit conversions, complex expressions)
+- Expand runtime tests (more builtin functions, complex scope scenarios)
+- Add integration tests (end-to-end compilation + execution)
+- Test error message formatting and context
+- Cover godot_bind module (currently untested)

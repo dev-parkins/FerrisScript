@@ -1091,4 +1091,184 @@ fn _process(delta: f32) {
         let program = parse(&tokens, input).unwrap();
         assert!(check(&program, input).is_ok());
     }
+
+    // ========== NEW COVERAGE TESTS: Type Coercion & Field Access ==========
+
+    #[test]
+    fn test_implicit_int_to_float_coercion_in_assignment() {
+        let input = "fn test() { let x: f32 = 42; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_implicit_int_to_float_coercion_in_function_arg() {
+        let input = r#"
+            fn take_float(x: f32) {}
+            fn test() { take_float(42); }
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_no_reverse_coercion_float_to_int() {
+        let input = "fn test() { let x: i32 = 3.14; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Type mismatch"));
+    }
+
+    #[test]
+    fn test_no_bool_to_numeric_coercion() {
+        let input = "fn test() { let x: i32 = true; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Type mismatch"));
+    }
+
+    #[test]
+    fn test_vector2_field_access_x() {
+        let input = "fn test() { let v = self.position; let x = v.x; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_vector2_field_access_y() {
+        let input = "fn test() { let v = self.position; let y = v.y; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_vector2_invalid_field_access() {
+        let input = "fn test() { let v = self.position; let z = v.z; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("has no field"));
+    }
+
+    #[test]
+    fn test_nested_field_access_chains() {
+        let input = "fn test() { let x: f32 = self.position.x; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_field_access_on_primitive_type_error() {
+        let input = "fn test() { let x: i32 = 5; let y = x.field; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("has no fields"));
+    }
+
+    #[test]
+    fn test_node_position_field_access() {
+        let input = "fn test() { let pos = self.position; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_string_type_in_declaration() {
+        let input = r#"fn test() { let msg: String = "hello"; }"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_string_type_mismatch() {
+        let input = r#"fn test() { let msg: String = 42; }"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Type mismatch"));
+    }
+
+    #[test]
+    fn test_multiple_type_coercions_in_expression() {
+        let input = "fn test() { let x: f32 = 1 + 2 + 3; }"; // Multiple i32 operations, then coerce to f32
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_mixed_int_float_arithmetic_with_coercion() {
+        let input = "fn test() { let x: f32 = 5; let y = x + 10; }"; // f32 + i32 (coerced)
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_type_inference_with_coercion() {
+        let input = "fn test() { let x = 5; let y: f32 = x; }"; // Infer i32, then coerce
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_function_return_type_coercion() {
+        let input = r#"
+            fn get_float() -> f32 { return 42; }
+            fn test() { let x = get_float(); }
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_comparison_with_coercion() {
+        let input = "fn test() { let x: f32 = 5.0; let result = x > 3; }"; // f32 > i32 (coerced)
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_compound_assignment_with_coercion() {
+        let input = "fn test() { let mut x: f32 = 5.0; x += 10; }"; // f32 += i32 (coerced)
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_void_return_type_checking() {
+        let input = "fn no_return() { let x = 5; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_undefined_type_error() {
+        let input = "fn test() { let x: UnknownType = 5; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        // Type checker treats unknown types as Type::Unknown, may still compile
+    }
 }
