@@ -523,12 +523,14 @@ This coverage improvement workstream demonstrated:
 ## 🎯 Objectives & Results
 
 ### Goals
+
 - ✅ Achieve 80%+ test coverage for TypeScript VSCode extension
 - ✅ Pass SonarCloud quality gates (80% coverage, <3% duplication)
 - ✅ Integrate TypeScript tests into CI/CD pipeline
 - ✅ Eliminate code duplication between completion and hover modules
 
 ### Results
+
 | Metric | Target | Achieved | Status |
 |--------|--------|----------|--------|
 | Statement Coverage | 80% | 97.50% | ✅ +17.5% |
@@ -576,6 +578,7 @@ export const languages = {
 ```
 
 **Key Learnings**:
+
 - Mock must support **multiple constructor signatures** (Range, Position)
 - Must implement **both classes and namespaces** (languages, workspace, window)
 - **Method chaining** requires returning `this` from builder methods
@@ -584,6 +587,7 @@ export const languages = {
 ### 2. Testing Strategy by Module
 
 #### Extension Lifecycle (`extension.test.ts`)
+
 ```typescript
 // Test provider registration without instantiating real providers
 jest.mock('../completion/provider');
@@ -604,6 +608,7 @@ it('should register completion provider with trigger characters', () => {
 **Learning**: Mock dependencies to test orchestration logic without side effects.
 
 #### Shared Definitions (`definitions.test.ts`)
+
 ```typescript
 // Test data consistency and completeness
 describe('KEYWORDS', () => {
@@ -626,6 +631,7 @@ describe('KEYWORDS', () => {
 **Learning**: Validate data integrity with property-based checks, not just existence.
 
 #### Context Detection (`context.test.ts`)
+
 ```typescript
 // Test completion context detection patterns
 const mockDocument = (lines: string[]): vscode.TextDocument => ({
@@ -648,6 +654,7 @@ it('should detect TypePosition after colon in let statement', () => {
 **Learning**: Factory functions for mock documents make tests readable and maintainable.
 
 #### Diagnostics Provider (`diagnostics.test.ts`)
+
 ```typescript
 // Mock child_process for compiler execution
 jest.mock('child_process');
@@ -675,6 +682,7 @@ it('should find compiler in PATH', () => {
 ### 3. Code Refactoring - DRY Principle
 
 **Problem**: Keyword, type, and function definitions duplicated across 6 files:
+
 - `completion/keywords.ts`, `completion/types.ts`, `completion/functions.ts`
 - `hover/keywords.ts`, `hover/types.ts`, `hover/functions.ts`
 
@@ -706,6 +714,7 @@ export function getKeyword(name: string): KeywordFeature | undefined {
 ```
 
 **Refactored modules**:
+
 ```typescript
 // Before: 101 lines with local KEYWORDS array
 // After: 22 lines importing from shared definitions
@@ -727,6 +736,7 @@ export function getKeywordCompletions(statementLevelOnly: boolean): vscode.Compl
 ```
 
 **Impact**:
+
 - **Before**: 554 lines across 6 files (with duplication)
 - **After**: 132 lines + 220 lines shared definitions
 - **Saved**: ~200 lines of duplicate code
@@ -737,6 +747,7 @@ export function getKeywordCompletions(statementLevelOnly: boolean): vscode.Compl
 ## 🧪 Testing Patterns & Best Practices
 
 ### Pattern 1: Mock Factories
+
 ```typescript
 // Reusable mock creation
 function createMockDocument(content: string): vscode.TextDocument {
@@ -755,6 +766,7 @@ function createMockDocument(content: string): vscode.TextDocument {
 **Benefit**: DRY principle in tests, easy to adjust mock behavior.
 
 ### Pattern 2: Spy on Methods Before Activation
+
 ```typescript
 // Common mistake: Spy after method is called
 activate(context);
@@ -767,6 +779,7 @@ expect(spy).toHaveBeenCalled();
 ```
 
 ### Pattern 3: Test Data Consistency
+
 ```typescript
 // Don't just test existence
 it('should have keywords', () => {
@@ -785,6 +798,7 @@ it('should have all keywords with required fields', () => {
 ```
 
 ### Pattern 4: Mock Node.js Built-ins
+
 ```typescript
 // Mock fs module
 jest.mock('fs');
@@ -809,6 +823,7 @@ it('should handle file system errors', () => {
 ## 🔧 Tools & Configuration
 
 ### Jest Configuration
+
 ```javascript
 // jest.config.js
 module.exports = {
@@ -832,11 +847,13 @@ module.exports = {
 ```
 
 **Key Settings**:
+
 - `testEnvironment: 'node'` - VS Code extensions are Node.js applications
 - `moduleNameMapper` - Redirect `vscode` imports to mock
 - `coverageThreshold` - Enforce 80% coverage (fails build if not met)
 
 ### Package.json Scripts
+
 ```json
 {
   "scripts": {
@@ -853,6 +870,7 @@ module.exports = {
 ## 📊 CI/CD Integration
 
 ### GitHub Actions Workflow
+
 ```yaml
 - name: Setup Node.js for TypeScript tests
   uses: actions/setup-node@v4
@@ -873,6 +891,7 @@ module.exports = {
 ```
 
 ### SonarCloud Configuration
+
 ```properties
 # sonar-project.properties
 sonar.tests=extensions/vscode/src/__tests__
@@ -888,32 +907,38 @@ sonar.javascript.lcov.reportPaths=extensions/vscode/coverage/lcov.info
 ## 🎓 Key Learnings
 
 ### 1. VS Code Extension Testing Requires Full API Mock
+
 - Can't use partial mocks - providers expect complete API surface
 - Must mock classes, interfaces, enums, AND namespaces
 - Constructor overloading is common (Position, Range, Uri)
 
 ### 2. Test Organization Matters
+
 - One test file per source file keeps tests discoverable
 - Group tests by functionality with `describe` blocks
 - Use clear, descriptive test names: `it('should X when Y')`
 
 ### 3. Mock Strategy: Minimal but Complete
+
 - Don't mock every method - only what tests use
 - Do implement core functionality (Position arithmetic, Range contains)
 - Balance: Too little = brittle tests, Too much = maintenance burden
 
 ### 4. Coverage ≠ Quality (But It Helps)
+
 - 97% coverage doesn't mean bug-free code
 - Coverage reveals untested code paths (valuable!)
 - Focus on edge cases: error handling, boundary conditions
 - One skipped test (return type detection) - known limitation documented
 
 ### 5. Refactoring Pays Off
+
 - Eliminating duplication made code easier to test
 - Single source of truth prevents inconsistencies
 - Shared definitions module became highly testable (100% coverage)
 
 ### 6. CI Integration is Critical
+
 - Local tests pass ≠ CI tests pass (environment differences)
 - LCOV format is standard for cross-tool compatibility
 - Separate coverage uploads (flags) enable per-language tracking
@@ -938,12 +963,14 @@ sonar.javascript.lcov.reportPaths=extensions/vscode/coverage/lcov.info
 ## 🚀 Future Improvements
 
 ### Potential Enhancements
+
 1. **E2E Testing**: Test extension in actual VS Code instance (slow but comprehensive)
 2. **Visual Regression**: Capture/compare hover tooltips, completion popups
 3. **Performance Testing**: Measure completion provider latency
 4. **Accessibility**: Test screen reader compatibility
 
 ### Technical Debt
+
 - One skipped test: Return type detection in context.ts (regex limitation)
 - Extension.ts lower coverage: Deactivate lifecycle not fully tested
 - Mock could be extracted to npm package for reuse
@@ -962,7 +989,8 @@ This TypeScript testing workstream demonstrated:
 
 **Time Investment**: ~4 hours to implement full test suite and CI integration
 
-**ROI**: 
+**ROI**:
+
 - Prevents regressions in 97% of codebase
 - Eliminates 400 lines of duplicate code
 - Enables confident refactoring
