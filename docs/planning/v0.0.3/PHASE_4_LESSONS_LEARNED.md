@@ -187,6 +187,7 @@ Phase 4 (VS Code Completion) was successfully completed with all features workin
 - Create test case: "Type in expression, verify statement keywords NOT present"
 
 **Test Matrix To Create**:
+
 | Context | Should Show | Should NOT Show |
 |---------|-------------|-----------------|
 | Statement Start | fn, let, if, while, return | - |
