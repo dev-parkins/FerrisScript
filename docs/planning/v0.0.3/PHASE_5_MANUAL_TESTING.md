@@ -592,11 +592,12 @@ fn update(delta: f32) -> void {
 **Actual**: Icon theme is a complete replacement - must define icons for ALL file types  
 **Root Cause**: Fundamental misunderstanding of VS Code icon theme system  
 **Resolution**: Removed `iconThemes` contribution from package.json  
-**Rationale**: 
-  - Icon themes are complete icon sets (like Seti, Material Icons)
-  - Cannot add single file icon without defining hundreds of file types
-  - Language extensions typically don't ship icon themes
-  - File icons are optional polish, not core functionality
+**Rationale**:
+
+- Icon themes are complete icon sets (like Seti, Material Icons)
+- Cannot add single file icon without defining hundreds of file types
+- Language extensions typically don't ship icon themes
+- File icons are optional polish, not core functionality
 **Status**: Feature removed, documentation updated
 
 ---
@@ -632,6 +633,7 @@ Based on [PHASE_5_VS_CODE_HOVER.md](./PHASE_5_VS_CODE_HOVER.md) acceptance crite
 **All Acceptance Criteria Met**: [~] Partial (7/10 fully met, 3/10 awaiting CLI)
 
 **Assessment**:
+
 - **Hover Features**: 100% complete and working (Criteria 1-3, 7) ✅
 - **Diagnostic Features**: Infrastructure complete, awaiting CLI implementation (Criteria 4-5, 8) ⏳
 - **File Icons**: Removed - VS Code icon themes must define ALL file types (Criterion 6 updated) ✅

@@ -11,6 +11,7 @@
 ### Misconception
 
 We initially believed VS Code icon themes worked like this:
+
 - ❌ Add a single icon for your file type
 - ❌ Other file types keep their existing icons
 - ❌ Icon "augments" the current icon set
@@ -18,6 +19,7 @@ We initially believed VS Code icon themes worked like this:
 ### Reality
 
 VS Code icon themes actually work like this:
+
 - ✅ **Complete replacement** of ALL file icons
 - ✅ Must define icons for **hundreds** of file types
 - ✅ When selected, **replaces** the entire icon system
@@ -30,12 +32,14 @@ VS Code icon themes actually work like this:
 ### What Icon Themes Are
 
 Icon themes are **complete icon sets** defined in a JSON file that maps:
+
 - File extensions → icon definitions
 - File names → icon definitions
 - Language IDs → icon definitions
 - Folder states → icon definitions
 
 **Example Icon Themes**:
+
 - **Seti** (vs-seti): Defines ~100+ file type icons
 - **Minimal** (vs-minimal): Shows generic file icon for all types
 - **Material Icon Theme**: Popular extension with 500+ file type icons
@@ -58,6 +62,7 @@ Icon themes are **complete icon sets** defined in a JSON file that maps:
 **Problem**: This defines ONLY `.ferris` icon. All other file types have no mapping.
 
 **Result**:
+
 - `.ferris` files → Crab icon ✅
 - `.md` files → No icon ❌
 - `.ts` files → No icon ❌
@@ -88,8 +93,10 @@ For Each File in Explorer:
 ## 🚫 Why We Can't Use Icon Themes
 
 ### Option 1: Complete Icon Theme
+
 **Pros**: Could work technically  
 **Cons**:
+
 - Must define icons for 100+ file types
 - Ongoing maintenance (new languages, updates)
 - Users lose their preferred icon theme
@@ -98,8 +105,10 @@ For Each File in Explorer:
 **Verdict**: ❌ Not feasible
 
 ### Option 2: Partial Icon Theme (What We Tried)
+
 **Pros**: Simple implementation  
 **Cons**:
+
 - Breaks all other file icons (user-reported bug)
 - Poor user experience
 - Not how VS Code icon system works
@@ -107,13 +116,16 @@ For Each File in Explorer:
 **Verdict**: ❌ Doesn't work
 
 ### Option 3: No Icon Theme (Final Decision)
+
 **Pros**:
+
 - Extension follows VS Code best practices
 - Users keep their preferred icon theme
 - Matches what other language extensions do
 - Removes non-essential feature
 
 **Cons**:
+
 - `.ferris` files use generic file icon
 
 **Verdict**: ✅ Correct approach
@@ -123,6 +135,7 @@ For Each File in Explorer:
 ## 🔬 Research: How Other Language Extensions Handle Icons
 
 ### Extensions WITHOUT Icon Themes (Most)
+
 - **Rust (rust-analyzer)**: No icon theme
 - **Python**: No icon theme
 - **Julia**: No icon theme
@@ -130,7 +143,9 @@ For Each File in Explorer:
 - **Zig**: No icon theme
 
 ### Extensions WITH Icon Support
+
 Language extensions don't ship icon themes. Instead:
+
 - Popular icon theme extensions (like **Material Icon Theme**) add support for many languages
 - Icon theme maintainers add new file types to their themes
 - Language extension developers can submit PRs to popular icon themes
@@ -150,11 +165,13 @@ Language extensions don't ship icon themes. Instead:
 3. Document: "FerrisScript icons available in Material Icon Theme v5.x+"
 
 **Benefits**:
+
 - Users get icons in their preferred theme
 - No maintenance burden on FerrisScript project
 - Consistent with VS Code ecosystem practices
 
 **Drawbacks**:
+
 - Depends on external maintainers accepting PRs
 - Not all users use those icon themes
 
@@ -163,12 +180,14 @@ Language extensions don't ship icon themes. Instead:
 ## 📝 Documentation Updates
 
 ### Files Updated
+
 1. **package.json**: Removed `contributes.iconThemes` section
 2. **CHANGELOG.md**: Removed file icon feature mention
 3. **PHASE_5_MANUAL_TESTING.md**: Updated Test 13 status and acceptance criteria
 4. **This document**: Created to explain the lesson learned
 
 ### Files Kept (For Reference)
+
 - `resources/icons/ferrisscript.svg` - Icon file (keep for future PR to icon themes)
 - `resources/icons/ferrisscript-icon-theme.json` - Example icon theme (keep as reference)
 
@@ -177,12 +196,14 @@ Language extensions don't ship icon themes. Instead:
 ## ✅ Final Status
 
 **Phase 5 Features**:
+
 - ✅ Hover tooltips (keywords, types, functions) - **Working**
 - ✅ Diagnostic provider infrastructure - **Ready for CLI**
 - ❌ File icons - **Removed (not feasible)**
 - ✅ Extension packaging (VSIX) - **Working**
 
 **Acceptance Criteria**: 7/10 met
+
 - 4/10 fully working (hover features)
 - 3/10 awaiting CLI (diagnostic features)
 - 3/10 removed (infeasible icon theme)

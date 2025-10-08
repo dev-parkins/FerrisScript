@@ -8,6 +8,7 @@
 ## 🔍 Current State
 
 The icon theme JSON is correctly configured:
+
 - ✅ No `"file"` property (was causing all files to use FerrisScript icon)
 - ✅ Only maps `"ferris"` extension to custom icon
 - ❌ VS Code may be using cached version
@@ -45,14 +46,17 @@ If Option 1 doesn't work:
 1. **Uninstall Extension**:
    - Use the Extensions panel in VS Code to uninstall "FerrisScript".
    - **Important:** After uninstalling, manually check for and delete any remaining extension folders:
+
      ```bash
      cd %USERPROFILE%\.vscode\extensions
      dir ferrisscript*
      rmdir /s ferrisscript-0.0.3
      ```
+
    - This ensures no cached files remain.
 
 2. **Rebuild and Reinstall**:
+
    ```bash
    cd Y:\cpark\Projects\FerrisScript\extensions\vscode
    npm run compile
@@ -83,6 +87,7 @@ If testing in development mode:
 1. **Close Extension Development Host**
 
 2. **Clear Extension Cache**:
+
    ```bash
    # Clear VS Code extension host cache
    rmdir /s %APPDATA%\Code\User\workspaceStorage
@@ -123,6 +128,7 @@ If testing in development mode:
 **Cause**: Icon theme disabled or cache corrupted
 
 **Fix**:
+
 1. Check icon theme is enabled: `Ctrl+Shift+P` → "Preferences: File Icon Theme"
 2. Try selecting a different theme (e.g., "Seti"), then back to "FerrisScript"
 3. Restart VS Code
@@ -134,6 +140,7 @@ If testing in development mode:
 **Cause**: Old version of extension still active
 
 **Fix**:
+
 1. Check extension version in Extensions view
 2. Uninstall and reinstall extension (see Option 2)
 3. Verify icon theme JSON file has no `"file"` property
@@ -145,6 +152,7 @@ If testing in development mode:
 **Cause**: Icon theme not selected or SVG file missing
 
 **Fix**:
+
 1. Verify `extensions/vscode/resources/icons/ferrisscript.svg` exists
 2. Select icon theme: `Ctrl+Shift+P` → "Preferences: File Icon Theme" → "FerrisScript"
 3. Check `package.json` has correct `iconThemes` contribution
@@ -170,6 +178,7 @@ After applying fix, verify:
 Once verified, update `PHASE_5_MANUAL_TESTING.md`:
 
 **Test 13: File Icon Display**
+
 - Change: `Result: [ ] Pass [X] Fail` → `Result: [X] Pass [ ] Fail`
 - Update Notes: "Icon displays correctly after clearing VS Code icon theme cache"
 
@@ -178,12 +187,14 @@ Once verified, update `PHASE_5_MANUAL_TESTING.md`:
 ## 🔍 Root Cause Analysis
 
 **Why This Happened**:
+
 1. Initial implementation had `"file": "ferrisscript-file"` in JSON
 2. VS Code cached this configuration
 3. Fix removed the line, but cache persisted
 4. VS Code continued using cached version
 
 **Prevention**:
+
 - Always test icon themes in clean Extension Development Host
 - Document cache clearing steps in testing guide
 - Consider versioning icon theme in `package.json` to force reload

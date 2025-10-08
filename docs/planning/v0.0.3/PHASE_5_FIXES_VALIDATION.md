@@ -16,16 +16,19 @@
 **Reporter**: User
 
 **Problem**:
+
 - File icon theme applied FerrisScript icon to **all** file types, not just `.ferris` files
 - Screenshot showed all files in explorer with FerrisScript crab icon
 - Disabling the icon theme reverted files to normal icons
 
 **Root Cause**:
+
 - Icon theme JSON had incorrect configuration
 - Line `"file": "ferrisscript-file"` set default icon for ALL files
 - Should only map `.ferris` extension to custom icon
 
 **Fix Applied**:
+
 ```json
 // BEFORE (incorrect)
 {
@@ -47,9 +50,11 @@
 ```
 
 **Files Modified**:
+
 - `extensions/vscode/resources/icons/ferrisscript-icon-theme.json`
 
 **Verification**:
+
 - Recompile extension: `npm run compile`
 - Reload VS Code window
 - Check file explorer - only `.ferris` files should have custom icon
@@ -63,11 +68,13 @@
 **Reporter**: User
 
 **Problem**:
+
 - Problem panel not showing any errors when saving `.ferris` files with errors
 - No inline red squiggles appearing
 - Diagnostic provider silently failing
 
 **Root Cause**:
+
 - **FerrisScript has no standalone CLI executable**
 - Project structure shows only library crates:
   - `crates/compiler` - library only (no `[[bin]]` target)
@@ -81,13 +88,14 @@
 
 1. **Graceful Degradation**: Updated diagnostic provider to handle missing compiler silently
 2. **Better Logging**: Added console logging to diagnose compiler detection
-3. **Documentation Updates**: 
+3. **Documentation Updates**:
    - Marked Tests 8-11 as "Not Testable (CLI not implemented)"
    - Updated Test 12 to verify graceful degradation (now passes)
    - Added ⚠️ warnings in testing guide about CLI requirement
    - Updated extension README with limitation notice
 
 **Files Modified**:
+
 - `extensions/vscode/src/diagnostics/provider.ts`
   - Fixed `runCompiler()` method to better capture stderr/stdout
   - Removed notification spam, added console logging
@@ -100,6 +108,7 @@
   - Added ⚠️ note that diagnostics require CLI
 
 **Current State**:
+
 - Diagnostic provider infrastructure is **complete and ready**
 - Will work immediately once CLI is implemented
 - Extension functions normally without CLI (hover, completion work)
@@ -113,17 +122,20 @@
 **Reporter**: User
 
 **Problem**:
+
 - Testing guide instructed user to verify `ferrisscript --version` works
 - This command doesn't exist (no CLI binary)
 - User couldn't proceed with diagnostic tests
 
 **Fix Applied**:
+
 - Updated setup instructions in PHASE_5_MANUAL_TESTING.md
 - Removed requirement to verify compiler
 - Added note explaining CLI doesn't exist yet
 - Marked diagnostic tests as skippable
 
 **Files Modified**:
+
 - `docs/planning/v0.0.3/PHASE_5_MANUAL_TESTING.md`
 
 ---
@@ -187,10 +199,12 @@ Based on [PHASE_5_VS_CODE_HOVER.md](./PHASE_5_VS_CODE_HOVER.md):
 ### For User - Immediate Testing
 
 1. **Reload VS Code Extension**:
+
    ```bash
    cd extensions/vscode
    npm run compile
    ```
+
    Then reload VS Code window (Ctrl+Shift+P → "Reload Window")
 
 2. **Verify Icon Fix**:
@@ -214,6 +228,7 @@ Based on [PHASE_5_VS_CODE_HOVER.md](./PHASE_5_VS_CODE_HOVER.md):
 **Task**: Create standalone FerrisScript CLI binary
 
 **Requirements**:
+
 1. Add `[[bin]]` section to `crates/compiler/Cargo.toml`
 2. Create `crates/compiler/src/bin/ferrisscript.rs`
 3. Implement CLI that:
@@ -224,6 +239,7 @@ Based on [PHASE_5_VS_CODE_HOVER.md](./PHASE_5_VS_CODE_HOVER.md):
 4. Build with `cargo build --bin ferrisscript`
 
 **Diagnostic Provider Impact**:
+
 - No changes needed to diagnostic provider code
 - Will automatically detect CLI once built
 - Will immediately start showing errors in problem panel
@@ -257,17 +273,20 @@ Based on [PHASE_5_VS_CODE_HOVER.md](./PHASE_5_VS_CODE_HOVER.md):
 ## 🎯 Summary
 
 **Issues Fixed**: 3/3
+
 - ✅ Icon theme applying to all files → Fixed
 - ✅ Diagnostic tests failing → Documented limitation, provider ready for CLI
 - ✅ Testing documentation incorrect → Updated with accurate instructions
 
 **Extension State**: Fully functional for implemented features
+
 - Hover tooltips: ✅ Working
 - Code completion: ✅ Working (Phase 4)
 - File icons: ✅ Fixed
 - Diagnostics: ⏳ Ready for CLI implementation
 
-**Ready for**: 
+**Ready for**:
+
 - User to retest after fixes
 - Create PR once icon fix verified
 - Plan CLI implementation for future phase

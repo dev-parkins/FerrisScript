@@ -20,6 +20,7 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 **Implementation**: Context-aware hover provider with rich Markdown content
 
 **Coverage**:
+
 - **9 Keywords**: `let`, `mut`, `fn`, `if`, `else`, `while`, `return`, `true`, `false`
   - Each includes: Description, syntax, and syntax-highlighted example
 - **7 Types**: `i32`, `f32`, `bool`, `String`, `Vector2`, `Node`, `void`
@@ -28,6 +29,7 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
   - Includes: Signature, parameter description, return type, and example
 
 **Technical Details**:
+
 - Uses VS Code `HoverProvider` API
 - Markdown formatting with code blocks
 - Language-specific syntax highlighting (`ferrisscript`)
@@ -35,6 +37,7 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 - ~50ms response time (verified in testing)
 
 **Files**:
+
 - `src/hover/provider.ts` - Main hover provider
 - `src/hover/keywords.ts` - Keyword documentation
 - `src/hover/types.ts` - Type information
@@ -45,6 +48,7 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 **Implementation**: Complete diagnostic provider awaiting standalone CLI
 
 **Features**:
+
 - Error parsing from compiler output
 - VS Code `DiagnosticCollection` integration
 - Problem panel integration
@@ -52,12 +56,14 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 - Error codes (E001-E499) mapping
 - Graceful degradation when compiler unavailable
 
-**Status**: 
+**Status**:
+
 - ✅ Infrastructure complete and tested
 - ⏳ Requires FerrisScript CLI executable (planned for future phase)
 - ✅ Extension works normally without CLI (no errors or crashes)
 
 **Files**:
+
 - `src/diagnostics/provider.ts` - Diagnostic provider and compiler integration
 - `src/diagnostics/parser.ts` - Error message parser
 
@@ -66,6 +72,7 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 **Implementation**: Proper VSIX packaging configuration
 
 **Improvements**:
+
 - Added `activationEvents` to `package.json`
 - Fixed `.vscodeignore` (ships compiled JS, not TypeScript source)
 - Added `icon.png` (extension marketplace icon)
@@ -73,6 +80,7 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 - Successfully packages as `ferrisscript-0.0.3.vsix`
 
 **Files**:
+
 - `package.json` - Added activation events
 - `.vscodeignore` - Fixed to include `out/` directory
 - `icon.png` - Extension icon (copied from assets)
@@ -85,6 +93,7 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 ### Manual Testing: 9/15 Tests Passing
 
 **Test Summary** (see `PHASE_5_MANUAL_TESTING.md`):
+
 - **Tests 1-7**: ✅ Hover features - All passing
   - Keyword hover works perfectly
   - Type hover shows correct information
@@ -116,11 +125,13 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 **Problem**: Icon theme replaced ALL file icons, not just `.ferris` files
 
 **Root Cause**: Fundamental misunderstanding of VS Code icon system
+
 - Icon themes are **complete replacements** for all file icons (like Seti, Material Icons)
 - Cannot add single file icon without defining icons for 100+ file types
 - When selected, replaces ALL file icons in VS Code
 
 **Resolution**: Removed `iconThemes` contribution from `package.json`
+
 - Language extensions typically don't ship icon themes
 - File icons are optional polish, not core functionality
 - Users keep their preferred icon theme (Seti, Material Icons, etc.)
@@ -136,6 +147,7 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 **Root Cause**: `package.json` missing required fields for TypeScript extensions
 
 **Resolution**:
+
 - Added `activationEvents: ["workspaceContains:**/*.ferris"]`
 - Fixed `.vscodeignore` to ship compiled JS (`out/`) not source (`src/`)
 - Added `icon.png` and `LICENSE` files
@@ -147,10 +159,12 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 **Problem**: Diagnostic features not working during testing
 
 **Root Cause**: FerrisScript has no standalone CLI executable
+
 - Project only builds library crates (`compiler`, `runtime`, `godot_bind`)
 - No `[[bin]]` target in `Cargo.toml`
 
 **Resolution**: Documented as known limitation
+
 - Diagnostic provider infrastructure is complete
 - Will work immediately once CLI is implemented
 - Extension handles missing compiler gracefully (no crashes)
@@ -218,16 +232,19 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 ## 📈 Statistics
 
 **Files Changed**: 23 files
+
 - **Additions**: 2,974 lines
 - **Deletions**: 39 lines
 - **Net**: +2,935 lines
 
 **Code Distribution**:
+
 - TypeScript implementation: ~600 lines
 - Documentation: ~2,300 lines
 - Configuration: ~35 lines
 
 **Commits**: 6 commits
+
 1. `6b0e69d` - Initial Phase 5 implementation
 2. `7818ce9` - Icon theme and diagnostic provider improvements
 3. `bc008fc` - Manual testing results
@@ -244,6 +261,7 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 **Required for**: Diagnostic features to work
 
 **Tasks**:
+
 - Add `[[bin]]` section to `crates/compiler/Cargo.toml`
 - Create `crates/compiler/src/bin/ferrisscript.rs`
 - Implement CLI that outputs errors in expected format
@@ -256,6 +274,7 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 **Deferred to**: v0.0.5 roadmap
 
 **Features**:
+
 - Go-to-definition
 - Find references
 - Rename symbol
@@ -267,6 +286,7 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 ### 3. Additional Hover Content
 
 **Potential additions**:
+
 - Hover for user-defined functions
 - Hover for variables (type inference)
 - Hover for Godot node methods
@@ -300,6 +320,7 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 ### Installation Steps
 
 1. **Install from VSIX**:
+
    ```bash
    cd extensions/vscode
    npm install
@@ -343,16 +364,19 @@ This PR implements Phase 5 of v0.0.3, adding **hover tooltips** and **diagnostic
 ## 📚 References
 
 **Planning Documents**:
+
 - [PHASE_5_VS_CODE_HOVER.md](./docs/planning/v0.0.3/PHASE_5_VS_CODE_HOVER.md)
 - [PHASE_5_MANUAL_TESTING.md](./docs/planning/v0.0.3/PHASE_5_MANUAL_TESTING.md)
 - [v0.0.3-roadmap.md](./docs/planning/v0.0.3/v0.0.3-roadmap.md)
 
 **VS Code API Documentation**:
+
 - [HoverProvider API](https://code.visualstudio.com/api/references/vscode-api#HoverProvider)
 - [DiagnosticCollection API](https://code.visualstudio.com/api/references/vscode-api#DiagnosticCollection)
 - [Icon Theme Documentation](https://code.visualstudio.com/api/extension-guides/icon-theme)
 
 **Lessons Learned**:
+
 - [docs/LEARNINGS.md](./docs/LEARNINGS.md) - Icon theme architecture analysis
 
 ---
