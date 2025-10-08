@@ -5,6 +5,7 @@
 
 A Rust-inspired scripting language for Godot 4.x
 
+[![Build Status](https://github.com/dev-parkins/FerrisScript/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-parkins/FerrisScript/actions/workflows/ci.yml)
 ![Version](https://img.shields.io/github/v/release/dev-parkins/FerrisScript?label=latest%20release&color=blue)
 ![Status](https://img.shields.io/badge/status-alpha-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)

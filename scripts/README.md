@@ -120,6 +120,66 @@ Formats all Rust code in the workspace.
 
 ---
 
+### Code Linter
+
+Runs cargo clippy with strict warning checks.
+
+**PowerShell (Windows)**:
+
+```powershell
+.\scripts\lint.ps1
+```
+
+**Bash (Linux/macOS)**:
+
+```bash
+./scripts/lint.sh
+```
+
+**What It Does**:
+
+- Runs `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- Catches common mistakes, anti-patterns, and potential bugs
+- Treats all warnings as errors (strict mode)
+- Returns exit code 0 on success, non-zero on failure
+
+**Use Cases**:
+
+- Pre-commit validation
+- CI/CD quality gates
+- Code review preparation
+- Maintaining code quality standards
+
+**Common Warnings**:
+
+- Unused variables or imports
+- Inefficient patterns
+- Potential bugs (e.g., unwrap() on Option)
+- Code style inconsistencies
+
+**Fixing Warnings**:
+
+Most warnings include suggestions. Example:
+
+```rust
+warning: unused variable: `x`
+ --> src/main.rs:5:9
+  |
+5 |     let x = 42;
+  |         ^ help: if this is intentional, prefix it with an underscore: `_x`
+```
+
+**Suppressing Warnings** (use sparingly):
+
+```rust
+#[allow(clippy::lint_name)]
+fn my_function() {
+    // Code that triggers warning
+}
+```
+
+---
+
 ## Code Coverage
 
 ### Prerequisites
@@ -229,6 +289,99 @@ Download and install from [nodejs.org](https://nodejs.org/)
 #### "npm: command not found"
 
 npm comes with Node.js. Restart your terminal after installing Node.js.
+
+---
+
+## Pre-commit Hooks
+
+Automatically run quality checks before each commit.
+
+### Installation
+
+**PowerShell (Windows)**:
+
+```powershell
+.\scripts\install-git-hooks.ps1
+```
+
+**Bash (Linux/macOS)**:
+
+```bash
+./scripts/install-git-hooks.sh
+```
+
+### What It Does
+
+Installs Git hooks that run before each commit and push:
+
+**Pre-commit Hook**:
+
+1. **Format Check**: Verifies code is formatted with `cargo fmt`
+2. **Linting**: Runs `cargo clippy` with strict warnings
+3. **Quick Tests**: Runs fast unit tests (skips slow integration tests)
+
+**Pre-push Hook**:
+
+1. **Markdown Linting**: Validates documentation formatting (only when `.md` files changed)
+
+### Workflow
+
+```bash
+git add .
+git commit -m "feat: add new feature"
+# 🔍 Pre-commit hook runs automatically
+# ✅ All checks pass → Commit proceeds
+# ❌ Any check fails → Commit blocked, fix issues
+```
+
+### Bypassing Hooks (use sparingly)
+
+For work-in-progress commits:
+
+```bash
+git commit --no-verify -m "WIP: experimenting"
+git push --no-verify
+```
+
+### When to Bypass
+
+- ✅ Experimental code (will revert)
+- ✅ WIP commits (will clean up before PR)
+- ✅ Debugging commits (temporary)
+- ❌ NOT for PR commits (must pass checks)
+
+### Troubleshooting
+
+#### Hooks stop working
+
+```bash
+# Reinstall hooks
+./scripts/install-git-hooks.sh
+
+# Verify hook exists
+cat .git/hooks/pre-commit
+cat .git/hooks/pre-push
+```
+
+#### Hooks too slow
+
+The pre-commit hook runs quick tests only (`cargo test --lib`). For WIP commits, you can bypass with `--no-verify`.
+
+#### Uninstalling Hooks
+
+**PowerShell**:
+
+```powershell
+Remove-Item .git/hooks/pre-commit
+Remove-Item .git/hooks/pre-push
+```
+
+**Bash**:
+
+```bash
+rm .git/hooks/pre-commit
+rm .git/hooks/pre-push
+```
 
 #### "Module not found"
 
