@@ -58,13 +58,6 @@
         "language": "ferrisscript",
         "path": "./snippets/ferrisscript.json"
       }
-    ],
-    "iconThemes": [
-      {
-        "id": "ferrisscript-icons",
-        "label": "FerrisScript Icons",
-        "path": "./resources/icons/ferrisscript-icon-theme.json"
-      }
     ]
   },
   "scripts": {

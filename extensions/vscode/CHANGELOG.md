@@ -20,9 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Error codes: FerrisScript error codes (E001-E499) included in diagnostics
   - Save-triggered: Errors update automatically when file is saved
   - Compiler auto-detection: Finds FerrisScript compiler in workspace or PATH
-- **File Icons** (Phase 5): Custom icon for `.ferris` files
-  - Rust-inspired crab icon with Godot accent
-  - Professional appearance in VS Code file explorer
+  - **Note**: Requires standalone CLI (planned for future release)
 - **Code Completion** (Phase 4): Context-aware auto-completion for FerrisScript
   - Keyword completion: `fn`, `let`, `mut`, `if`, `else`, `while`, `return`, `true`, `false`
   - Type completion: `i32`, `f32`, `bool`, `String`, `Vector2`, `Node`, `void`
