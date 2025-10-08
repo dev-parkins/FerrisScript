@@ -24,6 +24,7 @@ cp.spawnSync('ferrisscript', ['--version'], { shell: false });
 ```
 
 **Why This Is Flagged**:
+
 - Any use of PATH-based executable resolution is flagged
 - Even with `shell: false`, PATH could theoretically point to malicious binary
 - Scanner cannot verify PATH contents at static analysis time
@@ -43,6 +44,7 @@ cp.spawnSync('ferrisscript', ['--version'], { shell: false });
 ```
 
 **Benefits**:
+
 - Bypasses PATH entirely
 - User specifies exact trusted compiler location
 - Absolute path validated before use
@@ -53,12 +55,14 @@ cp.spawnSync('ferrisscript', ['--version'], { shell: false });
 ### Layer 2: Workspace Search (Existing)
 
 **Checked Locations**:
+
 ```
 workspace/target/debug/ferrisscript[.exe]
 workspace/target/release/ferrisscript[.exe]
 ```
 
 **Benefits**:
+
 - Local to project (not PATH-dependent)
 - User controls workspace contents
 - Common for development workflows
@@ -66,6 +70,7 @@ workspace/target/release/ferrisscript[.exe]
 ### Layer 3: PATH Search (Existing - Enhanced)
 
 **Implementation**:
+
 ```typescript
 cp.spawnSync('ferrisscript', ['--version'], { 
     encoding: 'utf-8',
@@ -75,11 +80,13 @@ cp.spawnSync('ferrisscript', ['--version'], {
 ```
 
 **Benefits**:
+
 - Standard CLI tool discovery pattern
 - Used by npm, cargo, python, etc.
 - Convenient for users
 
 **Protections**:
+
 - `shell: false` - prevents command injection
 - Timeout - prevents malicious binary from hanging
 - User notification - transparency about which compiler is used
@@ -116,7 +123,7 @@ cp.spawnSync('ferrisscript', ['--version'], {
    - Timeout protection
    - User notification
 
-4. **Threat Model**: 
+4. **Threat Model**:
    - If attacker can modify PATH, they can already execute arbitrary code
    - This is not a vulnerability introduced by extension
    - Defense-in-depth provides additional protection layers
@@ -128,6 +135,7 @@ cp.spawnSync('ferrisscript', ['--version'], {
 ### For Maximum Security
 
 **Recommended Setting** (in VS Code settings.json):
+
 ```json
 {
   "ferrisscript.compilerPath": "C:\\Program Files\\FerrisScript\\ferrisscript.exe"
@@ -135,6 +143,7 @@ cp.spawnSync('ferrisscript', ['--version'], {
 ```
 
 **Steps**:
+
 1. Install FerrisScript CLI to trusted location
 2. Open VS Code Settings (`Ctrl+,`)
 3. Search for "ferrisscript compiler"
@@ -144,12 +153,14 @@ cp.spawnSync('ferrisscript', ['--version'], {
 ### For Standard Security (Default)
 
 **No configuration needed** - Extension will:
+
 1. Check workspace `target/` directories
 2. Check PATH for `ferrisscript`
 3. Notify when compiler found
 4. Disable diagnostics if not found
 
 **User Responsibility**:
+
 - Keep PATH clean (standard OS hygiene)
 - Don't add untrusted directories to PATH
 - Keep system updated
@@ -160,12 +171,14 @@ cp.spawnSync('ferrisscript', ['--version'], {
 
 ### Why Scanner Still Flags This
 
-**Static Analysis Limitation**: 
+**Static Analysis Limitation**:
+
 - Scanner cannot verify PATH contents at analysis time
 - PATH is runtime environment variable
 - Scanner errs on side of caution (good practice)
 
 **Rating**: Low/Informational
+
 - Not a vulnerability in extension code
 - Flag is informational about general PATH usage
 - Standard practice across all CLI tools
@@ -181,6 +194,7 @@ cp.spawnSync('ferrisscript', ['--version'], {
 ### If Scanner Must Be Satisfied
 
 **Options**:
+
 1. **Suppress Finding**: Mark as false positive with justification
 2. **Document Exception**: Security review accepts PATH usage for CLI discovery
 3. **Risk Accept**: Management accepts low residual risk
@@ -193,6 +207,7 @@ cp.spawnSync('ferrisscript', ['--version'], {
 ### How Other Extensions Handle This
 
 **Example: Python Extension**
+
 ```json
 {
   "python.pythonPath": "/usr/bin/python3"  // Optional absolute path
@@ -201,6 +216,7 @@ cp.spawnSync('ferrisscript', ['--version'], {
 ```
 
 **Example: Rust Analyzer**
+
 ```json
 {
   "rust-analyzer.server.path": "/usr/bin/rust-analyzer"  // Optional
@@ -209,6 +225,7 @@ cp.spawnSync('ferrisscript', ['--version'], {
 ```
 
 **Pattern**: Industry standard is:
+
 1. Optional configuration for absolute path
 2. Fall back to PATH for convenience
 3. User notification when tool found
@@ -220,6 +237,7 @@ cp.spawnSync('ferrisscript', ['--version'], {
 ### For Security Audits
 
 **Documentation to Provide**:
+
 1. ✅ Defense-in-depth layers (config → workspace → PATH)
 2. ✅ Mitigation controls (spawnSync, timeout, validation)
 3. ✅ User guidance for high-security environments
@@ -227,6 +245,7 @@ cp.spawnSync('ferrisscript', ['--version'], {
 5. ✅ Risk acceptance rationale
 
 **Talking Points**:
+
 - "PATH usage is standard for CLI tool discovery"
 - "Users can configure absolute path to bypass PATH"
 - "Multiple protection layers prevent exploitation"
@@ -239,13 +258,15 @@ cp.spawnSync('ferrisscript', ['--version'], {
 
 **Issue**: Security scanner flags PATH usage (low severity)  
 **Response**: Added configuration option for absolute path  
-**Result**: 
+**Result**:
+
 - ✅ Users can bypass PATH entirely (zero risk)
 - ✅ Default behavior remains user-friendly (low risk)
 - ✅ Multiple protection layers (defense-in-depth)
 - ✅ Documented security posture
 
-**Recommendation**: 
+**Recommendation**:
+
 - Accept residual low risk for default behavior
 - Document configuration option for high-security users
 - Mark scanner finding as "accepted" or "mitigated"

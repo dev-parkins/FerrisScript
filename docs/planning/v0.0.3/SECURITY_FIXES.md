@@ -86,12 +86,14 @@ const result = cp.spawnSync('ferrisscript', ['--version'], {
 **Residual Risk**: Low
 
 If user does not configure absolute path, PATH is still checked. While `spawnSync` with `shell: false` prevents command injection, a malicious binary in PATH could still execute. Mitigations:
+
 - User control over PATH environment
 - Timeout protection (3 seconds)
 - User notification when compiler found
 - Standard practice for CLI tool discovery (npm, cargo, python all use PATH)
 
 **Recommendation**: For maximum security, configure absolute path:
+
 ```json
 {
   "ferrisscript.compilerPath": "/usr/local/bin/ferrisscript"
