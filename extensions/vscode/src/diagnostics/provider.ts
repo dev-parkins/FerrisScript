@@ -64,9 +64,15 @@ export class FerrisScriptDiagnosticProvider {
 
         // Try to find in PATH
         try {
-            cp.execSync('ferrisscript --version', { encoding: 'utf-8' });
-            console.log('Found FerrisScript compiler in PATH');
-            return 'ferrisscript';
+            // Security: Use spawnSync without shell to avoid command injection
+            const result = cp.spawnSync('ferrisscript', ['--version'], { 
+                encoding: 'utf-8',
+                shell: false  // Don't spawn a shell - prevents command injection
+            });
+            if (result.status === 0) {
+                console.log('Found FerrisScript compiler in PATH');
+                return 'ferrisscript';
+            }
         } catch (e) {
             // Not in PATH
         }
@@ -103,6 +109,10 @@ export class FerrisScriptDiagnosticProvider {
 
     /**
      * Run the FerrisScript compiler and capture output
+     * 
+     * Security: Uses spawnSync without shell to prevent command injection.
+     * The compiler path is validated during findCompiler() and file paths
+     * come from VS Code's document URIs (trusted sources).
      */
     private runCompiler(filePath: string): string | undefined {
         if (!this.compilerPath) {
@@ -110,28 +120,33 @@ export class FerrisScriptDiagnosticProvider {
         }
 
         try {
-            // Run compiler - it will throw if there are compilation errors
-            const result = cp.execSync(`"${this.compilerPath}" "${filePath}"`, {
+            // Security: Use spawnSync without shell to avoid command injection
+            // Pass arguments as array instead of concatenating into command string
+            const result = cp.spawnSync(this.compilerPath, [filePath], {
                 encoding: 'utf-8',
-                timeout: 5000
+                timeout: 5000,
+                shell: false  // Don't spawn a shell - prevents command injection
             });
             
-            // No errors if we get here - but check output anyway
-            // Some compilers write errors to stdout
-            if (result && result.includes('Error[')) {
-                return result;
-            }
-            return undefined;
-        } catch (error: any) {
-            // Compiler errors are in stderr or stdout
-            const stderr = error.stderr ? error.stderr.toString() : '';
-            const stdout = error.stdout ? error.stdout.toString() : '';
+            // Combine stdout and stderr
+            const stdout = result.stdout || '';
+            const stderr = result.stderr || '';
             const output = stderr + stdout;
             
             // Log for debugging
-            console.log('FerrisScript compiler output:', output);
+            if (output.length > 0) {
+                console.log('FerrisScript compiler output:', output);
+            }
             
-            return output.length > 0 ? output : undefined;
+            // Check if output contains errors
+            if (output.includes('Error[')) {
+                return output;
+            }
+            
+            return undefined;
+        } catch (error: any) {
+            console.error('FerrisScript compiler execution error:', error);
+            return undefined;
         }
     }
 
