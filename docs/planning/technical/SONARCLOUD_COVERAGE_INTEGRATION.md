@@ -1,18 +1,37 @@
 # SonarCloud Coverage Integration for FerrisScript
 
 **Date**: October 8, 2025  
-**Status**: Implemented  
+**Status**: ⚠️ LIMITATION DISCOVERED - SonarCloud does NOT support Rust  
 **Version**: v0.0.4 (post-v0.0.3 enhancement)
 
 ---
 
-## 🎯 Overview
+## 🚨 CRITICAL UPDATE (October 8, 2025)
 
-This document describes the integration of code coverage reporting into SonarCloud for FerrisScript's Rust codebase.
+**DISCOVERY**: SonarCloud does **NOT** natively support Rust language.
 
-**Goal**: Enable SonarCloud to receive and display code coverage metrics alongside quality metrics.
+**Impact**:
+- ❌ SonarCloud cannot analyze Rust code for quality issues
+- ❌ SonarCloud cannot consume Rust coverage reports (LCOV or otherwise)
+- ❌ Property `sonar.rust.lcov.reportPaths` does not exist
+- ✅ Codecov remains the primary and ONLY coverage tool for Rust code
 
-**Approach**: Low-effort LCOV integration (native SonarCloud support for Rust).
+**Resolution**: This document is kept for historical reference. See:
+- **`docs/COVERAGE_STRATEGY.md`** - Current coverage strategy (Codecov for Rust)
+- **`docs/planning/technical/SONARCLOUD_RUST_LIMITATION_ANALYSIS.md`** - Full analysis
+- **`docs/planning/v0.0.4/SONARCLOUD_COVERAGE_INVESTIGATION_SUMMARY.md`** - Investigation summary
+
+---
+
+## 🎯 Overview (Historical)
+
+This document describes the **attempted** integration of code coverage reporting into SonarCloud for FerrisScript's Rust codebase.
+
+**Original Goal**: Enable SonarCloud to receive and display code coverage metrics alongside quality metrics.
+
+**Original Approach**: Low-effort LCOV integration (assumed native SonarCloud support for Rust).
+
+**Actual Result**: SonarCloud does not support Rust language, making this integration impossible.
 
 ---
 
