@@ -5,7 +5,7 @@
 title: FerrisScript Documentation
 description: A Rust-inspired scripting language for Godot game engine
 author: dev-parkins
-email: your-email@example.com
+email: ferrisscript@gmail.com
 baseurl: "/FerrisScript" # GitHub Pages project URL
 url: "https://dev-parkins.github.io" # GitHub Pages base URL
 

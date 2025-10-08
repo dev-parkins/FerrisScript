@@ -13,7 +13,7 @@
 
 **SonarCloud does NOT support Rust as a language.**
 
-**Supported Languages** (as of 2025):
+**Supported Languages** (verified October 8, 2025):
 
 - ✅ Java, C#, JavaScript/TypeScript, Python, Go
 - ✅ PHP, Kotlin, Ruby, Scala, Swift, Objective-C

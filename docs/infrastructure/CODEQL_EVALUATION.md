@@ -44,10 +44,12 @@ This document evaluates integrating GitHub CodeQL into FerrisScript's CI/CD pipe
 
 ### Rust Support
 
-CodeQL has **experimental Rust support** (as of 2024):
+CodeQL has **improved Rust support** (as of October 2025):
 
-- Basic query support for Rust
-- Limited compared to mature languages (C++, Java, JavaScript)
+- Query support for Rust is now in beta, with coverage expanding beyond basic queries
+- Still limited compared to mature languages (C++, Java, JavaScript), but significant progress since 2024
+- GitHub continues to invest in Rust tooling, with regular updates
+- Community queries are maturing, though not yet as extensive as for other languages
 - Improving rapidly (GitHub investing in Rust tooling)
 - Community queries less mature than other languages
 
