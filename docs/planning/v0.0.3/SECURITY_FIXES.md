@@ -16,17 +16,20 @@
 **CWE**: CWE-78 (OS Command Injection)
 
 **Vulnerable Code**:
+
 ```typescript
 cp.execSync('ferrisscript --version', { encoding: 'utf-8' });
 ```
 
 **Problem**:
+
 - Uses `execSync` which spawns a shell
 - Command passed as string can be manipulated
 - PATH variable could contain malicious directories
 - Shell interprets special characters (`;`, `|`, `&&`, etc.)
 
 **Attack Vector**:
+
 ```bash
 # Attacker could manipulate PATH to inject commands
 export PATH="/malicious/path:$PATH"
@@ -34,6 +37,7 @@ export PATH="/malicious/path:$PATH"
 ```
 
 **Fixed Code**:
+
 ```typescript
 const result = cp.spawnSync('ferrisscript', ['--version'], { 
     encoding: 'utf-8',
@@ -46,6 +50,7 @@ if (result.status === 0) {
 ```
 
 **Why This Is Secure**:
+
 - `spawnSync` executes binary directly (no shell)
 - Arguments passed as array (cannot be interpreted as commands)
 - `shell: false` explicitly prevents shell spawning
@@ -60,6 +65,7 @@ if (result.status === 0) {
 **CWE**: CWE-78 (OS Command Injection)
 
 **Vulnerable Code**:
+
 ```typescript
 const result = cp.execSync(`"${this.compilerPath}" "${filePath}"`, {
     encoding: 'utf-8',
@@ -68,12 +74,14 @@ const result = cp.execSync(`"${this.compilerPath}" "${filePath}"`, {
 ```
 
 **Problem**:
+
 - Uses `execSync` with string concatenation
 - Spawns a shell that interprets special characters
 - File paths could contain shell metacharacters
 - Compiler path (if from PATH) could be manipulated
 
 **Attack Vector**:
+
 ```bash
 # Malicious filename with shell metacharacters
 test.ferris; rm -rf /; #.ferris
@@ -83,6 +91,7 @@ test.ferris; rm -rf /; #.ferris
 ```
 
 **Fixed Code**:
+
 ```typescript
 const result = cp.spawnSync(this.compilerPath, [filePath], {
     encoding: 'utf-8',
@@ -92,6 +101,7 @@ const result = cp.spawnSync(this.compilerPath, [filePath], {
 ```
 
 **Why This Is Secure**:
+
 - `spawnSync` executes binary directly (no shell)
 - File path passed as separate argument (cannot break out)
 - `shell: false` explicitly prevents shell interpretation
@@ -104,6 +114,7 @@ const result = cp.spawnSync(this.compilerPath, [filePath], {
 ### 1. Use `spawnSync` Instead of `execSync`
 
 **Difference**:
+
 - `execSync`: Spawns a shell, interprets command string
 - `spawnSync`: Executes binary directly, no shell
 
@@ -112,11 +123,13 @@ const result = cp.spawnSync(this.compilerPath, [filePath], {
 ### 2. Arguments as Array
 
 **Before** (String Concatenation):
+
 ```typescript
 execSync(`command "${arg1}" "${arg2}"`)
 ```
 
 **After** (Array Arguments):
+
 ```typescript
 spawnSync('command', [arg1, arg2])
 ```
@@ -132,6 +145,7 @@ spawnSync('command', [arg1, arg2])
 ### 4. Added Security Documentation
 
 **Added JSDoc Comments**:
+
 ```typescript
 /**
  * Security: Uses spawnSync without shell to prevent command injection.
@@ -151,12 +165,14 @@ spawnSync('command', [arg1, arg2])
 **Risk Level**: High
 
 **Potential Impact**:
+
 - Arbitrary code execution on developer's machine
 - File system access (read, write, delete)
 - Network access (exfiltrate source code, credentials)
 - Lateral movement (attack other systems)
 
 **Attack Scenarios**:
+
 1. **Malicious Repository**: User opens project with crafted file paths
 2. **PATH Manipulation**: Malware modifies PATH environment variable
 3. **Supply Chain Attack**: Compromised compiler binary in PATH
@@ -166,10 +182,12 @@ spawnSync('command', [arg1, arg2])
 **Risk Level**: Low
 
 **Remaining Risks**:
+
 - Malicious compiler binary (mitigated by file path validation)
 - Compromised VS Code extension host (outside scope)
 
 **Mitigations**:
+
 - Compiler path validated during `findCompiler()`
 - File paths come from VS Code URIs (validated)
 - No shell interpretation
@@ -182,6 +200,7 @@ spawnSync('command', [arg1, arg2])
 ### Testing Performed
 
 1. **Compilation Test**: ✅ Passed
+
    ```bash
    npm run compile
    # Result: No TypeScript errors
@@ -256,6 +275,7 @@ spawnSync('command', [arg1, arg2])
 **Lines Changed**: +33 / -18
 
 **Commit Message**:
+
 ```
 security(vscode): Fix command injection vulnerabilities in diagnostic provider
 
