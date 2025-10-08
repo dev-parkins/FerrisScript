@@ -1,6 +1,6 @@
 {
   "name": "ferrisscript",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "FerrisScript - A Rust-powered scripting language for Godot",
   "private": true,
   "scripts": {
