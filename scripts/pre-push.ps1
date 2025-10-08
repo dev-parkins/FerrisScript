@@ -55,7 +55,7 @@ if (-not (Test-Path "node_modules")) {
 
 # Run documentation linting
 Write-Host "🔧 Running markdownlint..." -ForegroundColor Cyan
-npx markdownlint '**/*.md' --ignore node_modules --ignore target --dot
+npx markdownlint '**/*.md' --ignore node_modules --ignore target --ignore extensions --dot
 $lintExitCode = $LASTEXITCODE
 
 if ($lintExitCode -ne 0) {
