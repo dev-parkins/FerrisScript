@@ -1153,3 +1153,271 @@ This TypeScript testing workstream demonstrated:
 - Passes SonarCloud quality gates
 
 **Recommendation**: Maintain 80%+ coverage as project evolves. When adding features, write tests first (TDD).
+
+---
+
+# v0.0.3 General Learnings - Error Recovery & Quality Gates
+
+**Date**: October 8, 2025  
+**Version**: v0.0.3 (Editor Experience Alpha)  
+**Source**: Extracted from v0.0.3/LEARNINGS.md (now archived)
+
+---
+
+## 🛠️ Error Recovery Implementation Patterns
+
+### Critical Pattern: Always Advance Before Synchronize
+
+**Discovery**: Parser error recovery can cause infinite loops if not implemented correctly.
+
+**Pattern**:
+
+```rust
+// ❌ WRONG - Risk of infinite loop
+self.record_error(error);
+self.synchronize();  // If already at sync point, stays forever
+
+// ✅ CORRECT - Guarantees forward progress
+self.record_error(error);
+self.advance();      // Always move past bad token first
+self.synchronize();  // Then find safe recovery point
+```
+
+**Rationale**: If `synchronize()` finds you're already at a sync point (`;`, `}`, `fn`, `let`), it returns immediately without advancing. This creates an infinite loop where the parser repeatedly processes the same bad token. The `advance()` call before `synchronize()` guarantees forward progress.
+
+**Application**: Any compiler implementing panic-mode error recovery must follow this pattern. Document it prominently in implementation guides.
+
+---
+
+## ✅ Quality Gates - Strict Standards Prevent Tech Debt
+
+### Established Quality Standards (v0.0.3)
+
+**Strict Clippy Mode**:
+
+```bash
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+```
+
+**Key Insight**: Standard `cargo clippy` is **too lenient** for production quality. Strict mode (`-D warnings`) catches:
+
+- Issues in test code (not just main code)
+- Issues in benchmark code
+- Issues in example code
+- Issues with all feature combinations
+
+**Impact**: Phase 1 passed standard clippy but failed strict mode, revealing:
+
+- `useless_vec` warnings in test code (should use arrays)
+- Deprecated `criterion::black_box` (should use `std::hint::black_box`)
+
+**Recommendation**: Establish strict clippy as the **only** acceptable standard from project start. Easier to maintain than to retroactively fix.
+
+### Format Before Commit
+
+**Standard**:
+
+```bash
+cargo fmt --all
+```
+
+**Why**: Prevents formatting diff noise in code reviews, maintains consistency, shows professionalism.
+
+**Integration**: Add to:
+
+- Pre-commit hooks (automated)
+- CI/CD validation (gated)
+- Contributor checklists (documented)
+
+### Documentation Validation
+
+**Tools**:
+
+```bash
+npm run docs:lint              # Markdownlint
+npx markdown-link-check        # Link validation
+```
+
+**Discovery**: Found 11 broken links in v0.0.3 planning docs during Phase 1 validation. Systematic link checking prevents:
+
+- Broken navigation in documentation
+- 404 errors for users
+- Outdated cross-references
+
+**Best Practice**: Run link checks on ALL modified markdown files before commit, not just at release time.
+
+---
+
+## 🧪 Testing Strategies
+
+### Integration Tests > Unit Tests (For User-Facing Features)
+
+**Discovery**: For features like error messages and suggestions, integration tests (full compiler pipeline) are more valuable than unit tests (algorithm internals).
+
+**Rationale**:
+
+- Users see **output** (error messages), not **algorithm behavior** (Levenshtein distance)
+- Integration tests verify the complete user experience
+- Unit tests only verify internal correctness
+
+**Example**:
+
+```rust
+// ❌ Less Valuable: Unit test of suggestion algorithm
+#[test]
+fn test_levenshtein_distance() {
+    assert_eq!(levenshtein("hello", "helo"), 1);
+}
+
+// ✅ More Valuable: Integration test of user-visible output
+#[test]
+fn test_typo_suggestion() {
+    let result = compile("let x: i32 = 5; let y = palyer;");
+    assert!(result.err().unwrap().contains("did you mean 'player'?"));
+}
+```
+
+**Application**: For user-facing features (error messages, diagnostics, suggestions), write integration tests first. Add unit tests only if algorithm complexity justifies them.
+
+### Test Both Success and Failure Paths
+
+**Discovery**: When implementing error recovery, must test that:
+
+1. ✅ Recovery works (parser continues after errors)
+2. ✅ Valid code still compiles (recovery doesn't break normal parsing)
+
+**Example**:
+
+```rust
+// Test recovery works
+#[test]
+fn test_parser_recovers_from_missing_semicolon() {
+    let code = "let x = 5\nlet y = 10;";  // Missing semicolon
+    let result = parse(code);
+    assert!(result.errors.len() > 0);      // Error detected
+    assert!(result.program.is_some());     // But parsing continued
+}
+
+// Test valid code unaffected
+#[test]
+fn test_valid_code_still_works() {
+    let code = "let x = 5;\nlet y = 10;";  // Valid code
+    let result = parse(code);
+    assert_eq!(result.errors.len(), 0);    // No errors
+    assert!(result.program.is_some());     // Parsing succeeded
+}
+```
+
+**Rationale**: Error recovery can accidentally break normal parsing if sync points are too aggressive or if panic mode isn't cleared properly.
+
+---
+
+## 🔧 Debugging Techniques
+
+### Debug Output First, Assertions Second
+
+**Problem**: Integration test fails with "Expected error message X, got Y"
+
+**Wrong Approach**:
+
+```rust
+assert!(error.contains("Expected ';'"));  // Fails, no idea what actual message is
+```
+
+**Right Approach**:
+
+```rust
+println!("Actual error: {}", error);      // See what it actually says
+// Output: "Error[E108]: Expected token\nExpected ;, found let"
+assert!(error.contains("Expected"));      // Now write flexible assertion
+```
+
+**Rationale**: Exact error message strings change during development. Debug output reveals actual format so you can write flexible assertions that check for patterns rather than exact strings.
+
+### Verify Data Structures Before Testing
+
+**Problem**: Test fails with "Token::Int(1) doesn't exist"
+
+**Discovery**: FerrisScript lexer uses `Token::Number(f32)` for all numeric literals, not separate `Token::Int(i32)` and `Token::Float(f32)` variants.
+
+**Lesson**: When writing parser tests, **always check the actual token enum definition** in the lexer. Don't assume token variant names - verify them to avoid cryptic compilation errors.
+
+**Application**: Before writing tests for any data structure (AST nodes, tokens, types), read the actual definitions in source code.
+
+---
+
+## 📐 Adaptive Algorithms
+
+### Threshold Tuning Through Testing
+
+**Discovery**: String similarity thresholds must adapt to identifier length. Short names need strict edit distance, long names need percentage similarity.
+
+**Implementation**:
+
+```rust
+fn is_similar(candidate: &str, target: &str) -> bool {
+    let distance = levenshtein(candidate, target);
+    
+    if target.len() <= 8 {
+        // Short names: strict edit distance
+        distance <= 2 || (target.len() <= 4 && distance <= 1)
+    } else {
+        // Long names: percentage similarity
+        let similarity = 1.0 - (distance as f32 / target.len() as f32);
+        similarity >= 0.70
+    }
+}
+```
+
+**Lesson**: Don't guess at algorithm parameters. Write comprehensive tests first, then adjust parameters until tests pass with good precision/recall balance.
+
+**Application**: For any algorithm with tunable parameters (thresholds, weights, limits), use test-driven parameter tuning rather than intuition.
+
+---
+
+## 📝 Documentation Best Practices
+
+### Document Critical Bugs Thoroughly
+
+**Discovery**: When you find a severe bug (like infinite loop in error recovery), document it with:
+
+1. **Symptoms**: What the user sees (memory consumption, hang)
+2. **Root Cause**: Why it happened (synchronize without advance)
+3. **Fix**: What changed (add advance before synchronize)
+4. **Prevention**: How to avoid in future (always advance first)
+
+**Example Documentation** (from Phase 3C):
+
+> **Critical Infinite Loop Bug**: Initial implementation caused infinite memory consumption when parser encountered unexpected top-level tokens. Root cause: Called `synchronize()` without first advancing past the bad token. If `synchronize()` returned immediately (token was already at sync point), parser stayed at same position forever, repeatedly processing same token.
+>
+> **Fix**: Added mandatory `self.advance()` call before `synchronize()` in error recovery path. This guarantees forward progress even if sync point is reached immediately.
+
+**Rationale**: These insights prevent similar bugs in future work. Future contributors can learn from past mistakes without repeating them.
+
+---
+
+## 🎯 Best Practices Summary
+
+**From v0.0.3 Development**:
+
+1. **Error Recovery**: Always advance before synchronize (prevent infinite loops)
+2. **Quality Gates**: Use strict clippy (`-D warnings`) from day one
+3. **Testing Priority**: Integration tests > unit tests for user-facing features
+4. **Test Coverage**: Test both error paths AND success paths
+5. **Debugging**: Print actual values before writing assertions
+6. **Algorithms**: Tune parameters through testing, not intuition
+7. **Documentation**: Document severe bugs thoroughly (symptoms, cause, fix, prevention)
+8. **Verification**: Verify data structure definitions before writing tests
+9. **Format Consistency**: Run `cargo fmt --all` before every commit
+10. **Link Validation**: Check markdown links before committing documentation
+
+**Application**: These practices apply to all future development phases and versions. Maintain these standards consistently.
+
+---
+
+**References**:
+
+- Full v0.0.3 Learnings: `docs/archive/v0.0.3/LEARNINGS.md` (after archival)
+- Error Recovery Details: Phase 3C section
+- Quality Gates: Phase 1 section
+- Testing Strategies: Phase 2 section
