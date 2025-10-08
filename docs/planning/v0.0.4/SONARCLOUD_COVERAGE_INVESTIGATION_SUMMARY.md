@@ -12,6 +12,7 @@
 **Initial Request**: "Integrate SonarCloud coverage reporting using Tarpaulin LCOV format"
 
 **Observed Issue**: SonarCloud showing 0.0% coverage despite:
+
 - LCOV file being generated successfully by cargo-tarpaulin
 - Codecov showing 64.54% coverage correctly
 - Workflow jobs running in correct sequential order
@@ -25,6 +26,7 @@
 ### Phase 1: Initial Integration (Commit 179dddb)
 
 **Actions Taken**:
+
 - Added `--out Lcov` to tarpaulin command in CI
 - Configured `sonar.rust.lcov.reportPaths=coverage/lcov.info` in sonar-project.properties
 - Created `docs/planning/technical/SONARCLOUD_COVERAGE_INTEGRATION.md`
@@ -56,6 +58,7 @@
 **Discovery**: Jobs running in parallel, SonarQube finishing BEFORE coverage generated
 
 **Evidence** (Run 18355233555):
+
 - Both jobs started: 19:04:38
 - SonarQube finished: 19:05:56 (NO coverage available yet)
 - Coverage finished: 19:08:48 (TOO LATE)
@@ -63,12 +66,14 @@
 **Root Cause**: No job dependency between `coverage` and `sonarqube` jobs
 
 **Solution Implemented**:
+
 - Renamed `codecov` job → `coverage` (more accurate name)
 - Added `needs: coverage` dependency to `sonarqube` job
 - Added artifact upload/download for coverage-reports
 - Split into separate `sonarqube` (push) and `sonarqube-pr` (PR) jobs
 
 **Verification** (Run 18355415604):
+
 - Coverage completed: 19:16:35 ✅
 - SonarQube started: 19:16:38 ✅
 - Sequential execution: WORKING CORRECTLY
@@ -86,6 +91,7 @@
 **Critical Discovery**: **SonarCloud does NOT support Rust language!**
 
 **Evidence**:
+
 - User observation: "reporting 0% on vscode... not reporting anything on rust files"
 - SonarCloud analyzing TypeScript files (VSCode extension) instead of Rust
 - Property `sonar.rust.lcov.reportPaths` **does not exist** (not a valid SonarCloud property)
@@ -93,6 +99,7 @@
 - Rust: **NOT SUPPORTED**
 
 **Implications**:
+
 - SonarCloud cannot analyze Rust code for quality issues
 - SonarCloud cannot parse Rust coverage reports (LCOV or otherwise)
 - No amount of workflow configuration will fix this (it's a language support issue)
@@ -109,6 +116,7 @@
 **Research Input**: Investigated `cargo-sonar` as potential workaround
 
 **What cargo-sonar Provides**:
+
 - Converts Clippy warnings → SonarCloud "external issues"
 - Converts tarpaulin/grcov coverage → SonarCloud format
 - Provides basic metrics (LOC, complexity)
@@ -117,11 +125,13 @@
 **Cost/Benefit Analysis**:
 
 **Pros**:
+
 - ✅ Shows Rust code in SonarCloud (better than nothing)
 - ✅ Automates conversion (no manual scripts)
 - ✅ CI-ready (GitHub Actions compatible)
 
 **Cons**:
+
 - ❌ Additional dependency to maintain
 - ❌ Additional CI time (~2-3 minutes per run)
 - ❌ Issues appear as "External Issues" (limited metadata)
@@ -132,6 +142,7 @@
 **Decision**: **REJECTED**
 
 **Rationale**:
+
 1. **Marginal value**: We already have excellent Rust tooling (Clippy + Codecov)
 2. **Duplicates existing gates**: Clippy already enforces quality in CI
 3. **Inferior coverage UX**: Codecov is superior for Rust coverage visualization
@@ -140,6 +151,7 @@
 6. **Time cost**: +2-3 minutes CI time for repackaging existing data
 
 **When cargo-sonar would make sense**:
+
 - Polyglot monorepo needing unified dashboard
 - Organization mandate: "All projects must use SonarCloud"
 - Team unfamiliar with Rust tooling
@@ -188,6 +200,7 @@ sonarqube:
 ```
 
 **3. Created Documentation**:
+
 - `docs/COVERAGE_STRATEGY.md` - Comprehensive coverage strategy
 - `docs/planning/technical/SONARCLOUD_RUST_LIMITATION_ANALYSIS.md` - Root cause analysis
 
@@ -198,23 +211,27 @@ sonarqube:
 ### Before Configuration Update
 
 **SonarCloud**:
+
 - ❌ Quality Gate: FAILED
 - Coverage: 0.0% (trying to measure unsupported Rust)
 - Duplication: 7.3% (analyzing Rust as "generic" files)
 - Analyzing: Rust files as unknown/generic type
 
 **Codecov**:
+
 - ✅ Coverage: 64.54% (working correctly)
 
 ### After Configuration Update
 
 **SonarCloud**:
+
 - ✅ Quality Gate: SHOULD PASS (adjust thresholds in UI)
 - Coverage: N/A or 0% (acknowledged as not applicable)
 - Duplication: Lower (only TypeScript/Markdown analyzed)
 - Analyzing: TypeScript, Markdown, YAML (correct files only)
 
 **Codecov**:
+
 - ✅ Coverage: 64.54% (unchanged, still working)
 
 ---
@@ -226,6 +243,7 @@ sonarqube:
 Navigate to: https://sonarcloud.io/project/quality_gates?id=dev-parkins_FerrisScript
 
 **Required Changes**:
+
 - Coverage on New Code: **Set to 0% or "Not Required"**
   - Reason: Rust not measurable in SonarCloud
 - Duplication on New Code: **Increase to 10%**

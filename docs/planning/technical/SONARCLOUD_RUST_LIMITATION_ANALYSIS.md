@@ -14,12 +14,14 @@
 **SonarCloud does NOT support Rust as a language.**
 
 **Supported Languages** (as of 2025):
+
 - ✅ Java, C#, JavaScript/TypeScript, Python, Go
 - ✅ PHP, Kotlin, Ruby, Scala, Swift, Objective-C
 - ✅ HTML, CSS, XML
 - ❌ **Rust** (not supported)
 
 **What This Means**:
+
 - SonarCloud cannot analyze Rust code for quality issues
 - SonarCloud cannot parse Rust coverage reports (LCOV or otherwise)
 - The property `sonar.rust.lcov.reportPaths` **does not exist**
@@ -32,16 +34,19 @@
 ### Current SonarCloud Analysis
 
 **What SonarCloud IS analyzing**:
+
 - ✅ TypeScript files in `extensions/vscode/` (VSCode extension)
 - ✅ Markdown files (documentation)
 - ✅ YAML files (CI workflows)
 - ✅ JSON files (configuration)
 
 **What SonarCloud is NOT analyzing**:
+
 - ❌ Rust files in `crates/` (language not supported)
 - ❌ Rust coverage from tarpaulin (no Rust analyzer to consume it)
 
 **Current Quality Gate Failure**:
+
 ```
 ❌ 0.0% Coverage on New Code (required ≥ 80%)
    └─ Analyzing: TypeScript files (no coverage provided)
@@ -62,6 +67,7 @@ sonar.rust.lcov.reportPaths=coverage/lcov.info
 ```
 
 **Why This Fails**:
+
 1. Property `sonar.rust.lcov.reportPaths` is **not a real SonarCloud property**
 2. SonarCloud has no Rust language plugin
 3. LCOV file is generated but never consumed
@@ -76,16 +82,19 @@ sonar.rust.lcov.reportPaths=coverage/lcov.info
 **Action**: Use SonarCloud for TypeScript, disable for Rust coverage
 
 **Pros**:
+
 - ✅ Simple and honest approach
 - ✅ SonarCloud still provides value for TypeScript/docs
 - ✅ Use Codecov for Rust coverage (already working)
 - ✅ No complex workarounds needed
 
 **Cons**:
+
 - ⚠️ Quality gate will always fail on coverage
 - ⚠️ Two separate tools (SonarCloud + Codecov)
 
 **Implementation**:
+
 1. Adjust SonarCloud quality gate to not require coverage
 2. Use Codecov as primary coverage tool (already at 64.54%)
 3. Use SonarCloud for TypeScript analysis only
@@ -110,10 +119,12 @@ sonar.rust.lcov.reportPaths=coverage/lcov.info
 ```
 
 **Pros**:
+
 - ✅ SonarCloud might accept the coverage report
 - ✅ Coverage percentage could show up
 
 **Cons**:
+
 - ❌ Still no code quality analysis for Rust
 - ❌ Requires custom conversion script (medium effort)
 - ❌ SonarCloud won't understand Rust syntax
@@ -129,6 +140,7 @@ sonar.rust.lcov.reportPaths=coverage/lcov.info
 **Action**: Replace SonarCloud with Rust-native tools
 
 **Rust Quality Tools**:
+
 - **Clippy**: Linting (already using)
 - **Cargo-audit**: Security vulnerabilities
 - **Cargo-deny**: License and dependency checks
@@ -136,11 +148,13 @@ sonar.rust.lcov.reportPaths=coverage/lcov.info
 - **Cargo-outdated**: Dependency updates
 
 **Pros**:
+
 - ✅ Purpose-built for Rust
 - ✅ Better Rust-specific analysis
 - ✅ Native integration with Cargo
 
 **Cons**:
+
 - ⚠️ No centralized dashboard like SonarCloud
 - ⚠️ Multiple tools to configure
 - ⚠️ Lose SonarCloud's unified view
@@ -170,12 +184,14 @@ sonar.typescript.lcov.reportPaths=extensions/vscode/coverage/lcov.info
 ```
 
 **Pros**:
+
 - ✅ SonarCloud works correctly for what it supports
 - ✅ Quality gate can pass (only TypeScript analyzed)
 - ✅ Clear separation of concerns
 - ✅ Codecov handles Rust coverage
 
 **Cons**:
+
 - ⚠️ Need to generate TypeScript coverage separately
 - ⚠️ SonarCloud dashboard won't show Rust metrics
 
@@ -186,18 +202,21 @@ sonar.typescript.lcov.reportPaths=extensions/vscode/coverage/lcov.info
 **Action**: Use `cargo-sonar` to convert Clippy/coverage to SonarCloud format
 
 **What cargo-sonar Does**:
+
 - Converts Clippy warnings → SonarCloud "external issues"
 - Converts tarpaulin/grcov coverage → SonarCloud format
 - Provides basic metrics (LOC, complexity)
 - Automates report generation and conversion
 
 **Pros**:
+
 - ✅ Shows Rust code in SonarCloud (better than nothing)
 - ✅ Automates conversion (no manual scripts)
 - ✅ CI-ready (GitHub Actions compatible)
 - ✅ Leverages existing Clippy + tarpaulin setup
 
 **Cons**:
+
 - ❌ Additional dependency to maintain (cargo-sonar installation)
 - ❌ Additional CI time (~2-3 minutes per run)
 - ❌ Issues appear as "External Issues" (limited metadata)
@@ -207,6 +226,7 @@ sonar.typescript.lcov.reportPaths=extensions/vscode/coverage/lcov.info
 - ❌ Questionable value: What do we gain over Clippy + Codecov?
 
 **Why Rejected**:
+
 1. **Marginal value**: We already have excellent Rust tooling (Clippy + Codecov)
 2. **Duplicates existing gates**: Clippy already enforces quality in CI
 3. **Inferior coverage UX**: Codecov is superior for Rust coverage visualization
@@ -215,6 +235,7 @@ sonar.typescript.lcov.reportPaths=extensions/vscode/coverage/lcov.info
 6. **Time cost**: +2-3 minutes CI time for repackaging existing data
 
 **When cargo-sonar WOULD make sense**:
+
 - Polyglot monorepo (Rust + Java + Python) needing unified dashboard
 - Organization mandate: "All projects must use SonarCloud"
 - Team unfamiliar with Rust tooling, needs SonarCloud UI consistency
@@ -270,6 +291,7 @@ sonar.exclusions=crates/**,target/**,**/*.rs
 **2. Adjust SonarCloud Quality Gate**:
 
 In SonarCloud dashboard:
+
 - Navigate to **Project Settings → Quality Gates**
 - Create custom gate or modify default:
   - Coverage on New Code: **0%** or **Not Required** (since Rust unmeasurable)
@@ -356,11 +378,13 @@ sonarqube:
 ### SonarCloud Dashboard
 
 **Before** (Current State):
+
 - ❌ Quality Gate: FAILED
 - Coverage: 0% (trying to measure unmeasurable Rust)
 - Duplication: 7.3% (too strict)
 
 **After** (Recommended Configuration):
+
 - ✅ Quality Gate: PASSED
 - Coverage: N/A or 0% (acknowledged as not applicable)
 - Duplication: Within adjusted threshold
@@ -369,6 +393,7 @@ sonarqube:
 ### Codecov Dashboard
 
 **Unchanged** (Already Working):
+
 - ✅ Coverage: 64.54%
 - ✅ Rust code fully measured
 - ✅ Pull request comments and tracking
@@ -382,16 +407,19 @@ sonarqube:
 **Rust Coverage**: Continue using Codecov (excellent support)
 
 **TypeScript Coverage**: Add coverage for VSCode extension
+
 - Use Jest or Vitest
 - Generate LCOV for SonarCloud
 - Set realistic thresholds (70%+)
 
 **Quality Tools**:
+
 - Rust: Clippy (linting), Cargo-audit (security)
 - TypeScript: SonarCloud (quality + coverage)
 - Both: CodeQL (security scanning)
 
 **Dashboard Strategy**:
+
 - **Codecov**: Primary coverage visualization
 - **SonarCloud**: Code quality and security
 - **GitHub**: Unified view via PR checks
@@ -403,6 +431,7 @@ sonarqube:
 **SonarCloud + Rust = Incompatible**
 
 This is NOT a configuration issue. It's a fundamental limitation:
+
 - SonarCloud cannot analyze Rust code
 - No amount of LCOV configuration will fix this
 - Codecov is the correct tool for Rust coverage

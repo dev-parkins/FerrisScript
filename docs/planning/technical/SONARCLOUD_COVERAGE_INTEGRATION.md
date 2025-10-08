@@ -11,12 +11,14 @@
 **DISCOVERY**: SonarCloud does **NOT** natively support Rust language.
 
 **Impact**:
+
 - ❌ SonarCloud cannot analyze Rust code for quality issues
 - ❌ SonarCloud cannot consume Rust coverage reports (LCOV or otherwise)
 - ❌ Property `sonar.rust.lcov.reportPaths` does not exist
 - ✅ Codecov remains the primary and ONLY coverage tool for Rust code
 
 **Resolution**: This document is kept for historical reference. See:
+
 - **`docs/COVERAGE_STRATEGY.md`** - Current coverage strategy (Codecov for Rust)
 - **`docs/planning/technical/SONARCLOUD_RUST_LIMITATION_ANALYSIS.md`** - Full analysis
 - **`docs/planning/v0.0.4/SONARCLOUD_COVERAGE_INVESTIGATION_SUMMARY.md`** - Investigation summary

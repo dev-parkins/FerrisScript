@@ -23,7 +23,7 @@ FerrisScript uses **two separate coverage tools** due to language-specific limit
 
 - **Tool**: Codecov (via cargo-tarpaulin)
 - **Current Coverage**: 64.54% (as of commit 4d48d67)
-- **Target**: 
+- **Target**:
   - v0.0.4: 70-75%
   - v0.1.0: 80%+
 - **Format**: Cobertura XML + LCOV
@@ -42,6 +42,7 @@ FerrisScript uses **two separate coverage tools** due to language-specific limit
 ```
 
 **Outputs**:
+
 - `coverage/cobertura.xml` → Uploaded to Codecov
 - `coverage/lcov.info` → Uploaded to Codecov (alternate format)
 
@@ -52,11 +53,13 @@ FerrisScript uses **two separate coverage tools** due to language-specific limit
 **SonarCloud does NOT support Rust as a language.**
 
 **Supported Languages** (as of 2025):
+
 - ✅ Java, C#, JavaScript/TypeScript, Python, Go
 - ✅ PHP, Kotlin, Ruby, Scala, Swift, Objective-C
 - ❌ **Rust** (not supported)
 
 **Implications**:
+
 - SonarCloud cannot analyze Rust code for quality issues
 - SonarCloud cannot parse Rust coverage reports (LCOV or otherwise)
 - Property `sonar.rust.lcov.reportPaths` **does not exist**
@@ -87,6 +90,7 @@ FerrisScript uses **two separate coverage tools** due to language-specific limit
 ```
 
 **sonar-project.properties** (future):
+
 ```properties
 sonar.typescript.lcov.reportPaths=extensions/vscode/coverage/lcov.info
 ```
@@ -100,32 +104,38 @@ sonar.typescript.lcov.reportPaths=extensions/vscode/coverage/lcov.info
 ### v0.0.3 (Current: "Editor Experience Alpha")
 
 **Rust Coverage**:
+
 - ✅ Current: **64.54%**
 - Target: 65%+ (MET ✅)
 - Focus: Core compiler functionality
 
 **TypeScript Coverage**:
+
 - ❌ Not implemented yet
 - Target: N/A (extension too early)
 
 ### v0.0.4 (Planned: "Enhanced Developer Experience")
 
 **Rust Coverage**:
+
 - Current: 64.54%
 - Target: **70-75%**
 - Focus: Improved testing for error handling, edge cases
 
 **TypeScript Coverage**:
+
 - Target: **Initial tests** (if extension development progresses)
 - Focus: Basic functionality tests
 
 ### v0.1.0 (Planned: "Production Ready")
 
 **Rust Coverage**:
+
 - Target: **80%+**
 - Focus: Comprehensive testing, all critical paths covered
 
 **TypeScript Coverage**:
+
 - Target: **70%+**
 - Focus: Full extension functionality tested
 
@@ -180,6 +190,7 @@ sonar.typescript.lcov.reportPaths=extensions/vscode/coverage/lcov.info
 ```
 
 **Why No Job Dependency?**
+
 - SonarCloud cannot use Rust coverage
 - Parallel execution saves ~4 minutes
 - No need to wait for coverage completion
@@ -196,6 +207,7 @@ sonar.typescript.lcov.reportPaths=extensions/vscode/coverage/lcov.info
 4. **Trends**: Track coverage over time
 
 **Example**:
+
 ```
 Codecov Report
 Merging #32 (abc1234) into develop (def5678) will increase coverage by 0.12%.
@@ -220,6 +232,7 @@ The diff coverage is 75.00%.
 3. **PR Decoration**: SonarCloud comments on PRs (quality metrics only)
 
 **Current Metrics** (focus areas):
+
 - Code Smells: Maintainability issues
 - Bugs: Potential runtime errors
 - Security Hotspots: Security review needed
@@ -234,12 +247,14 @@ The diff coverage is 75.00%.
 ### Short-Term (v0.0.4)
 
 **Rust**:
+
 - [ ] Increase coverage to 70%+
 - [ ] Add tests for error handling paths
 - [ ] Add tests for edge cases in type checker
 - [ ] Add tests for Godot binding layer
 
 **TypeScript**:
+
 - [ ] Add basic tests for VSCode extension (if time permits)
 - [ ] Set up Jest or Vitest
 - [ ] Initial 50%+ coverage on core functions
@@ -247,12 +262,14 @@ The diff coverage is 75.00%.
 ### Long-Term (v0.1.0)
 
 **Rust**:
+
 - [ ] Achieve 80%+ coverage
 - [ ] 100% coverage on critical paths (lexer, parser, type checker)
 - [ ] Add property-based tests (proptest)
 - [ ] Add fuzzing tests
 
 **TypeScript**:
+
 - [ ] 70%+ coverage on VSCode extension
 - [ ] Integration tests with mock LSP server
 - [ ] E2E tests with VS Code test runner
@@ -295,6 +312,7 @@ Start-Process coverage/lcov-report/index.html  # Windows
 ### Writing Tests for Coverage
 
 **DO**:
+
 - ✅ Focus on critical paths first (parser, type checker)
 - ✅ Test error handling explicitly
 - ✅ Test edge cases (empty input, max values, etc.)
@@ -302,6 +320,7 @@ Start-Process coverage/lcov-report/index.html  # Windows
 - ✅ Aim for meaningful tests, not just coverage numbers
 
 **DON'T**:
+
 - ❌ Write tests just to increase coverage percentage
 - ❌ Skip error paths ("this can never happen")
 - ❌ Test implementation details
@@ -317,6 +336,7 @@ Start-Process coverage/lcov-report/index.html  # Windows
 - Combine with code review, static analysis, fuzzing
 
 **Good Test Indicators**:
+
 - Tests fail when code is broken
 - Tests document expected behavior
 - Tests are readable and maintainable
