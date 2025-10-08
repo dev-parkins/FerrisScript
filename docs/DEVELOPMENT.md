@@ -45,12 +45,48 @@ cargo test --workspace -- --show-output
 # Check code formatting
 cargo fmt --all -- --check
 
-# Run clippy linter
-cargo clippy --workspace -- -D warnings
+# Run clippy linter (strict - treats warnings as errors)
+cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 # Generate documentation
 cargo doc --workspace --open
 ```
+
+### Cross-Platform Builds
+
+FerrisScript supports building for multiple platforms. The CI automatically builds native binaries for Linux, macOS, and Windows.
+
+**Native Build (Recommended)**:
+
+```bash
+# Build for your current platform (always works)
+cargo build --workspace --release
+```
+
+**Cross-Compilation Setup**:
+
+⚠️ **Note**: Cross-compilation from Windows requires platform-specific linkers and is complex to set up. For most development, use native builds or rely on CI for multi-platform builds.
+
+If you need to verify target compatibility locally:
+
+```bash
+# Install target platform support
+rustup target add x86_64-unknown-linux-gnu
+rustup target add aarch64-unknown-linux-gnu
+rustup target add x86_64-apple-darwin
+rustup target add aarch64-apple-darwin
+
+# Verify compilation (may fail at linking stage without proper linkers)
+cargo build --workspace --release --target x86_64-unknown-linux-gnu
+```
+
+**CI Builds**: The GitHub Actions workflow automatically builds native binaries for:
+
+- Linux x86_64 (`x86_64-unknown-linux-gnu`)
+- Windows x86_64 (`x86_64-pc-windows-msvc`)
+- macOS x86_64 (`x86_64-apple-darwin`)
+
+See `.github/workflows/ci.yml` for the full build matrix.
 
 ---
 
@@ -139,7 +175,7 @@ cargo test test_compile_hello
 
 # Check formatting and linting
 cargo fmt --all
-cargo clippy --workspace
+cargo clippy --workspace --all-targets --all-features -- -D warnings
 ```
 
 ### 4.5. Validate Documentation Changes
@@ -290,7 +326,7 @@ We use different coverage tools for different environments:
 - **cargo-llvm-cov**: Native LLVM-based coverage, no file locking issues on Windows, faster local execution
 - **cargo-tarpaulin**: Mature CI integration, generates Codecov-compatible reports, but has Windows file locking issues
 
-See [COVERAGE_SETUP_NOTES.md](COVERAGE_SETUP_NOTES.md) for the technical investigation that led to this approach.
+See [infrastructure/COVERAGE_SETUP_NOTES.md](infrastructure/COVERAGE_SETUP_NOTES.md) for the technical investigation that led to this approach.
 
 ### Running Coverage Locally
 
@@ -790,8 +826,9 @@ Before submitting a PR:
 
 - [ ] All tests pass (`cargo test --workspace`)
 - [ ] Code is formatted (`cargo fmt --all`)
-- [ ] No clippy warnings (`cargo clippy --workspace`)
+- [ ] No clippy warnings (strict mode: `cargo clippy --workspace --all-targets --all-features -- -D warnings`)
 - [ ] Documentation updated if needed
+- [ ] Documentation linting passes (`npm run docs:lint`)
 - [ ] Commit messages follow convention
 - [ ] PR description explains the change
 

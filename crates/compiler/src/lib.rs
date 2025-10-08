@@ -31,15 +31,18 @@
 //! # Modules
 //!
 //! - [`ast`]: Abstract Syntax Tree node definitions
+//! - [`error_code`]: Error code definitions and categories
 //! - [`error_context`]: Error formatting with source context
 //! - [`lexer`]: Lexical analysis (tokenization)
 //! - [`parser`]: Syntax analysis (AST generation)
 //! - [`type_checker`]: Semantic analysis (type checking)
 
 pub mod ast;
+pub mod error_code;
 pub mod error_context;
 pub mod lexer;
 pub mod parser;
+pub mod suggestions;
 pub mod type_checker;
 
 /// Compile FerrisScript source code to an Abstract Syntax Tree (AST).

@@ -1,12 +1,12 @@
 [package]
 name = "ferrisscript_godot_bind"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 
 [dependencies]
 # gdext is the Godot 4.x Rust binding (formerly gdextension)
-# Using version 0.1 which is compatible with Godot 4.2+
-godot = "0.1"
+# Using version 0.4 which is compatible with Godot 4.2+
+godot = "0.4"
 ferrisscript_compiler = { path = "../compiler" }
 ferrisscript_runtime = { path = "../runtime" }
 

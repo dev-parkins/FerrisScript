@@ -1,0 +1,81 @@
+name: Benchmarks
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'crates/**/*.rs'
+      - 'Cargo.toml'
+      - 'crates/**/Cargo.toml'
+      - '.github/workflows/benchmarks.yml'
+  workflow_dispatch:
+    inputs:
+      compare_baseline:
+        description: 'Compare against baseline'
+        required: false
+        default: 'true'
+
+jobs:
+  benchmark:
+    name: Run Benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@6d653acede28d24f02e3cd41383119e8b1b35921
+        with:
+            toolchain: stable
+            components: rustfmt, clippy
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1
+
+      - name: Run compiler benchmarks
+        run: cargo bench --package ferrisscript_compiler -- --output-format bencher | tee compiler_bench.txt
+
+      - name: Run runtime benchmarks
+        run: cargo bench --package ferrisscript_runtime -- --output-format bencher | tee runtime_bench.txt
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ github.sha }}
+          path: |
+            compiler_bench.txt
+            runtime_bench.txt
+            target/criterion/**/*.html
+            target/criterion/**/*.json
+          retention-days: 30
+
+      - name: Comment benchmark results (on PR)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const compilerBench = fs.readFileSync('compiler_bench.txt', 'utf8');
+            const runtimeBench = fs.readFileSync('runtime_bench.txt', 'utf8');
+
+            const body = `## 📊 Benchmark Results
+
+            ### Compiler Benchmarks
+            \`\`\`
+            ${compilerBench}
+            \`\`\`
+
+            ### Runtime Benchmarks
+            \`\`\`
+            ${runtimeBench}
+            \`\`\`
+
+            _Full reports available in workflow artifacts._`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

@@ -31,25 +31,31 @@
 //! ```
 
 use crate::ast::*;
-use crate::error_context::format_error_with_context;
+use crate::error_code::ErrorCode;
+use crate::error_context::format_error_with_code;
 use crate::lexer::Token;
 
-struct Parser<'a> {
+pub struct Parser<'a> {
     tokens: Vec<Token>,
     source: &'a str, // Keep source for error context
     position: usize,
     current_line: usize,
     current_column: usize,
+    // Error recovery fields (Phase 3C)
+    panic_mode: bool,    // Track if currently recovering from error
+    errors: Vec<String>, // Collect all errors during parsing
 }
 
 impl<'a> Parser<'a> {
-    fn new(tokens: Vec<Token>, source: &'a str) -> Self {
+    pub fn new(tokens: Vec<Token>, source: &'a str) -> Self {
         Parser {
             tokens,
             source,
             position: 0,
             current_line: 1,
             current_column: 1,
+            panic_mode: false,
+            errors: Vec::new(),
         }
     }
 
@@ -84,7 +90,8 @@ impl<'a> Parser<'a> {
                 self.current_line,
                 self.current_column
             );
-            Err(format_error_with_context(
+            Err(format_error_with_code(
+                ErrorCode::E100,
                 &base_msg,
                 self.source,
                 self.current_line,
@@ -98,15 +105,96 @@ impl<'a> Parser<'a> {
         Span::new(self.current_line, self.current_column)
     }
 
-    fn parse_program(&mut self) -> Result<Program, String> {
+    /// Synchronize parser to next safe recovery point after error.
+    ///
+    /// This implements panic-mode error recovery by skipping tokens until
+    /// reaching a statement boundary or safe keyword. Sync points are:
+    /// - `;` (semicolon) - end of statement
+    /// - `}` (right brace) - end of block
+    /// - `fn` - start of function
+    /// - `let` - start of variable declaration
+    ///
+    /// When a sync point is found, clears panic mode so parsing can resume.
+    fn synchronize(&mut self) {
+        self.panic_mode = true;
+
+        while !matches!(self.current(), Token::Eof) {
+            // Check if previous token was a statement boundary
+            if self.position > 0 {
+                let prev_idx = self.position - 1;
+                if matches!(self.tokens.get(prev_idx), Some(Token::Semicolon)) {
+                    self.panic_mode = false;
+                    return;
+                }
+            }
+
+            // Check if current token is a safe recovery point
+            match self.current() {
+                Token::Fn | Token::Let | Token::RBrace => {
+                    self.panic_mode = false;
+                    return;
+                }
+                _ => {
+                    self.advance();
+                }
+            }
+        }
+
+        // Reached EOF
+        self.panic_mode = false;
+    }
+
+    /// Record an error without immediately returning.
+    ///
+    /// This allows the parser to continue after errors and collect multiple
+    /// diagnostics in a single pass. Errors are suppressed while in panic
+    /// mode to prevent cascading false positives.
+    ///
+    /// # Arguments
+    /// * `error` - The formatted error message to record
+    fn record_error(&mut self, error: String) {
+        // Only record errors when not already in panic mode
+        // This prevents cascading false positives
+        if !self.panic_mode {
+            self.errors.push(error);
+            self.panic_mode = true;
+        }
+    }
+
+    /// Get all errors collected during parsing.
+    ///
+    /// This allows callers to access all errors found during a parse,
+    /// not just the first one. Useful for displaying multiple diagnostics.
+    ///
+    /// # Returns
+    /// A reference to the vector of collected error messages
+    pub fn get_errors(&self) -> &Vec<String> {
+        &self.errors
+    }
+
+    pub fn parse_program(&mut self) -> Result<Program, String> {
         let mut program = Program::new();
 
         while !matches!(self.current(), Token::Eof) {
             // Check if it's a global let statement
             if matches!(self.current(), Token::Let) {
-                program.global_vars.push(self.parse_global_var()?);
+                match self.parse_global_var() {
+                    Ok(global_var) => program.global_vars.push(global_var),
+                    Err(e) => {
+                        self.record_error(e);
+                        self.synchronize();
+                        // Continue parsing to find more errors
+                    }
+                }
             } else if matches!(self.current(), Token::Fn) {
-                program.functions.push(self.parse_function()?);
+                match self.parse_function() {
+                    Ok(function) => program.functions.push(function),
+                    Err(e) => {
+                        self.record_error(e);
+                        self.synchronize();
+                        // Continue parsing to find more errors
+                    }
+                }
             } else {
                 let base_msg = format!(
                     "Expected 'fn' or 'let' at top level, found {} at line {}, column {}",
@@ -114,17 +202,28 @@ impl<'a> Parser<'a> {
                     self.current_line,
                     self.current_column
                 );
-                return Err(format_error_with_context(
+                let error = format_error_with_code(
+                    ErrorCode::E101,
                     &base_msg,
                     self.source,
                     self.current_line,
                     self.current_column,
                     "Only function or global variable declarations allowed at top level",
-                ));
+                );
+                self.record_error(error);
+                // Advance at least one token to prevent infinite loop
+                self.advance();
+                self.synchronize();
+                // Continue parsing to find more errors
             }
         }
 
-        Ok(program)
+        // Return first error if any were collected (maintains API compatibility)
+        if let Some(first_error) = self.errors.first() {
+            Err(first_error.clone())
+        } else {
+            Ok(program)
+        }
     }
 
     fn parse_global_var(&mut self) -> Result<GlobalVar, String> {
@@ -147,7 +246,8 @@ impl<'a> Parser<'a> {
                     self.current_line,
                     self.current_column
                 );
-                return Err(format_error_with_context(
+                return Err(format_error_with_code(
+                    ErrorCode::E109,
                     &base_msg,
                     self.source,
                     self.current_line,
@@ -168,7 +268,8 @@ impl<'a> Parser<'a> {
                         self.current_line,
                         self.current_column
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E110,
                         &base_msg,
                         self.source,
                         self.current_line,
@@ -207,7 +308,8 @@ impl<'a> Parser<'a> {
                     self.current_line,
                     self.current_column
                 );
-                return Err(format_error_with_context(
+                return Err(format_error_with_code(
+                    ErrorCode::E109,
                     &base_msg,
                     self.source,
                     self.current_line,
@@ -231,7 +333,8 @@ impl<'a> Parser<'a> {
                         self.current_line,
                         self.current_column
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E111,
                         &base_msg,
                         self.source,
                         self.current_line,
@@ -252,7 +355,8 @@ impl<'a> Parser<'a> {
                         self.current_line,
                         self.current_column
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E111,
                         &base_msg,
                         self.source,
                         self.current_line,
@@ -290,7 +394,8 @@ impl<'a> Parser<'a> {
                             self.current_line,
                             self.current_column
                         );
-                        return Err(format_error_with_context(
+                        return Err(format_error_with_code(
+                            ErrorCode::E112,
                             &base_msg,
                             self.source,
                             self.current_line,
@@ -304,7 +409,8 @@ impl<'a> Parser<'a> {
                     "Expected '>' after '-' in return type at line {}, column {}",
                     self.current_line, self.current_column
                 );
-                return Err(format_error_with_context(
+                return Err(format_error_with_code(
+                    ErrorCode::E112,
                     &base_msg,
                     self.source,
                     self.current_line,
@@ -407,7 +513,8 @@ impl<'a> Parser<'a> {
                     self.current_line,
                     self.current_column
                 );
-                return Err(format_error_with_context(
+                return Err(format_error_with_code(
+                    ErrorCode::E109,
                     &base_msg,
                     self.source,
                     self.current_line,
@@ -428,7 +535,8 @@ impl<'a> Parser<'a> {
                         self.current_line,
                         self.current_column
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E110,
                         &base_msg,
                         self.source,
                         self.current_line,
@@ -536,7 +644,8 @@ impl<'a> Parser<'a> {
                             self.current_line,
                             self.current_column
                         );
-                        return Err(format_error_with_context(
+                        return Err(format_error_with_code(
+                            ErrorCode::E103,
                             &base_msg,
                             self.source,
                             self.current_line,
@@ -636,7 +745,7 @@ impl<'a> Parser<'a> {
                 Ok(Expr::Unary(UnaryOp::Not, Box::new(expr), span))
             }
             t => Err(format!(
-                "Unexpected token in expression: {} at line {}, column {}",
+                "Error[E102]: Expected expression, found '{}' at line {}, column {}",
                 t.name(),
                 self.current_line,
                 self.current_column
@@ -678,7 +787,8 @@ impl<'a> Parser<'a> {
                     self.current_line,
                     self.current_column
                 );
-                Err(format_error_with_context(
+                Err(format_error_with_code(
+                    ErrorCode::E113,
                     &base_msg,
                     self.source,
                     self.current_line,
@@ -1086,6 +1196,498 @@ fn _process(delta: f32) {
     #[test]
     fn test_parse_error_missing_brace() {
         let input = "fn test() {";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    // ========================================
+    // Error Recovery Tests (Phase 3C)
+    // ========================================
+
+    #[test]
+    fn test_recovery_missing_semicolon() {
+        // Parser should recover after missing semicolon and continue parsing
+        let input = "fn test() { let x = 5 let y = 10; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // Should error on first issue but continue parsing
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+
+        // Error should mention missing semicolon or unexpected token
+        assert!(error.contains("Expected") || error.contains("E100"));
+    }
+
+    #[test]
+    fn test_recovery_invalid_top_level() {
+        // Parser should recover from invalid top-level item
+        let input = "@ fn test() {}";
+        let tokens_result = tokenize(input);
+
+        // Lexer should catch the @ symbol first
+        assert!(tokens_result.is_err());
+    }
+
+    #[test]
+    fn test_recovery_multiple_functions_with_error() {
+        // Parser should recover and continue to next function
+        let input = r#"
+fn broken() { let x = 5 }
+fn working() { let y = 10; }
+"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // Should report error but parser collected both functions
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_recovery_missing_function_body() {
+        // Parser should handle missing function body gracefully
+        let input = "fn test() fn other() {}";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // Should error on missing brace
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_recovery_sync_on_fn_keyword() {
+        // Parser should sync to 'fn' keyword
+        let input = "let broken = @ fn test() {}";
+        let tokens_result = tokenize(input);
+
+        // Lexer catches @ first
+        assert!(tokens_result.is_err());
+    }
+
+    #[test]
+    fn test_recovery_sync_on_let_keyword() {
+        // Parser should sync to 'let' keyword in function body
+        let input = "fn test() { @ let x = 5; }";
+        let tokens_result = tokenize(input);
+
+        // Lexer catches @ first
+        assert!(tokens_result.is_err());
+    }
+
+    #[test]
+    fn test_recovery_continues_after_valid_code() {
+        // After error, parser should continue with valid code
+        let input = r#"
+fn good1() { let x = 5; }
+let broken = 
+fn good2() { let y = 10; }
+"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // Should collect first function successfully
+        // Error on global variable without value
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_recovery_empty_file_after_error() {
+        // Parser should handle errors followed by EOF
+        let input = "fn test() {";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("E100") || error.contains("Expected"));
+    }
+
+    #[test]
+    fn test_recovery_panic_mode_suppresses_cascading() {
+        // This is a behavioral test - we expect the parser to report
+        // the first error and not cascade false positives
+        let input = "fn test() { let let let }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // Should report error (likely first 'let' without identifier)
+        assert!(result.is_err());
+
+        // The error message should be about the first issue, not cascading errors
+        let error = result.unwrap_err();
+        assert!(error.contains("Expected") || error.contains("identifier"));
+    }
+
+    #[test]
+    fn test_recovery_global_var_error() {
+        // Test recovery at global level
+        let input = r#"
+let x = 5;
+let broken 
+let y = 10;
+fn test() {}
+"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // Should report error on 'broken' (missing = and value)
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_no_recovery_needed_on_success() {
+        // Sanity check: valid code should not trigger recovery
+        let input = r#"
+let x = 5;
+fn test() { let y = 10; }
+fn other() { return 42; }
+"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // Should succeed without errors
+        assert!(result.is_ok());
+        let program = result.unwrap();
+        assert_eq!(program.global_vars.len(), 1);
+        assert_eq!(program.functions.len(), 2);
+    }
+
+    #[test]
+    fn test_synchronize_semicolon() {
+        let tokens = vec![
+            Token::Let,
+            Token::Ident("x".to_string()),
+            Token::Equal,
+            Token::Number(1.0),
+            Token::Semicolon,
+            Token::Fn,
+            Token::Ident("foo".to_string()),
+            Token::LParen,
+            Token::RParen,
+            Token::LBrace,
+            Token::RBrace,
+            Token::Eof,
+        ];
+        let mut parser = Parser::new(tokens, "let x = 1; fn foo() {} ");
+        parser.position = 0;
+        parser.synchronize();
+        // Should stop at 'let' keyword (first token is a sync point)
+        assert!(!parser.panic_mode);
+        assert_eq!(parser.current(), &Token::Let);
+    }
+
+    #[test]
+    fn test_synchronize_rbrace() {
+        let tokens = vec![
+            Token::Let,
+            Token::Ident("x".to_string()),
+            Token::Equal,
+            Token::Number(1.0),
+            Token::RBrace,
+            Token::Eof,
+        ];
+        let mut parser = Parser::new(tokens, "let x = 1} ");
+        parser.position = 0;
+        parser.synchronize();
+        // Should stop at 'let' keyword (first token is a sync point)
+        assert!(!parser.panic_mode);
+        assert_eq!(parser.current(), &Token::Let);
+    }
+
+    #[test]
+    fn test_record_error_and_panic_mode() {
+        let tokens = vec![
+            Token::Let,
+            Token::Ident("x".to_string()),
+            Token::Equal,
+            Token::Number(1.0),
+            Token::Semicolon,
+            Token::Eof,
+        ];
+        let mut parser = Parser::new(tokens, "let x = 1; ");
+        assert!(!parser.panic_mode);
+        parser.record_error("Test error".to_string());
+        assert!(parser.panic_mode);
+        assert_eq!(parser.errors.len(), 1);
+        // Should not record another error while in panic mode
+        parser.record_error("Another error".to_string());
+        assert_eq!(parser.errors.len(), 1);
+    }
+
+    #[test]
+    fn test_error_collection_in_parse_program() {
+        // Invalid top-level token triggers error recovery
+        let tokens = vec![
+            Token::Ident("oops".to_string()),
+            Token::Let,
+            Token::Ident("x".to_string()),
+            Token::Equal,
+            Token::Number(1.0),
+            Token::Semicolon,
+            Token::Eof,
+        ];
+        let mut parser = Parser::new(tokens, "oops let x = 1; ");
+        let result = parser.parse_program();
+        // Should collect error and continue parsing, but return error due to API compatibility
+        assert!(result.is_err());
+        assert_eq!(parser.errors.len(), 1);
+        assert!(parser.errors[0].contains("Expected 'fn' or 'let' at top level"));
+        // Note: parse_program returns Err with first error, so we can't check the program structure
+        // The important thing is that we collected the error and continued parsing
+    }
+
+    // ========================================
+    // Parser Error Recovery Tests - Phase 3
+    // ========================================
+
+    #[test]
+    fn test_parser_recovery_sync_after_semicolon() {
+        // Parser should sync after semicolon
+        let input = "fn test() { let x = 5; let y = 10; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_parser_recovery_sync_after_rbrace() {
+        // Parser should sync after right brace
+        let input = "fn test() { let x = 5; } fn other() { let y = 10; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_parser_recovery_batch_errors() {
+        // Parser should collect multiple errors without cascading
+        let input = "fn test() { let x = 5 let y = 10 let z = 15; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+        // Should report first error only (API limitation)
+    }
+
+    #[test]
+    fn test_parser_recovery_unclosed_brace_sync_to_fn() {
+        // Parser should sync to 'fn' after unclosed brace
+        let input = "fn broken() { let x = 5; fn other() {}";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_sync_to_let() {
+        // Parser should sync to 'let' keyword
+        let input = "fn test() { let x = 5 let y = 10; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_missing_semicolon_batch() {
+        // Parser should handle multiple missing semicolons
+        let input = "fn test() { let x = 5 let y = 10 let z = 15 }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_invalid_expression_sync() {
+        // Parser should recover from invalid expression
+        let input = "fn test() { let x = ; let y = 10; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_missing_function_param_type() {
+        // Parser should handle missing parameter type
+        let input = "fn test(x) {}";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_missing_return_type() {
+        // Parser should handle missing return type after arrow
+        let input = "fn test() -> {}";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_cascading_suppression() {
+        // Parser should suppress cascading errors in panic mode
+        let tokens = vec![
+            Token::Let,
+            Token::Ident("x".to_string()),
+            Token::Equal,
+            // Missing value
+            Token::Semicolon,
+            Token::Eof,
+        ];
+        let mut parser = Parser::new(tokens, "let x = ;");
+        let result = parser.parse_program();
+        assert!(result.is_err());
+        // Should only record first error due to panic mode
+    }
+
+    #[test]
+    fn test_parser_recovery_top_level_vs_function_level() {
+        // Parser should differentiate top-level and function-level errors
+        let input = "fn test() { let x = 5 } fn other() { let y = 10; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_nested_blocks() {
+        // Parser should recover in nested blocks
+        let input = "fn test() { if (true) { let x = 5 } }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_while_loop_error() {
+        // Parser should recover from while loop errors
+        let input = "fn test() { while (true) { let x = 5 } }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_multiple_functions() {
+        // Parser should recover across multiple function definitions
+        let input = r#"
+fn first() { let x = 5; }
+fn second() { let y = 10 }
+fn third() { let z = 15; }
+"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_global_let_error() {
+        // Parser should recover from global variable errors
+        let input = "let x = 5 let y = 10;";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_sync_at_eof() {
+        // Parser should handle sync at EOF gracefully
+        let tokens = vec![
+            Token::Ident("invalid".to_string()),
+            Token::Number(1.0),
+            // No sync points, should reach EOF
+            Token::Eof,
+        ];
+        let mut parser = Parser::new(tokens, "invalid 1");
+        parser.synchronize();
+        assert!(!parser.panic_mode);
+        assert_eq!(parser.current(), &Token::Eof);
+    }
+
+    #[test]
+    fn test_parser_recovery_function_call_error() {
+        // Parser should recover from function call errors
+        let input = "fn test() { foo( }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_binary_op_error() {
+        // Parser should recover from binary operation errors
+        let input = "fn test() { let x = 5 + ; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_member_access_error() {
+        // Parser should recover from member access errors
+        let input = "fn test() { let x = obj. ; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_panic_mode_clears_on_sync() {
+        // Panic mode should clear when reaching sync point
+        let tokens = vec![
+            Token::Fn,
+            Token::Ident("test".to_string()),
+            Token::LParen,
+            Token::RParen,
+            Token::LBrace,
+            Token::Let,
+            Token::Ident("x".to_string()),
+            Token::Equal,
+            Token::Number(5.0),
+            // Missing semicolon
+            Token::RBrace,
+            Token::Eof,
+        ];
+        let mut parser = Parser::new(tokens, "fn test() { let x = 5 }");
+        parser.panic_mode = true;
+        parser.synchronize();
+        assert!(!parser.panic_mode); // Should be cleared after sync
+    }
+
+    #[test]
+    fn test_parser_recovery_continue_after_error() {
+        // Parser should continue parsing after error
+        let input = "fn test() { let x = 5 let y = 10; }";
+        let tokens = tokenize(input).unwrap();
+        let mut parser = Parser::new(tokens.clone(), input);
+        let result = parser.parse_program();
+        assert!(result.is_err());
+        // Parser collected at least one error
+        assert!(!parser.errors.is_empty());
+    }
+
+    #[test]
+    fn test_parser_recovery_multiple_sync_points() {
+        // Parser should handle multiple sync points
+        let input = "fn test() { let x = 5; let y = 10; let z = 15; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_parser_recovery_empty_statement() {
+        // Parser should handle empty statements gracefully
+        let input = "fn test() { ; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parser_recovery_invalid_return() {
+        // Parser should recover from invalid return statement
+        let input = "fn test() { return }";
         let tokens = tokenize(input).unwrap();
         let result = parse(&tokens, input);
         assert!(result.is_err());

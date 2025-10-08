@@ -1,7 +1,11 @@
 # VS Code Extension Ignore
 
-# Build outputs
-out/
+# Source files (we ship compiled JS in out/)
+src/
+tsconfig.json
+.eslintrc.json
+
+# Build artifacts we don't ship
 dist/
 *.vsix
 

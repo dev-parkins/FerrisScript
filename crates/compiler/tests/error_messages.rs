@@ -132,7 +132,8 @@ mod parser_errors {
 
         assert!(result.is_err());
         let error = result.unwrap_err();
-        assert!(error.contains("Unexpected token in expression"));
+        // Updated: Now uses "Expected expression" with error code
+        assert!(error.contains("Expected expression") || error.contains("Error[E102]:"));
         assert!(error.contains("line"));
         assert!(error.contains("column"));
     }

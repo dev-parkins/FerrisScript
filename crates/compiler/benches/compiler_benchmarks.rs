@@ -1,5 +1,6 @@
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use ferrisscript_compiler::{lexer, parser, type_checker};
+use std::hint::black_box;
 
 fn lexer_benchmarks(c: &mut Criterion) {
     let mut group = c.benchmark_group("lexer");

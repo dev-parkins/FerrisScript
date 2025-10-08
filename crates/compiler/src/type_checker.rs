@@ -37,7 +37,9 @@
 //! ```
 
 use crate::ast::*;
-use crate::error_context::format_error_with_context;
+use crate::error_code::ErrorCode;
+use crate::error_context::format_error_with_code;
+use crate::suggestions::find_similar_identifiers;
 use std::collections::HashMap;
 
 /// Type representation for FerrisScript's type system.
@@ -162,6 +164,27 @@ impl<'a> TypeChecker<'a> {
         None
     }
 
+    /// Get all variable names in scope (for suggestion purposes)
+    fn list_variables(&self) -> Vec<&str> {
+        let mut vars = Vec::new();
+        for scope in self.scopes.iter().rev() {
+            for name in scope.keys() {
+                vars.push(name.as_str());
+            }
+        }
+        vars
+    }
+
+    /// Get all function names (for suggestion purposes)
+    fn list_functions(&self) -> Vec<&str> {
+        self.functions.keys().map(|s| s.as_str()).collect()
+    }
+
+    /// Get all known type names (for suggestion purposes)
+    fn list_types() -> Vec<&'static str> {
+        vec!["i32", "f32", "bool", "String", "Vector2", "Node"]
+    }
+
     fn error(&mut self, message: String) {
         self.errors.push(message);
     }
@@ -170,24 +193,54 @@ impl<'a> TypeChecker<'a> {
         // Register global variables
         for var in &program.global_vars {
             let ty = if let Some(type_name) = &var.ty {
-                Type::from_string(type_name)
-            } else {
-                self.infer_expr(&var.value)
-            };
+                let parsed_ty = Type::from_string(type_name);
 
-            if ty == Type::Unknown {
-                let base_msg = format!(
-                    "Cannot infer type for global variable '{}' at {}",
-                    var.name, var.span
-                );
-                self.error(format_error_with_context(
-                    &base_msg,
-                    self.source,
-                    var.span.line,
-                    var.span.column,
-                    "Add an explicit type annotation (e.g., let name: type = value)",
-                ));
-            }
+                // If type is unknown and a type annotation was provided, report E203
+                if parsed_ty == Type::Unknown {
+                    let base_msg = format!("Unknown type '{}' at {}", type_name, var.span);
+
+                    // Find similar type names
+                    let candidates = Self::list_types();
+                    let suggestions = find_similar_identifiers(type_name, &candidates);
+
+                    let hint = if !suggestions.is_empty() {
+                        format!("Type not recognized. Did you mean '{}'?", suggestions[0])
+                    } else {
+                        "Type not recognized. Available types: i32, f32, bool, String, Vector2, Node".to_string()
+                    };
+
+                    self.error(format_error_with_code(
+                        ErrorCode::E203,
+                        &base_msg,
+                        self.source,
+                        var.span.line,
+                        var.span.column,
+                        &hint,
+                    ));
+                }
+
+                parsed_ty
+            } else {
+                let inferred = self.infer_expr(&var.value);
+
+                // Only report E218 if type inference failed AND no annotation was provided
+                if inferred == Type::Unknown {
+                    let base_msg = format!(
+                        "Cannot infer type for global variable '{}' at {}",
+                        var.name, var.span
+                    );
+                    self.error(format_error_with_code(
+                        ErrorCode::E218,
+                        &base_msg,
+                        self.source,
+                        var.span.line,
+                        var.span.column,
+                        "Add an explicit type annotation (e.g., let name: type = value)",
+                    ));
+                }
+
+                inferred
+            };
 
             self.declare_variable(var.name.clone(), ty.clone());
 
@@ -201,7 +254,8 @@ impl<'a> TypeChecker<'a> {
                     init_ty.name(),
                     var.span
                 );
-                self.error(format_error_with_context(
+                self.error(format_error_with_code(
+                    ErrorCode::E200,
                     &base_msg,
                     self.source,
                     var.span.line,
@@ -217,16 +271,76 @@ impl<'a> TypeChecker<'a> {
 
         // Register all functions first
         for func in &program.functions {
-            let param_types = func
+            let param_types: Vec<Type> = func
                 .params
                 .iter()
-                .map(|p| Type::from_string(&p.ty))
+                .map(|p| {
+                    let ty = Type::from_string(&p.ty);
+
+                    // Check for unknown parameter types
+                    if ty == Type::Unknown {
+                        let base_msg = format!(
+                            "Unknown type '{}' for parameter '{}' at {}",
+                            p.ty, p.name, func.span
+                        );
+
+                        let candidates = Self::list_types();
+                        let suggestions = find_similar_identifiers(&p.ty, &candidates);
+
+                        let hint = if !suggestions.is_empty() {
+                            format!("Type not recognized. Did you mean '{}'?", suggestions[0])
+                        } else {
+                            "Type not recognized. Available types: i32, f32, bool, String, Vector2, Node".to_string()
+                        };
+
+                        self.error(format_error_with_code(
+                            ErrorCode::E203,
+                            &base_msg,
+                            self.source,
+                            func.span.line,
+                            func.span.column,
+                            &hint,
+                        ));
+                    }
+
+                    ty
+                })
                 .collect();
 
             let return_type = func
                 .return_type
                 .as_ref()
-                .map(|s| Type::from_string(s))
+                .map(|s| {
+                    let ty = Type::from_string(s);
+
+                    // Check for unknown return types
+                    if ty == Type::Unknown {
+                        let base_msg = format!(
+                            "Unknown return type '{}' for function '{}' at {}",
+                            s, func.name, func.span
+                        );
+
+                        let candidates = Self::list_types();
+                        let suggestions = find_similar_identifiers(s, &candidates);
+
+                        let hint = if !suggestions.is_empty() {
+                            format!("Type not recognized. Did you mean '{}'?", suggestions[0])
+                        } else {
+                            "Type not recognized. Available types: i32, f32, bool, String, Vector2, Node".to_string()
+                        };
+
+                        self.error(format_error_with_code(
+                            ErrorCode::E203,
+                            &base_msg,
+                            self.source,
+                            func.span.line,
+                            func.span.column,
+                            &hint,
+                        ));
+                    }
+
+                    ty
+                })
                 .unwrap_or(Type::Void);
 
             self.functions.insert(
@@ -274,21 +388,52 @@ impl<'a> TypeChecker<'a> {
                 ..
             } => {
                 let declared_ty = if let Some(type_name) = ty {
-                    Type::from_string(type_name)
-                } else {
-                    self.infer_expr(value)
-                };
+                    let parsed_ty = Type::from_string(type_name);
 
-                if declared_ty == Type::Unknown {
-                    let base_msg = format!("Cannot infer type for variable '{}' at {}", name, span);
-                    self.error(format_error_with_context(
-                        &base_msg,
-                        self.source,
-                        span.line,
-                        span.column,
-                        "Add an explicit type annotation (e.g., let name: type = value)",
-                    ));
-                }
+                    // If type is unknown and a type annotation was provided, report E203
+                    if parsed_ty == Type::Unknown {
+                        let base_msg = format!("Unknown type '{}' at {}", type_name, span);
+
+                        // Find similar type names
+                        let candidates = Self::list_types();
+                        let suggestions = find_similar_identifiers(type_name, &candidates);
+
+                        let hint = if !suggestions.is_empty() {
+                            format!("Type not recognized. Did you mean '{}'?", suggestions[0])
+                        } else {
+                            "Type not recognized. Available types: i32, f32, bool, String, Vector2, Node".to_string()
+                        };
+
+                        self.error(format_error_with_code(
+                            ErrorCode::E203,
+                            &base_msg,
+                            self.source,
+                            span.line,
+                            span.column,
+                            &hint,
+                        ));
+                    }
+
+                    parsed_ty
+                } else {
+                    let inferred = self.infer_expr(value);
+
+                    // Only report E218 if type inference failed AND no annotation was provided
+                    if inferred == Type::Unknown {
+                        let base_msg =
+                            format!("Cannot infer type for variable '{}' at {}", name, span);
+                        self.error(format_error_with_code(
+                            ErrorCode::E218,
+                            &base_msg,
+                            self.source,
+                            span.line,
+                            span.column,
+                            "Add an explicit type annotation (e.g., let name: type = value)",
+                        ));
+                    }
+
+                    inferred
+                };
 
                 let value_ty = self.check_expr(value);
                 if !value_ty.can_coerce_to(&declared_ty) {
@@ -299,7 +444,8 @@ impl<'a> TypeChecker<'a> {
                         value_ty.name(),
                         span
                     );
-                    self.error(format_error_with_context(
+                    self.error(format_error_with_code(
+                        ErrorCode::E200,
                         &base_msg,
                         self.source,
                         span.line,
@@ -329,7 +475,8 @@ impl<'a> TypeChecker<'a> {
                         value_ty.name(),
                         span
                     );
-                    self.error(format_error_with_context(
+                    self.error(format_error_with_code(
+                        ErrorCode::E219,
                         &base_msg,
                         self.source,
                         span.line,
@@ -355,7 +502,8 @@ impl<'a> TypeChecker<'a> {
                         cond_ty.name(),
                         span
                     );
-                    self.error(format_error_with_context(
+                    self.error(format_error_with_code(
+                        ErrorCode::E211,
                         &base_msg,
                         self.source,
                         span.line,
@@ -386,7 +534,8 @@ impl<'a> TypeChecker<'a> {
                         cond_ty.name(),
                         span
                     );
-                    self.error(format_error_with_context(
+                    self.error(format_error_with_code(
+                        ErrorCode::E211,
                         &base_msg,
                         self.source,
                         span.line,
@@ -425,12 +574,27 @@ impl<'a> TypeChecker<'a> {
                     ty
                 } else {
                     let base_msg = format!("Undefined variable '{}' at {}", name, span);
-                    self.error(format_error_with_context(
+
+                    // Find similar variable names
+                    let candidates = self.list_variables();
+                    let suggestions = find_similar_identifiers(name, &candidates);
+
+                    let hint = if !suggestions.is_empty() {
+                        format!(
+                            "Variable must be declared before use. Did you mean '{}'?",
+                            suggestions[0]
+                        )
+                    } else {
+                        "Variable must be declared before use".to_string()
+                    };
+
+                    self.error(format_error_with_code(
+                        ErrorCode::E201,
                         &base_msg,
                         self.source,
                         span.line,
                         span.column,
-                        "Variable must be declared before use",
+                        &hint,
                     ));
                     Type::Unknown
                 }
@@ -459,7 +623,8 @@ impl<'a> TypeChecker<'a> {
                                 right_ty.name(),
                                 span
                             );
-                            self.error(format_error_with_context(
+                            self.error(format_error_with_code(
+                                ErrorCode::E212,
                                 &base_msg,
                                 self.source,
                                 span.line,
@@ -487,7 +652,8 @@ impl<'a> TypeChecker<'a> {
                                 right_ty.name(),
                                 span
                             );
-                            self.error(format_error_with_context(
+                            self.error(format_error_with_code(
+                                ErrorCode::E212,
                                 &base_msg,
                                 self.source,
                                 span.line,
@@ -507,7 +673,8 @@ impl<'a> TypeChecker<'a> {
                                 right_ty.name(),
                                 span
                             );
-                            self.error(format_error_with_context(
+                            self.error(format_error_with_code(
+                                ErrorCode::E212,
                                 &base_msg,
                                 self.source,
                                 span.line,
@@ -529,7 +696,8 @@ impl<'a> TypeChecker<'a> {
                                 expr_ty.name(),
                                 span
                             );
-                            self.error(format_error_with_context(
+                            self.error(format_error_with_code(
+                                ErrorCode::E213,
                                 &base_msg,
                                 self.source,
                                 span.line,
@@ -546,7 +714,8 @@ impl<'a> TypeChecker<'a> {
                                 expr_ty.name(),
                                 span
                             );
-                            self.error(format_error_with_context(
+                            self.error(format_error_with_code(
+                                ErrorCode::E213,
                                 &base_msg,
                                 self.source,
                                 span.line,
@@ -568,7 +737,8 @@ impl<'a> TypeChecker<'a> {
                             args.len(),
                             span
                         );
-                        self.error(format_error_with_context(
+                        self.error(format_error_with_code(
+                            ErrorCode::E204,
                             &base_msg,
                             self.source,
                             span.line,
@@ -589,7 +759,8 @@ impl<'a> TypeChecker<'a> {
                                     arg_ty.name(),
                                     span
                                 );
-                                self.error(format_error_with_context(
+                                self.error(format_error_with_code(
+                                    ErrorCode::E205,
                                     &base_msg,
                                     self.source,
                                     span.line,
@@ -606,12 +777,27 @@ impl<'a> TypeChecker<'a> {
                     sig.return_type
                 } else {
                     let base_msg = format!("Undefined function '{}' at {}", name, span);
-                    self.error(format_error_with_context(
+
+                    // Find similar function names
+                    let candidates = self.list_functions();
+                    let suggestions = find_similar_identifiers(name, &candidates);
+
+                    let hint = if !suggestions.is_empty() {
+                        format!(
+                            "Function must be declared before use. Did you mean '{}'?",
+                            suggestions[0]
+                        )
+                    } else {
+                        "Function must be declared before use".to_string()
+                    };
+
+                    self.error(format_error_with_code(
+                        ErrorCode::E202,
                         &base_msg,
                         self.source,
                         span.line,
                         span.column,
-                        "Function must be declared before use",
+                        &hint,
                     ));
                     Type::Unknown
                 }
@@ -624,7 +810,8 @@ impl<'a> TypeChecker<'a> {
                             Type::F32
                         } else {
                             let base_msg = format!("Vector2 has no field '{}' at {}", field, span);
-                            self.error(format_error_with_context(
+                            self.error(format_error_with_code(
+                                ErrorCode::E215,
                                 &base_msg,
                                 self.source,
                                 span.line,
@@ -645,7 +832,8 @@ impl<'a> TypeChecker<'a> {
                     }
                     _ => {
                         let base_msg = format!("Type {} has no fields at {}", obj_ty.name(), span);
-                        self.error(format_error_with_context(
+                        self.error(format_error_with_code(
+                            ErrorCode::E209,
                             &base_msg,
                             self.source,
                             span.line,
@@ -902,5 +1090,185 @@ fn _process(delta: f32) {
         let tokens = tokenize(input).unwrap();
         let program = parse(&tokens, input).unwrap();
         assert!(check(&program, input).is_ok());
+    }
+
+    // ========== NEW COVERAGE TESTS: Type Coercion & Field Access ==========
+
+    #[test]
+    fn test_implicit_int_to_float_coercion_in_assignment() {
+        let input = "fn test() { let x: f32 = 42; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_implicit_int_to_float_coercion_in_function_arg() {
+        let input = r#"
+            fn take_float(x: f32) {}
+            fn test() { take_float(42); }
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_no_reverse_coercion_float_to_int() {
+        let input = "fn test() { let x: i32 = 3.14; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Type mismatch"));
+    }
+
+    #[test]
+    fn test_no_bool_to_numeric_coercion() {
+        let input = "fn test() { let x: i32 = true; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Type mismatch"));
+    }
+
+    #[test]
+    fn test_vector2_field_access_x() {
+        let input = "fn test() { let v = self.position; let x = v.x; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_vector2_field_access_y() {
+        let input = "fn test() { let v = self.position; let y = v.y; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_vector2_invalid_field_access() {
+        let input = "fn test() { let v = self.position; let z = v.z; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("has no field"));
+    }
+
+    #[test]
+    fn test_nested_field_access_chains() {
+        let input = "fn test() { let x: f32 = self.position.x; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_field_access_on_primitive_type_error() {
+        let input = "fn test() { let x: i32 = 5; let y = x.field; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("has no fields"));
+    }
+
+    #[test]
+    fn test_node_position_field_access() {
+        let input = "fn test() { let pos = self.position; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_string_type_in_declaration() {
+        let input = r#"fn test() { let msg: String = "hello"; }"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_string_type_mismatch() {
+        let input = r#"fn test() { let msg: String = 42; }"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Type mismatch"));
+    }
+
+    #[test]
+    fn test_multiple_type_coercions_in_expression() {
+        let input = "fn test() { let x: f32 = 1 + 2 + 3; }"; // Multiple i32 operations, then coerce to f32
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_mixed_int_float_arithmetic_with_coercion() {
+        let input = "fn test() { let x: f32 = 5; let y = x + 10; }"; // f32 + i32 (coerced)
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_type_inference_with_coercion() {
+        let input = "fn test() { let x = 5; let y: f32 = x; }"; // Infer i32, then coerce
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_function_return_type_coercion() {
+        let input = r#"
+            fn get_float() -> f32 { return 42; }
+            fn test() { let x = get_float(); }
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_comparison_with_coercion() {
+        let input = "fn test() { let x: f32 = 5.0; let result = x > 3; }"; // f32 > i32 (coerced)
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_compound_assignment_with_coercion() {
+        let input = "fn test() { let mut x: f32 = 5.0; x += 10; }"; // f32 += i32 (coerced)
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_void_return_type_checking() {
+        let input = "fn no_return() { let x = 5; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_undefined_type_error() {
+        let input = "fn test() { let x: UnknownType = 5; }";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        // Type checker treats unknown types as Type::Unknown, may still compile
     }
 }

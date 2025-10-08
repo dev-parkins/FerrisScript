@@ -2,6 +2,7 @@
 ///
 /// This module provides utilities to display error messages with surrounding
 /// source code context (±2 lines) and visual indicators pointing to the error location.
+use crate::error_code::ErrorCode;
 /// Extract source code context around an error location
 ///
 /// Returns a formatted string with line numbers showing ±2 lines around the error,
@@ -121,9 +122,81 @@ pub fn format_error_with_context(
     format!("{}\n\n{}{}", base_message, context, pointer)
 }
 
+/// Format a complete error message with error code, context, and pointer
+///
+/// Similar to [`format_error_with_context`] but includes a structured error code
+/// prefix (e.g., "Error[E201]:") for better error tracking and documentation.
+///
+/// # Arguments
+/// * `code` - The structured error code (e.g., ErrorCode::E201)
+/// * `base_message` - The main error message (e.g., "Undefined variable 'x'")
+/// * `source` - The complete source code
+/// * `line` - The 1-based line number where the error occurred
+/// * `column` - The 1-based column number where the error occurred
+/// * `hint` - A helpful hint message for the pointer line
+///
+/// # Returns
+/// A fully formatted error message with error code, context, and pointer
+///
+/// # Example
+/// ```
+/// use ferrisscript_compiler::error_context::format_error_with_code;
+/// use ferrisscript_compiler::error_code::ErrorCode;
+///
+/// let source = "fn test() {\n    let x = unknown_var;\n}\n";
+/// let error = format_error_with_code(
+///     ErrorCode::E201,
+///     "Undefined variable 'unknown_var'",
+///     source,
+///     2,
+///     13,
+///     "Variable must be declared before use"
+/// );
+/// // Output:
+/// // Error[E201]: Undefined variable
+/// // Undefined variable 'unknown_var' at line 2, column 13
+/// //
+/// //  1 | fn test() {
+/// //  2 |     let x = unknown_var;
+/// //    |             ^ Variable must be declared before use
+/// //  3 | }
+/// ```
+pub fn format_error_with_code(
+    code: ErrorCode,
+    base_message: &str,
+    source: &str,
+    line: usize,
+    column: usize,
+    hint: &str,
+) -> String {
+    let context = extract_source_context(source, line);
+
+    // Calculate line number width from the context
+    let lines: Vec<&str> = source.lines().collect();
+    let end_line = (line + 2).min(lines.len());
+    let line_num_width = end_line.to_string().len().max(2);
+
+    let pointer = format_error_pointer(column, line_num_width, hint);
+
+    // Add documentation link
+    let docs_url = code.get_docs_url();
+    let docs_note = format!("   = note: see {} for more information\n", docs_url);
+
+    format!(
+        "Error[{}]: {}\n{}\n\n{}{}{}",
+        code.as_str(),
+        code.description(),
+        base_message,
+        context,
+        pointer,
+        docs_note
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::error_code::ErrorCode;
 
     #[test]
     fn test_extract_context_normal() {
@@ -241,5 +314,43 @@ mod tests {
         assert!(context.contains("100 | line 100"));
         assert!(context.contains("101 | line 101"));
         assert!(context.contains("102 | line 102"));
+    }
+
+    #[test]
+    fn test_format_error_with_code() {
+        let source = "fn test() {\n    let x = unknown_var;\n}\n";
+        let error = format_error_with_code(
+            ErrorCode::E201,
+            "Undefined variable 'unknown_var' at line 2, column 13",
+            source,
+            2,
+            13,
+            "Variable must be declared before use",
+        );
+
+        // Check all components are present
+        assert!(error.contains("Error[E201]"));
+        assert!(error.contains("Undefined variable"));
+        assert!(error.contains("at line 2, column 13"));
+        assert!(error.contains(" 1 | fn test() {"));
+        assert!(error.contains(" 2 |     let x = unknown_var;"));
+        assert!(error.contains(" 3 | }"));
+        assert!(error.contains("^ Variable must be declared before use"));
+    }
+
+    #[test]
+    fn test_error_code_format() {
+        let source = "let x = \"unterminated\n";
+        let error = format_error_with_code(
+            ErrorCode::E002,
+            "Unterminated string at line 1, column 9",
+            source,
+            1,
+            9,
+            "String must be closed with \"",
+        );
+
+        assert!(error.contains("Error[E002]"));
+        assert!(error.contains("Unterminated string literal"));
     }
 }

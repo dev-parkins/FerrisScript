@@ -28,7 +28,7 @@ Instead, please report vulnerabilities using one of the following methods:
    - Provide detailed information about the vulnerability
 
 2. **Alternative: Email**
-   - Send an email to: dev-parkins@users.noreply.github.com
+   - Send an email to: ferrisscript@gmail.com
    - Include "SECURITY" in the subject line
    - Provide as much information as possible (see below)
 
@@ -100,7 +100,7 @@ When using FerrisScript in your projects:
 
 For security-related questions or concerns, please contact:
 
-- **Email**: dev-parkins@users.noreply.github.com (with "SECURITY" in subject)
+- **Email**: ferrisscript@gmail.com (with "SECURITY" in subject)
 - **GitHub Security**: https://github.com/dev-parkins/FerrisScript/security/advisories
 
 For general questions, feature requests, or non-security bugs, please use:

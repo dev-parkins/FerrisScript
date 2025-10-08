@@ -1,11 +1,11 @@
 {
   "name": "ferrisscript",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "FerrisScript - A Rust-powered scripting language for Godot",
   "private": true,
   "scripts": {
-    "docs:lint": "markdownlint \"**/*.md\" --ignore node_modules --ignore target --dot",
-    "docs:fix": "markdownlint \"**/*.md\" --ignore node_modules --ignore target --dot --fix"
+    "docs:lint": "markdownlint \"**/*.md\" --ignore node_modules --ignore target --ignore extensions/vscode/node_modules --dot",
+    "docs:fix": "markdownlint \"**/*.md\" --ignore node_modules --ignore target --ignore extensions/vscode/node_modules --dot --fix"
   },
   "devDependencies": {
     "markdown-link-check": "^3.12.2",

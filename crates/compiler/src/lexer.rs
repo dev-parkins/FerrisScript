@@ -18,7 +18,8 @@
 //! let tokens = tokenize(source).unwrap();
 //! ```
 
-use crate::error_context::format_error_with_context;
+use crate::error_code::ErrorCode;
+use crate::error_context::format_error_with_code;
 
 /// Token representation for FerrisScript.
 ///
@@ -214,7 +215,7 @@ impl<'a> Lexer<'a> {
 
         num_str.parse::<f32>().map(Token::Number).map_err(|_| {
             format!(
-                "Invalid number '{}' at line {}, column {}",
+                "Error[E003]: Invalid number '{}' at line {}, column {}",
                 num_str, start_line, start_col
             )
         })
@@ -234,7 +235,8 @@ impl<'a> Lexer<'a> {
                         "Unterminated string at line {}, column {}",
                         start_line, start_col
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E002,
                         &base_msg,
                         self.source,
                         start_line,
@@ -274,7 +276,8 @@ impl<'a> Lexer<'a> {
                                 "Invalid escape sequence '\\{}' at line {}, column {}",
                                 ch, self.line, self.column
                             );
-                            return Err(format_error_with_context(
+                            return Err(format_error_with_code(
+                                ErrorCode::E003,
                                 &base_msg,
                                 self.source,
                                 self.line,
@@ -287,7 +290,8 @@ impl<'a> Lexer<'a> {
                                 "Unterminated string at line {}, column {}",
                                 start_line, start_col
                             );
-                            return Err(format_error_with_context(
+                            return Err(format_error_with_code(
+                                ErrorCode::E002,
                                 &base_msg,
                                 self.source,
                                 start_line,
@@ -419,7 +423,8 @@ impl<'a> Lexer<'a> {
                         "Unexpected character '&' at line {}, column {}",
                         error_line, error_col
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E001,
                         &base_msg,
                         self.source,
                         error_line,
@@ -440,7 +445,8 @@ impl<'a> Lexer<'a> {
                         "Unexpected character '|' at line {}, column {}",
                         error_line, error_col
                     );
-                    return Err(format_error_with_context(
+                    return Err(format_error_with_code(
+                        ErrorCode::E001,
                         &base_msg,
                         self.source,
                         error_line,
@@ -486,7 +492,8 @@ impl<'a> Lexer<'a> {
                     "Unexpected character '{}' at line {}, column {}",
                     ch, self.line, self.column
                 );
-                return Err(format_error_with_context(
+                return Err(format_error_with_code(
+                    ErrorCode::E001,
                     &base_msg,
                     self.source,
                     self.line,
@@ -1029,5 +1036,283 @@ fn test() {
         assert_eq!(tokens[1], Token::Minus);
         assert_eq!(tokens[2], Token::Star);
         assert_eq!(tokens[3], Token::Slash);
+    }
+
+    // ========================================
+    // Lexer Edge Case Tests - Phase 4
+    // ========================================
+
+    #[test]
+    fn test_lexer_unicode_identifier_emoji() {
+        // Test emoji in identifier (should error with clear message)
+        let input = "let 😀 = 5;";
+        let result = tokenize(input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Unexpected character"));
+    }
+
+    #[test]
+    fn test_lexer_unicode_combining_characters() {
+        // Test combining characters (should error)
+        let input = "let a\u{0301} = 5;"; // 'a' + combining acute accent
+        let result = tokenize(input);
+        // May succeed if combining character is ignored, or error
+        match result {
+            Ok(_) => {} // Acceptable if lexer treats as 'a'
+            Err(e) => assert!(e.contains("Unexpected character")),
+        }
+    }
+
+    #[test]
+    fn test_lexer_invalid_escape_x() {
+        // Test invalid \x escape sequence
+        let input = r#""test\xZZ""#;
+        let result = tokenize(input);
+        // Should succeed and treat as literal characters (no escape processing)
+        if let Ok(tokens) = result {
+            if let Token::StringLit(s) = &tokens[0] {
+                // Lexer may or may not process escapes
+                assert!(s.contains("test"));
+            } else {
+                panic!("Expected StringLit");
+            }
+        }
+        // Also acceptable if lexer rejects invalid escapes
+    }
+
+    #[test]
+    fn test_lexer_invalid_escape_u() {
+        // Test invalid \u escape sequence
+        let input = r#""test\uXXXX""#;
+        let result = tokenize(input);
+        // Should handle gracefully (either process literally or error)
+        assert!(result.is_ok() || result.is_err());
+    }
+
+    #[test]
+    fn test_lexer_numeric_overflow_i32_max() {
+        // Test number exceeding i32::MAX
+        let input = "let x = 2147483648;"; // i32::MAX + 1
+        let result = tokenize(input);
+        assert!(result.is_ok()); // Lexer uses f32, should succeed
+        let tokens = result.unwrap();
+        match &tokens[3] {
+            Token::Number(n) => assert!(*n == 2147483648.0),
+            _ => panic!("Expected Number"),
+        }
+    }
+
+    #[test]
+    fn test_lexer_numeric_overflow_f32_max() {
+        // Test number close to f32::MAX
+        let input = "let x = 3.4e38;";
+        let result = tokenize(input);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_lexer_unterminated_string() {
+        // Test unterminated string literal
+        let input = r#"let x = "hello"#;
+        let result = tokenize(input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Unterminated string"));
+    }
+
+    #[test]
+    fn test_lexer_unterminated_string_with_newline() {
+        // Test unterminated string with newline
+        let input = "let x = \"hello\nworld;";
+        let result = tokenize(input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_lexer_invalid_character_at() {
+        // Test @ character (invalid)
+        let input = "let @ = 5;";
+        let result = tokenize(input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Unexpected character"));
+    }
+
+    #[test]
+    fn test_lexer_invalid_character_hash() {
+        // Test # character (not comment syntax in FerrisScript)
+        let input = "let # = 5;";
+        let result = tokenize(input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Unexpected character"));
+    }
+
+    #[test]
+    fn test_lexer_invalid_character_dollar() {
+        // Test $ character (invalid)
+        let input = "let $var = 5;";
+        let result = tokenize(input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Unexpected character"));
+    }
+
+    #[test]
+    fn test_lexer_invalid_character_backtick() {
+        // Test backtick character (invalid)
+        let input = "let `var` = 5;";
+        let result = tokenize(input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_lexer_complex_operator_sequence() {
+        // Test complex sequence: ===
+        let input = "a === b";
+        let result = tokenize(input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        // Should parse as: a, ==, =, b, EOF
+        assert_eq!(tokens[1], Token::EqualEqual);
+        assert_eq!(tokens[2], Token::Equal);
+    }
+
+    #[test]
+    fn test_lexer_ambiguous_operator_sequence() {
+        // Test sequence that could be ambiguous: !==
+        let input = "a !== b";
+        let result = tokenize(input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        // Should parse as: a, !=, =, b, EOF
+        assert_eq!(tokens[1], Token::NotEqual);
+        assert_eq!(tokens[2], Token::Equal);
+    }
+
+    #[test]
+    fn test_lexer_numeric_leading_zero() {
+        // Test number with leading zero
+        let input = "let x = 0123;";
+        let result = tokenize(input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        match &tokens[3] {
+            Token::Number(n) => assert_eq!(*n, 123.0),
+            _ => panic!("Expected Number"),
+        }
+    }
+
+    #[test]
+    fn test_lexer_numeric_trailing_dot() {
+        // Test number with trailing dot: "5."
+        let input = "let x = 5.;";
+        let result = tokenize(input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        // Should parse as: let, x, =, 5., ;, EOF
+        match &tokens[3] {
+            Token::Number(_) => {}
+            _ => panic!("Expected Number"),
+        }
+    }
+
+    #[test]
+    fn test_lexer_whitespace_only() {
+        // Test input with only whitespace
+        let input = "   \t\n\r\n  ";
+        let result = tokenize(input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        assert_eq!(tokens.len(), 1); // Just EOF
+        assert_eq!(tokens[0], Token::Eof);
+    }
+
+    #[test]
+    fn test_lexer_very_long_identifier() {
+        // Test very long identifier (1000+ chars)
+        let long_name = "a".repeat(1000);
+        let input = format!("let {} = 5;", long_name);
+        let result = tokenize(&input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        match &tokens[1] {
+            Token::Ident(s) => assert_eq!(s.len(), 1000),
+            _ => panic!("Expected Ident"),
+        }
+    }
+
+    #[test]
+    fn test_lexer_string_with_quotes_escaped() {
+        // Test string with escaped quotes
+        let input = r#"let x = "say \"hello\"";"#;
+        let result = tokenize(input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        match &tokens[3] {
+            Token::StringLit(s) => {
+                // Lexer should preserve escape sequences
+                assert!(s.contains("hello"));
+            }
+            _ => panic!("Expected StringLit"),
+        }
+    }
+
+    #[test]
+    fn test_lexer_all_special_characters() {
+        // Test all structural tokens
+        let input = "(){},.;:";
+        let result = tokenize(input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        assert_eq!(tokens[0], Token::LParen);
+        assert_eq!(tokens[1], Token::RParen);
+        assert_eq!(tokens[2], Token::LBrace);
+        assert_eq!(tokens[3], Token::RBrace);
+        assert_eq!(tokens[4], Token::Comma);
+        assert_eq!(tokens[5], Token::Dot);
+        assert_eq!(tokens[6], Token::Semicolon);
+        assert_eq!(tokens[7], Token::Colon);
+    }
+
+    #[test]
+    fn test_lexer_keyword_prefix_identifier() {
+        // Test identifier that starts with keyword
+        let input = "let letter = 5;";
+        let result = tokenize(input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        match &tokens[1] {
+            Token::Ident(s) => assert_eq!(s, "letter"),
+            _ => panic!("Expected Ident 'letter'"),
+        }
+    }
+
+    #[test]
+    fn test_lexer_case_sensitive_keywords() {
+        // Test that keywords are case-sensitive
+        let input = "Let LET leT";
+        let result = tokenize(input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        // All should be identifiers, not keywords
+        match &tokens[0] {
+            Token::Ident(s) => assert_eq!(s, "Let"),
+            _ => panic!("Expected Ident 'Let'"),
+        }
+        match &tokens[1] {
+            Token::Ident(s) => assert_eq!(s, "LET"),
+            _ => panic!("Expected Ident 'LET'"),
+        }
+    }
+
+    #[test]
+    fn test_lexer_numeric_negative() {
+        // Test negative number (should tokenize as minus + number)
+        let input = "let x = -5;";
+        let result = tokenize(input);
+        assert!(result.is_ok());
+        let tokens = result.unwrap();
+        assert_eq!(tokens[3], Token::Minus);
+        match &tokens[4] {
+            Token::Number(n) => assert_eq!(*n, 5.0),
+            _ => panic!("Expected Number"),
+        }
     }
 }

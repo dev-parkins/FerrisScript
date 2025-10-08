@@ -92,10 +92,12 @@ cargo llvm-cov --workspace --lcov --output-path target/coverage/lcov.info
 
 **GitHub Actions Configuration**:
 
+> **Note**: As of October 8, 2025, coverage reporting has been moved to `.github/workflows/code-scanning.yml` for consolidation with other code quality tools.
+
 ```yaml
-# .github/workflows/ci.yml
-coverage:
-  name: Code Coverage
+# .github/workflows/code-scanning.yml
+codecov:
+  name: Code Coverage (Codecov)
   runs-on: ubuntu-latest  # Linux - no file locking issues
   steps:
     - name: Install tarpaulin

@@ -120,7 +120,7 @@ impl FerrisScriptNode {
         let path = path_gstring.to_string();
 
         // Use Godot's FileAccess to read the file (handles res:// paths correctly)
-        let file = match FileAccess::open(path_gstring.clone(), ModeFlags::READ) {
+        let file = match FileAccess::open(&path_gstring, ModeFlags::READ) {
             Some(f) => f,
             None => {
                 godot_error!(

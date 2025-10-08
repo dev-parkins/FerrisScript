@@ -1,8 +1,8 @@
 {
   "name": "ferrisscript",
   "displayName": "FerrisScript",
-  "description": "Syntax highlighting and code snippets for FerrisScript - a Rust-inspired scripting language for Godot 4.x",
-  "version": "0.1.0",
+  "description": "Full IDE support for FerrisScript: completion, hover tooltips, error diagnostics, and syntax highlighting for Rust-inspired scripting in Godot 4.x",
+  "version": "0.0.3",
   "publisher": "ferrisscript",
   "repository": {
     "type": "git",
@@ -17,7 +17,8 @@
   },
   "categories": [
     "Programming Languages",
-    "Snippets"
+    "Snippets",
+    "Linters"
   ],
   "keywords": [
     "ferrisscript",
@@ -27,6 +28,10 @@
     "scripting"
   ],
   "icon": "icon.png",
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "workspaceContains:**/*.ferris"
+  ],
   "contributes": {
     "languages": [
       {
@@ -53,6 +58,39 @@
         "language": "ferrisscript",
         "path": "./snippets/ferrisscript.json"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "FerrisScript",
+      "properties": {
+        "ferrisscript.compilerPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the FerrisScript compiler executable. If empty, searches workspace and PATH. For security, use absolute path to trusted compiler location.",
+          "scope": "machine-overridable"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --maxWorkers=2"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^18.19.0",
+    "@types/vscode": "^1.75.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^8.56.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.4",
+    "typescript": "^5.3.0"
   }
 }

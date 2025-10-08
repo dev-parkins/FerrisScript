@@ -22,7 +22,9 @@ mono_crash.*.json
 
 # Node.js (for documentation tooling)
 node_modules/
-package-lock.json
+
+# Temporary files (PR bodies, scripts)
+/temp/
 
 # OS
 Thumbs.db

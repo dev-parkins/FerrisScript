@@ -1,0 +1,27 @@
+# Node.js dependencies
+node_modules/
+
+# TypeScript compilation output
+out/
+# Exclude compiled JS except config files
+src/**/*.js
+src/**/*.js.map
+*.d.ts
+
+# Test coverage reports
+coverage/
+
+# VS Code extension packaging
+*.vsix
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

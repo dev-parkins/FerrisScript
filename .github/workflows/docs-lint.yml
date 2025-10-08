@@ -11,6 +11,13 @@ on:
       - '.github/workflows/docs-lint.yml'
       - '.markdownlint.json'
       - '.markdown-link-check.json'
+  push:
+    branches: 
+      - main
+      - develop
+    paths:
+      - '**.md'
+      - 'docs/**'
 
 jobs:
   markdown-lint:
@@ -21,7 +28,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run markdownlint
-        uses: nosborn/github-action-markdown-cli@v3.3.0
+        uses: nosborn/github-action-markdown-cli@508d6cefd8f0cc99eab5d2d4685b1d5f470042c1
         with:
           files: .
           config_file: .markdownlint.json

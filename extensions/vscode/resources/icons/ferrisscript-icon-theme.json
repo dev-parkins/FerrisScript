@@ -1,0 +1,10 @@
+{
+  "iconDefinitions": {
+    "ferrisscript-file": {
+      "iconPath": "./ferrisscript.svg"
+    }
+  },
+  "fileExtensions": {
+    "ferris": "ferrisscript-file"
+  }
+}

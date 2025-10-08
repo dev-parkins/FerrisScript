@@ -3,6 +3,8 @@ name: Auto Apply PR Template
 on:
   pull_request:
     types: [opened]
+    branches:
+      - '**'
 
 jobs:
   apply-template:
@@ -14,19 +16,21 @@ jobs:
 
       - name: Select template based on branch name
         id: template
+        env:
+          # Security: Pass user-controlled data via environment variable to prevent injection
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          BRANCH="${{ github.head_ref }}"
           TEMPLATE=""
 
-          echo "🔍 Analyzing branch: $BRANCH"
+          echo "🔍 Analyzing branch: $HEAD_REF"
 
-          if [[ "$BRANCH" == bugfix/* ]] || [[ "$BRANCH" == fix/* ]]; then
+          if [[ "$HEAD_REF" == bugfix/* ]] || [[ "$HEAD_REF" == fix/* ]]; then
             TEMPLATE=".github/PULL_REQUEST_TEMPLATE/bug_fix.md"
             echo "🐛 Detected bug fix branch"
-          elif [[ "$BRANCH" == feature/* ]] || [[ "$BRANCH" == feat/* ]]; then
+          elif [[ "$HEAD_REF" == feature/* ]] || [[ "$HEAD_REF" == feat/* ]]; then
             TEMPLATE=".github/PULL_REQUEST_TEMPLATE/feature.md"
             echo "✨ Detected feature branch"
-          elif [[ "$BRANCH" == docs/* ]] || [[ "$BRANCH" == doc/* ]]; then
+          elif [[ "$HEAD_REF" == docs/* ]] || [[ "$HEAD_REF" == doc/* ]]; then
             TEMPLATE=".github/PULL_REQUEST_TEMPLATE/docs.md"
             echo "📝 Detected documentation branch"
           else

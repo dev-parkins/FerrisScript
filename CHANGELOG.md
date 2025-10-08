@@ -23,6 +23,109 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.0.3] - 2025-10-08
+
+**Codename**: "Editor Experience Alpha" 💡🔍
+
+This release transforms FerrisScript into a professional development environment with enhanced error diagnostics, full IDE support, and comprehensive development tooling. Focus on developer experience and editor integration.
+
+### Added
+
+#### Enhanced Error Diagnostics (Phases 1-3)
+
+- **Structured Error Code System** (Phase 1, PR #27)
+  - Error codes E001-E499 across 5 categories (Lexical, Syntax, Type, Semantic, Runtime)
+  - `ERROR_CODES.md` comprehensive reference with examples and fixes
+  - Documentation URLs in error messages (GitHub + Jekyll site)
+  - All 63 error codes categorized and documented
+
+- **"Did You Mean?" Suggestions** (Phase 2, PR #28)
+  - Levenshtein distance-based typo detection for variables, functions, and types
+  - Adaptive thresholds for short vs long identifiers
+  - 20+ comprehensive suggestion tests
+  - Keyword suggestions deferred to v0.0.4 (Phase 2B)
+
+- **Error Documentation & Recovery** (Phase 3, PRs #32, #34, #35)
+  - Enhanced ERROR_CODES.md with cross-references between related errors
+  - Jekyll documentation site at https://dev-parkins.github.io/FerrisScript
+  - Professional landing page with error code lookup and navigation
+  - **Parser Error Recovery (Phase 3C)**: Panic-mode error recovery enabling parser to continue after syntax errors
+  - Synchronization points: `;`, `}`, `fn`, `let`
+  - Cascading error prevention
+  - 23 new recovery-specific tests (13 unit + 10 integration)
+  - Foundation for multi-error reporting (Phase 3D/3E deferred to v0.0.4)
+
+#### VS Code Extension Features (Phases 4-5)
+
+- **Code Completion** (Phase 4, PR #37)
+  - Keyword completion (let, fn, if, else, while, return, mut, true, false)
+  - Type completion (i32, f32, bool, String, Vector2, Node, void)
+  - Built-in function completion (print with parameter hints)
+  - Context-aware completion (statement-level vs expression keywords)
+  - TypeScript extension infrastructure
+
+- **Hover & Problem Panel** (Phase 5, PR #38)
+  - Hover tooltips for keywords, types, and functions
+  - Markdown-formatted hover content with syntax-highlighted examples
+  - Problem panel integration (inline red squiggles)
+  - Automatic compiler detection (workspace or PATH)
+  - Real-time error diagnostics
+  - File icons for `.ferris` files (Rust-inspired crab icon)
+  - Improved marketplace presentation
+
+#### Development Tooling & CI (Phase 6+7)
+
+- **Development Scripts** (Phase 6, PR #39)
+  - `scripts/lint.ps1` / `.sh` - Cargo clippy with strict warnings
+  - `scripts/test.ps1` / `.sh` - Run all workspace tests
+  - `scripts/bench.ps1` / `.sh` - Run benchmarks
+  - `scripts/format.ps1` / `.sh` - Code formatting
+  - `scripts/coverage.ps1` / `.sh` - Coverage reports
+  - Pre-commit hooks (format, lint, tests)
+  - `scripts/install-git-hooks.ps1` / `.sh` - Hook installation
+  - `scripts/README.md` - Comprehensive script documentation
+
+- **Benchmark CI** (Phase 7, PR #39)
+  - `.github/workflows/benchmarks.yml` - Automated benchmarking
+  - Runs on push to main/develop, manual dispatch for feature branches
+  - Compiler benchmarks (lexer, parser, type_checker)
+  - Runtime benchmarks
+  - Baseline measurements documented
+  - Results uploaded as artifacts
+
+- **Project Presentation** (Phase 9 Quick Wins)
+  - GitHub badges in README.md (build status, version, license, Rust, Godot, stars)
+
+#### Infrastructure Improvements
+
+- **CI/CD Consolidation** (PR #40)
+  - Consolidated code scanning & coverage workflows
+  - SonarQube quality scanning (coverage disabled)
+  - Codecov reporting in code-scanning.yml
+  - CodeQL evaluation documented
+  - SHA-pinned actions for security (supply chain protection)
+
+### Changed
+
+- **Error Messages**: All errors now include error codes, source context, and helpful hints
+- **VS Code Extension**: Upgraded from basic syntax highlighting to full IDE support
+- **Development Workflow**: Streamlined with comprehensive scripts and pre-commit hooks
+
+### Fixed
+
+- **Critical Parser Bug** (Phase 3C, PR #35): Fixed infinite loop in error recovery that consumed all RAM when encountering unexpected top-level tokens. Parser now always advances past problematic tokens before synchronizing to recovery points.
+- **CI Build Errors**: Fixed cross-compilation target installation for Linux/macOS builds
+- **Documentation Links**: Fixed 11 broken markdown links across planning documents
+- **Dependency Updates**: Updated criterion 0.5 → 0.7, godot 0.1 → 0.4, fixed API breaking changes
+
+### Deferred
+
+- **Phase 3D/3E**: Multi-error reporting and diagnostic collection (deferred to v0.0.4)
+- **Phase 8**: Integration tests and cross-platform verification (deferred to v0.0.4)
+- **Phase 9**: Test coverage badge, Rustdoc hosting, marketplace submission (deferred to v0.1.0)
+
+---
+
 ## [0.0.2] - 2025-10-05
 
 **Codename**: "Foundation & Polish" 🦀✨
