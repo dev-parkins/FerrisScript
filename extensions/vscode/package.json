@@ -2,7 +2,7 @@
   "name": "ferrisscript",
   "displayName": "FerrisScript",
   "description": "Syntax highlighting and code snippets for FerrisScript - a Rust-inspired scripting language for Godot 4.x",
-  "version": "0.1.0",
+  "version": "0.0.3",
   "publisher": "ferrisscript",
   "repository": {
     "type": "git",
@@ -27,6 +27,7 @@
     "scripting"
   ],
   "icon": "icon.png",
+  "main": "./out/extension.js",
   "contributes": {
     "languages": [
       {
@@ -54,5 +55,19 @@
         "path": "./snippets/ferrisscript.json"
       }
     ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "^18.19.0",
+    "typescript": "^5.3.0",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0"
   }
 }
