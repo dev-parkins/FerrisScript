@@ -16,6 +16,19 @@ export class FerrisScriptDiagnosticProvider {
     constructor() {
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection('ferrisscript');
         this.compilerPath = this.findCompiler();
+        
+        // Notify user about compiler status
+        if (this.compilerPath) {
+            console.log(`FerrisScript: Diagnostics enabled (compiler: ${this.compilerPath})`);
+            vscode.window.showInformationMessage(
+                `FerrisScript: Diagnostics enabled using compiler at ${this.compilerPath}`
+            );
+        } else {
+            console.warn('FerrisScript: Diagnostics disabled (compiler not found)');
+            // Note: Diagnostic provider infrastructure is in place,
+            // but requires a standalone CLI executable to function.
+            // This will be added in a future version.
+        }
     }
 
     /**
@@ -97,20 +110,28 @@ export class FerrisScriptDiagnosticProvider {
         }
 
         try {
-            // Run compiler with check flag (don't execute, just check for errors)
+            // Run compiler - it will throw if there are compilation errors
             const result = cp.execSync(`"${this.compilerPath}" "${filePath}"`, {
                 encoding: 'utf-8',
-                timeout: 5000,
-                // Capture both stdout and stderr
-                stdio: ['pipe', 'pipe', 'pipe']
+                timeout: 5000
             });
             
-            // No errors if we get here
+            // No errors if we get here - but check output anyway
+            // Some compilers write errors to stdout
+            if (result && result.includes('Error[')) {
+                return result;
+            }
             return undefined;
         } catch (error: any) {
-            // Compiler errors are returned via stderr
-            const output = (error.stderr || error.stdout || '').toString();
-            return output;
+            // Compiler errors are in stderr or stdout
+            const stderr = error.stderr ? error.stderr.toString() : '';
+            const stdout = error.stdout ? error.stdout.toString() : '';
+            const output = stderr + stdout;
+            
+            // Log for debugging
+            console.log('FerrisScript compiler output:', output);
+            
+            return output.length > 0 ? output : undefined;
         }
     }
 

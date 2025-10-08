@@ -38,9 +38,12 @@ This guide provides comprehensive test cases for Phase 5 features:
    - Create `test_hover.ferris` in workspace
    - Create `test_errors.ferris` in workspace
 
-4. **Verify Compiler Available** (for diagnostic tests):
-   - Ensure FerrisScript compiler is in PATH or workspace `target/debug/`
-   - Run `ferrisscript --version` to verify
+4. **Note on Diagnostic Tests** (Tests 8-12):
+   - ⚠️ **Known Limitation**: FerrisScript currently has no standalone CLI executable
+   - The diagnostic provider infrastructure is in place but requires a CLI to function
+   - Tests 8-12 (Problem Panel) will not work until CLI is implemented
+   - **Skip Tests 8-12** for this phase - mark as "Not Testable" in results
+   - CLI implementation is planned for a future phase
 
 ---
 
@@ -69,7 +72,7 @@ This guide provides comprehensive test cases for Phase 5 features:
 let speed: f32 = 100.0;
 ```
 
-**Result**: [ ] Pass [ ] Fail
+**Result**: [X] Pass [ ] Fail
 
 **Notes**:
 
@@ -108,17 +111,17 @@ fn test() -> bool {
 
 **Keywords to Test**:
 
-- [ ] `let` - Shows immutable variable declaration info
-- [ ] `mut` - Shows mutable variable info
-- [ ] `fn` - Shows function declaration info
-- [ ] `if` - Shows conditional statement info
-- [ ] `else` - Shows alternative branch info
-- [ ] `while` - Shows loop info
-- [ ] `return` - Shows return statement info
-- [ ] `true` - Shows boolean literal info
-- [ ] `false` - Shows boolean literal info
+- [X] `let` - Shows immutable variable declaration info
+- [X] `mut` - Shows mutable variable info
+- [X] `fn` - Shows function declaration info
+- [X] `if` - Shows conditional statement info
+- [X] `else` - Shows alternative branch info
+- [X] `while` - Shows loop info
+- [X] `return` - Shows return statement info
+- [X] `true` - Shows boolean literal info
+- [X] `false` - Shows boolean literal info
 
-**Result**: [ ] Pass [ ] Fail
+**Result**: [X] Pass [ ] Fail
 
 **Notes**:
 
@@ -150,12 +153,12 @@ let name: String = "Player";
 
 **Types to Test**:
 
-- [ ] `i32` - Shows "32-bit signed integer"
-- [ ] `f32` - Shows "32-bit floating point number"
-- [ ] `bool` - Shows "Boolean value (true or false)"
-- [ ] `String` - Shows "Text string"
+- [X] `i32` - Shows "32-bit signed integer"
+- [X] `f32` - Shows "32-bit floating point number"
+- [X] `bool` - Shows "Boolean value (true or false)"
+- [X] `String` - Shows "Text string"
 
-**Result**: [ ] Pass [ ] Fail
+**Result**: [X] Pass [ ] Fail
 
 **Notes**:
 
@@ -192,11 +195,11 @@ fn update(delta: f32) -> void {
 
 **Types to Test**:
 
-- [ ] `Vector2` - Shows "2D vector (x, y coordinates)"
-- [ ] `Node` - Shows "Base Godot scene node"
-- [ ] `void` - Shows "No return value (used for functions)"
+- [X] `Vector2` - Shows "2D vector (x, y coordinates)"
+- [X] `Node` - Shows "Base Godot scene node"
+- [X] `void` - Shows "No return value (used for functions)"
 
-**Result**: [ ] Pass [ ] Fail
+**Result**: [X] Pass [ ] Fail
 
 **Notes**:
 
@@ -225,7 +228,7 @@ fn update(delta: f32) -> void {
 print("Hello, World!");
 ```
 
-**Result**: [ ] Pass [ ] Fail
+**Result**: [X] Pass [ ] Fail
 
 **Notes**:
 
@@ -249,7 +252,7 @@ print("Hello, World!");
 
 **Test Code**: (Use any code from previous tests)
 
-**Result**: [ ] Pass [ ] Fail
+**Result**: [X] Pass [ ] Fail
 
 **Notes**:
 
@@ -282,13 +285,13 @@ let name: String = "Player";
 
 **Cases to Test**:
 
-- [ ] Whitespace - No hover
-- [ ] Operators (`+`, `=`) - No hover
-- [ ] Numbers (`100`, `50`) - No hover
-- [ ] Strings (`"Player"`) - No hover
-- [ ] Comments (`// This is a comment`) - No hover
+- [X] Whitespace - No hover
+- [X] Operators (`+`, `=`) - No hover
+- [X] Numbers (`100`, `50`) - No hover
+- [X] Strings (`"Player"`) - No hover
+- [X] Comments (`// This is a comment`) - No hover
 
-**Result**: [ ] Pass [ ] Fail
+**Result**: [X] Pass [ ] Fail
 
 **Notes**:
 
@@ -298,6 +301,8 @@ let name: String = "Player";
 
 **Objective**: Verify compiler errors appear in problem panel
 
+**⚠️ SKIP**: Requires standalone CLI executable (not yet implemented)
+
 **Steps**:
 
 1. Create `test_errors.ferris`
@@ -305,7 +310,7 @@ let name: String = "Player";
 3. Save file (Ctrl+S)
 4. Open VS Code Problems panel (Ctrl+Shift+M)
 
-**Expected Result**:
+**Expected Result** (when CLI available):
 
 - Problem panel shows 1 error
 - Error message: `[E201] Undefined variable 'velocty'`
@@ -320,9 +325,9 @@ fn update(delta: f32) -> void {
 }
 ```
 
-**Result**: [ ] Pass [ ] Fail
+**Result**: [N/A] Not Testable (CLI not implemented)
 
-**Notes**:
+**Notes**: Diagnostic provider infrastructure is in place. Will work once CLI is added.
 
 ---
 
@@ -330,12 +335,14 @@ fn update(delta: f32) -> void {
 
 **Objective**: Verify errors show as red squiggles inline
 
+**⚠️ SKIP**: Requires standalone CLI executable (not yet implemented)
+
 **Steps**:
 
 1. Use same `test_errors.ferris` from Test 8
 2. After saving, look at line 2 in editor
 
-**Expected Result**:
+**Expected Result** (when CLI available):
 
 - Red squiggle appears under `velocty`
 - Hovering over squiggle shows error message
@@ -343,15 +350,17 @@ fn update(delta: f32) -> void {
 
 **Test Code**: (Same as Test 8)
 
-**Result**: [ ] Pass [ ] Fail
+**Result**: [N/A] Not Testable (CLI not implemented)
 
-**Notes**:
+**Notes**: Diagnostic provider infrastructure is in place. Will work once CLI is added.
 
 ---
 
 ### Test 10: Problem Panel - Error Clearing
 
 **Objective**: Verify errors clear when fixed
+
+**⚠️ SKIP**: Requires standalone CLI executable (not yet implemented)
 
 **Steps**:
 
@@ -360,7 +369,7 @@ fn update(delta: f32) -> void {
 3. Fix error (add `let velocity: f32 = 100.0;` before `print`)
 4. Save file again
 
-**Expected Result**:
+**Expected Result** (when CLI available):
 
 - After step 2: Error appears in problem panel and as squiggle
 - After step 4: Error disappears from problem panel and squiggle removed
@@ -380,9 +389,9 @@ fn update(delta: f32) -> void {
 }
 ```
 
-**Result**: [ ] Pass [ ] Fail
+**Result**: [N/A] Not Testable (CLI not implemented)
 
-**Notes**:
+**Notes**: Diagnostic provider infrastructure is in place. Will work once CLI is added.
 
 ---
 
@@ -390,13 +399,15 @@ fn update(delta: f32) -> void {
 
 **Objective**: Verify multiple errors shown correctly
 
+**⚠️ SKIP**: Requires standalone CLI executable (not yet implemented)
+
 **Steps**:
 
 1. Type code with 3 different errors
 2. Save file
 3. Check problem panel
 
-**Expected Result**:
+**Expected Result** (when CLI available):
 
 - Problem panel shows 3 errors
 - Each error has correct line number
@@ -412,9 +423,9 @@ fn test() -> void {
 }
 ```
 
-**Result**: [ ] Pass [ ] Fail
+**Result**: [N/A] Not Testable (CLI not implemented)
 
-**Notes**:
+**Notes**: Diagnostic provider infrastructure is in place. Will work once CLI is added.
 
 ---
 
@@ -422,11 +433,14 @@ fn test() -> void {
 
 **Objective**: Verify graceful handling when compiler not found
 
+**Status**: ✅ **VERIFIED** - This is the current state (no CLI exists)
+
 **Steps**:
 
-1. Temporarily rename compiler (or ensure it's not in PATH)
+1. Compiler not available (current state)
 2. Open `.ferris` file and save
 3. Check problem panel
+4. Test hover and completion features
 
 **Expected Result**:
 
@@ -434,9 +448,9 @@ fn test() -> void {
 - No error dialogs or crashes
 - Extension continues to work (hover, completion still functional)
 
-**Result**: [ ] Pass [ ] Fail
+**Result**: [X] Pass [ ] Fail
 
-**Notes**:
+**Notes**: Extension loads successfully without compiler. Hover and completion work as expected.
 
 ---
 

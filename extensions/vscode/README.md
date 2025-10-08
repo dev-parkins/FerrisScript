@@ -17,9 +17,11 @@ Full IDE support for FerrisScript - a Rust-inspired scripting language for Godot
 
 ### Error Diagnostics ✨ NEW in v0.0.3 Phase 5
 
-- **Real-time Error Detection**: Compiler errors shown inline as you save
-- **Problem Panel Integration**: All errors and warnings appear in VS Code's Problems panel
-- **Inline Squiggles**: Red underlines highlight error locations
+⚠️ **Note**: Diagnostic features require a standalone FerrisScript CLI executable (planned for future release). The infrastructure is in place and ready to use once the CLI is available.
+
+- **Real-time Error Detection**: Compiler errors shown inline as you save (when CLI available)
+- **Problem Panel Integration**: All errors and warnings appear in VS Code's Problems panel (when CLI available)
+- **Inline Squiggles**: Red underlines highlight error locations (when CLI available)
 - **Error Codes**: Each error includes FerrisScript error code (E001-E499)
 - **Quick Access**: Click on error in Problems panel to jump to location
 
