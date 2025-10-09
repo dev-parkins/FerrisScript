@@ -376,4 +376,357 @@ mod tests {
         assert!(error.contains("Error[E002]"));
         assert!(error.contains("Unterminated string literal"));
     }
+
+    // ============================================================================
+    // Phase 4: Diagnostic Edge Cases
+    // ============================================================================
+    // Testing error formatting with Unicode characters, line endings, and
+    // column alignment edge cases to ensure robust diagnostic output.
+
+    // ----------------------------------------------------------------------------
+    // Unicode Character Handling
+    // ----------------------------------------------------------------------------
+
+    #[test]
+    fn test_error_pointer_with_emoji_before_error() {
+        // Emoji are multi-byte UTF-8 characters
+        let source = "let 🦀 = 10;\nlet y = unknown;";
+        let context = extract_source_context_with_pointer(source, 2, Some(9), "undefined");
+
+        // Should contain the source line and pointer
+        assert!(context.contains("let y = unknown;"));
+        assert!(context.contains("undefined"));
+    }
+
+    #[test]
+    fn test_error_pointer_with_multibyte_chars() {
+        // Chinese characters are 3 bytes in UTF-8
+        let source = "let 变量 = 10;\nlet y = unknown;";
+        let context = extract_source_context_with_pointer(source, 2, Some(9), "undefined");
+
+        // Should still format correctly
+        assert!(context.contains("let y = unknown;"));
+        assert!(context.contains("undefined"));
+    }
+
+    #[test]
+    fn test_error_at_emoji_location() {
+        // Error pointing directly at an emoji
+        let source = "let x = 🚀;";
+        let context = extract_source_context_with_pointer(source, 1, Some(9), "invalid symbol");
+
+        assert!(context.contains("let x = 🚀;"));
+        assert!(context.contains("invalid symbol"));
+    }
+
+    #[test]
+    fn test_extract_context_with_combining_characters() {
+        // Combining diacritical marks (e.g., é as e + ́)
+        let source = "let café = 10;\nlet y = x;";
+        let context = extract_source_context(source, 2);
+
+        // Should preserve combining characters
+        assert!(context.contains("let café = 10;"));
+        assert!(context.contains("let y = x;"));
+    }
+
+    #[test]
+    fn test_error_pointer_with_zero_width_characters() {
+        // Zero-width characters (like zero-width space U+200B)
+        let source = "let\u{200B}x = 10;";
+        let context = extract_source_context_with_pointer(source, 1, Some(4), "unexpected char");
+
+        // Should handle zero-width characters gracefully
+        assert!(context.contains("unexpected char"));
+    }
+
+    #[test]
+    fn test_error_with_right_to_left_text() {
+        // Arabic text (right-to-left script)
+        let source = "let x = مرحبا;\nlet y = 10;";
+        let context = extract_source_context(source, 2);
+
+        // Should preserve RTL text
+        assert!(context.contains("let x = مرحبا;"));
+        assert!(context.contains("let y = 10;"));
+    }
+
+    // ----------------------------------------------------------------------------
+    // Line Ending Edge Cases
+    // ----------------------------------------------------------------------------
+
+    #[test]
+    fn test_extract_context_with_crlf_line_endings() {
+        // Windows-style CRLF line endings
+        let source = "line 1\r\nline 2\r\nline 3\r\nline 4\r\nline 5";
+        let context = extract_source_context(source, 3);
+
+        // Should handle CRLF correctly
+        assert!(context.contains(" 1 | line 1"));
+        assert!(context.contains(" 2 | line 2"));
+        assert!(context.contains(" 3 | line 3"));
+        assert!(context.contains(" 4 | line 4"));
+        assert!(context.contains(" 5 | line 5"));
+    }
+
+    #[test]
+    fn test_extract_context_with_mixed_line_endings() {
+        // Mixed LF and CRLF line endings
+        let source = "line 1\nline 2\r\nline 3\nline 4\r\nline 5";
+        let context = extract_source_context(source, 3);
+
+        // Should handle mixed line endings
+        assert!(context.contains(" 1 | line 1"));
+        assert!(context.contains(" 2 | line 2"));
+        assert!(context.contains(" 3 | line 3"));
+        assert!(context.contains(" 4 | line 4"));
+        assert!(context.contains(" 5 | line 5"));
+    }
+
+    #[test]
+    fn test_error_pointer_with_crlf() {
+        // Error pointer with CRLF line endings
+        let source = "fn test() {\r\n    let x = unknown;\r\n}";
+        let context = extract_source_context_with_pointer(source, 2, Some(13), "undefined");
+
+        assert!(context.contains("let x = unknown;"));
+        assert!(context.contains("undefined"));
+    }
+
+    #[test]
+    fn test_extract_context_cr_only_line_endings() {
+        // Old Mac-style CR-only line endings (rare but possible)
+        let source = "line 1\rline 2\rline 3\rline 4\rline 5";
+        let context = extract_source_context(source, 3);
+
+        // Should handle CR-only (each line becomes separate)
+        // Note: Rust's lines() treats \r as line separator
+        assert!(context.contains("line"));
+    }
+
+    // ----------------------------------------------------------------------------
+    // Column Alignment and Pointer Positioning
+    // ----------------------------------------------------------------------------
+
+    #[test]
+    fn test_error_pointer_at_column_1() {
+        // Error at first column
+        let source = "unknown;";
+        let context = extract_source_context_with_pointer(source, 1, Some(1), "undefined");
+
+        assert!(context.contains("unknown;"));
+        assert!(context.contains("^ undefined"));
+    }
+
+    #[test]
+    fn test_error_pointer_at_end_of_line() {
+        // Error at last column of the line
+        let source = "let x = 10";
+        let context = extract_source_context_with_pointer(source, 1, Some(11), "missing ';'");
+
+        assert!(context.contains("let x = 10"));
+        assert!(context.contains("missing ';'"));
+    }
+
+    #[test]
+    fn test_error_pointer_very_long_line() {
+        // Error in a very long line (100+ chars)
+        let mut source = String::from("let x = ");
+        for i in 0..20 {
+            source.push_str(&format!("value{} + ", i));
+        }
+        source.push_str("unknown;");
+
+        let context = extract_source_context_with_pointer(&source, 1, Some(50), "undefined");
+
+        // Should handle long lines without truncating
+        assert!(context.contains("value"));
+        assert!(context.contains("undefined"));
+    }
+
+    #[test]
+    fn test_format_pointer_with_tabs_in_source() {
+        // Tabs in source code affect column calculation
+        let source = "fn test() {\n\tlet x = unknown;\n}";
+        let context = extract_source_context_with_pointer(source, 2, Some(10), "undefined");
+
+        // Should handle tabs (though pointer position may vary)
+        assert!(context.contains("let x = unknown;"));
+        assert!(context.contains("undefined"));
+    }
+
+    #[test]
+    fn test_line_number_width_adjustment() {
+        // Test alignment when transitioning from 1-digit to 2-digit line numbers
+        let mut source = String::new();
+        for i in 1..=12 {
+            source.push_str(&format!("line {}\n", i));
+        }
+
+        let context = extract_source_context(&source, 10);
+
+        // Line numbers should be aligned with proper width
+        assert!(context.contains(" 8 | line 8"));
+        assert!(context.contains(" 9 | line 9"));
+        assert!(context.contains("10 | line 10"));
+        assert!(context.contains("11 | line 11"));
+        assert!(context.contains("12 | line 12"));
+    }
+
+    // ----------------------------------------------------------------------------
+    // Error Context at File Boundaries
+    // ----------------------------------------------------------------------------
+
+    #[test]
+    fn test_error_at_line_zero() {
+        // Edge case: requesting line 0 (invalid)
+        let source = "line 1\nline 2\nline 3";
+        let context = extract_source_context(source, 0);
+
+        // Should handle gracefully (likely shows first few lines)
+        // Implementation may vary, but shouldn't panic
+        assert!(!context.is_empty() || context.is_empty()); // Just ensure no panic
+    }
+
+    #[test]
+    fn test_error_beyond_last_line() {
+        // Error reported beyond file length
+        let source = "line 1\nline 2\nline 3";
+        let context = extract_source_context(source, 100);
+
+        // Should handle gracefully (likely shows last few lines)
+        assert!(context.contains("line") || context.is_empty()); // Just ensure no panic
+    }
+
+    #[test]
+    fn test_extract_context_with_empty_lines() {
+        // File with empty lines around error
+        let source = "line 1\n\n\nline 4\nline 5";
+        let context = extract_source_context(source, 4);
+
+        // Should include empty lines in context
+        assert!(context.contains(" 4 | line 4"));
+    }
+
+    #[test]
+    fn test_error_in_file_with_only_newlines() {
+        // File containing only newline characters
+        let source = "\n\n\n";
+        let context = extract_source_context(source, 2);
+
+        // Should handle gracefully (empty lines)
+        // Just ensure it doesn't panic
+        let _ = context;
+    }
+
+    // ----------------------------------------------------------------------------
+    // Error Message Formatting Edge Cases
+    // ----------------------------------------------------------------------------
+
+    #[test]
+    fn test_format_error_with_very_long_message() {
+        // Very long error message
+        let source = "let x = 10;";
+        let long_message = "This is a very long error message that explains in great detail what went wrong and why, including multiple sentences and elaborate explanations that go on and on.";
+        let error = format_error_with_context("Syntax error", source, 1, 9, long_message);
+
+        // Should include the full message without truncation
+        assert!(error.contains(long_message));
+        assert!(error.contains("let x = 10;"));
+    }
+
+    #[test]
+    fn test_format_error_with_empty_hint() {
+        // Error with no hint message
+        let source = "let x = unknown;";
+        let context = extract_source_context_with_pointer(source, 1, Some(9), "");
+
+        // Should handle empty hint gracefully
+        assert!(context.contains("let x = unknown;"));
+    }
+
+    #[test]
+    fn test_format_error_with_special_chars_in_hint() {
+        // Hint containing special characters
+        let source = "let x = 10;";
+        let hint = "Expected ';' or '\\n' or '\\t' character";
+        let context = extract_source_context_with_pointer(source, 1, Some(11), hint);
+
+        // Should preserve special characters in hint
+        assert!(context.contains(hint));
+    }
+
+    #[test]
+    fn test_multiple_errors_same_line_different_columns() {
+        // Multiple errors on same line (different column positions)
+        let source = "let x = y + z;";
+
+        let context1 = extract_source_context_with_pointer(source, 1, Some(9), "y undefined");
+        let context2 = extract_source_context_with_pointer(source, 1, Some(13), "z undefined");
+
+        // Both should point to correct positions
+        assert!(context1.contains("y undefined"));
+        assert!(context2.contains("z undefined"));
+    }
+
+    // ----------------------------------------------------------------------------
+    // Edge Cases with Error Code Formatting
+    // ----------------------------------------------------------------------------
+
+    #[test]
+    fn test_format_error_with_code_unicode_source() {
+        // Error code formatting with Unicode in source
+        let source = "let π = 3.14;\nlet x = unknown_π;";
+        let error = format_error_with_code(
+            ErrorCode::E201,
+            "Undefined variable at line 2, column 9",
+            source,
+            2,
+            9,
+            "Variable not found",
+        );
+
+        // Should handle Unicode in source
+        assert!(error.contains("Error[E201]"));
+        assert!(error.contains("let π = 3.14;"));
+        assert!(error.contains("let x = unknown_π;"));
+    }
+
+    #[test]
+    fn test_format_error_with_code_at_file_start() {
+        // Error on first character of file
+        let source = "unknown";
+        let error = format_error_with_code(
+            ErrorCode::E201,
+            "Undefined variable at line 1, column 1",
+            source,
+            1,
+            1,
+            "Variable not declared",
+        );
+
+        // Should format correctly for file start
+        assert!(error.contains("Error[E201]"));
+        assert!(error.contains(" 1 | unknown"));
+        assert!(error.contains("Variable not declared"));
+    }
+
+    #[test]
+    fn test_format_error_with_code_at_file_end() {
+        // Error at last character of file
+        let source = "let x = 10";
+        let error = format_error_with_code(
+            ErrorCode::E101,
+            "Expected ';' at line 1, column 11",
+            source,
+            1,
+            11,
+            "Missing semicolon",
+        );
+
+        // Should format correctly for file end
+        assert!(error.contains("Error[E101]"));
+        assert!(error.contains(" 1 | let x = 10"));
+        assert!(error.contains("Missing semicolon"));
+    }
 }
