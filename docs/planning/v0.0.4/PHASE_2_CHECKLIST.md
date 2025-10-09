@@ -23,6 +23,7 @@
 **Goal**: Implement 4 lifecycle callbacks for input handling, physics, and scene tree events.
 
 **Callbacks**:
+
 1. `_input(event: InputEvent)` - User input handling
 2. `_physics_process(delta: f32)` - Fixed timestep physics
 3. `_enter_tree()` - Node enters scene tree
@@ -250,10 +251,12 @@ Before marking Phase 2 complete, verify:
 ### Commit Strategy
 
 **Option A: Single PR** (all 4 callbacks)
+
 - Recommended if callbacks are tightly coupled
 - Easier to review as complete feature
 
 **Option B: Incremental PRs** (1-2 callbacks per PR)
+
 - Faster feedback loops
 - Smaller review burden
 - Can start Phase 3 sooner
@@ -267,6 +270,7 @@ Before marking Phase 2 complete, verify:
 ### From Phase 1 (Signal Support)
 
 **Deferred to Future Phase**:
+
 - ⏸️ Programmatic signal connection (`connect()` method)
 - ⏸️ Programmatic signal disconnection (`disconnect()` method)
 
@@ -275,11 +279,13 @@ Before marking Phase 2 complete, verify:
 ### Phase 2 Limitations
 
 **InputEvent Simplified**:
+
 - Starting with action checks only (`is_action_pressed`, `is_action_released`)
 - Full InputEvent API (position, button index, etc.) deferred to future enhancement
 - Sufficient for basic input handling (jump, shoot, move actions)
 
 **Future Enhancements** (not in Phase 2):
+
 - Full InputEvent property access (e.g., `event.position`, `event.button_index`)
 - Mouse motion events
 - Touch/gesture support
@@ -291,18 +297,21 @@ Before marking Phase 2 complete, verify:
 ### ✅ Completed Work
 
 **Lifecycle Callbacks** (All 4 implemented):
+
 - ✅ `_input(event: InputEvent)` - Input event handling with action checks
 - ✅ `_physics_process(delta: f32)` - Fixed timestep physics updates
 - ✅ `_enter_tree()` - Node enters scene tree notification
 - ✅ `_exit_tree()` - Node exits scene tree notification
 
 **Code Quality**:
+
 - ✅ **4 clean commits** (b437fc4, dcc12d6, 557024c, 9895e9c)
 - ✅ **396 tests passing** (11 new tests added)
 - ✅ **0 compiler warnings** (clippy clean)
 - ✅ **All code formatted** (pre-commit hooks pass)
 
 **Documentation**:
+
 - ✅ E305 error code added and tested
 - ✅ Known limitations documented
 

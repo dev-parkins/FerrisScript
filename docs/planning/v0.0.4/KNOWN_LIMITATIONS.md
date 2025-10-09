@@ -34,6 +34,7 @@ This document tracks design decisions, known limitations, and deferred features 
 **Feature**: `connect()` and `disconnect()` methods in FerrisScript
 
 **Example** (not currently supported):
+
 ```rust
 fn _ready() {
     // This does NOT work in v0.0.4
@@ -42,6 +43,7 @@ fn _ready() {
 ```
 
 **Why Deferred**:
+
 - Requires node path system (Phase 3: Node Query Functions)
 - Requires callable reference system (complex Godot API integration)
 - Editor-based connections are the primary Godot workflow (90% of use cases)
@@ -59,17 +61,21 @@ fn _ready() {
 
 **Limitation**: Dynamically registered signals don't appear in Node→Signals panel
 
-**Technical Reason**: 
+**Technical Reason**:
+
 - Godot Inspector only shows compile-time signals (declared with `#[signal]` in Rust/GDScript)
 - FerrisScript uses dynamic registration (`add_user_signal()`) at runtime
 - This is a Godot engine limitation, not a FerrisScript bug
+- **Root cause**: Editor introspects `ClassDB` at class registration time (compile-time), before any .ferris files are loaded
 
-**Impact**: 
+**Impact**:
+
 - ✅ Signals ARE fully functional (registration, emission, connection all work)
 - ❌ Cannot connect signals via drag-and-drop in Inspector UI
 - ✅ Can connect programmatically in GDScript (workaround available)
 
 **Workaround** (for manual testing):
+
 ```gdscript
 # In GDScript receiver node
 func _ready():
@@ -77,29 +83,41 @@ func _ready():
     ferris_node.connect("health_changed", _on_health_changed)
 
 func _on_health_changed(old_health: int, new_health: int):
-    print("Health changed: ", old_health, " -> ", new_health)
+    print("Health changed: ", old_health, " -> ", new_height)
 ```
 
-**Future Enhancement**: Hybrid approach with common signals declared at compile-time
+**Architectural Context**: FerrisScript has **one** Rust class (`FerrisScriptNode`) that loads **many** `.ferris` scripts at runtime. We cannot know what signals exist until the script is loaded, making static registration impossible without significant build system integration.
 
-**Reference**: [SIGNAL_VISIBILITY_ISSUE.md](SIGNAL_VISIBILITY_ISSUE.md)
+**Future Enhancement Options**:
+
+1. **Hybrid approach** (v0.1.0): Predefined common signals in Rust + dynamic custom signals
+2. **Metadata system** (future): Extract signal metadata during compilation, register statically
+3. **Per-script classes** (complex): Generate Rust wrapper class for each .ferris file (like GDScript)
+
+**References**:
+
+- [SIGNAL_VISIBILITY_ISSUE.md](SIGNAL_VISIBILITY_ISSUE.md) - Testing results and workarounds
+- [SIGNAL_EDITOR_VISIBILITY_ARCHITECTURE.md](SIGNAL_EDITOR_VISIBILITY_ARCHITECTURE.md) - **Deep technical analysis with solution comparison**
 
 ---
 
 ### 🎓 Phase 1 Learnings
 
 **What Worked Well**:
+
 - Instance ID pattern for signal emission (clean, no borrowing conflicts)
 - Boxed closures for capturing environment
 - Dynamic signal registration simpler than expected
 - Type checking at compile-time, runtime validation minimal
 
 **Challenges Overcome**:
+
 - Godot 4.3+ compatibility (required `api-4-3` feature flag)
 - Signal parameter types not stored by Godot (solved with compile-time checking)
 - Clippy warnings with PI literal (changed 3.14 to 3.15 in tests)
 
 **Documentation Created**:
+
 - [GODOT_SETUP_GUIDE.md](../../GODOT_SETUP_GUIDE.md) - Comprehensive setup guide
 - [SIGNAL_VISIBILITY_ISSUE.md](SIGNAL_VISIBILITY_ISSUE.md) - Limitation explanation
 - [SIGNAL_TESTING_INSTRUCTIONS.md](SIGNAL_TESTING_INSTRUCTIONS.md) - Manual test guide
@@ -111,6 +129,7 @@ func _on_health_changed(old_health: int, new_health: int):
 ### 🎯 Planned Implementation
 
 **Callbacks**:
+
 1. `_input(event: InputEvent)` - User input handling
 2. `_physics_process(delta: f32)` - Fixed timestep physics
 3. `_enter_tree()` - Node enters scene tree
@@ -123,6 +142,7 @@ func _on_health_changed(old_health: int, new_health: int):
 **Implementation Plan**: Start with action checks only
 
 **Supported in Phase 2**:
+
 ```rust
 fn _input(event: InputEvent) {
     if event.is_action_pressed("jump") {
@@ -135,6 +155,7 @@ fn _input(event: InputEvent) {
 ```
 
 **NOT Supported in Phase 2**:
+
 ```rust
 fn _input(event: InputEvent) {
     // These will NOT work in Phase 2
@@ -145,6 +166,7 @@ fn _input(event: InputEvent) {
 ```
 
 **Why Simplified**:
+
 - Godot has 10+ InputEvent subclasses (InputEventKey, InputEventMouse, etc.)
 - Each subclass has unique properties
 - Action checks cover 80% of use cases
@@ -168,6 +190,7 @@ fn _input(event: InputEvent) {
 ### 🔗 Dependency Note
 
 Phase 3 is a **prerequisite** for:
+
 - Programmatic signal connection (deferred from Phase 1)
 - Cross-node script communication
 - Dynamic scene tree manipulation
@@ -185,6 +208,7 @@ Phase 3 is a **prerequisite** for:
 ### ⏸️ Deferred Types
 
 **Not in v0.0.4**:
+
 - `Vector3` - 3D vector (not needed for 2D focus)
 - `Quaternion` - 3D rotation (not needed for 2D focus)
 - `AABB` - 3D bounding box (not needed for 2D focus)
@@ -206,6 +230,7 @@ Phase 3 is a **prerequisite** for:
 **Challenge**: Godot expects properties declared at class registration time (compile-time)
 
 **Options**:
+
 1. Code generation approach (generate Rust code with `#[export]`)
 2. Reflection-based approach (dynamic property registration)
 3. Hybrid approach (common properties compiled, custom ones dynamic)
@@ -295,17 +320,20 @@ Phase 3 is a **prerequisite** for:
 **Issue**: Example files created programmatically fail to compile with parser error "Expected {, found ("
 
 **Symptoms**:
+
 - Files created with `create_file` tool or PowerShell `Out-File` fail compilation
 - Error occurs at line 1, column 1 regardless of actual content
 - Same syntax works in unit tests (inline strings) but fails when loaded from files
 - Error message is misleading - points to wrong token
 
 **Context**:
+
 - Attempted to create `examples/input.ferris` and `examples/callbacks.ferris`
 - Files contain valid FerrisScript syntax (verified against working examples)
 - Type checker tests with identical syntax pass successfully
 
 **Attempted Solutions**:
+
 1. ❌ Removed leading comments (no BOM found)
 2. ❌ Changed line endings from LF to CRLF (hello.ferris uses CRLF)
 3. ❌ Used different encoding methods (UTF-8, ASCII)
@@ -313,17 +341,20 @@ Phase 3 is a **prerequisite** for:
 5. ❌ Verified no BOM present (first bytes are correct: 66='f')
 
 **Investigation Findings**:
+
 - `hello.ferris` (working): Starts with 0x66 0x6E 0x20 (fn ), uses CRLF (0D 0A)
 - `input.ferris` (broken): Starts with 0x66 0x6E 0x20 (fn ), uses CRLF (0D 0A)
 - Byte-level inspection shows no differences
 - Parser error message is inconsistent with actual file content
 
 **Impact**: Low
+
 - Core functionality verified through 396 passing unit tests
 - Examples can be created manually in Godot editor
 - Issue does not affect actual FerrisScript usage in Godot
 
 **Status**: 🔍 Under investigation
+
 - May be related to file reading/parsing in test environment
 - Does not affect runtime compilation in Godot
 - Will be addressed in follow-up work

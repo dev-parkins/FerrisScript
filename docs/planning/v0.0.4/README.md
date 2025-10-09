@@ -24,52 +24,86 @@
 
 ---
 
-## 📊 Phase Tracker
+## � Key Documentation
 
-### Phase 1: Signal Support 🔥
-
-**Status**: Not Started  
-**Priority**: Critical (Core Godot Feature)  
-**Branch**: `feature/v0.0.4-signals`  
-**Document**: *(To be created: PHASE_1_SIGNALS.md)*  
-**Target PR**: TBD
-
-**Key Deliverables**:
-
-- [ ] Signal definition in FerrisScript (`signal health_changed(old: i32, new: i32);`)
-- [ ] Signal emission (`emit_signal("health_changed", old, new);`)
-- [ ] Signal connection from Godot editor
-- [ ] Signal connection from FerrisScript code
-- [ ] Signal with parameters (multiple types)
-- [ ] Signal without parameters
-- [ ] Signal disconnect support
-- [ ] Comprehensive tests (20+ cases)
-
-**Dependencies**: None (clean start for v0.0.4)  
-**Estimated Effort**: 5-7 days
+- **[Known Limitations & Design Decisions](KNOWN_LIMITATIONS.md)** - What's supported, what's deferred, and why
+- **[Phase 2 Implementation Checklist](PHASE_2_CHECKLIST.md)** - Detailed task list for Phase 2
+- **[Godot Setup Guide](../../GODOT_SETUP_GUIDE.md)** - Installation and troubleshooting
+- **[Signal Visibility Issue](SIGNAL_VISIBILITY_ISSUE.md)** - Why signals don't appear in Inspector
+- **[Signal Testing Instructions](SIGNAL_TESTING_INSTRUCTIONS.md)** - Manual testing guide
 
 ---
 
-### Phase 2: Additional Callbacks
+## �📊 Phase Tracker
 
-**Status**: Not Started  
-**Priority**: High  
-**Branch**: `feature/v0.0.4-callbacks`  
-**Document**: *(To be created: PHASE_2_CALLBACKS.md)*  
-**Target PR**: TBD
+### Phase 1: Signal Support ✅
+
+**Status**: ✅ **COMPLETE & MERGED** ([PR #46](https://github.com/dev-parkins/FerrisScript/pull/46))  
+**Priority**: Critical (Core Godot Feature)  
+**Branch**: `feature/v0.0.4-signals` → `develop` (merged October 8, 2025)  
+**Document**: [PHASE_1_SIGNALS.md](PHASE_1_SIGNALS.md), [PHASE_1_STATUS_UPDATE.md](PHASE_1_STATUS_UPDATE.md)  
+**Actual Effort**: 3-4 days (under 5-7 day estimate)
 
 **Key Deliverables**:
 
-- [ ] `_input(event: InputEvent)` - User input handling
-- [ ] `_physics_process(delta: f32)` - Fixed timestep updates
-- [ ] `_enter_tree()` - Node enters scene tree
-- [ ] `_exit_tree()` - Node exits scene tree
-- [ ] InputEvent type implementation
-- [ ] Callback integration tests
-- [ ] Example scripts demonstrating usage
+- [x] Signal definition in FerrisScript (`signal health_changed(old: i32, new: i32);`)
+- [x] Signal emission (`emit_signal("health_changed", old, new);`)
+- [x] Signal connection from Godot editor
+- [ ] Signal connection from FerrisScript code (⏸️ Deferred - see status doc)
+- [x] Signal with parameters (multiple types)
+- [x] Signal without parameters
+- [ ] Signal disconnect support (⏸️ Deferred - depends on programmatic connection)
+- [x] Comprehensive tests (29 tests added, 382 total passing)
 
-**Dependencies**: Phase 1 (signal support may be used in examples)  
-**Estimated Effort**: 3-4 days
+**Implementation Highlights**:
+
+- ✅ Full signal lifecycle (declaration → emission → Godot integration)
+- ✅ Type checking with 6 error codes (E301-E304, E501-E502)
+- ✅ Editor-based connections fully functional
+- ✅ Comprehensive documentation and examples
+- ⏸️ Programmatic connection deferred (non-blocking for Phase 2)
+
+**Dependencies**: None (clean start for v0.0.4)  
+**Enables**: Phase 2 (callbacks may use signals for events)
+
+---
+
+### Phase 2: Additional Callbacks ✅
+
+**Status**: ✅ **COMPLETE** (October 9, 2025)  
+**Priority**: High  
+**Branch**: `feature/v0.0.4-phase1-prep` (continued from Phase 1)  
+**Document**: [PHASE_2_CHECKLIST.md](PHASE_2_CHECKLIST.md)  
+**Target PR**: TBD (Signal architecture research included)  
+**Actual Effort**: 1 day (callbacks + tests)
+
+**Key Deliverables**:
+
+- [x] `_input(event: InputEvent)` - User input handling
+- [x] `_physics_process(delta: f32)` - Fixed timestep updates
+- [x] `_enter_tree()` - Node enters scene tree
+- [x] `_exit_tree()` - Node exits scene tree
+- [x] InputEvent type implementation
+- [x] Callback integration tests (11 new tests, 396 total passing)
+- [ ] Example scripts demonstrating usage (⚠️ Deferred - compilation investigation needed)
+
+**Implementation Highlights**:
+
+- ✅ All 4 lifecycle callbacks implemented and validated
+- ✅ InputEvent type with action checks (is_action_pressed/released)
+- ✅ E305 error code for lifecycle validation
+- ✅ 11 new tests (7 type checker + 4 runtime)
+- ✅ 4 clean commits with passing pre-commit hooks
+- ⚠️ Examples deferred due to file compilation issue (core functionality verified via tests)
+
+**Additional Work**:
+
+- ✅ **Signal Editor Visibility Research** - Deep architectural analysis of why signals don't appear in Godot's Node→Signals panel
+- ✅ **Production-Ready Implementation Pattern** - Complete `FerrisMetadataRegistry` helper for future v0.1.0+ implementation
+- ✅ **Roadmap Validation** - Confirmed by Godot GDExtension experts that current direction is correct
+
+**Dependencies**: Phase 1 complete ✅  
+**Enables**: Phase 3 (node queries can use callbacks for testing)
 
 ---
 
@@ -318,7 +352,26 @@ fn take_damage() {
 
 ## 📚 Related Documents
 
+### v0.0.4 Planning
+
 - [v0.0.4 ROADMAP](./ROADMAP.md) - Comprehensive feature roadmap
+- [Known Limitations](./KNOWN_LIMITATIONS.md) - What's supported, deferred, and why
+- [Phase 2 Checklist](./PHASE_2_CHECKLIST.md) - Implementation task list
+
+### v0.0.4 Phase 1 (Complete)
+
+- [Phase 1 Status](./PHASE_1_STATUS_UPDATE.md) - Completion report
+- [Phase 1 Signals](./PHASE_1_SIGNALS.md) - Original plan
+- [Signal Visibility Issue](./SIGNAL_VISIBILITY_ISSUE.md) - Known limitation
+- [Signal Testing Guide](./SIGNAL_TESTING_INSTRUCTIONS.md) - Manual testing
+
+### v0.0.4 Phase 2 (Ready)
+
+- [Phase 2 Preparation](./PHASE_2_PREP.md) - Technical approach
+- [Phase 2 Checklist](./PHASE_2_CHECKLIST.md) - Task-by-task breakdown
+
+### Cross-Version
+
 - [v0.0.3 Archive](../../archive/v0.0.3/README.md) - Previous version reference
 - [v0.1.0 Roadmap](../v0.1.0-release-plan.md) - Future plans
 - [Architecture](../../ARCHITECTURE.md) - System architecture
@@ -327,11 +380,49 @@ fn take_damage() {
 
 ---
 
+## 📝 Status Summary (October 9, 2025)
+
+### ✅ Completed
+
+- **Phase 1: Signal Support** - Merged to develop ([PR #46](https://github.com/dev-parkins/FerrisScript/pull/46))
+  - Signal declaration, emission, Godot integration
+  - 29 new tests, 382 total passing
+  - Known limitations documented
+
+- **Phase 2: Additional Callbacks** - Implementation complete (October 9, 2025)
+  - All 4 callbacks implemented (_input, _physics_process, _enter_tree, _exit_tree)
+  - InputEvent type with action checks
+  - 11 new tests, 396 total passing
+  - Signal editor visibility research completed
+  - Actual effort: 1 day (under 3-4 day estimate)
+
+### � Ready to Start
+
+- **Phase 3: Node Query Functions** - Ready after Phase 2 PR merge
+  - get_node(), get_parent(), has_node(), find_child()
+  - Estimated 3-5 days
+  - Depends on Phase 2 complete ✅
+
+### 🔜 Upcoming
+
+- **Phase 4**: Godot Types (Color, Rect2, Transform2D)
+- **Phase 5**: Property Exports
+
+### 📊 Quality Metrics
+
+- **Tests**: 396 passing (231 compiler + 68 runtime + 97 integration)
+- **Build Status**: Clean (0 errors, 0 warnings)
+- **Godot Compatibility**: 4.2+, 4.3+ (with api-4-3 feature), 4.5 (validated)
+- **Documentation**: Comprehensive (setup, limitations, testing guides, architectural analysis)
+
+---
+
 ## 📝 Notes
 
 - **Quality over Speed**: No strict timeline. Focus on comprehensive Godot API coverage and solid testing.
-- **Deferred Items Tracked**: All v0.0.3 deferrals documented in ROADMAP.md and prioritized appropriately.
+- **Deferred Items Tracked**: All limitations documented in [KNOWN_LIMITATIONS.md](./KNOWN_LIMITATIONS.md) with rationale.
 - **Feature Grouping**: Each phase targets specific Godot functionality for focused PRs.
+- **Incremental Value**: Ship functional features early, iterate based on usage.
 - **Test-Driven**: Write tests before/during implementation, not after.
 - **Integration Focus**: v0.0.4 is perfect timing for comprehensive Godot integration tests (more API surface than v0.0.3).
 - **Strategic Position**: This release enables real game development and sets foundation for v0.0.5 LSP work.
