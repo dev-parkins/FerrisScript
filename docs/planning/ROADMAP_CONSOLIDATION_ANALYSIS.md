@@ -392,6 +392,7 @@ This document analyzes existing roadmap documentation and research agent suggest
 **Workstream**: 3 PRs (schema design, generation, then registry integration)
 
 **Dependencies**:
+
 - ✅ All v0.0.5-7 complete
 - 🚨 **BLOCKS**: All Godot editor plugins (v0.2.0)
 - 🚨 **BLOCKS**: Inspector integration
@@ -506,6 +507,7 @@ v0.2.5+ Advanced features (scene validation, debug telemetry)
 **Original Estimate**: v0.1.0 in 10-15 weeks
 
 **Revised Estimate** (with editor integration):
+
 - v0.1.0 in 10-15 weeks (no change - manifest added to this version)
 - v0.2.0 in 18-22 weeks (Godot plugins are complex)
 - v0.2.5+ in 25-30 weeks (if pursuing advanced features)
@@ -679,7 +681,8 @@ Each package below is optimized for the `workstream-execution.prompt.md` templat
 
 **Dependencies**: All v0.0.5-7 complete
 
-**Blocks**: 
+**Blocks**:
+
 - 🚨 All Godot editor plugins (v0.2.0)
 - 🚨 Inspector integration
 - 🚨 Signal/property visibility in editor
@@ -687,6 +690,7 @@ Each package below is optimized for the `workstream-execution.prompt.md` templat
 **Risks**: Medium (manifest schema design is critical)
 
 **Mitigation**:
+
 - Design manifest schema carefully with versioning
 - Get community feedback on schema before shipping
 - Keep schema minimal initially, extend later

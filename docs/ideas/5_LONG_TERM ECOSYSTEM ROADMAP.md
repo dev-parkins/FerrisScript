@@ -16,10 +16,10 @@ a world where static analysis, Rust-backed speed, and ergonomic developer toolin
 
 ### 🎯 Core Goals
 
-* Stable compiler/runtime integration with Godot.
-* Correct, deterministic lifecycle handling.
-* Reliable Cargo-based build pipeline.
-* Clean GDScript <-> FerrisScript interop.
+- Stable compiler/runtime integration with Godot.
+- Correct, deterministic lifecycle handling.
+- Reliable Cargo-based build pipeline.
+- Clean GDScript <-> FerrisScript interop.
 
 ### 🔩 Deliverables
 
@@ -43,10 +43,10 @@ FerrisScript behaves like a stable scripting language *runtime*, with reliable f
 
 ### 🎯 Core Goals
 
-* Compile-time signal and property registration.
-* Scene contract validation.
-* Static reflection and typed node references.
-* Basic compiler plugin support.
+- Compile-time signal and property registration.
+- Scene contract validation.
+- Static reflection and typed node references.
+- Basic compiler plugin support.
 
 ### 🔩 Deliverables
 
@@ -69,10 +69,10 @@ FerrisScript becomes *compile-time aware* — Godot’s editor knows about your 
 
 ### 🎯 Core Goals
 
-* First-class Godot plugin experience.
-* FerrisScript Developer Panel (compile, debug, reload).
-* LSP (autocompletion, type hints, inline docs).
-* Live performance profiling & deterministic replay.
+- First-class Godot plugin experience.
+- FerrisScript Developer Panel (compile, debug, reload).
+- LSP (autocompletion, type hints, inline docs).
+- Live performance profiling & deterministic replay.
 
 ### 🔩 Deliverables
 
@@ -96,10 +96,10 @@ FerrisScript feels like a *native engine language* — deterministic, observable
 
 ### 🎯 Core Goals
 
-* Fully static build-time registration of nodes, signals, and resources.
-* Deterministic serialization and networking.
-* Scene Contracts validated at compile-time.
-* Static codegen for resource dependencies.
+- Fully static build-time registration of nodes, signals, and resources.
+- Deterministic serialization and networking.
+- Scene Contracts validated at compile-time.
+- Static codegen for resource dependencies.
 
 ### 🔩 Deliverables
 
@@ -124,10 +124,10 @@ No “surprise” runtime errors for missing nodes, wrong signal names, or bad a
 
 ### 🎯 Core Goals
 
-* Safe sandboxed scripting for modders.
-* User-extensible FerrisScript modules.
-* Compiler plugin API (custom macros, lints, and codegen).
-* Versioned ABI compatibility between FerrisScript modules.
+- Safe sandboxed scripting for modders.
+- User-extensible FerrisScript modules.
+- Compiler plugin API (custom macros, lints, and codegen).
+- Versioned ABI compatibility between FerrisScript modules.
 
 ### 🔩 Deliverables
 
@@ -151,10 +151,10 @@ Teams and modders can safely extend games, engines, and tools without access to 
 
 ### 🎯 Core Goals
 
-* Deeper integration with Godot’s tool APIs.
-* Native plugin development for the Godot editor in FerrisScript.
-* Visual tooling for scripting and data editing.
-* AI-assisted insights (optional).
+- Deeper integration with Godot’s tool APIs.
+- Native plugin development for the Godot editor in FerrisScript.
+- Visual tooling for scripting and data editing.
+- AI-assisted insights (optional).
 
 ### 🔩 Deliverables
 
@@ -178,9 +178,9 @@ FerrisScript becomes a **first-class Godot tooling language**, on par with GDScr
 
 ### 🎯 Core Goals
 
-* Decouple FerrisScript runtime from Godot-only assumptions.
-* Enable compilation targets for other engines (Bevy, Fyrox, etc.).
-* Shared runtime layer for simulation, AI, or networking.
+- Decouple FerrisScript runtime from Godot-only assumptions.
+- Enable compilation targets for other engines (Bevy, Fyrox, etc.).
+- Shared runtime layer for simulation, AI, or networking.
 
 ### 🔩 Deliverables
 

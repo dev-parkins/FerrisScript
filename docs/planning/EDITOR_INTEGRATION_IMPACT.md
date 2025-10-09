@@ -25,18 +25,21 @@ The research agent provided a comprehensive Editor Integration Plan that signifi
 ### 1. Manifest & Metadata System (v0.1.0)
 
 **What It Is**: JSON file (`ferris_manifest.json`) containing:
+
 - Signal definitions with argument types
 - Method signatures
 - Property types and defaults
 - Optional scene validation results
 
-**Why It Matters**: 
+**Why It Matters**:
+
 - **Enables** Inspector to show typed properties
 - **Enables** Node tab to show signals correctly
 - **Enables** Editor plugins to provide context-aware UI
 - **Enables** External tools to understand FerrisScript code structure
 
 **Dependencies Introduced**:
+
 ```
 Manifest Generation (v0.1.0)
     ↓ BLOCKS
@@ -47,6 +50,7 @@ Scene Validation (v0.2.5+)
 ```
 
 **Impact on v0.1.0**:
+
 - ✅ Add: Manifest schema design (1 PR, 1-2 premium requests)
 - ✅ Add: Manifest generation in compiler (1 PR, 2-3 premium requests)
 - ✅ Add: `FerrisMetadataRegistry` in godot_bind (1 PR, 1-2 premium requests)
@@ -83,23 +87,27 @@ Scene Validation (v0.2.5+)
    - Debug mapping visualization
 
 **Why It Matters**:
+
 - **In-editor experience**: Developers don't need external editor
 - **Seamless workflow**: Build/test without leaving Godot
 - **Type-aware UI**: Inspector shows correct property types
 - **Signal visibility**: Signals appear properly in Node tab
 
 **New Skillset Required**:
+
 - ❌ GDScript or GDExtension plugin development
 - ❌ Godot EditorPlugin API knowledge
 - ❌ Godot UI system (Control nodes, docking, etc.)
 
 **Risk Assessment**: **HIGH**
+
 - Limited documentation for EditorPlugin development
 - New territory for solo dev
 - UI/UX design considerations
 - Testing complexity (need running Godot editor)
 
 **Impact on Roadmap**:
+
 - ✅ Create new version: v0.2.0 (Godot Editor Integration)
 - ✅ Timeline: 4-6 weeks
 - ✅ Premium requests: 12-16
@@ -113,12 +121,14 @@ Scene Validation (v0.2.5+)
 **What It Is**: Compile-time validation of Godot scene files (.tscn)
 
 **Capabilities**:
+
 - Parse .tscn text format
 - Validate node paths referenced in FerrisScript
 - Check node types match expectations
 - Compile-time errors for missing nodes
 
 **Example**:
+
 ```rust
 // FerrisScript code
 fn _ready() {
@@ -127,6 +137,7 @@ fn _ready() {
 ```
 
 **Why It's Complex**:
+
 - ❌ Need .tscn parser (Godot's text scene format)
 - ❌ Need scene graph representation
 - ❌ Need type inference across scene boundaries
@@ -135,12 +146,14 @@ fn _ready() {
 **New Subsystem Required**: Scene Parser
 
 **Risk Assessment**: **HIGH**
+
 - .tscn format is complex and version-specific
 - Scene graph traversal adds complexity
 - Type checking across scene boundaries is hard
 - Error messages must be actionable
 
 **Recommendation**: **DEFER to v0.2.5+ or later**
+
 - Not critical for initial adoption
 - High complexity for unclear benefit
 - Can add later if users request it
@@ -152,6 +165,7 @@ fn _ready() {
 **What It Is**: Runtime debugging with breakpoints and telemetry
 
 **Capabilities**:
+
 - Runtime telemetry (metrics, events)
 - Source map generation (`.ferris.map.json`)
 - Debug command protocol (WebSocket or TCP)
@@ -160,6 +174,7 @@ fn _ready() {
 - Stack introspection
 
 **Why It's Complex**:
+
 - ❌ Runtime instrumentation needed
 - ❌ Protocol design (how editor talks to runtime)
 - ❌ Source mapping (compiled code → FerrisScript lines)
@@ -169,6 +184,7 @@ fn _ready() {
 **New Subsystem Required**: Debug Runtime + Protocol
 
 **Risk Assessment**: **VERY HIGH**
+
 - Deep runtime integration
 - Protocol design is hard to get right
 - Breakpoints require runtime support
@@ -176,6 +192,7 @@ fn _ready() {
 - Security considerations (remote debug access)
 
 **Recommendation**: **DEFER INDEFINITELY**
+
 - Not critical for v0.1.0 or v0.2.0
 - Very high complexity
 - Can use Godot's native debugger for now
@@ -190,12 +207,14 @@ fn _ready() {
 **Decision**: ✅ Proceed as planned
 
 **Rationale**:
+
 - LSP for VSCode/external editors is independent of manifest
 - Can ship before v0.1.0 manifest system
 - Provides value immediately
 - No new dependencies introduced
 
 **Scope Remains**:
+
 - LSP server (tower-lsp)
 - Syntax checking via compiler
 - Autocomplete (keywords, types, symbols)
@@ -212,12 +231,14 @@ fn _ready() {
 **Decision**: ✅ Incorporate manifest generation
 
 **Rationale**:
+
 - Required for v0.2.0 editor plugins
 - Logical extension of "metadata & polish" theme
 - Better to design schema early than bolt on later
 - Enables third-party tooling
 
 **New Scope for v0.1.0**:
+
 1. Design manifest schema (`ferris_manifest.json`)
 2. Implement manifest generation in compiler
 3. Implement `FerrisMetadataRegistry` in godot_bind
@@ -230,6 +251,7 @@ fn _ready() {
 **Risk**: Medium (schema design is critical)
 
 **Mitigation**:
+
 - Version the manifest schema (`"manifest_version": 1`)
 - Keep initial schema minimal
 - Document thoroughly
@@ -242,12 +264,14 @@ fn _ready() {
 **Decision**: ✅ New version dedicated to editor plugins
 
 **Rationale**:
+
 - Substantial work (12-16 premium requests)
 - Requires new skillset (Godot plugin development)
 - Deserves its own release for marketing
 - Allows incremental rollout (Project plugin → Inspector plugin)
 
 **Scope for v0.2.0**:
+
 1. FerrisProjectPlugin (build panel, console, manifest viewer)
 2. FerrisInspectorPlugin (typed properties, signal UI)
 3. Enhanced LSP (workspace symbols, rename refactoring)
@@ -257,6 +281,7 @@ fn _ready() {
 **Risk**: High (new skillset)
 
 **Mitigation**:
+
 - Start with minimal Project plugin
 - Use GDScript first (easier than GDExtension)
 - Iterate based on user feedback
@@ -269,12 +294,14 @@ fn _ready() {
 **Decision**: ✅ Defer scene validation and debug infrastructure
 
 **Rationale**:
+
 - Not critical for initial adoption
 - Very high complexity
 - Unclear user demand
 - Can add later if requested
 
 **Deferred Features**:
+
 - FerrisSceneVerifier (scene validation)
 - FerrisDebugPanel (telemetry display)
 - Debug infrastructure (breakpoints, stepping)
@@ -310,6 +337,7 @@ fn _ready() {
 | **Total to v0.2.0** | **18-25 weeks** | **55-75** | - |
 
 **Key Changes**:
+
 - ⬆️ v0.1.0 timeline extended by 1 week
 - ⬆️ v0.1.0 premium requests increased by 1-2
 - 🆕 v0.2.0 added for editor plugins (substantial work)
@@ -342,6 +370,7 @@ v0.2.5+ Debug infrastructure (if pursuing)
 ### What Blocks What
 
 **Manifest Generation (v0.1.0) blocks**:
+
 - ❌ Inspector typed property display
 - ❌ Signal registration visibility
 - ❌ Editor build workflow
@@ -349,20 +378,25 @@ v0.2.5+ Debug infrastructure (if pursuing)
 - ❌ All Godot editor plugins
 
 **Metadata Registry (v0.1.0) blocks**:
+
 - ❌ Runtime signal registration with editor visibility
 - ❌ Property inspector integration
 
 **CLI Tooling (v0.1.0) blocks**:
+
 - ❌ Editor build workflow
 - ❌ Diagnostic integration
 
 **Godot Plugin Skillset (v0.2.0) blocks**:
+
 - ❌ All editor integration features
 
 **Scene Parser (v0.2.5+) blocks**:
+
 - ❌ Compile-time scene validation (if pursuing)
 
 **Debug Infrastructure (v0.2.5+) blocks**:
+
 - ❌ Breakpoint debugging (if pursuing)
 - ❌ Step-through debugging (if pursuing)
 

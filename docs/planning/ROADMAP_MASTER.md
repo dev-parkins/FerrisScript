@@ -105,17 +105,20 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 **Goal**: Solid foundation for Godot integration
 
 **Phase 1** ✅ Complete:
+
 - Signal system (declaration, registration, emit)
 - 379 tests passing
 - Edge case testing comprehensive
 
 **Phase 2** 🔄 In Progress:
+
 - [ ] `_ready()` callback
 - [ ] `_process(delta: f32)` callback
 - [ ] `_physics_process(delta: f32)` callback
 - [ ] `_input(event: InputEvent)` callback
 
 **Deliverables**:
+
 - All lifecycle callbacks working
 - Integration tests for each
 - Examples demonstrating usage
@@ -130,7 +133,8 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 **Goal**: First-class editor support with real-time diagnostics
 
-**Why This Matters**: 
+**Why This Matters**:
+
 - 🔥 Editor support is adoption-critical
 - 🔥 Differentiates FerrisScript from GDScript
 - 🔥 Attracts Rust developers to Godot
@@ -166,6 +170,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
    - Marketplace publishing
 
 **Deliverables**:
+
 - Working LSP server
 - VS Code extension published
 - Real-time error checking
@@ -206,6 +211,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
    - Expression support
 
 **Deliverables**:
+
 - All language features implemented
 - Comprehensive tests
 - Examples for each feature
@@ -247,6 +253,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
    - PackedScene
 
 **Deliverables**:
+
 - All Godot types implemented
 - Rust-side wrappers
 - FerrisScript bindings
@@ -284,6 +291,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
    - Release notes
 
 **Deliverables**:
+
 - JSON metadata working
 - Manifest schema documented
 - Metadata registry in GDExtension
@@ -325,6 +333,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 **Decision**: LSP in v0.0.5 (not v0.2.0 as originally planned)
 
 **Rationale**:
+
 - Developers need great tooling to be productive
 - Editor support is adoption-critical
 - Differentiates FerrisScript from GDScript
@@ -335,6 +344,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 **Decision**: Split v0.1.0 into v0.0.5-7 + v0.1.0 polish
 
 **Rationale**:
+
 - Shorter feedback cycles
 - Lower risk per release
 - Faster time to market
@@ -345,6 +355,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 **Decision**: Default to small incremental PRs (workstream Option C)
 
 **Rationale**:
+
 - Easier to review alone
 - Clear phase boundaries
 - Lower risk per PR
@@ -355,6 +366,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 **Decision**: Structure work into self-contained execution packages
 
 **Rationale**:
+
 - Each package completes in 1-2 premium requests
 - Clear acceptance criteria
 - Minimal dependencies
@@ -413,6 +425,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 **Risk**: High (new territory) + Medium (hot reload complexity)
 
 **⭐ New Features** from research analysis:
+
 - Hot reload enables sub-second iteration (major productivity win)
 - Profiler integration provides performance transparency
 - Doc generation improves discoverability
@@ -455,6 +468,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 **Risk**: Very High (new subsystems, engine limitations)
 
 **Prerequisites**:
+
 - User feedback from v0.2.0
 - Community validation of priorities
 - Prototype risky features first
@@ -492,6 +506,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 **Risk**: Very High (requires team, long-term commitment)
 
 **Prerequisites**:
+
 - Established community
 - Multiple contributors
 - Proven adoption and demand
@@ -501,6 +516,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 ## 🔮 Long-Term Vision (Phase 2.0+)
 
 See `planning/VISION.md` for aspirational multi-year goals including:
+
 - Multi-engine support (Bevy, Fyrox, etc.)
 - Cross-engine runtime abstraction
 - Advanced determinism features
@@ -539,17 +555,20 @@ See `planning/VISION.md` for aspirational multi-year goals including:
 ### Per Version
 
 **Code Quality**:
+
 - ✅ All tests passing
 - ✅ Zero compiler warnings
 - ✅ Code coverage >80%
 - ✅ Performance within 10% of baseline
 
 **Documentation**:
+
 - ✅ API docs updated
 - ✅ Examples working
 - ✅ Release notes written
 
 **Adoption** (v0.1.0+):
+
 - 📊 VS Code extension downloads
 - 📊 GitHub stars/forks
 - 📊 Community feedback
@@ -558,14 +577,17 @@ See `planning/VISION.md` for aspirational multi-year goals including:
 ### Overall Roadmap
 
 **Timeline**:
+
 - 🎯 Target: v0.1.0 in 10-15 weeks
 - 🚀 Stretch: v0.1.0 in 8-10 weeks (aggressive parallelization)
 
 **Premium Requests**:
+
 - 🎯 Target: 35-50 requests total
 - 🚀 Stretch: 30-40 requests (optimized workstreams)
 
 **Feature Completeness**:
+
 - ✅ All planned features implemented
 - ✅ No critical bugs
 - ✅ Documentation comprehensive
@@ -576,18 +598,21 @@ See `planning/VISION.md` for aspirational multi-year goals including:
 ## 🚀 Next Actions
 
 ### This Week
+
 1. ✅ Complete roadmap consolidation analysis
 2. ✅ Review and approve strategic direction
 3. 🔄 Execute v0.0.4 Phase 2 (`_ready()` callback first)
 4. ⏳ Begin v0.0.5 LSP research
 
 ### Next 2-4 Weeks
+
 1. ⏳ Complete v0.0.4 Phase 2 (all lifecycle callbacks)
 2. ⏳ Ship v0.0.4 release
 3. ⏳ Start v0.0.5 LSP implementation
 4. ⏳ Archive superseded planning docs
 
 ### Next 2-3 Months
+
 1. ⏳ Complete v0.0.5 (LSP alpha)
 2. ⏳ Complete v0.0.6 (language features)
 3. ⏳ Complete v0.0.7 (Godot API)
@@ -600,6 +625,7 @@ See `planning/VISION.md` for aspirational multi-year goals including:
 **Update Frequency**: After each version release
 
 **Review Triggers**:
+
 - Major feature complete
 - Strategic priority change
 - Community feedback requiring pivot

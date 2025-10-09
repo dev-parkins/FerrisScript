@@ -41,6 +41,7 @@ This document outlines FerrisScript's aspirational future beyond v0.2.0. These a
 **Status**: ✅ Committed (see ROADMAP_MASTER.md)
 
 **Milestones**:
+
 - v0.0.4: Runtime stability + lifecycle callbacks
 - v0.0.5: LSP Alpha for external editors
 - v0.0.6: Language features (arrays, for loops)
@@ -62,7 +63,9 @@ This document outlines FerrisScript's aspirational future beyond v0.2.0. These a
 **Vision**: Compile-time validation of scene dependencies
 
 **Features**:
+
 - **Scene Contracts**: Static analysis of .tscn files
+
   ```ferris
   #[scene_contract]
   trait PlayerScene {
@@ -72,6 +75,7 @@ This document outlines FerrisScript's aspirational future beyond v0.2.0. These a
   ```
 
 - **Parallel Processing**: Safe threading for gameplay
+
   ```ferris
   #[parallel]
   fn update_agents(agents: &mut [Agent]) {
@@ -80,6 +84,7 @@ This document outlines FerrisScript's aspirational future beyond v0.2.0. These a
   ```
 
 - **Determinism Toolkit**: Guaranteed reproducibility
+
   ```ferris
   #[deterministic]
   fn simulate_physics(bodies: &mut [RigidBody]) {
@@ -88,6 +93,7 @@ This document outlines FerrisScript's aspirational future beyond v0.2.0. These a
   ```
 
 **Prerequisites**:
+
 - Scene parser subsystem
 - Godot threading model integration
 - Community validation of priorities
@@ -99,7 +105,9 @@ This document outlines FerrisScript's aspirational future beyond v0.2.0. These a
 **Vision**: Compile-time asset existence and type checking
 
 **Features**:
+
 - **Static Resource Linking**:
+
   ```ferris
   #[resource(path = "res://assets/player.png")]
   const PLAYER_TEXTURE: Texture2D = Texture2D::load();
@@ -107,6 +115,7 @@ This document outlines FerrisScript's aspirational future beyond v0.2.0. These a
   ```
 
 - **Recipe/Data Validation**:
+
   ```ferris
   #[recipe(inputs = ["IronOre", "Coal"], output = "Steel")]
   fn smelt() -> Item { /* ... */ }
@@ -114,6 +123,7 @@ This document outlines FerrisScript's aspirational future beyond v0.2.0. These a
   ```
 
 - **Node Path Type Checking**:
+
   ```ferris
   fn _ready() {
       let health = get_node("HealthBar") as ProgressBar;
@@ -122,6 +132,7 @@ This document outlines FerrisScript's aspirational future beyond v0.2.0. These a
   ```
 
 **Prerequisites**:
+
 - Asset manifest system
 - Deep .tscn integration
 - User demand proven
@@ -140,6 +151,7 @@ This document outlines FerrisScript's aspirational future beyond v0.2.0. These a
 **Vision**: Share and reuse FerrisScript modules
 
 **Features**:
+
 - **FerrisScript Package Registry**
   - Like crates.io but for game logic
   - Versioned dependencies
@@ -156,6 +168,7 @@ This document outlines FerrisScript's aspirational future beyond v0.2.0. These a
   - Plug-and-play components
 
 **Example**:
+
 ```toml
 [dependencies]
 ferris_inventory = "0.2.0"
@@ -164,6 +177,7 @@ pathfinding = "0.4.0"  # Rust crate
 ```
 
 **Prerequisites**:
+
 - Multiple projects using FerrisScript
 - Community contributors
 - Stable ABI across versions
@@ -173,12 +187,14 @@ pathfinding = "0.4.0"  # Rust crate
 **Vision**: Safe user-authored scripts for modding
 
 **Features**:
+
 - **Sandboxed Compilation**
   - User scripts compile to WASM
   - Limited API surface (no filesystem, network)
   - Performance isolation
 
 - **Mod API**
+
   ```ferris
   #[mod_api]
   trait ItemMod {
@@ -192,6 +208,7 @@ pathfinding = "0.4.0"  # Rust crate
   - Mod verification system
 
 **Prerequisites**:
+
 - WASM target for FerrisScript
 - Sandboxing infrastructure
 - Proven modding demand
@@ -203,6 +220,7 @@ pathfinding = "0.4.0"  # Rust crate
 **Vision**: Blueprint-style programming for FerrisScript
 
 **Features**:
+
 - **Visual Graph Editor**
   - Node-based programming
   - Compiles to FerrisScript
@@ -219,6 +237,7 @@ pathfinding = "0.4.0"  # Rust crate
   - Performance hotspot highlighting
 
 **Prerequisites**:
+
 - Stable compiler API
 - Community demand for visual tools
 - UI/UX design expertise
@@ -235,7 +254,9 @@ pathfinding = "0.4.0"  # Rust crate
 **Goal**: FerrisScript as portable simulation language
 
 **Features**:
+
 - **Engine Abstraction Layer**
+
   ```ferris
   // Same code works in Godot, Bevy, Fyrox
   fn update(delta: f32, nodes: &mut SceneGraph) {
@@ -244,6 +265,7 @@ pathfinding = "0.4.0"  # Rust crate
   ```
 
 - **Multi-Target Builds**
+
   ```bash
   cargo ferris build --target godot
   cargo ferris build --target bevy
@@ -256,6 +278,7 @@ pathfinding = "0.4.0"  # Rust crate
   - Engine-specific bindings
 
 **Why This Is Out of Scope**:
+
 - ❌ Requires full-time team
 - ❌ 2-5 years of work
 - ❌ Deep integration with multiple engines
@@ -271,6 +294,7 @@ pathfinding = "0.4.0"  # Rust crate
 ### Today (v0.1.0-v0.2.0): Scripting Language
 
 **Use Cases**:
+
 - Performance-critical gameplay logic
 - AI and behavior systems
 - Simulation-heavy games
@@ -283,6 +307,7 @@ pathfinding = "0.4.0"  # Rust crate
 ### Near Future (v0.3.0-v0.4.0): Systems Language
 
 **Use Cases** (add to above):
+
 - Compile-time scene validation
 - Parallel agent simulation
 - Static asset pipelines
@@ -295,6 +320,7 @@ pathfinding = "0.4.0"  # Rust crate
 ### Far Future (v0.5.0+): Ecosystem Platform
 
 **Use Cases** (add to above):
+
 - Reusable gameplay modules
 - Community-built libraries
 - Modding platform
@@ -307,6 +333,7 @@ pathfinding = "0.4.0"  # Rust crate
 ### Aspirational (Phase 2.0+): Meta-Language
 
 **Use Cases** (theoretical):
+
 - Cross-engine logic
 - Simulation frameworks
 - Educational platforms
@@ -329,6 +356,7 @@ let health = player.health_bar(); // Compile-time checked!
 ```
 
 **Why It's Hard**:
+
 - Requires .tscn parser
 - Scene format changes between Godot versions
 - Runtime vs compile-time mismatch
@@ -352,6 +380,7 @@ fn fast_pathfinding(start: Vec2, end: Vec2) -> Path {
 ```
 
 **Why It's Hard**:
+
 - Security concerns (unsafe code)
 - Compilation complexity
 - ABI stability
@@ -365,6 +394,7 @@ fn fast_pathfinding(start: Vec2, end: Vec2) -> Path {
 **Vision**: Real-time per-function timing in editor
 
 **UI Example**:
+
 ```
 FerrisScript Performance (last 60 frames)
 update_ai():     0.34ms ████████░░
@@ -373,6 +403,7 @@ render_ui():     0.08ms ██░░░░░░░░
 ```
 
 **Why It's Valuable**:
+
 - Immediate performance feedback
 - No external profiler needed
 - Guides optimization
@@ -394,6 +425,7 @@ cargo ferris add inventory-system
 ```
 
 **Why It's Valuable**:
+
 - Don't rewrite common systems
 - Community best practices
 - Faster development
@@ -409,11 +441,13 @@ cargo ferris add inventory-system
 **Challenge**: Parse Godot's .tscn format reliably
 
 **Issues**:
+
 - Format changes between Godot versions
 - Binary .scn format support needed too
 - Large, complex scene files
 
 **Mitigation**:
+
 - Start with simple validation
 - Leverage Godot's own parser if possible
 - Provide runtime fallback
@@ -425,11 +459,13 @@ cargo ferris add inventory-system
 **Challenge**: True cross-platform determinism
 
 **Issues**:
+
 - Floating-point behavior varies by CPU
 - Godot physics not deterministic
 - Memory layout differences
 
 **Mitigation**:
+
 - Opt-in determinism mode (`#[deterministic]`)
 - Fixed-point math option
 - Document limitations clearly
@@ -442,11 +478,13 @@ cargo ferris add inventory-system
 **Challenge**: Safe threading in Godot context
 
 **Issues**:
+
 - Godot uses shared mutable state
 - No borrow checker at runtime
 - Thread safety conflicts with GDScript
 
 **Mitigation**:
+
 - Start with explicit parallelism (no auto-threading)
 - Require unsafe blocks for threading
 - Provide job system API
@@ -459,11 +497,13 @@ cargo ferris add inventory-system
 **Challenge**: Safe user scripts without exploits
 
 **Issues**:
+
 - Resource exhaustion attacks
 - Side-channel attacks
 - API surface vulnerabilities
 
 **Mitigation**:
+
 - Use battle-tested WASM runtimes (wasmtime)
 - Strict capability-based security
 - Resource limits (CPU, memory)
@@ -559,6 +599,7 @@ Focus on the foundation first. The future will come if we build it together.
 **Last Updated**: October 9, 2025
 
 **See Also**:
+
 - ROADMAP_MASTER.md - Committed features (v0.0.4-v0.2.0)
 - VISION_USE_CASE_ANALYSIS.md - Strategic assessment
 - planning/EDITOR_INTEGRATION_PLAN.md - Technical details

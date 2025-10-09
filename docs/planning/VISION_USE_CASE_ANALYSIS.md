@@ -66,12 +66,14 @@ Five research documents explore FerrisScript's long-term potential across use ca
 ### v0.0.5-v0.1.0 (Immediate) ✅
 
 **Already Planned**:
+
 - ✅ LSP for external editors (VSCode)
 - ✅ Manifest generation (`ferris_manifest.json`)
 - ✅ Metadata registry in GDExtension
 - ✅ CLI tooling (`ferris build`, `ferris lint`)
 
 **Add from Research**:
+
 - ✅ **Positioning docs**: Emphasize compile-time safety and determinism
 - ✅ **Use case examples**: Add simulation/RTS examples to docs
 - ✅ **CI integration guide**: Show how to test without editor
@@ -79,10 +81,12 @@ Five research documents explore FerrisScript's long-term potential across use ca
 ### v0.2.0 (Medium-Term) ✅
 
 **Already Planned**:
+
 - ✅ FerrisProjectPlugin (build panel, console, manifest viewer)
 - ✅ FerrisInspectorPlugin (typed properties, signal UI)
 
 **Add from Research**:
+
 - ✅ **Hot Reload**: Incremental compilation with state preservation
 - ✅ **Performance Profiler Hooks**: Compiler-injected timing instrumentation
 - ✅ **Documentation Overlay**: Inline docs from compiler in editor tooltips
@@ -93,11 +97,13 @@ Five research documents explore FerrisScript's long-term potential across use ca
 ### v0.2.5+ (Long-Term) ⏸️
 
 **Require Community Validation**:
+
 - ⏸️ **Scene Contract Visualization**: Requires scene parser (high complexity)
 - ⏸️ **Determinism Debugger**: Frame-by-frame replay with checksums (very complex)
 - ⏸️ **Compile-Time Inspector Extensions**: Custom widget annotations (nice-to-have)
 
 **Rationale**: These are valuable but require:
+
 1. Proven user demand
 2. Scene parser subsystem (deferred)
 3. Additional 8-12 premium requests each
@@ -109,11 +115,13 @@ Five research documents explore FerrisScript's long-term potential across use ca
 ### v0.1.0 (Manifest System) ✅
 
 **Already Planned**:
+
 - ✅ JSON manifest for signals, properties, methods
 - ✅ Metadata registry for runtime reflection
 - ✅ Inspector integration foundation
 
 **Add from Research**:
+
 - ✅ **Manifest versioning**: `"manifest_version": 1` for future evolution
 - ✅ **Type mapping documentation**: Show how FerrisScript types map to Godot
 - ✅ **Asset reference validation** (optional): Warn about missing textures/sounds at compile time
@@ -121,11 +129,13 @@ Five research documents explore FerrisScript's long-term potential across use ca
 ### v0.2.0+ (Editor Integration) ✅
 
 **Already Planned**:
+
 - ✅ FerrisScript panel in Godot editor
 - ✅ Typed property display in Inspector
 - ✅ Signal connection enhancements
 
 **Add from Research**:
+
 - ✅ **Hot Reload Support**: Recompile changed modules, reload without restart
 - ✅ **Profiler Integration**: Show FerrisScript function timings in Godot profiler
 - ✅ **Doc Generation**: Auto-generate docs from code comments
@@ -133,6 +143,7 @@ Five research documents explore FerrisScript's long-term potential across use ca
 ### v0.3.0+ (Advanced Integration) ⏸️
 
 **Defer Until User Demand Proven**:
+
 - ⏸️ **Scene Contracts**: Compile-time node path validation
 - ⏸️ **Static Resource Linking**: Compile-time asset existence checks
 - ⏸️ **Parallel Processing APIs**: Safe threading with `par_iter_mut()`
@@ -140,6 +151,7 @@ Five research documents explore FerrisScript's long-term potential across use ca
 - ⏸️ **Network Serialization**: Type-safe, deterministic state sync
 
 **Rationale**: These require:
+
 1. Scene parser (new subsystem)
 2. Deep engine integration (may not be possible via GDExtension)
 3. Careful API design (breaking changes risky)
@@ -216,6 +228,7 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
 **Issue**: Research documents propose 50+ features spanning years of work.
 
 **Mitigation**:
+
 - Clearly mark features as "aspirational" vs "planned"
 - Require community validation before committing to advanced features
 - Focus on v0.1.0-v0.2.0 core experience first
@@ -223,11 +236,13 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
 ### 2. Technical Feasibility (MEDIUM)
 
 **Issue**: Some features may not be possible via GDExtension:
+
 - Deep scene integration (contracts)
 - Compile-time .tscn parsing
 - Runtime thread safety enforcement
 
 **Mitigation**:
+
 - Prototype risky features before committing
 - Have fallback plans (e.g., runtime validation instead of compile-time)
 - Get Godot community input on engine limitations
@@ -237,6 +252,7 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
 **Issue**: Many features assume team development or years of effort.
 
 **Mitigation**:
+
 - Defer Phase 1.2+ features to community contributors
 - Focus on high-value, achievable features first
 - Build community momentum before tackling ecosystem
@@ -244,11 +260,13 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
 ### 4. Parallel Processing Complexity (VERY HIGH)
 
 **Issue**: Safe parallel processing requires:
+
 - Borrow checker-like semantics
 - Deep understanding of Godot's threading model
 - Potential conflicts with GDScript's shared state
 
 **Mitigation**:
+
 - **Defer to v0.3.0+ at earliest**
 - Require extensive prototyping
 - Consider starting with "unsafe but explicit" threading first
@@ -257,12 +275,14 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
 ### 5. Determinism Guarantees (HIGH)
 
 **Issue**: True determinism requires:
+
 - Fixed-point math or strict FP control
 - Deterministic allocation
 - No platform-specific behavior
 - Careful integration with Godot's physics
 
 **Mitigation**:
+
 - Start with "deterministic by default" for simple cases
 - Document limitations clearly
 - Provide opt-in deterministic mode (`#[deterministic]`)
@@ -277,6 +297,7 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
 **Gap**: No discussion of sharing FerrisScript modules or libraries.
 
 **Opportunity**:
+
 - Integration with crates.io for Rust dependencies
 - FerrisScript package registry (long-term)
 - Module versioning and compatibility
@@ -288,6 +309,7 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
 **Gap**: No guidance on GDScript → FerrisScript migration.
 
 **Opportunity**:
+
 - Migration guide in documentation
 - Interop patterns (calling GDScript from FerrisScript and vice versa)
 - Gradual adoption path (FerrisScript for hot paths, GDScript for glue)
@@ -299,6 +321,7 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
 **Gap**: No concrete performance targets or comparisons.
 
 **Opportunity**:
+
 - Benchmark suite showing FerrisScript vs GDScript
 - Performance documentation (when to use each)
 - Optimization guide
@@ -310,6 +333,7 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
 **Gap**: No onboarding strategy for Godot devs unfamiliar with Rust.
 
 **Opportunity**:
+
 - "FerrisScript for GDScript developers" guide
 - Simplified syntax subset (no lifetimes, minimal generics)
 - Interactive tutorials in docs
@@ -321,6 +345,7 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
 **Gap**: No plan for early adopters or feedback loops.
 
 **Opportunity**:
+
 - Alpha/beta program for simulation game developers
 - Discord/forum for feedback
 - Example game showcase
@@ -375,6 +400,7 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
 ### v0.2.0 Scope Additions
 
 **New Features** (add to existing scope):
+
 1. **Hot Reload** (2-3 premium requests)
    - Incremental compilation
    - State preservation where possible
@@ -396,6 +422,7 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
    - Gradual adoption strategy
 
 **Updated v0.2.0 Totals**:
+
 - Timeline: 5-7 weeks (was 4-6)
 - Premium Requests: 16-21 (was 12-16)
 
@@ -404,6 +431,7 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
 **Title**: "Advanced Integration & Performance"
 
 **Scope** (all conditional on user demand):
+
 1. **Scene Contracts** (6-8 premium requests)
    - Compile-time node path validation
    - Scene dependency graph
@@ -433,6 +461,7 @@ v0.4.0+: Ecosystem & Community-Driven   [Months 18+]   ⏸️ Community-led
 **Title**: "Ecosystem & Community-Led Features"
 
 **Scope** (community-driven, not solo dev):
+
 1. Package ecosystem (crates.io integration)
 2. FerrisScript package registry
 3. WASM modding sandbox

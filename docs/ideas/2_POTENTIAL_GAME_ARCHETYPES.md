@@ -2,10 +2,10 @@ Perfect — let’s start with **example game archetypes** that FerrisScript is 
 
 Each section includes:
 
-* The **archetype**
-* Why it’s a *pain point* in Godot today
-* What **FerrisScript specifically enables**
-* A concrete **example system or feature**
+- The **archetype**
+- Why it’s a *pain point* in Godot today
+- What **FerrisScript specifically enables**
+- A concrete **example system or feature**
 
 ---
 
@@ -15,16 +15,16 @@ Each section includes:
 
 ### 💢 GDScript pain points
 
-* Hundreds to thousands of objects updating per frame → GDScript performance tanks.
-* Difficult to parallelize logic or batch simulate agents.
-* Game states are complex and require deterministic logic for save/reload or replay.
+- Hundreds to thousands of objects updating per frame → GDScript performance tanks.
+- Difficult to parallelize logic or batch simulate agents.
+- Game states are complex and require deterministic logic for save/reload or replay.
 
 ### ⚙️ What FerrisScript enables
 
-* Compile-time deterministic ECS-style simulation.
-* Rust-level performance for thousands of concurrent agents.
-* Compile-time data layout optimization for cache efficiency.
-* Deterministic save/load serialization checked at build time.
+- Compile-time deterministic ECS-style simulation.
+- Rust-level performance for thousands of concurrent agents.
+- Compile-time data layout optimization for cache efficiency.
+- Deterministic save/load serialization checked at build time.
 
 ### 🧩 Example
 
@@ -53,16 +53,16 @@ fn update_citizens(citizens: &mut [Citizen]) {
 
 ### 💢 GDScript pain points
 
-* Lockstep simulation needs deterministic logic — GDScript is not.
-* Network sync requires tight control over floating-point behavior.
-* Massive pathfinding and AI updates can’t be parallelized easily.
+- Lockstep simulation needs deterministic logic — GDScript is not.
+- Network sync requires tight control over floating-point behavior.
+- Massive pathfinding and AI updates can’t be parallelized easily.
 
 ### ⚙️ What FerrisScript enables
 
-* Deterministic logic (build reproducibility).
-* Fixed-point math or compile-time numeric modes.
-* Type-safe serialization for replay and network state.
-* Fast concurrent pathfinding (via Rust’s multithreading).
+- Deterministic logic (build reproducibility).
+- Fixed-point math or compile-time numeric modes.
+- Type-safe serialization for replay and network state.
+- Fast concurrent pathfinding (via Rust’s multithreading).
 
 ### 🧩 Example
 
@@ -84,15 +84,15 @@ fn update_unit(u: &mut Unit, dt: f32) {
 
 ### 💢 GDScript pain points
 
-* Complex agent reasoning requires performance and deep data structures.
-* Hard to debug or visualize AI states with dynamic typing.
-* Limited compile-time validation of agent properties.
+- Complex agent reasoning requires performance and deep data structures.
+- Hard to debug or visualize AI states with dynamic typing.
+- Limited compile-time validation of agent properties.
 
 ### ⚙️ What FerrisScript enables
 
-* Typed behavior trees / planners (compile-time node validation).
-* ECS-style data separation with zero-cost abstraction.
-* Static graphs and property schemas for AI editors.
+- Typed behavior trees / planners (compile-time node validation).
+- ECS-style data separation with zero-cost abstraction.
+- Static graphs and property schemas for AI editors.
 
 ### 🧩 Example
 
@@ -119,15 +119,15 @@ fn choose_task(a: &mut Agent) {
 
 ### 💢 GDScript pain points
 
-* Heavy crafting networks or voxel systems are CPU-bound.
-* Inventory systems easily become memory inefficient.
-* Save/load logic and state sync cause runtime errors.
+- Heavy crafting networks or voxel systems are CPU-bound.
+- Inventory systems easily become memory inefficient.
+- Save/load logic and state sync cause runtime errors.
 
 ### ⚙️ What FerrisScript enables
 
-* Memory-efficient structures via value semantics.
-* Safe async pipelines for background world generation.
-* Compile-time validation of item types and crafting recipes.
+- Memory-efficient structures via value semantics.
+- Safe async pipelines for background world generation.
+- Compile-time validation of item types and crafting recipes.
 
 ### 🧩 Example
 
@@ -148,15 +148,15 @@ fn smelt(ore: &Item) -> Item {
 
 ### 💢 GDScript pain points
 
-* Procedural generation often CPU-heavy, needs low-level control.
-* Hard to guarantee reproducibility between runs.
-* Random number seeding errors cause subtle desyncs.
+- Procedural generation often CPU-heavy, needs low-level control.
+- Hard to guarantee reproducibility between runs.
+- Random number seeding errors cause subtle desyncs.
 
 ### ⚙️ What FerrisScript enables
 
-* Deterministic seeded RNG at compile-time or runtime.
-* Fast procedural generation in tight loops.
-* Compile-time validation of level blueprints.
+- Deterministic seeded RNG at compile-time or runtime.
+- Fast procedural generation in tight loops.
+- Compile-time validation of level blueprints.
 
 ### 🧩 Example
 
@@ -176,15 +176,15 @@ fn generate_map(seed: u64) -> Map {
 
 ### 💢 GDScript pain points
 
-* Floating-point inconsistencies across clients.
-* Poor determinism = desyncs.
-* Serialization must be manual and error-prone.
+- Floating-point inconsistencies across clients.
+- Poor determinism = desyncs.
+- Serialization must be manual and error-prone.
 
 ### ⚙️ What FerrisScript enables
 
-* Compiler-enforced deterministic modules.
-* Type-safe binary serialization.
-* Predictive rollback via structural cloning.
+- Compiler-enforced deterministic modules.
+- Type-safe binary serialization.
+- Predictive rollback via structural cloning.
 
 ---
 
@@ -194,15 +194,15 @@ fn generate_map(seed: u64) -> Map {
 
 ### 💢 GDScript pain points
 
-* Tools written in GDScript are slow for large data.
-* Complex editor extensions (analyzers, inspectors) need native speed.
-* No compile-time verification of UI → data bindings.
+- Tools written in GDScript are slow for large data.
+- Complex editor extensions (analyzers, inspectors) need native speed.
+- No compile-time verification of UI → data bindings.
 
 ### ⚙️ What FerrisScript enables
 
-* Rust-speed editor extensions (e.g. live code preview, scene analysis).
-* Compile-time reflection for inspector widgets.
-* Plugin system that can ship compiled FerrisScript “tools.”
+- Rust-speed editor extensions (e.g. live code preview, scene analysis).
+- Compile-time reflection for inspector widgets.
+- Plugin system that can ship compiled FerrisScript “tools.”
 
 ---
 
@@ -212,15 +212,15 @@ fn generate_map(seed: u64) -> Map {
 
 ### 💢 GDScript pain points
 
-* Complex branching logic = runtime chaos.
-* Stringly-typed dialogue nodes.
-* No validation of references between dialogue files.
+- Complex branching logic = runtime chaos.
+- Stringly-typed dialogue nodes.
+- No validation of references between dialogue files.
 
 ### ⚙️ What FerrisScript enables
 
-* Compile-time validation of dialogue trees.
-* Declarative story scripting with strong typing.
-* Integration with AI or data-driven logic safely.
+- Compile-time validation of dialogue trees.
+- Declarative story scripting with strong typing.
+- Integration with AI or data-driven logic safely.
 
 ### 🧩 Example
 
@@ -242,15 +242,15 @@ fn intro_scene() -> Dialogue {
 
 ### 💢 GDScript pain points
 
-* Needs high-performance simulation loops.
-* Numerical accuracy or safety issues.
-* Hard to sandbox user scripts safely.
+- Needs high-performance simulation loops.
+- Numerical accuracy or safety issues.
+- Hard to sandbox user scripts safely.
 
 ### ⚙️ What FerrisScript enables
 
-* Compile-time safety and isolation for user scripts.
-* Deterministic math and physics logic.
-* Rust-level numerical precision and speed.
+- Compile-time safety and isolation for user scripts.
+- Deterministic math and physics logic.
+- Rust-level numerical precision and speed.
 
 ---
 
@@ -260,15 +260,15 @@ fn intro_scene() -> Dialogue {
 
 ### 💢 GDScript pain points
 
-* No static safety for user-generated scripts.
-* Hard to scale or sandbox runtime user code.
-* Performance unpredictable with user logic.
+- No static safety for user-generated scripts.
+- Hard to scale or sandbox runtime user code.
+- Performance unpredictable with user logic.
 
 ### ⚙️ What FerrisScript enables
 
-* Safe, sandboxed scripting compiled to bytecode or WASM.
-* Pre-validated user scripts.
-* Stable ABI for user plugin APIs.
+- Safe, sandboxed scripting compiled to bytecode or WASM.
+- Pre-validated user scripts.
+- Stable ABI for user plugin APIs.
 
 ---
 

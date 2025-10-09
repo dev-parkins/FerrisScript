@@ -86,19 +86,19 @@ FerrisScript emits a manifest (prebuilt by the FerrisScript compiler) that Godot
 
 **Key points**
 
-* `nodes` keyed by the binding class name used in `register_class()` (matches ClassDB name).
-* `signals` list with arg names & basic types.
-* `methods` & `properties` allow inspector and completion hints.
-* `scenes` is optional output of static scene validation step.
+- `nodes` keyed by the binding class name used in `register_class()` (matches ClassDB name).
+- `signals` list with arg names & basic types.
+- `methods` & `properties` allow inspector and completion hints.
+- `scenes` is optional output of static scene validation step.
 
 **Variant type mapping** (used by editor to show types):
 
-* `i32` → shown as `int`
-* `f32` → `float`
-* `bool` → `bool`
-* `String` → `String`
-* `Vector2` → `Vector2`
-* `Ref<T>` or `Resource` → shown as `Resource` and open type hint
+- `i32` → shown as `int`
+- `f32` → `float`
+- `bool` → `bool`
+- `String` → `String`
+- `Vector2` → `Vector2`
+- `Ref<T>` or `Resource` → shown as `Resource` and open type hint
 
 ### 🚨 Dependency Alert: Manifest Generation (v0.1.0)
 
@@ -116,23 +116,23 @@ We provide a small set of Godot plugins (GDExtension or script-based) that read 
 ### Plugins
 
 1. **FerrisProjectPlugin** (EditorPlugin)
-   * UI: dock panel with `Build / Rebuild / Test / View Manifest` buttons.
-   * Hooks to call external toolchain (e.g. run `cargo ferris build`).
-   * Shows build output (console) in a docked terminal.
-   * Registers `ferris_manifest.json` watchers to refresh UI on change.
+   - UI: dock panel with `Build / Rebuild / Test / View Manifest` buttons.
+   - Hooks to call external toolchain (e.g. run `cargo ferris build`).
+   - Shows build output (console) in a docked terminal.
+   - Registers `ferris_manifest.json` watchers to refresh UI on change.
 
 2. **FerrisInspectorPlugin** (EditorInspectorPlugin)
-   * When an object is selected whose script/class matches a `nodes` key in the manifest, shows typed properties & signal list.
-   * Adds "Connect Signal" UI using manifest types (so when connecting, the editor suggests function signatures).
-   * Shows `View Source` and `Go to Definition` links if source map available.
+   - When an object is selected whose script/class matches a `nodes` key in the manifest, shows typed properties & signal list.
+   - Adds "Connect Signal" UI using manifest types (so when connecting, the editor suggests function signatures).
+   - Shows `View Source` and `Go to Definition` links if source map available.
 
 3. **FerrisSceneVerifier** (EditorScript or EditorPlugin)
-   * Optional scene validation runner that parses `.tscn` (Godot's text scenes) and checks node existence/types referenced from manifest annotations (or from inline `#[scene]` annotations present in FerrisScript).
-   * Writes results back to manifest under `scenes`.
+   - Optional scene validation runner that parses `.tscn` (Godot's text scenes) and checks node existence/types referenced from manifest annotations (or from inline `#[scene]` annotations present in FerrisScript).
+   - Writes results back to manifest under `scenes`.
 
 4. **FerrisDebugPanel** (EditorPlugin)
-   * Displays runtime metrics (if the running game publishes them).
-   * Shows last compile artifacts and quick links to source.
+   - Displays runtime metrics (if the running game publishes them).
+   - Shows last compile artifacts and quick links to source.
 
 ### 🚨 Dependency Alert: Godot Plugin Development
 
@@ -143,9 +143,9 @@ We provide a small set of Godot plugins (GDExtension or script-based) that read 
 
 ### Implementation notes
 
-* Plugins should be pure Godot plugins that call out to the FerrisScript CLI via `OS.execute()` or spawn background processes via `Process` (GDExtension). Use spawn+async to avoid blocking editor UI.
-* Use `FileSystem` change watchers (or a simple timer poll) to reload manifest on changes.
-* All plugins must gracefully degrade if `res://ferris_manifest.json` is missing (show helpful CTA: "Generate manifest by running `cargo ferris build`").
+- Plugins should be pure Godot plugins that call out to the FerrisScript CLI via `OS.execute()` or spawn background processes via `Process` (GDExtension). Use spawn+async to avoid blocking editor UI.
+- Use `FileSystem` change watchers (or a simple timer poll) to reload manifest on changes.
+- All plugins must gracefully degrade if `res://ferris_manifest.json` is missing (show helpful CTA: "Generate manifest by running `cargo ferris build`").
 
 ---
 
@@ -153,19 +153,19 @@ We provide a small set of Godot plugins (GDExtension or script-based) that read 
 
 **FerrisScript toolchain** should provide:
 
-* `ferris build` or `cargo ferris build` → emits `.gdextension` or plugin artifact + `res://ferris_manifest.json`.
-* `ferris lint` → outputs diagnostics in JSON for editor ingestion.
-* `ferris test` → runs FerrisScript tests and reports pass/fail.
+- `ferris build` or `cargo ferris build` → emits `.gdextension` or plugin artifact + `res://ferris_manifest.json`.
+- `ferris lint` → outputs diagnostics in JSON for editor ingestion.
+- `ferris test` → runs FerrisScript tests and reports pass/fail.
 
 **Recommended manifest placement**
 
-* Write manifest to `res://ferris/manifest.json` (subfolder) to avoid clutter; plugin reads this path via project setting `ferris.manifest_path`.
+- Write manifest to `res://ferris/manifest.json` (subfolder) to avoid clutter; plugin reads this path via project setting `ferris.manifest_path`.
 
 **Editor build invocation**
 
-* `FerrisProjectPlugin` invokes build and parses JSON diagnostics:
-  * On success: update manifest and show success toast.
-  * On failure: show diagnostics in dock (with file/line links if path info present) and mark last build errors.
+- `FerrisProjectPlugin` invokes build and parses JSON diagnostics:
+  - On success: update manifest and show success toast.
+  - On failure: show diagnostics in dock (with file/line links if path info present) and mark last build errors.
 
 ### 🚨 Dependency Alert: CLI Tooling (v0.1.0+)
 
@@ -182,22 +182,22 @@ We provide a small set of Godot plugins (GDExtension or script-based) that read 
 
 ### Server responsibilities
 
-* Provide completions, hover docs, go-to-definition, workspace symbol search.
-* Provide diagnostics by parsing FerrisScript compile output (errors/warnings).
-* Optionally provide source → compiled mapping (for runtime debug mapping).
+- Provide completions, hover docs, go-to-definition, workspace symbol search.
+- Provide diagnostics by parsing FerrisScript compile output (errors/warnings).
+- Optionally provide source → compiled mapping (for runtime debug mapping).
 
 ### Suggested protocol & tools
 
-* Use **Language Server Protocol**; implement in Rust with `tower-lsp` (or similar).
-* Provide capability to produce a `ferris_manifest.json` from a workspace request.
-* Expose `ferris.lsp/manifest` custom notification to tell the Godot plugin where to read up-to-date metadata (optional).
+- Use **Language Server Protocol**; implement in Rust with `tower-lsp` (or similar).
+- Provide capability to produce a `ferris_manifest.json` from a workspace request.
+- Expose `ferris.lsp/manifest` custom notification to tell the Godot plugin where to read up-to-date metadata (optional).
 
 ### Example LSP features mapping
 
-* `textDocument/publishDiagnostics` → compile-time errors for Godot editor or VSCode.
-* `textDocument/completion` → completions using manifest `methods/properties/signals`.
-* `textDocument/hover` → show docstring & type info derived from AST.
-* `workspace/executeCommand` → run `ferris build` and return results.
+- `textDocument/publishDiagnostics` → compile-time errors for Godot editor or VSCode.
+- `textDocument/completion` → completions using manifest `methods/properties/signals`.
+- `textDocument/hover` → show docstring & type info derived from AST.
+- `workspace/executeCommand` → run `ferris build` and return results.
 
 **Note:** Godot's built-in script editor has limited LSP support; the recommended path is making LSP support for external editors (VSCode, Neovim) and feeding the manifest to the Godot plugin for in-editor UX.
 
@@ -214,20 +214,20 @@ We provide a small set of Godot plugins (GDExtension or script-based) that read 
 
 **Inspector enhancements**
 
-* When a Node has a FerrisScript script:
-  * If manifest lists `properties`, show typed editor controls (numeric slider, bool checkbox, resource pickers).
-  * Provide a compact "FerrisScript" section summarizing signals & methods with quick "Connect" buttons.
+- When a Node has a FerrisScript script:
+  - If manifest lists `properties`, show typed editor controls (numeric slider, bool checkbox, resource pickers).
+  - Provide a compact "FerrisScript" section summarizing signals & methods with quick "Connect" buttons.
 
 **Node Tab (Signals)**
 
-* Because Godot's Node dock reads ClassDB, we can't dynamically add signals at runtime for the editor. Instead:
-  * The Rust GDExtension should call `builder.add_signal(...)` during `register_class()` using manifest data (as previously planned).
-  * The plugin should ensure the manifest and GDExtension are in sync; show warning if manifest signals differ from loaded ClassDB.
+- Because Godot's Node dock reads ClassDB, we can't dynamically add signals at runtime for the editor. Instead:
+  - The Rust GDExtension should call `builder.add_signal(...)` during `register_class()` using manifest data (as previously planned).
+  - The plugin should ensure the manifest and GDExtension are in sync; show warning if manifest signals differ from loaded ClassDB.
 
 **Editor connect flow**
 
-* When connecting a signal via the Node tab, the Godot editor will show functions with matching signature. Since we register signals in `register_class()`, they appear normally.
-* The `FerrisInspectorPlugin` enhances the connect dialog by allowing filters on manifest-driven method templates.
+- When connecting a signal via the Node tab, the Godot editor will show functions with matching signature. Since we register signals in `register_class()`, they appear normally.
+- The `FerrisInspectorPlugin` enhances the connect dialog by allowing filters on manifest-driven method templates.
 
 ### 🚨 Dependency Alert: Metadata Registry (v0.1.0)
 
@@ -242,20 +242,20 @@ We provide a small set of Godot plugins (GDExtension or script-based) that read 
 
 **Telemetry (lightweight)**
 
-* Add optional runtime telemetry API in FerrisScript runtime that publishes to Godot's `Remote` or custom `DebugBus`:
-  * `FerrisDebug.publish_metric(name: &str, value: Variant)`
-  * `FerrisDebug.publish_event(name: &str, payload: VariantDict)`
+- Add optional runtime telemetry API in FerrisScript runtime that publishes to Godot's `Remote` or custom `DebugBus`:
+  - `FerrisDebug.publish_metric(name: &str, value: Variant)`
+  - `FerrisDebug.publish_event(name: &str, payload: VariantDict)`
 
 **Debugging mapping**
 
-* Ferris compiler should emit a source map (`.ferris.map.json`) mapping compiled function offsets to FerrisScript source lines.
-* `FerrisDebugPanel` can display current call-site mapping when a frame event is received.
+- Ferris compiler should emit a source map (`.ferris.map.json`) mapping compiled function offsets to FerrisScript source lines.
+- `FerrisDebugPanel` can display current call-site mapping when a frame event is received.
 
 **Breakpoints & stepping (longer-term)**
 
-* Prototype approach:
-  * FerrisScript runtime listens for debug commands from `EditorPlugin` via WebSocket or local TCP.
-  * Implement basic `pause/resume` and `stack` introspection first; full stepping later.
+- Prototype approach:
+  - FerrisScript runtime listens for debug commands from `EditorPlugin` via WebSocket or local TCP.
+  - Implement basic `pause/resume` and `stack` introspection first; full stepping later.
 
 ### 🚨 Dependency Alert: Debug Infrastructure (v0.2.5+)
 
@@ -268,17 +268,17 @@ We provide a small set of Godot plugins (GDExtension or script-based) that read 
 
 ## 8. Security & Safety Considerations
 
-* **Editor plugin sandboxing:** Plugins invoking external processes must not expose unsafe behavior to users. Only run toolchain from project root.
-* **Manifest trust model:** Treat manifest as build artifact; if missing/old, show clear warnings rather than silently assuming correctness.
-* **Modding scenario:** If exposing FerrisScript to mods, provide restricted subset and ensure FS/OS calls are gated.
+- **Editor plugin sandboxing:** Plugins invoking external processes must not expose unsafe behavior to users. Only run toolchain from project root.
+- **Manifest trust model:** Treat manifest as build artifact; if missing/old, show clear warnings rather than silently assuming correctness.
+- **Modding scenario:** If exposing FerrisScript to mods, provide restricted subset and ensure FS/OS calls are gated.
 
 ---
 
 ## 9. UX & Error Handling Guidelines
 
-* **Graceful degrade:** When the manifest or build tool is missing, show clear CTAs: "Install FerrisScript toolchain" or "Run build".
-* **Diagnostic linking:** Errors should include `file`, `line`, and `column` fields, and `FerrisProjectPlugin` should convert them to clickable links.
-* **Non-blocking UI:** All external process calls must be async. Provide progress spinners and cancel buttons.
+- **Graceful degrade:** When the manifest or build tool is missing, show clear CTAs: "Install FerrisScript toolchain" or "Run build".
+- **Diagnostic linking:** Errors should include `file`, `line`, and `column` fields, and `FerrisProjectPlugin` should convert them to clickable links.
+- **Non-blocking UI:** All external process calls must be async. Provide progress spinners and cancel buttons.
 
 ---
 
@@ -286,17 +286,17 @@ We provide a small set of Godot plugins (GDExtension or script-based) that read 
 
 **CI tasks**
 
-* `ferris build` in CI to ensure compile-time checks pass.
-* `ferris lint` + `ferris test` as part of PR gating.
-* Generate `ferris_manifest.json` as CI artifact (for release packaging).
+- `ferris build` in CI to ensure compile-time checks pass.
+- `ferris lint` + `ferris test` as part of PR gating.
+- Generate `ferris_manifest.json` as CI artifact (for release packaging).
 
 **Packaging**
 
-* Produce `ferris_gdextension.zip` or `.gdpack` that includes:
-  * compiled extension binaries
-  * `res://ferris/manifest.json`
-  * editor plugin scripts (optional)
-* Provide Godot Marketplace packaging instructions.
+- Produce `ferris_gdextension.zip` or `.gdpack` that includes:
+  - compiled extension binaries
+  - `res://ferris/manifest.json`
+  - editor plugin scripts (optional)
+- Provide Godot Marketplace packaging instructions.
 
 ---
 
@@ -339,22 +339,22 @@ func _process(delta):
 ferris-lsp --workspace /path/to/project --port 6009
 ```
 
-* The LSP supports a custom request `workspace/ferrisManifest` returning the latest manifest JSON.
+- The LSP supports a custom request `workspace/ferrisManifest` returning the latest manifest JSON.
 
 ---
 
 ## 12. Testing Strategy for Editor Integration
 
-* **Unit tests (Ferris toolchain)**
-  * Manifest generation for many AST patterns.
-  * Scene verification tests: test `.tscn` variations.
+- **Unit tests (Ferris toolchain)**
+  - Manifest generation for many AST patterns.
+  - Scene verification tests: test `.tscn` variations.
 
-* **Integration tests (Editor Plugin)**
-  * Mock manifest file and run plugin automation to ensure UI updates.
-  * Simulate build failure and check plugin diagnostic display.
+- **Integration tests (Editor Plugin)**
+  - Mock manifest file and run plugin automation to ensure UI updates.
+  - Simulate build failure and check plugin diagnostic display.
 
-* **E2E tests**
-  * Use headless Godot runs in CI to spawn editor, load plugin, and simulate a build flow (use Godot 4 headless + CLI automation).
+- **E2E tests**
+  - Use headless Godot runs in CI to spawn editor, load plugin, and simulate a build flow (use Godot 4 headless + CLI automation).
 
 ---
 
@@ -362,19 +362,19 @@ ferris-lsp --workspace /path/to/project --port 6009
 
 **Phase 5 (v0.1.0)**
 
-* Ferris compiler emits `ferris_manifest.json`.
-* FerrisProjectPlugin reads manifest and displays it.
-* `register_class()` uses manifest via `FerrisMetadataRegistry` (Rust side) so signals show in Node tab.
+- Ferris compiler emits `ferris_manifest.json`.
+- FerrisProjectPlugin reads manifest and displays it.
+- `register_class()` uses manifest via `FerrisMetadataRegistry` (Rust side) so signals show in Node tab.
 
 **Phase 6 (v0.2.0)**
 
-* Implement Ferris LSP with hover/completion.
-* Add Inspector typed views and "Connect Signal" enhancements.
+- Implement Ferris LSP with hover/completion.
+- Add Inspector typed views and "Connect Signal" enhancements.
 
 **Phase 7 (v0.2.5+)**
 
-* FerrisSceneVerifier with compile-time scene checks.
-* Telemetry & DebugPanel prototype.
+- FerrisSceneVerifier with compile-time scene checks.
+- Telemetry & DebugPanel prototype.
 
 ---
 
@@ -410,10 +410,10 @@ ferris-lsp --workspace /path/to/project --port 6009
 
 ## 16. Final notes & recommended libs/tools
 
-* Use `miette`/`ariadne` in Ferris compiler for nice diagnostics (helpful when rendering inside Godot).
-* For LSP: `tower-lsp` or similar Rust LSP lib.
-* For plugin communication: use JSON manifest + file watchers rather than ad-hoc sockets (simpler, cross-platform).
-* Keep manifest format small & stable; version it (`"manifest_version": 1`) to allow forward changes.
+- Use `miette`/`ariadne` in Ferris compiler for nice diagnostics (helpful when rendering inside Godot).
+- For LSP: `tower-lsp` or similar Rust LSP lib.
+- For plugin communication: use JSON manifest + file watchers rather than ad-hoc sockets (simpler, cross-platform).
+- Keep manifest format small & stable; version it (`"manifest_version": 1`) to allow forward changes.
 
 ---
 
@@ -436,21 +436,25 @@ ferris-lsp --workspace /path/to/project --port 6009
 ### Recommended Sequencing 📋
 
 **v0.0.5 (Current Priority)**:
+
 - ✅ LSP for external editors ONLY
 - ✅ No manifest dependency
 - ✅ Focus on VSCode extension
 
 **v0.1.0**:
+
 - ✅ Manifest generation system
 - ✅ Metadata registry in GDExtension
 - ✅ Basic CLI tooling (`ferris build`, `ferris lint`)
 
 **v0.2.0**:
+
 - ✅ FerrisProjectPlugin (build panel)
 - ✅ FerrisInspectorPlugin (property/signal display)
 - ✅ Enhanced LSP (workspace symbols, rename)
 
 **v0.2.5+**:
+
 - ⏳ FerrisSceneVerifier (scene validation)
 - ⏳ FerrisDebugPanel (telemetry)
 - ⏳ Debug infrastructure (breakpoints, stepping)
@@ -500,12 +504,14 @@ ferris-lsp --workspace /path/to/project --port 6009
 **Maintenance**: Update after each version as features ship
 
 **Related Documents**:
+
 - `ROADMAP_MASTER.md` - Version sequencing
 - `ROADMAP_CONSOLIDATION_ANALYSIS.md` - Strategic analysis
 - `v0.0.5-roadmap.md` - LSP implementation details
 - `v0.1.0-ROADMAP.md` - Metadata system plans
 
 **Changelog**:
+
 - 2025-10-09: Initial technical specification with dependency analysis
 
 ---

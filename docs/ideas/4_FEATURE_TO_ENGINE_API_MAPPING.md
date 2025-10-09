@@ -3,10 +3,10 @@ Perfect — here’s the next major layer:
 
 Each section connects:
 
-* 💡 **Godot System**
-* 💢 **Limitations (current pain points)**
-* ⚙️ **FerrisScript Capability**
-* 🧩 **Implementation Example / Concept**
+- 💡 **Godot System**
+- 💢 **Limitations (current pain points)**
+- ⚙️ **FerrisScript Capability**
+- 🧩 **Implementation Example / Concept**
 
 ---
 
@@ -18,16 +18,16 @@ Each section connects:
 
 ### 💢 Limitations
 
-* GDScript nodes are dynamic; signals, properties, and methods are runtime-registered.
-* Type errors and missing nodes often appear *during gameplay*, not in-editor.
-* Dependency chains between nodes are fragile.
+- GDScript nodes are dynamic; signals, properties, and methods are runtime-registered.
+- Type errors and missing nodes often appear *during gameplay*, not in-editor.
+- Dependency chains between nodes are fragile.
 
 ### ⚙️ FerrisScript Solution
 
-* Compile-time validation of node dependencies.
-* Typed node references (`NodeRef<T>`).
-* Static registration of signals & properties during compilation.
-* Potential for scene “contracts” (like Rust traits for node behaviors).
+- Compile-time validation of node dependencies.
+- Typed node references (`NodeRef<T>`).
+- Static registration of signals & properties during compilation.
+- Potential for scene “contracts” (like Rust traits for node behaviors).
 
 ### 🧩 Example
 
@@ -54,16 +54,16 @@ impl HealthBarScene for PlayerUI {
 
 ### 💢 Limitations
 
-* Signals must be declared in GDScript or C# before runtime.
-* Dynamically connected signals are fragile and error-prone.
-* No compile-time validation that a signal exists or that a callback matches its signature.
+- Signals must be declared in GDScript or C# before runtime.
+- Dynamically connected signals are fragile and error-prone.
+- No compile-time validation that a signal exists or that a callback matches its signature.
 
 ### ⚙️ FerrisScript Solution
 
-* Compile-time signal definitions derived from structs.
-* Signal signature validation and generation.
-* Static connection graph between nodes and listeners.
-* Potential use of procedural macros (`#[signal(auto)]`).
+- Compile-time signal definitions derived from structs.
+- Signal signature validation and generation.
+- Static connection graph between nodes and listeners.
+- Potential use of procedural macros (`#[signal(auto)]`).
 
 ### 🧩 Example
 
@@ -85,16 +85,16 @@ fn take_damage(&mut self, amount: f32) {
 
 ### 💢 Limitations
 
-* Godot physics callbacks (`_physics_process`) are often slow or unsafe to parallelize.
-* Deterministic physics simulation isn’t guaranteed.
-* Complex simulation logic bloats frame times.
+- Godot physics callbacks (`_physics_process`) are often slow or unsafe to parallelize.
+- Deterministic physics simulation isn’t guaranteed.
+- Complex simulation logic bloats frame times.
 
 ### ⚙️ FerrisScript Solution
 
-* Deterministic compile-time physics passes.
-* Parallel-safe simulation APIs (via `rayon` or built-in job system).
-* Compile-time fixed timestep verification.
-* Strong typing for units (e.g., meters, seconds, newtons).
+- Deterministic compile-time physics passes.
+- Parallel-safe simulation APIs (via `rayon` or built-in job system).
+- Compile-time fixed timestep verification.
+- Strong typing for units (e.g., meters, seconds, newtons).
 
 ### 🧩 Example
 
@@ -113,15 +113,15 @@ fn integrate_forces(bodies: &mut [RigidBody]) {
 
 ### 💢 Limitations
 
-* Resource loading in Godot is runtime-checked only.
-* Missing textures, audio, or script files can silently fail.
-* No static dependency map for assets.
+- Resource loading in Godot is runtime-checked only.
+- Missing textures, audio, or script files can silently fail.
+- No static dependency map for assets.
 
 ### ⚙️ FerrisScript Solution
 
-* Compile-time resource dependency validation.
-* Static asset linking (compile-time reference validation).
-* Declarative resource types (`#[resource(path = "...")]`).
+- Compile-time resource dependency validation.
+- Static asset linking (compile-time reference validation).
+- Declarative resource types (`#[resource(path = "...")]`).
 
 ### 🧩 Example
 
@@ -138,15 +138,15 @@ const HIT_SOUND: AudioStream = AudioStream::load();
 
 ### 💢 Limitations
 
-* GDScript lacks strong serialization and determinism.
-* Network sync logic must be manually written.
-* No compile-time enforcement of authority or role logic.
+- GDScript lacks strong serialization and determinism.
+- Network sync logic must be manually written.
+- No compile-time enforcement of authority or role logic.
 
 ### ⚙️ FerrisScript Solution
 
-* Type-safe, deterministic serialization (`#[networked]`).
-* Role-based access enforced by compiler.
-* Predictive sync with rollback logic guaranteed by types.
+- Type-safe, deterministic serialization (`#[networked]`).
+- Role-based access enforced by compiler.
+- Predictive sync with rollback logic guaranteed by types.
 
 ### 🧩 Example
 
@@ -167,14 +167,14 @@ struct PlayerState {
 
 ### 💢 Limitations
 
-* GDScript’s threading is coarse and unsafe.
-* No concept of shared immutable data or compile-time thread checks.
+- GDScript’s threading is coarse and unsafe.
+- No concept of shared immutable data or compile-time thread checks.
 
 ### ⚙️ FerrisScript Solution
 
-* Compile-time checked thread safety.
-* `#[parallel]` function attribute for safe concurrent systems.
-* Cross-thread message passing using Rust-style channels.
+- Compile-time checked thread safety.
+- `#[parallel]` function attribute for safe concurrent systems.
+- Cross-thread message passing using Rust-style channels.
 
 ### 🧩 Example
 
@@ -193,15 +193,15 @@ fn pathfinding_system(map: &NavMesh, agents: &mut [Agent]) {
 
 ### 💢 Limitations
 
-* GDScript tools can extend the editor, but often slowly.
-* No introspection for statically defined game data.
-* Editor tooling can’t reason about compile-time constants.
+- GDScript tools can extend the editor, but often slowly.
+- No introspection for statically defined game data.
+- Editor tooling can’t reason about compile-time constants.
 
 ### ⚙️ FerrisScript Solution
 
-* Reflection data emitted at compile time (for custom inspectors).
-* In-editor autocomplete and docs generated from the compiler.
-* Dynamic preview of static constants and expressions.
+- Reflection data emitted at compile time (for custom inspectors).
+- In-editor autocomplete and docs generated from the compiler.
+- Dynamic preview of static constants and expressions.
 
 ### 🧩 Example
 
@@ -221,14 +221,14 @@ struct EnemyStats {
 
 ### 💢 Limitations
 
-* Godot lacks an incremental build system for scripts.
-* Reloading scripts causes runtime errors or data loss.
+- Godot lacks an incremental build system for scripts.
+- Reloading scripts causes runtime errors or data loss.
 
 ### ⚙️ FerrisScript Solution
 
-* Incremental compilation via Cargo plugin.
-* Deterministic, dependency-tracked builds.
-* Hot reload for changed functions with ABI stability.
+- Incremental compilation via Cargo plugin.
+- Deterministic, dependency-tracked builds.
+- Hot reload for changed functions with ABI stability.
 
 ### 🧩 Example
 
@@ -244,14 +244,14 @@ $ cargo ferris hot-reload
 
 ### 💢 Limitations
 
-* GDScript-based editor tools slow with large projects.
-* C# tools have high iteration cost and poor integration.
+- GDScript-based editor tools slow with large projects.
+- C# tools have high iteration cost and poor integration.
 
 ### ⚙️ FerrisScript Solution
 
-* Fast, natively compiled editor extensions.
-* Compile-time safe access to Godot editor APIs.
-* Inline UIs defined in FerrisScript.
+- Fast, natively compiled editor extensions.
+- Compile-time safe access to Godot editor APIs.
+- Inline UIs defined in FerrisScript.
 
 ### 🧩 Example
 
@@ -269,15 +269,15 @@ fn generate_level_preview(scene: &mut SceneTree) {
 
 ### 💢 Limitations
 
-* GDScript lints are limited to basic syntax.
-* No cross-file semantic validation.
-* Plugins can’t introspect compiled state.
+- GDScript lints are limited to basic syntax.
+- No cross-file semantic validation.
+- Plugins can’t introspect compiled state.
 
 ### ⚙️ FerrisScript Solution
 
-* Compiler emits static analysis metadata.
-* LSP integration for semantic diagnostics.
-* Type-safe reflection and auto-documentation.
+- Compiler emits static analysis metadata.
+- LSP integration for semantic diagnostics.
+- Type-safe reflection and auto-documentation.
 
 ### 🧩 Example
 

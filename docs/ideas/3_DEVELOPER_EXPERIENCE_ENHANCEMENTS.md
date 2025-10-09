@@ -17,9 +17,9 @@ Each section describes:
 
 A dedicated dockable panel for FerrisScript projects:
 
-* Displays compile-time diagnostics
-* Lists all registered nodes, signals, and modules
-* Offers hot-reload and build commands
+- Displays compile-time diagnostics
+- Lists all registered nodes, signals, and modules
+- Offers hot-reload and build commands
 
 ### 🧠 Benefit
 
@@ -28,9 +28,9 @@ Developers don’t need to leave the editor for 90% of tasks.
 
 ### 🧩 Integration
 
-* Custom Godot `EditorPlugin` with dock panel
-* Hooks into Cargo via `cargo-godot` subprocess
-* Live compiler output in a terminal-like panel
+- Custom Godot `EditorPlugin` with dock panel
+- Hooks into Cargo via `cargo-godot` subprocess
+- Live compiler output in a terminal-like panel
 
 **Example Layout**
 
@@ -57,16 +57,16 @@ Language Server Protocol (LSP) support for autocompletion, type hints, and docs.
 
 Editor shows accurate completions for:
 
-* Node methods
-* FerrisScript structs
-* Signals and fields
+- Node methods
+- FerrisScript structs
+- Signals and fields
   All based on **compile-time metadata**, not runtime reflection.
 
 ### 🧩 Integration
 
-* `ferris-lsp` server built atop the compiler frontend
-* Plugin integration similar to GDScript’s language server
-* Inline hints (type annotations, symbol docs)
+- `ferris-lsp` server built atop the compiler frontend
+- Plugin integration similar to GDScript’s language server
+- Inline hints (type annotations, symbol docs)
 
 **Example**
 
@@ -90,9 +90,9 @@ Similar to Unreal’s “Live Coding,” but deterministic and state-safe.
 
 ### 🧩 Integration
 
-* Background `cargo ferris --watch`
-* Godot plugin monitors output file changes
-* Scene reload preserves node state where compatible
+- Background `cargo ferris --watch`
+- Godot plugin monitors output file changes
+- Scene reload preserves node state where compatible
 
 **Workflow**
 
@@ -117,8 +117,8 @@ Visual dependency map for large systems.
 
 ### 🧩 Integration
 
-* Contract data emitted as JSON during compile
-* Plugin visualizes this under the “Scene” panel
+- Contract data emitted as JSON during compile
+- Plugin visualizes this under the “Scene” panel
 
 **Example (in Inspector)**
 
@@ -141,13 +141,13 @@ FerrisScript compiler can inject lightweight profiling hooks that Godot’s Prof
 
 Developers can see per-function timings directly in the Godot profiler:
 
-* “update_ai” → 0.34ms
-* “calculate_path” → 0.12ms
+- “update_ai” → 0.34ms
+- “calculate_path” → 0.12ms
 
 ### 🧩 Integration
 
-* Compiler emits metadata and lightweight instrumentation calls.
-* Editor plugin extends profiler view with FerrisScript function names.
+- Compiler emits metadata and lightweight instrumentation calls.
+- Editor plugin extends profiler view with FerrisScript function names.
 
 ---
 
@@ -163,8 +163,8 @@ Educates users on API design and system behavior right inside the editor.
 
 ### 🧩 Integration
 
-* Docs compiled into JSON or Markdown during build.
-* The editor plugin injects this into the Inspector or Code Editor tooltips.
+- Docs compiled into JSON or Markdown during build.
+- The editor plugin injects this into the Inspector or Code Editor tooltips.
 
 **Example**
 Hovering over `take_damage()` in the Inspector shows:
@@ -188,8 +188,8 @@ Simplifies creating tailored UIs without writing separate GDScript editor tools.
 
 ### 🧩 Integration
 
-* Plugin auto-generates Godot EditorProperty widgets based on annotations.
-* Hot-reload updates inspector widgets without restart.
+- Plugin auto-generates Godot EditorProperty widgets based on annotations.
+- Hot-reload updates inspector widgets without restart.
 
 **Example**
 
@@ -212,8 +212,8 @@ Easier debugging of dependency issues, circular references, or missing exports.
 
 ### 🧩 Integration
 
-* Compiler emits `.ferris_graph` file.
-* Plugin displays graph view similar to the Animation Tree or Visual Shader.
+- Compiler emits `.ferris_graph` file.
+- Plugin displays graph view similar to the Animation Tree or Visual Shader.
 
 **UI Example**
 
@@ -236,8 +236,8 @@ Perfect for RTS, roguelikes, or physics-heavy systems where reproducibility matt
 
 ### 🧩 Integration
 
-* Compiler emits a “determinism checksum” log.
-* Editor UI lets you compare state between runs or clients.
+- Compiler emits a “determinism checksum” log.
+- Editor UI lets you compare state between runs or clients.
 
 **Example**
 
@@ -260,8 +260,8 @@ Empowers modders and tool developers to safely write FerrisScript in-editor.
 
 ### 🧩 Integration
 
-* WASM or bytecode sandbox for limited runtime compilation.
-* Static analysis to prevent unsafe APIs.
+- WASM or bytecode sandbox for limited runtime compilation.
+- Static analysis to prevent unsafe APIs.
 
 ---
 
@@ -284,11 +284,11 @@ FerrisScript turns Godot into a *compile-time aware engine*:
 
 ## 🧩 Optional Developer Features (Long-term Vision)
 
-* 🔍 **Scene Analyzers:** compile-time rules enforcing architecture guidelines.
-* 🧩 **Blueprint Visualizer:** hybrid visual programming via generated FerrisScript nodes.
-* 🧪 **Play-in-Editor Testing:** run simulation tests in parallel without full scene load.
-* 🧠 **Static Debugger:** step through FerrisScript “compile-time simulation passes.”
-* 🧰 **Cargo-Godot Dashboard:** integrated build target management (debug/release/editor).
+- 🔍 **Scene Analyzers:** compile-time rules enforcing architecture guidelines.
+- 🧩 **Blueprint Visualizer:** hybrid visual programming via generated FerrisScript nodes.
+- 🧪 **Play-in-Editor Testing:** run simulation tests in parallel without full scene load.
+- 🧠 **Static Debugger:** step through FerrisScript “compile-time simulation passes.”
+- 🧰 **Cargo-Godot Dashboard:** integrated build target management (debug/release/editor).
 
 ---
 
@@ -299,9 +299,9 @@ FerrisScript turns Godot into a *compile-time aware engine*:
 
 This approach positions FerrisScript as:
 
-* The **compile-time-first scripting layer** for Godot
-* The **bridge** between Rust ecosystems and Godot tooling
-* The **developer-friendly static scripting language** the engine never had
+- The **compile-time-first scripting layer** for Godot
+- The **bridge** between Rust ecosystems and Godot tooling
+- The **developer-friendly static scripting language** the engine never had
 
 ---
 
