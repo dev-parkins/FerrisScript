@@ -2535,4 +2535,83 @@ mod tests {
             .unwrap_err()
             .contains("emit_signal first argument must be a string"));
     }
+
+    // Phase 2: Lifecycle callback runtime tests
+
+    #[test]
+    fn test_call_input_function() {
+        let source = r#"
+            fn _input(event: InputEvent) {
+                print("Input callback called");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Create an InputEventHandle
+        let input_event = InputEventHandle::new(Some("ui_accept".to_string()), None);
+        let input_value = Value::InputEvent(input_event);
+
+        // Call the _input function
+        let result = call_function("_input", &[input_value], &mut env);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Nil);
+    }
+
+    #[test]
+    fn test_call_physics_process_function() {
+        let source = r#"
+            fn _physics_process(delta: f32) {
+                print("Physics callback called");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Call the _physics_process function with delta
+        let delta_value = Value::Float(0.016);
+        let result = call_function("_physics_process", &[delta_value], &mut env);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Nil);
+    }
+
+    #[test]
+    fn test_call_enter_tree_function() {
+        let source = r#"
+            fn _enter_tree() {
+                print("Enter tree callback called");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Call the _enter_tree function
+        let result = call_function("_enter_tree", &[], &mut env);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Nil);
+    }
+
+    #[test]
+    fn test_call_exit_tree_function() {
+        let source = r#"
+            fn _exit_tree() {
+                print("Exit tree callback called");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Call the _exit_tree function
+        let result = call_function("_exit_tree", &[], &mut env);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Nil);
+    }
 }

@@ -1743,4 +1743,101 @@ fn _process(delta: f32) {
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("must be of type InputEvent"));
     }
+
+    // Phase 2.2: _physics_process() lifecycle function tests
+
+    #[test]
+    fn test_physics_process_function_valid() {
+        let input = r#"fn _physics_process(delta: f32) {
+    print("Physics update");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_physics_process_function_wrong_param_count() {
+        // Test with no parameters
+        let input = r#"fn _physics_process() {
+    print("Physics update");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .contains("must have exactly 1 parameter"));
+
+        // Test with two parameters
+        let input2 = r#"fn _physics_process(delta: f32, extra: i32) {
+    print("Physics update");
+}"#;
+        let tokens2 = tokenize(input2).unwrap();
+        let program2 = parse(&tokens2, input2).unwrap();
+        let result2 = check(&program2, input2);
+        assert!(result2.is_err());
+        assert!(result2
+            .unwrap_err()
+            .contains("must have exactly 1 parameter"));
+    }
+
+    #[test]
+    fn test_physics_process_function_wrong_param_type() {
+        let input = r#"fn _physics_process(event: InputEvent) {
+    print("Physics update");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("must be of type f32"));
+    }
+
+    // Phase 2.3: _enter_tree() and _exit_tree() lifecycle function tests
+
+    #[test]
+    fn test_enter_tree_function_valid() {
+        let input = r#"fn _enter_tree() {
+    print("Entered tree");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_enter_tree_function_wrong_param_count() {
+        let input = r#"fn _enter_tree(extra: i32) {
+    print("Entered tree");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("must have no parameters"));
+    }
+
+    #[test]
+    fn test_exit_tree_function_valid() {
+        let input = r#"fn _exit_tree() {
+    print("Exited tree");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_exit_tree_function_wrong_param_count() {
+        let input = r#"fn _exit_tree(extra: i32) {
+    print("Exited tree");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("must have no parameters"));
+    }
 }
