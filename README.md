@@ -149,6 +149,8 @@ cargo test --workspace
    cargo build --package ferrisscript_godot_bind
    ```
 
+   > **Note for Godot 4.3+**: The project is configured with `api-4-3` feature for compatibility. If you encounter initialization errors, ensure `crates/godot_bind/Cargo.toml` has the correct API version feature enabled.
+
 2. **Open the test project:**
    - Open Godot 4.2+
    - Import project from `godot_test/project.godot`
