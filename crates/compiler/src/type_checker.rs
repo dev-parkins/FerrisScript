@@ -59,6 +59,7 @@ pub enum Type {
     String,
     Vector2,
     Node,
+    InputEvent,
     Void,
     Unknown,
 }
@@ -72,6 +73,7 @@ impl Type {
             Type::String => "String",
             Type::Vector2 => "Vector2",
             Type::Node => "Node",
+            Type::InputEvent => "InputEvent",
             Type::Void => "void",
             Type::Unknown => "unknown",
         }
@@ -85,6 +87,7 @@ impl Type {
             "String" => Type::String,
             "Vector2" => Type::Vector2,
             "Node" => Type::Node,
+            "InputEvent" => Type::InputEvent,
             _ => Type::Unknown,
         }
     }
@@ -195,7 +198,15 @@ impl<'a> TypeChecker<'a> {
 
     /// Get all known type names (for suggestion purposes)
     fn list_types() -> Vec<&'static str> {
-        vec!["i32", "f32", "bool", "String", "Vector2", "Node"]
+        vec![
+            "i32",
+            "f32",
+            "bool",
+            "String",
+            "Vector2",
+            "Node",
+            "InputEvent",
+        ]
     }
 
     fn error(&mut self, message: String) {
@@ -377,6 +388,9 @@ impl<'a> TypeChecker<'a> {
     }
 
     fn check_function(&mut self, func: &Function) {
+        // Validate lifecycle function signatures
+        self.validate_lifecycle_function(func);
+
         self.push_scope();
 
         // Add parameters to scope
@@ -391,6 +405,122 @@ impl<'a> TypeChecker<'a> {
         }
 
         self.pop_scope();
+    }
+
+    fn validate_lifecycle_function(&mut self, func: &Function) {
+        // Validate _input() lifecycle function signature
+        if func.name.as_str() == "_input" {
+            // _input must have exactly 1 parameter of type InputEvent
+            if func.params.len() != 1 {
+                let base_msg = format!(
+                    "Lifecycle function '_input' must have exactly 1 parameter, found {} at {}",
+                    func.params.len(),
+                    func.span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E305,
+                    &base_msg,
+                    self.source,
+                    func.span.line,
+                    func.span.column,
+                    "Expected signature: fn _input(event: InputEvent)",
+                ));
+            } else {
+                let param_type = Type::from_string(&func.params[0].ty);
+                if param_type != Type::InputEvent {
+                    let base_msg = format!(
+                        "Lifecycle function '_input' parameter must be of type InputEvent, found {} at {}",
+                        func.params[0].ty,
+                        func.span
+                    );
+                    self.error(format_error_with_code(
+                        ErrorCode::E305,
+                        &base_msg,
+                        self.source,
+                        func.span.line,
+                        func.span.column,
+                        &format!("Expected type 'InputEvent', found '{}'", func.params[0].ty),
+                    ));
+                }
+            }
+        }
+
+        // Validate _physics_process() lifecycle function signature
+        if func.name.as_str() == "_physics_process" {
+            // _physics_process must have exactly 1 parameter of type f32
+            if func.params.len() != 1 {
+                let base_msg = format!(
+                    "Lifecycle function '_physics_process' must have exactly 1 parameter, found {} at {}",
+                    func.params.len(),
+                    func.span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E305,
+                    &base_msg,
+                    self.source,
+                    func.span.line,
+                    func.span.column,
+                    "Expected signature: fn _physics_process(delta: f32)",
+                ));
+            } else {
+                let param_type = Type::from_string(&func.params[0].ty);
+                if param_type != Type::F32 {
+                    let base_msg = format!(
+                        "Lifecycle function '_physics_process' parameter must be of type f32, found {} at {}",
+                        func.params[0].ty,
+                        func.span
+                    );
+                    self.error(format_error_with_code(
+                        ErrorCode::E305,
+                        &base_msg,
+                        self.source,
+                        func.span.line,
+                        func.span.column,
+                        &format!("Expected type 'f32', found '{}'", func.params[0].ty),
+                    ));
+                }
+            }
+        }
+
+        // Validate _enter_tree() lifecycle function signature
+        if func.name.as_str() == "_enter_tree" {
+            // _enter_tree must have no parameters
+            if !func.params.is_empty() {
+                let base_msg = format!(
+                    "Lifecycle function '_enter_tree' must have no parameters, found {} at {}",
+                    func.params.len(),
+                    func.span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E305,
+                    &base_msg,
+                    self.source,
+                    func.span.line,
+                    func.span.column,
+                    "Expected signature: fn _enter_tree()",
+                ));
+            }
+        }
+
+        // Validate _exit_tree() lifecycle function signature
+        if func.name.as_str() == "_exit_tree" {
+            // _exit_tree must have no parameters
+            if !func.params.is_empty() {
+                let base_msg = format!(
+                    "Lifecycle function '_exit_tree' must have no parameters, found {} at {}",
+                    func.params.len(),
+                    func.span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E305,
+                    &base_msg,
+                    self.source,
+                    func.span.line,
+                    func.span.column,
+                    "Expected signature: fn _exit_tree()",
+                ));
+            }
+        }
     }
 
     fn check_signal(&mut self, signal: &Signal) {
@@ -1561,5 +1691,287 @@ fn _process(delta: f32) {
         let tokens = tokenize(input).unwrap();
         let program = parse(&tokens, input).unwrap();
         assert!(check(&program, input).is_ok()); // i32 can coerce to f32
+    }
+
+    // Phase 2.1: InputEvent and _input() lifecycle function tests
+
+    #[test]
+    fn test_input_function_valid() {
+        let input = r#"fn _input(event: InputEvent) {
+    print("Input received");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_input_function_wrong_param_count() {
+        // Test with no parameters
+        let input = r#"fn _input() {
+    print("Input received");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .contains("must have exactly 1 parameter"));
+
+        // Test with two parameters
+        let input2 = r#"fn _input(event: InputEvent, extra: i32) {
+    print("Input received");
+}"#;
+        let tokens2 = tokenize(input2).unwrap();
+        let program2 = parse(&tokens2, input2).unwrap();
+        let result2 = check(&program2, input2);
+        assert!(result2.is_err());
+        assert!(result2
+            .unwrap_err()
+            .contains("must have exactly 1 parameter"));
+    }
+
+    #[test]
+    fn test_input_function_wrong_param_type() {
+        let input = r#"fn _input(delta: f32) {
+    print("Input received");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("must be of type InputEvent"));
+    }
+
+    // Phase 2.2: _physics_process() lifecycle function tests
+
+    #[test]
+    fn test_physics_process_function_valid() {
+        let input = r#"fn _physics_process(delta: f32) {
+    print("Physics update");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_physics_process_function_wrong_param_count() {
+        // Test with no parameters
+        let input = r#"fn _physics_process() {
+    print("Physics update");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .contains("must have exactly 1 parameter"));
+
+        // Test with two parameters
+        let input2 = r#"fn _physics_process(delta: f32, extra: i32) {
+    print("Physics update");
+}"#;
+        let tokens2 = tokenize(input2).unwrap();
+        let program2 = parse(&tokens2, input2).unwrap();
+        let result2 = check(&program2, input2);
+        assert!(result2.is_err());
+        assert!(result2
+            .unwrap_err()
+            .contains("must have exactly 1 parameter"));
+    }
+
+    #[test]
+    fn test_physics_process_function_wrong_param_type() {
+        let input = r#"fn _physics_process(event: InputEvent) {
+    print("Physics update");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("must be of type f32"));
+    }
+
+    // Phase 2.3: _enter_tree() and _exit_tree() lifecycle function tests
+
+    #[test]
+    fn test_enter_tree_function_valid() {
+        let input = r#"fn _enter_tree() {
+    print("Entered tree");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_enter_tree_function_wrong_param_count() {
+        let input = r#"fn _enter_tree(extra: i32) {
+    print("Entered tree");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("must have no parameters"));
+    }
+
+    #[test]
+    fn test_exit_tree_function_valid() {
+        let input = r#"fn _exit_tree() {
+    print("Exited tree");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_exit_tree_function_wrong_param_count() {
+        let input = r#"fn _exit_tree(extra: i32) {
+    print("Exited tree");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("must have no parameters"));
+    }
+
+    // Additional lifecycle function edge case tests for coverage
+
+    #[test]
+    fn test_input_function_error_code_e305() {
+        // Test that _input validation uses E305 error code
+        let input = r#"fn _input(wrong_type: i32) {
+    print("test");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("E305"));
+        assert!(error.contains("must be of type InputEvent"));
+    }
+
+    #[test]
+    fn test_physics_process_function_error_code_e305() {
+        // Test that _physics_process validation uses E305 error code
+        let input = r#"fn _physics_process(wrong_type: i32) {
+    print("test");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("E305"));
+        assert!(error.contains("must be of type f32"));
+    }
+
+    #[test]
+    fn test_enter_tree_function_error_code_e305() {
+        // Test that _enter_tree validation uses E305 error code
+        let input = r#"fn _enter_tree(extra: i32) {
+    print("test");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("E305"));
+        assert!(error.contains("must have no parameters"));
+    }
+
+    #[test]
+    fn test_exit_tree_function_error_code_e305() {
+        // Test that _exit_tree validation uses E305 error code
+        let input = r#"fn _exit_tree(extra: i32) {
+    print("test");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("E305"));
+        assert!(error.contains("must have no parameters"));
+    }
+
+    #[test]
+    fn test_multiple_lifecycle_functions() {
+        // Test that multiple lifecycle functions can coexist
+        let input = r#"
+fn _input(event: InputEvent) {
+    print("Input");
+}
+
+fn _physics_process(delta: f32) {
+    print("Physics");
+}
+
+fn _enter_tree() {
+    print("Enter");
+}
+
+fn _exit_tree() {
+    print("Exit");
+}
+"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_lifecycle_function_with_body() {
+        // Test that lifecycle functions can have complex bodies
+        let input = r#"
+fn _physics_process(delta: f32) {
+    let velocity: f32 = 100.0;
+    let position: f32 = velocity * delta;
+    if position > 500.0 {
+        print("Out of bounds");
+    }
+}
+"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_input_function_no_param_error_message() {
+        // Test specific error message for _input with no params
+        let input = r#"fn _input() {
+    print("test");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("must have exactly 1 parameter"));
+        assert!(error.contains("found 0"));
+    }
+
+    #[test]
+    fn test_physics_process_no_param_error_message() {
+        // Test specific error message for _physics_process with no params
+        let input = r#"fn _physics_process() {
+    print("test");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("must have exactly 1 parameter"));
+        assert!(error.contains("found 0"));
     }
 }

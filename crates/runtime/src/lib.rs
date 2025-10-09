@@ -72,6 +72,55 @@ pub enum Value {
     Nil,
     /// Special value representing the Godot node (self)
     SelfObject,
+    /// Opaque handle to a Godot InputEvent
+    InputEvent(InputEventHandle),
+}
+
+/// Opaque handle to a Godot InputEvent.
+///
+/// This type wraps Godot's InputEvent in an opaque way, allowing FerrisScript
+/// code to check input actions without exposing the full Godot API.
+///
+/// # Supported Methods
+///
+/// - `is_action_pressed(action: String) -> bool` - Check if action is pressed
+/// - `is_action_released(action: String) -> bool` - Check if action is released
+///
+/// # Example (FerrisScript)
+///
+/// ```ferris
+/// fn _input(event: InputEvent) {
+///     if event.is_action_pressed("ui_accept") {
+///         print("Accept pressed!");
+///     }
+/// }
+/// ```
+#[derive(Debug, Clone, PartialEq)]
+pub struct InputEventHandle {
+    // Opaque storage - actual implementation will be provided by godot_bind
+    // For now, we'll store action state information
+    pub(crate) action_pressed: Option<String>,
+    pub(crate) action_released: Option<String>,
+}
+
+impl InputEventHandle {
+    /// Create a new InputEvent handle with action state
+    pub fn new(action_pressed: Option<String>, action_released: Option<String>) -> Self {
+        InputEventHandle {
+            action_pressed,
+            action_released,
+        }
+    }
+
+    /// Check if an action is pressed in this event
+    pub fn is_action_pressed(&self, action: &str) -> bool {
+        self.action_pressed.as_ref().is_some_and(|a| a == action)
+    }
+
+    /// Check if an action is released in this event
+    pub fn is_action_released(&self, action: &str) -> bool {
+        self.action_released.as_ref().is_some_and(|a| a == action)
+    }
 }
 
 impl Value {
@@ -357,6 +406,7 @@ fn builtin_print(args: &[Value]) -> Result<Value, String> {
             Value::Vector2 { x, y } => format!("Vector2({}, {})", x, y),
             Value::Nil => "nil".to_string(),
             Value::SelfObject => "self".to_string(),
+            Value::InputEvent(_) => "InputEvent".to_string(),
         })
         .collect::<Vec<_>>()
         .join(" ");
@@ -2484,5 +2534,196 @@ mod tests {
         assert!(result
             .unwrap_err()
             .contains("emit_signal first argument must be a string"));
+    }
+
+    // Phase 2: Lifecycle callback runtime tests
+
+    #[test]
+    fn test_call_input_function() {
+        let source = r#"
+            fn _input(event: InputEvent) {
+                print("Input callback called");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Create an InputEventHandle
+        let input_event = InputEventHandle::new(Some("ui_accept".to_string()), None);
+        let input_value = Value::InputEvent(input_event);
+
+        // Call the _input function
+        let result = call_function("_input", &[input_value], &mut env);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Nil);
+    }
+
+    #[test]
+    fn test_call_physics_process_function() {
+        let source = r#"
+            fn _physics_process(delta: f32) {
+                print("Physics callback called");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Call the _physics_process function with delta
+        let delta_value = Value::Float(0.016);
+        let result = call_function("_physics_process", &[delta_value], &mut env);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Nil);
+    }
+
+    #[test]
+    fn test_call_enter_tree_function() {
+        let source = r#"
+            fn _enter_tree() {
+                print("Enter tree callback called");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Call the _enter_tree function
+        let result = call_function("_enter_tree", &[], &mut env);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Nil);
+    }
+
+    #[test]
+    fn test_call_exit_tree_function() {
+        let source = r#"
+            fn _exit_tree() {
+                print("Exit tree callback called");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Call the _exit_tree function
+        let result = call_function("_exit_tree", &[], &mut env);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Nil);
+    }
+
+    #[test]
+    fn test_input_event_is_action_pressed() {
+        // Test InputEventHandle is_action_pressed method
+        let input_event = InputEventHandle::new(Some("ui_accept".to_string()), None);
+        assert!(input_event.is_action_pressed("ui_accept"));
+        assert!(!input_event.is_action_pressed("ui_cancel"));
+
+        // Test with different action
+        let input_event2 = InputEventHandle::new(Some("move_left".to_string()), None);
+        assert!(input_event2.is_action_pressed("move_left"));
+        assert!(!input_event2.is_action_pressed("ui_accept"));
+
+        // Test with no action
+        let input_event3 = InputEventHandle::new(None, None);
+        assert!(!input_event3.is_action_pressed("ui_accept"));
+    }
+
+    #[test]
+    fn test_input_event_is_action_released() {
+        // Test InputEventHandle is_action_released method
+        let input_event = InputEventHandle::new(None, Some("ui_accept".to_string()));
+        assert!(input_event.is_action_released("ui_accept"));
+        assert!(!input_event.is_action_released("ui_cancel"));
+
+        // Test with pressed action (should not be released)
+        let input_event2 = InputEventHandle::new(Some("ui_accept".to_string()), None);
+        assert!(!input_event2.is_action_released("ui_accept"));
+
+        // Test with no action
+        let input_event3 = InputEventHandle::new(None, None);
+        assert!(!input_event3.is_action_released("ui_accept"));
+    }
+
+    #[test]
+    fn test_input_function_with_event_parameter() {
+        // Test _input function receives InputEvent parameter
+        let source = r#"
+            fn _input(event: InputEvent) {
+                print("Input received");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Create input event with pressed action
+        let input_event = InputEventHandle::new(Some("ui_accept".to_string()), None);
+        let input_value = Value::InputEvent(input_event);
+
+        let result = call_function("_input", &[input_value], &mut env);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_lifecycle_functions_with_return_values() {
+        // Test that lifecycle functions can have return values (even though typically void)
+        let source = r#"
+            fn _physics_process(delta: f32) -> i32 {
+                return 42;
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        let delta_value = Value::Float(0.016);
+        let result = call_function("_physics_process", &[delta_value], &mut env);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Int(42));
+    }
+
+    #[test]
+    fn test_lifecycle_functions_with_variables() {
+        // Test lifecycle functions that use variables
+        let source = r#"
+            fn _physics_process(delta: f32) {
+                let speed: f32 = 100.0;
+                let distance: f32 = speed * delta;
+                print("Moved distance");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        let delta_value = Value::Float(0.016);
+        let result = call_function("_physics_process", &[delta_value], &mut env);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_call_function_wrong_arg_count() {
+        // Test calling lifecycle function with wrong number of arguments
+        let source = r#"
+            fn _physics_process(delta: f32) {
+                print("Physics");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Try to call with no arguments (should fail)
+        let result = call_function("_physics_process", &[], &mut env);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("expects 1 arguments, got 0"));
     }
 }

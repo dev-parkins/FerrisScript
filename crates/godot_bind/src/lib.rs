@@ -1,6 +1,6 @@
 use ferrisscript_compiler::{ast, compile};
-use ferrisscript_runtime::{call_function, execute, Env, Value};
-use godot::classes::{file_access::ModeFlags, FileAccess};
+use ferrisscript_runtime::{call_function, execute, Env, InputEventHandle, Value};
+use godot::classes::{file_access::ModeFlags, FileAccess, InputEvent};
 use godot::prelude::*;
 use std::cell::RefCell;
 
@@ -52,6 +52,7 @@ fn value_to_variant(value: &Value) -> Variant {
         Value::Vector2 { x, y } => Variant::from(Vector2::new(*x, *y)),
         Value::Nil => Variant::nil(),
         Value::SelfObject => Variant::nil(), // self cannot be passed as signal parameter
+        Value::InputEvent(_) => Variant::nil(), // InputEvent cannot be passed as signal parameter
     }
 }
 
@@ -67,6 +68,7 @@ fn godot_print_builtin(args: &[Value]) -> Result<Value, String> {
             Value::Vector2 { x, y } => format!("Vector2({}, {})", x, y),
             Value::Nil => "nil".to_string(),
             Value::SelfObject => "self".to_string(),
+            Value::InputEvent(_) => "InputEvent".to_string(),
         })
         .collect::<Vec<_>>()
         .join(" ");
@@ -139,6 +141,77 @@ impl INode2D for FerrisScriptNode {
             // Convert delta to Float (f32 for FerrisScript)
             let delta_value = Value::Float(delta as f32);
             self.call_script_function_with_self("_process", &[delta_value]);
+        }
+    }
+
+    fn input(&mut self, event: Gd<InputEvent>) {
+        // Execute _input function if script is loaded
+        if self.script_loaded {
+            // Convert Godot InputEvent to FerrisScript InputEventHandle
+            // NOTE: Simplified implementation for Phase 2.1
+            // - Currently checks hardcoded common actions (ui_* actions)
+            // - Stores action name strings, not full Godot event reference
+            // - Full InputEvent API (position, button_index, etc.) deferred to Phase 5/6
+            // See: docs/planning/v0.0.4/KNOWN_LIMITATIONS.md - "InputEvent Simplified API"
+            let action_pressed = if event.is_action_pressed("ui_accept") {
+                Some("ui_accept".to_string())
+            } else if event.is_action_pressed("ui_cancel") {
+                Some("ui_cancel".to_string())
+            } else if event.is_action_pressed("ui_left") {
+                Some("ui_left".to_string())
+            } else if event.is_action_pressed("ui_right") {
+                Some("ui_right".to_string())
+            } else if event.is_action_pressed("ui_up") {
+                Some("ui_up".to_string())
+            } else if event.is_action_pressed("ui_down") {
+                Some("ui_down".to_string())
+            } else {
+                None
+            };
+
+            let action_released = if event.is_action_released("ui_accept") {
+                Some("ui_accept".to_string())
+            } else if event.is_action_released("ui_cancel") {
+                Some("ui_cancel".to_string())
+            } else if event.is_action_released("ui_left") {
+                Some("ui_left".to_string())
+            } else if event.is_action_released("ui_right") {
+                Some("ui_right".to_string())
+            } else if event.is_action_released("ui_up") {
+                Some("ui_up".to_string())
+            } else if event.is_action_released("ui_down") {
+                Some("ui_down".to_string())
+            } else {
+                None
+            };
+
+            let input_event_handle = InputEventHandle::new(action_pressed, action_released);
+            let input_event_value = Value::InputEvent(input_event_handle);
+
+            self.call_script_function_with_self("_input", &[input_event_value]);
+        }
+    }
+
+    fn physics_process(&mut self, delta: f64) {
+        // Execute _physics_process function if script is loaded
+        if self.script_loaded {
+            // Convert delta to Float (f32 for FerrisScript)
+            let delta_value = Value::Float(delta as f32);
+            self.call_script_function_with_self("_physics_process", &[delta_value]);
+        }
+    }
+
+    fn enter_tree(&mut self) {
+        // Execute _enter_tree function if script is loaded
+        if self.script_loaded {
+            self.call_script_function("_enter_tree", &[]);
+        }
+    }
+
+    fn exit_tree(&mut self) {
+        // Execute _exit_tree function if script is loaded
+        if self.script_loaded {
+            self.call_script_function("_exit_tree", &[]);
         }
     }
 }

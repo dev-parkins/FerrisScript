@@ -370,5 +370,89 @@ git push origin develop
 
 ---
 
+## 🏗️ Architectural Decision: Signal Editor Visibility (October 9, 2025)
+
+### Context
+
+During Phase 2 preparation, research was conducted on why FerrisScript signals don't appear in Godot's Node→Signals panel despite being fully functional at runtime.
+
+### Key Finding
+
+**Root Cause**: Godot's editor introspects `ClassDB` at **class registration time** (compile-time), but FerrisScript registers signals **dynamically at runtime** via `add_user_signal()` in the `ready()` lifecycle method.
+
+**Why This Happens**:
+
+- FerrisScript has **one** Rust class (`FerrisScriptNode`) that loads **many** `.ferris` scripts
+- Signals are defined in `.ferris` files, not known until runtime
+- Godot's `register_class()` method (where editor-visible signals must be registered) runs before any scripts are loaded
+
+### Design Decision: Accept Limitation for v0.0.4
+
+**Status**: ✅ **Documented and accepted** (not a bug)
+
+**Rationale**:
+
+1. Signals are **fully functional** at runtime (emission, connection, parameters all work)
+2. Editor visibility is **nice-to-have**, not critical for v0.0.4
+3. Engineering cost for metadata system not justified at this stage (2-3 days)
+4. Matches behavior of other dynamic language GDExtensions (Python, Lua)
+
+**Workaround**: Connect signals programmatically in GDScript (fully supported)
+
+### Future Solutions Identified
+
+**Option 1: Predefined Common Signals** (v0.1.0 candidate)
+
+- Declare 5-10 frequently-used signals in Rust `register_class()`
+- Custom signals still work dynamically
+- Engineering cost: 1 hour
+
+**Option 2: Metadata System** (post-v0.1.0)
+
+- Extract signal metadata during .ferris compilation
+- Generate Rust code to register signals statically
+- Engineering cost: 2-3 days
+- Requires build system integration
+
+**Option 3: Per-Script Classes** (complex, deferred)
+
+- Generate Rust wrapper class for each .ferris file
+- Like GDScript's one-class-per-file model
+- Engineering cost: 1-2 weeks
+- Major architectural change
+
+### Documentation Created
+
+1. **SIGNAL_EDITOR_VISIBILITY_ARCHITECTURE.md** (NEW) - Deep technical analysis
+   - How Godot's signal system works (compile-time vs. runtime)
+   - Why FerrisScript faces this challenge
+   - Research on similar systems (Python, Lua, C# GDExtensions)
+   - 4 solution options with comparison matrix
+   - Recommended hybrid approach for future
+
+2. **KNOWN_LIMITATIONS.md** (UPDATED) - Enhanced signal visibility section
+   - Added architectural context
+   - Referenced deep-dive document
+   - Listed future enhancement options
+
+### Impact Assessment
+
+| Aspect | Status | Notes |
+|--------|--------|-------|
+| Signal functionality | ✅ Works perfectly | Emission, connection, parameters all functional |
+| Editor UI visibility | ❌ Not visible | Expected limitation of dynamic registration |
+| Manual testing | ✅ Fully supported | GDScript programmatic connections work |
+| User experience | 🟡 Acceptable | Workaround is standard Godot practice |
+| Future enhancement | ✅ Path identified | Multiple solutions researched and documented |
+
+### References
+
+- [SIGNAL_EDITOR_VISIBILITY_ARCHITECTURE.md](SIGNAL_EDITOR_VISIBILITY_ARCHITECTURE.md) - Complete technical analysis
+- [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md#signal-visibility) - User-facing limitation documentation
+- [SIGNAL_VISIBILITY_ISSUE.md](SIGNAL_VISIBILITY_ISSUE.md) - Testing results and workarounds
+
+---
+
 **Status**: ✅ Phase 1 COMPLETE and Phase 2 READY  
+**Architectural Decision**: ✅ Signal visibility limitation documented with future solutions identified  
 **Next Action**: User creates Phase 1 PR, performs manual testing, approves merge
