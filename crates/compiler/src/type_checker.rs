@@ -59,6 +59,7 @@ pub enum Type {
     String,
     Vector2,
     Node,
+    InputEvent,
     Void,
     Unknown,
 }
@@ -72,6 +73,7 @@ impl Type {
             Type::String => "String",
             Type::Vector2 => "Vector2",
             Type::Node => "Node",
+            Type::InputEvent => "InputEvent",
             Type::Void => "void",
             Type::Unknown => "unknown",
         }
@@ -85,6 +87,7 @@ impl Type {
             "String" => Type::String,
             "Vector2" => Type::Vector2,
             "Node" => Type::Node,
+            "InputEvent" => Type::InputEvent,
             _ => Type::Unknown,
         }
     }
@@ -195,7 +198,15 @@ impl<'a> TypeChecker<'a> {
 
     /// Get all known type names (for suggestion purposes)
     fn list_types() -> Vec<&'static str> {
-        vec!["i32", "f32", "bool", "String", "Vector2", "Node"]
+        vec![
+            "i32",
+            "f32",
+            "bool",
+            "String",
+            "Vector2",
+            "Node",
+            "InputEvent",
+        ]
     }
 
     fn error(&mut self, message: String) {

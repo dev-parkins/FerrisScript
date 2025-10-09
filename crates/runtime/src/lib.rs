@@ -72,6 +72,55 @@ pub enum Value {
     Nil,
     /// Special value representing the Godot node (self)
     SelfObject,
+    /// Opaque handle to a Godot InputEvent
+    InputEvent(InputEventHandle),
+}
+
+/// Opaque handle to a Godot InputEvent.
+///
+/// This type wraps Godot's InputEvent in an opaque way, allowing FerrisScript
+/// code to check input actions without exposing the full Godot API.
+///
+/// # Supported Methods
+///
+/// - `is_action_pressed(action: String) -> bool` - Check if action is pressed
+/// - `is_action_released(action: String) -> bool` - Check if action is released
+///
+/// # Example (FerrisScript)
+///
+/// ```ferris
+/// fn _input(event: InputEvent) {
+///     if event.is_action_pressed("ui_accept") {
+///         print("Accept pressed!");
+///     }
+/// }
+/// ```
+#[derive(Debug, Clone, PartialEq)]
+pub struct InputEventHandle {
+    // Opaque storage - actual implementation will be provided by godot_bind
+    // For now, we'll store action state information
+    pub(crate) action_pressed: Option<String>,
+    pub(crate) action_released: Option<String>,
+}
+
+impl InputEventHandle {
+    /// Create a new InputEvent handle with action state
+    pub fn new(action_pressed: Option<String>, action_released: Option<String>) -> Self {
+        InputEventHandle {
+            action_pressed,
+            action_released,
+        }
+    }
+
+    /// Check if an action is pressed in this event
+    pub fn is_action_pressed(&self, action: &str) -> bool {
+        self.action_pressed.as_ref().is_some_and(|a| a == action)
+    }
+
+    /// Check if an action is released in this event
+    pub fn is_action_released(&self, action: &str) -> bool {
+        self.action_released.as_ref().is_some_and(|a| a == action)
+    }
 }
 
 impl Value {
@@ -357,6 +406,7 @@ fn builtin_print(args: &[Value]) -> Result<Value, String> {
             Value::Vector2 { x, y } => format!("Vector2({}, {})", x, y),
             Value::Nil => "nil".to_string(),
             Value::SelfObject => "self".to_string(),
+            Value::InputEvent(_) => "InputEvent".to_string(),
         })
         .collect::<Vec<_>>()
         .join(" ");
