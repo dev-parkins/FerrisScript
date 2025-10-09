@@ -16,11 +16,13 @@
 **URL**: https://github.com/dev-parkins/FerrisScript/pull/new/feature/v0.0.4-signals
 
 **Commits**:
+
 - `d3d05ff` - feat(parser): add signal declaration parsing
 - `466c83a` - feat: Add complete signal support for FerrisScript v0.0.4
 - `c69bd95` - feat(signal): enhance documentation for dynamic signal registration and emission
 
 **Test Results**:
+
 - ✅ 382 tests passing (221 compiler + 95 integration + 64 runtime + 1 godot_bind + 1 ignored)
 - ✅ 0 failures
 - ✅ All quality gates passing (build, test, lint, format, docs)
@@ -76,6 +78,7 @@
 **Functionality**: `connect()` and `disconnect()` methods
 
 **Why Deferred**:
+
 - Editor-based connections are the primary Godot workflow
 - Requires additional complexity:
   - Node path system implementation
@@ -85,6 +88,7 @@
 - Does NOT block Phase 2 work
 
 **Future Timeline**:
+
 - Phase 1.5 (optional enhancement) or Phase 6
 - Estimated: 2-3 days
 - Depends on: Node query functions (Phase 3)
@@ -122,6 +126,7 @@
 ### After Phase 1 Merge (Phase 2 Start)
 
 1. **Create Phase 2 Branch**:
+
    ```bash
    git checkout develop
    git pull origin develop
@@ -144,6 +149,7 @@
 ## 📊 Status Dashboard
 
 ### Phase 1: Signal Support
+
 - **Status**: ✅ COMPLETE (Ready for PR)
 - **Branch**: `feature/v0.0.4-signals` (pushed)
 - **PR**: Awaiting creation
@@ -152,6 +158,7 @@
 - **Deferred Items**: 2 (programmatic connection/disconnection)
 
 ### Phase 2: Additional Callbacks
+
 - **Status**: 📋 READY (Documentation prepared)
 - **Branch**: `feature/v0.0.4-callbacks` (to be created)
 - **Document**: PHASE_2_PREP.md (comprehensive)
@@ -159,6 +166,7 @@
 - **Dependencies**: None (can start after Phase 1 merge)
 
 ### Phase 3: Node Query Functions
+
 - **Status**: 🔜 UPCOMING
 - **Document**: To be created
 - **Note**: Required for programmatic signal connection (deferred)
@@ -202,6 +210,7 @@
 ### Phase 1 Files (In PR Branch)
 
 **Implementation**:
+
 - `crates/compiler/src/lexer.rs` (modified)
 - `crates/compiler/src/parser.rs` (modified)
 - `crates/compiler/src/type_checker.rs` (modified)
@@ -211,12 +220,14 @@
 - `crates/godot_bind/src/signal_prototype.rs` (created)
 
 **Documentation**:
+
 - `docs/ERROR_CODES.md` (modified)
 - `CHANGELOG.md` (modified)
 - `examples/signals.ferris` (created)
 - `godot_test/scripts/signal_test.ferris` (created)
 
 **Planning**:
+
 - `docs/planning/v0.0.4/SIGNAL_RESEARCH.md` (created)
 - `docs/planning/v0.0.4/SIGNAL_RESEARCH_SUMMARY.md` (created)
 - `docs/planning/v0.0.4/STEP_6_COMPLETION_REPORT.md` (created)
@@ -224,6 +235,7 @@
 ### Phase 1 Prep Files (Current Branch)
 
 **Documentation**:
+
 - `docs/planning/v0.0.4/PHASE_1_STATUS_UPDATE.md` (created)
 - `docs/planning/v0.0.4/PR_TEMPLATE_PHASE_1.md` (created)
 - `docs/planning/v0.0.4/PHASE_2_PREP.md` (created)
@@ -321,11 +333,13 @@ git push origin develop
 ### When User Returns
 
 **If Continuing Phase 2**:
+
 - Check `PHASE_2_PREP.md` for current step
 - Follow implementation plan systematically
 - Add tests throughout (don't wait until end)
 
 **If Reviewing Phase 1**:
+
 - Manual Godot testing steps in `PR_TEMPLATE_PHASE_1.md`
 - Status details in `PHASE_1_STATUS_UPDATE.md`
 

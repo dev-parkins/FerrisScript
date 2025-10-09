@@ -36,6 +36,7 @@ cargo build --package ferrisscript_godot_bind
 ```
 
 **Expected Output**:
+
 - `target/debug/ferrisscript_godot_bind.dll` (Windows)
 - `target/debug/libferrisscript_godot_bind.so` (Linux)
 - `target/debug/libferrisscript_godot_bind.dylib` (macOS)
@@ -55,9 +56,11 @@ cargo build --package ferrisscript_godot_bind
 
 - Open Godot's **Output** panel (bottom of editor)
 - Look for:
+
   ```
   GDExtension loaded: res://ferrisscript.gdextension
   ```
+
 - If you see errors like `classdb_register_extension_class5`, rebuild with `api-4-3` feature
 
 ---
@@ -102,6 +105,7 @@ godot = { version = "0.4", features = ["api-4-3"] }
 ```
 
 Then rebuild:
+
 ```powershell
 cargo clean -p ferrisscript_godot_bind
 cargo build --package ferrisscript_godot_bind
@@ -112,6 +116,7 @@ cargo build --package ferrisscript_godot_bind
 ### Error: "GDExtension initialization failed"
 
 **Check**:
+
 1. DLL exists in `target/debug/`
 2. `godot_test/ferrisscript.gdextension` points to correct path
 3. Godot version matches gdext API version
@@ -140,6 +145,7 @@ cargo build --package ferrisscript_godot_bind --release
 ```
 
 Update Godot to use release build in `ferrisscript.gdextension`:
+
 ```ini
 windows.release.x86_64 = "res://../target/release/ferrisscript_godot_bind.dll"
 ```

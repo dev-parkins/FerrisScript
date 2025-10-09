@@ -11,6 +11,7 @@
 ### Expected Behavior
 
 Godot's **Node→Signals** panel in the Inspector shows signals that are:
+
 - Declared with `#[signal]` attribute (compile-time)
 - Part of the GDScript class definition
 - Statically defined in C++ classes
@@ -18,6 +19,7 @@ Godot's **Node→Signals** panel in the Inspector shows signals that are:
 ### Dynamic Signal Registration (FerrisScript)
 
 FerrisScript uses **dynamic signal registration** via `add_user_signal()`:
+
 - Signals are registered at **runtime** in `ready()`
 - Godot's Inspector UI only shows **compile-time** signals
 - Dynamic signals ARE registered and functional, just **not visible in editor**
@@ -27,6 +29,7 @@ FerrisScript uses **dynamic signal registration** via `add_user_signal()`:
 ## ✅ Signals ARE Working
 
 Your console output confirms:
+
 ```
 Registered signal: health_changed
 Registered signal: player_died
@@ -34,6 +37,7 @@ Registered signal: score_updated
 ```
 
 These signals are **fully functional** - they can be:
+
 - Emitted via `emit_signal()`
 - Connected programmatically via GDScript
 - Received by other nodes
@@ -89,7 +93,7 @@ fn _process(delta: f32) {
 
 If you **need** signals to appear in the editor, you can add them to the Rust class definition:
 
-### In `crates/godot_bind/src/lib.rs`:
+### In `crates/godot_bind/src/lib.rs`
 
 ```rust
 #[godot_api]
@@ -107,6 +111,7 @@ impl FerrisScriptNode {
 ```
 
 **Trade-offs**:
+
 - ✅ Signals appear in editor UI
 - ❌ Must be declared in Rust (not FerrisScript)
 - ❌ Requires rebuild for each signal change
@@ -138,6 +143,7 @@ impl FerrisScriptNode {
 The lack of editor UI visibility is a **known limitation** of dynamic signals, not a bug.
 
 **For Phase 1.5** (future enhancement):
+
 - Consider hybrid approach: predefined "common" signals with `#[signal]`
 - Allow dynamic signals for custom cases
 - Document both approaches for users
@@ -152,6 +158,7 @@ The lack of editor UI visibility is a **known limitation** of dynamic signals, n
 4. **Update Phase 1 status** with this finding
 
 Would you like me to:
+
 - Create a test scene with GDScript receiver?
 - Update documentation with this limitation?
 - Implement compile-time signal declarations as alternative?
@@ -163,6 +170,7 @@ Would you like me to:
 **Manual Testing Performed**: ✅ SUCCESSFUL
 
 Testing confirmed signals are **fully functional**:
+
 - ✅ Signals registered correctly (health_changed, player_died, score_updated)
 - ✅ Signal emission works from FerrisScript functions
 - ✅ Programmatic connection from GDScript successful

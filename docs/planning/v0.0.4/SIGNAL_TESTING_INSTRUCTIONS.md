@@ -35,10 +35,12 @@ FerrisScript signals are **registered and functional**, but don't appear in Godo
    - **Important**: Adjust the node path in `receiver.gd` line 6 to match your scene structure
 
 4. **Adjust Path if Needed**:
+
    ```gdscript
    # In receiver.gd, line 6
    var ferris_node = get_node_or_null("../FerrisScriptNode")
    ```
+
    Change `"../FerrisScriptNode"` to match your node hierarchy.
 
 ---
@@ -53,6 +55,7 @@ FerrisScript signals are **registered and functional**, but don't appear in Godo
 ### Step 2: Verify Initial Output
 
 You should see:
+
 ```
 Successfully loaded FerrisScript: res://scripts/signal_test.ferris
 Registered signal: health_changed
@@ -71,6 +74,7 @@ Available signals: health_changed, player_died, score_updated
 ### Step 3: Verify Signal Emissions
 
 After 1 second, you should see:
+
 ```
 === Testing signal emissions ===
 Called take_damage(25)
@@ -108,11 +112,14 @@ Called take_damage(150) - should trigger player_died
 **Cause**: Node path in `receiver.gd` doesn't match scene structure
 
 **Fix**:
+
 1. Check your scene tree
 2. Update line 6 in `receiver.gd`:
+
    ```gdscript
    var ferris_node = get_node_or_null("/root/NodeName/FerrisScriptNode")
    ```
+
    Use absolute path or adjust relative path
 
 ---
@@ -120,11 +127,13 @@ Called take_damage(150) - should trigger player_died
 ### Error: "Failed to connect to [signal]"
 
 **Possible Causes**:
+
 1. Signal not registered (check "Registered signal" messages)
 2. FerrisScript didn't load (check "Successfully loaded" message)
 3. Godot version incompatibility
 
 **Debug Steps**:
+
 1. Verify signal registration in console
 2. Check for script compilation errors
 3. Ensure GDExtension loaded (no errors about `classdb_register_extension_class5`)
@@ -134,11 +143,13 @@ Called take_damage(150) - should trigger player_died
 ### No Signal Received
 
 **Possible Causes**:
+
 1. Connection failed (check for ❌ messages)
 2. Function not called (check "Called" messages)
 3. Logic error in FerrisScript
 
 **Debug Steps**:
+
 1. Add print statements in FerrisScript functions
 2. Verify signal emission reaches `emit_signal()` call
 3. Check parameter types match signal declaration
@@ -194,6 +205,7 @@ In Godot's script editor debugger, you can also test directly:
 1. Set a breakpoint in `receiver.gd`
 2. Run scene
 3. In debugger console:
+
    ```gdscript
    var node = get_node("../FerrisScriptNode")
    node.call_ferris_function("take_damage", [10])

@@ -13,6 +13,7 @@
 **Goal**: Implement additional Godot lifecycle callbacks to enable input handling, physics processing, and scene tree events.
 
 **Strategic Importance**: These callbacks are essential for interactive game development:
+
 - `_input()` - Handle player input (keyboard, mouse, gamepad)
 - `_physics_process()` - Fixed timestep physics and movement
 - `_enter_tree()` - Node initialization when added to scene
@@ -31,6 +32,7 @@
 **Purpose**: Handle user input events
 
 **Example Usage**:
+
 ```rust
 fn _input(event: InputEvent) {
     if event.is_action_pressed("jump") {
@@ -43,6 +45,7 @@ fn _input(event: InputEvent) {
 ```
 
 **Implementation Notes**:
+
 - Requires InputEvent type (simplified version)
 - `is_action_pressed(action: String) -> bool` method
 - `is_action_released(action: String) -> bool` method
@@ -57,6 +60,7 @@ fn _input(event: InputEvent) {
 **Purpose**: Fixed timestep updates for physics and movement
 
 **Example Usage**:
+
 ```rust
 fn _physics_process(delta: f32) {
     // Physics calculations
@@ -74,6 +78,7 @@ fn _physics_process(delta: f32) {
 ```
 
 **Implementation Notes**:
+
 - Called at fixed 60 FPS by default
 - Already have `_process(delta)` pattern to follow
 - No new types required
@@ -87,6 +92,7 @@ fn _physics_process(delta: f32) {
 **Purpose**: Called when node enters scene tree
 
 **Example Usage**:
+
 ```rust
 fn _enter_tree() {
     print("Node entered the scene tree");
@@ -96,6 +102,7 @@ fn _enter_tree() {
 ```
 
 **Implementation Notes**:
+
 - No parameters
 - Called before `_ready()`
 - Useful for early initialization
@@ -109,6 +116,7 @@ fn _enter_tree() {
 **Purpose**: Called when node exits scene tree
 
 **Example Usage**:
+
 ```rust
 fn _exit_tree() {
     print("Node exiting the scene tree");
@@ -119,6 +127,7 @@ fn _exit_tree() {
 ```
 
 **Implementation Notes**:
+
 - No parameters
 - Called after node removed from tree
 - Useful for cleanup
@@ -134,6 +143,7 @@ fn _exit_tree() {
 #### 1. InputEvent Type (`crates/runtime/src/value.rs`)
 
 **Option A: Simplified InputEvent**
+
 ```rust
 pub enum Value {
     // ... existing variants ...
@@ -145,6 +155,7 @@ pub enum Value {
 ```
 
 **Option B: Opaque Handle**
+
 ```rust
 pub enum Value {
     // ... existing variants ...
@@ -157,6 +168,7 @@ pub struct InputEventHandle {
 ```
 
 **Recommendation**: Option B (opaque handle)
+
 - Avoids reimplementing Godot's complex InputEvent hierarchy
 - Delegates to Godot methods via FFI
 - Simpler to maintain
@@ -166,6 +178,7 @@ pub struct InputEventHandle {
 #### 2. Godot Binding (`crates/godot_bind/src/lib.rs`)
 
 **Add New Lifecycle Methods**:
+
 ```rust
 #[godot_api]
 impl INode2D for FerrisScriptNode {
@@ -214,6 +227,7 @@ impl INode2D for FerrisScriptNode {
 #### 3. Type Checker (`crates/compiler/src/type_checker.rs`)
 
 **Add Lifecycle Function Validation**:
+
 ```rust
 fn check_lifecycle_function(&mut self, name: &str, params: &[Parameter]) -> Result<(), TypeCheckError> {
     match name {
@@ -273,6 +287,7 @@ fn check_lifecycle_function(&mut self, name: &str, params: &[Parameter]) -> Resu
 ### Unit Tests
 
 **Type Checker Tests** (`crates/compiler/src/type_checker/tests.rs`):
+
 - [ ] `test_input_function_valid`
 - [ ] `test_input_function_wrong_param_count`
 - [ ] `test_input_function_wrong_param_type`
@@ -285,6 +300,7 @@ fn check_lifecycle_function(&mut self, name: &str, params: &[Parameter]) -> Resu
 - [ ] `test_exit_tree_with_params_error`
 
 **Runtime Tests** (`crates/runtime/src/tests.rs`):
+
 - [ ] `test_call_input_function`
 - [ ] `test_call_physics_process_function`
 - [ ] `test_call_enter_tree_function`
@@ -297,6 +313,7 @@ fn check_lifecycle_function(&mut self, name: &str, params: &[Parameter]) -> Resu
 ### Integration Tests
 
 **Manual Godot Testing**:
+
 1. Create test scene with FerrisScript node
 2. Implement all 4 lifecycle callbacks
 3. Verify `_input()` responds to keyboard input
@@ -311,6 +328,7 @@ fn check_lifecycle_function(&mut self, name: &str, params: &[Parameter]) -> Resu
 ### Code Documentation
 
 **Error Codes** (`docs/ERROR_CODES.md`):
+
 - [ ] E305: Invalid Lifecycle Function Signature
 - [ ] E306: Lifecycle Function Wrong Parameter Count
 - [ ] E307: Lifecycle Function Wrong Parameter Type
@@ -318,6 +336,7 @@ fn check_lifecycle_function(&mut self, name: &str, params: &[Parameter]) -> Resu
 ### User Documentation
 
 **Example File** (`examples/callbacks.ferris`):
+
 ```rust
 // Example demonstrating all lifecycle callbacks
 
@@ -349,6 +368,7 @@ fn _input(event: InputEvent) {
 ```
 
 **CHANGELOG.md**:
+
 - [ ] Add Phase 2 entry for v0.0.4
 
 ---
@@ -358,6 +378,7 @@ fn _input(event: InputEvent) {
 ### 1. `_input()` Callback ✅
 
 **Verification**:
+
 - [ ] Type checker validates function signature
 - [ ] InputEvent value created from Godot event
 - [ ] Function called when input occurs in Godot
@@ -369,6 +390,7 @@ fn _input(event: InputEvent) {
 ### 2. `_physics_process()` Callback ✅
 
 **Verification**:
+
 - [ ] Type checker validates function signature
 - [ ] Function called at fixed 60 FPS
 - [ ] Delta parameter accurate (approximately 0.0166s)
@@ -379,6 +401,7 @@ fn _input(event: InputEvent) {
 ### 3. `_enter_tree()` Callback ✅
 
 **Verification**:
+
 - [ ] Type checker validates function signature (no params)
 - [ ] Function called when node enters scene tree
 - [ ] Called before `_ready()`
@@ -389,6 +412,7 @@ fn _input(event: InputEvent) {
 ### 4. `_exit_tree()` Callback ✅
 
 **Verification**:
+
 - [ ] Type checker validates function signature (no params)
 - [ ] Function called when node exits scene tree
 - [ ] Called after node removed from parent
@@ -450,10 +474,12 @@ fn _input(event: InputEvent) {
 ## 🔗 Dependencies
 
 **No Blocking Dependencies**:
+
 - Phase 1 complete (but not required for Phase 2)
 - Can start immediately after Phase 1 PR created
 
 **Optional Dependencies**:
+
 - Phase 3 (Node Queries) - Could use `get_node()` in examples, but not required
 
 ---
@@ -463,12 +489,14 @@ fn _input(event: InputEvent) {
 ### Design Decisions
 
 **InputEvent as Opaque Handle**:
+
 - Avoids reimplementing complex Godot type hierarchy
 - Simpler to maintain
 - Delegates to Godot's existing implementation
 - Trade-off: Less transparent than native type
 
 **Lifecycle Function Naming**:
+
 - Use Godot's exact naming convention (`_input`, `_physics_process`, etc.)
 - Familiar to Godot developers
 - Clear documentation link to Godot docs
@@ -476,11 +504,13 @@ fn _input(event: InputEvent) {
 ### Known Challenges
 
 **InputEvent Complexity**:
+
 - Godot has 10+ InputEvent subclasses
 - Each subclass has unique properties
 - Solution: Start with action checks only, expand later
 
 **Physics Process Timing**:
+
 - Must ensure called at correct frequency
 - Godot handles this, but verify in testing
 
@@ -489,13 +519,15 @@ fn _input(event: InputEvent) {
 ## 🚀 Ready to Start
 
 **Prerequisites Met**:
+
 - ✅ Phase 1 implementation complete
 - ✅ Clear scope and acceptance criteria
 - ✅ Technical approach defined
 - ✅ Test plan prepared
 - ✅ Documentation plan prepared
 
-**Next Action**: 
+**Next Action**:
+
 1. Wait for Phase 1 PR review/merge
 2. Create `feature/v0.0.4-callbacks` branch
 3. Begin Step 1 (InputEvent Type)
