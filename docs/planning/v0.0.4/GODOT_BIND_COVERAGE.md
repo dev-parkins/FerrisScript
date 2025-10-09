@@ -13,6 +13,7 @@ The `godot_bind` crate has 0% unit test coverage according to Codecov. This is *
 ### Technical Requirements
 
 The `godot_bind` crate provides the GDExtension integration layer that:
+
 1. Registers the `FerrisScriptNode` class with Godot's ClassDB
 2. Implements Godot lifecycle callbacks (`_ready`, `_process`, `_input`, etc.)
 3. Loads and executes `.ferris` scripts through the runtime
@@ -35,6 +36,7 @@ fn test_ferrisscript_node_ready() {
 ```
 
 Requirements for genuine testing:
+
 - A **running Godot 4.x instance**
 - The **GDExtension library loaded**
 - A **valid Godot scene tree**
@@ -67,11 +69,13 @@ godot_test/
 ### Testing Process
 
 1. **Build the Extension**:
+
    ```bash
    cargo build --package ferrisscript_godot_bind
    ```
 
 2. **Open Godot Project**:
+
    ```bash
    cd godot_test
    godot --editor
@@ -86,6 +90,7 @@ godot_test/
 ### Tested Features
 
 ✅ **Manually Validated**:
+
 - Node registration with Godot ClassDB
 - Script loading from `.ferris` files
 - `_ready()` callback execution
@@ -114,6 +119,7 @@ coverage:
 ```
 
 **Justification**:
+
 1. **Core Logic Separation**: Compiler and runtime are thoroughly unit-tested (396 tests)
 2. **Integration Boundary**: godot_bind is a thin integration layer with minimal logic
 3. **Testing ROI**: Setting up automated Godot testing infrastructure has low return on investment for this project phase
@@ -122,6 +128,7 @@ coverage:
 ### What godot_bind Does NOT Contain
 
 ❌ **NOT in godot_bind** (these ARE unit-tested):
+
 - FerrisScript parsing logic → `compiler`
 - Type checking logic → `compiler`
 - Runtime execution logic → `runtime`
@@ -129,6 +136,7 @@ coverage:
 - Value coercion logic → `runtime`
 
 ✅ **Only in godot_bind** (requires Godot):
+
 - GDExtension class registration boilerplate
 - Godot → Rust callback forwarding
 - File loading through Godot's `FileAccess` API

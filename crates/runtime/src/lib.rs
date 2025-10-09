@@ -2724,8 +2724,6 @@ mod tests {
         // Try to call with no arguments (should fail)
         let result = call_function("_physics_process", &[], &mut env);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains("expects 1 arguments, got 0"));
+        assert!(result.unwrap_err().contains("expects 1 arguments, got 0"));
     }
 }
