@@ -191,6 +191,29 @@ impl INode2D for FerrisScriptNode {
             self.call_script_function_with_self("_input", &[input_event_value]);
         }
     }
+
+    fn physics_process(&mut self, delta: f64) {
+        // Execute _physics_process function if script is loaded
+        if self.script_loaded {
+            // Convert delta to Float (f32 for FerrisScript)
+            let delta_value = Value::Float(delta as f32);
+            self.call_script_function_with_self("_physics_process", &[delta_value]);
+        }
+    }
+
+    fn enter_tree(&mut self) {
+        // Execute _enter_tree function if script is loaded
+        if self.script_loaded {
+            self.call_script_function("_enter_tree", &[]);
+        }
+    }
+
+    fn exit_tree(&mut self) {
+        // Execute _exit_tree function if script is loaded
+        if self.script_loaded {
+            self.call_script_function("_exit_tree", &[]);
+        }
+    }
 }
 
 #[godot_api]

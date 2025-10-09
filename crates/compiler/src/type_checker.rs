@@ -444,7 +444,83 @@ impl<'a> TypeChecker<'a> {
                 }
             }
         }
-        // Other lifecycle functions will be validated here in future phases
+
+        // Validate _physics_process() lifecycle function signature
+        if func.name.as_str() == "_physics_process" {
+            // _physics_process must have exactly 1 parameter of type f32
+            if func.params.len() != 1 {
+                let base_msg = format!(
+                    "Lifecycle function '_physics_process' must have exactly 1 parameter, found {} at {}",
+                    func.params.len(),
+                    func.span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E305,
+                    &base_msg,
+                    self.source,
+                    func.span.line,
+                    func.span.column,
+                    "Expected signature: fn _physics_process(delta: f32)",
+                ));
+            } else {
+                let param_type = Type::from_string(&func.params[0].ty);
+                if param_type != Type::F32 {
+                    let base_msg = format!(
+                        "Lifecycle function '_physics_process' parameter must be of type f32, found {} at {}",
+                        func.params[0].ty,
+                        func.span
+                    );
+                    self.error(format_error_with_code(
+                        ErrorCode::E305,
+                        &base_msg,
+                        self.source,
+                        func.span.line,
+                        func.span.column,
+                        &format!("Expected type 'f32', found '{}'", func.params[0].ty),
+                    ));
+                }
+            }
+        }
+
+        // Validate _enter_tree() lifecycle function signature
+        if func.name.as_str() == "_enter_tree" {
+            // _enter_tree must have no parameters
+            if !func.params.is_empty() {
+                let base_msg = format!(
+                    "Lifecycle function '_enter_tree' must have no parameters, found {} at {}",
+                    func.params.len(),
+                    func.span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E305,
+                    &base_msg,
+                    self.source,
+                    func.span.line,
+                    func.span.column,
+                    "Expected signature: fn _enter_tree()",
+                ));
+            }
+        }
+
+        // Validate _exit_tree() lifecycle function signature
+        if func.name.as_str() == "_exit_tree" {
+            // _exit_tree must have no parameters
+            if !func.params.is_empty() {
+                let base_msg = format!(
+                    "Lifecycle function '_exit_tree' must have no parameters, found {} at {}",
+                    func.params.len(),
+                    func.span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E305,
+                    &base_msg,
+                    self.source,
+                    func.span.line,
+                    func.span.column,
+                    "Expected signature: fn _exit_tree()",
+                ));
+            }
+        }
     }
 
     fn check_signal(&mut self, signal: &Signal) {
