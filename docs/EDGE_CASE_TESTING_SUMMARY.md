@@ -11,6 +11,7 @@ This document summarizes the comprehensive edge case testing initiative that add
 ## 📊 Test Statistics
 
 ### Before Initiative
+
 - **Total Compiler Tests**: 237
 - **Lexer Tests**: 78
 - **Parser Tests**: 73
@@ -18,6 +19,7 @@ This document summarizes the comprehensive edge case testing initiative that add
 - **Diagnostic Tests**: 13
 
 ### After Initiative
+
 - **Total Compiler Tests**: 379 (+142, +59.9%)
 - **Lexer Tests**: 85 (+7, +9.0%)
 - **Parser Tests**: 112 (+39, +53.4%)
@@ -25,6 +27,7 @@ This document summarizes the comprehensive edge case testing initiative that add
 - **Diagnostic Tests**: 39 (+26, +200.0%)
 
 ### Quality Metrics
+
 - ✅ All 379 tests passing
 - ✅ Zero clippy warnings
 - ✅ Code formatting verified
@@ -258,6 +261,7 @@ match result {
 ```
 
 This approach:
+
 - Validates current behavior
 - Documents expected future behavior
 - Prevents regressions when features are added
@@ -345,16 +349,19 @@ This approach:
 The testing initiative documented several current limitations for future enhancement:
 
 ### Lexer
+
 - Binary/hexadecimal literals not fully supported
 - Numbers with underscores not supported
 - Some numeric edge cases need validation
 
 ### Parser
+
 - Method chaining on function calls not supported (`obj.method().field`)
 - Braces required for all control flow (no single-statement bodies)
 - No nested function definitions
 
 ### Type Checker
+
 - Variable shadowing support varies by context
 - Recursive functions may require forward declarations
 - Missing return statement detection incomplete
@@ -363,6 +370,7 @@ The testing initiative documented several current limitations for future enhance
 - If-as-expression not supported
 
 ### Diagnostics
+
 - Tab characters may affect column alignment
 - Very long lines not truncated in error output
 

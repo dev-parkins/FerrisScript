@@ -1485,4 +1485,3 @@ fn is_similar(candidate: &str, target: &str) -> bool {
 ### 🔗 References
 
 - [EDGE_CASE_TESTING_SUMMARY.md](EDGE_CASE_TESTING_SUMMARY.md) - Full initiative summary
-
