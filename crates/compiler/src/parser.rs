@@ -33,10 +33,10 @@
 use crate::ast::*;
 use crate::error_code::ErrorCode;
 use crate::error_context::format_error_with_code;
-use crate::lexer::Token;
+use crate::lexer::{PositionedToken, Token};
 
 pub struct Parser<'a> {
-    tokens: Vec<Token>,
+    tokens: Vec<PositionedToken>,
     source: &'a str, // Keep source for error context
     position: usize,
     current_line: usize,
@@ -47,7 +47,7 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(tokens: Vec<Token>, source: &'a str) -> Self {
+    pub fn new(tokens: Vec<PositionedToken>, source: &'a str) -> Self {
         Parser {
             tokens,
             source,
@@ -60,19 +60,35 @@ impl<'a> Parser<'a> {
     }
 
     fn current(&self) -> &Token {
-        self.tokens.get(self.position).unwrap_or(&Token::Eof)
+        self.tokens
+            .get(self.position)
+            .map(|pt| &pt.token)
+            .unwrap_or(&Token::Eof)
+    }
+
+    fn current_position(&self) -> (usize, usize) {
+        self.tokens
+            .get(self.position)
+            .map(|pt| (pt.line, pt.column))
+            .unwrap_or((1, 1))
     }
 
     #[allow(dead_code)]
     fn peek(&self, offset: usize) -> &Token {
         self.tokens
             .get(self.position + offset)
+            .map(|pt| &pt.token)
             .unwrap_or(&Token::Eof)
     }
 
     fn advance(&mut self) -> Token {
         let token = self.current().clone();
         if self.position < self.tokens.len() {
+            // Update current_line and current_column from token position
+            if let Some(pt) = self.tokens.get(self.position) {
+                self.current_line = pt.line;
+                self.current_column = pt.column;
+            }
             self.position += 1;
         }
         token
@@ -80,6 +96,7 @@ impl<'a> Parser<'a> {
 
     fn expect(&mut self, expected: Token) -> Result<Token, String> {
         let current = self.current();
+        let (line, column) = self.current_position();
         if std::mem::discriminant(current) == std::mem::discriminant(&expected) {
             Ok(self.advance())
         } else {
@@ -87,15 +104,15 @@ impl<'a> Parser<'a> {
                 "Expected {}, found {} at line {}, column {}",
                 expected.name(),
                 current.name(),
-                self.current_line,
-                self.current_column
+                line,
+                column
             );
             Err(format_error_with_code(
                 ErrorCode::E100,
                 &base_msg,
                 self.source,
-                self.current_line,
-                self.current_column,
+                line,
+                column,
                 &format!("Expected {}", expected.name()),
             ))
         }
@@ -122,9 +139,11 @@ impl<'a> Parser<'a> {
             // Check if previous token was a statement boundary
             if self.position > 0 {
                 let prev_idx = self.position - 1;
-                if matches!(self.tokens.get(prev_idx), Some(Token::Semicolon)) {
-                    self.panic_mode = false;
-                    return;
+                if let Some(pt) = self.tokens.get(prev_idx) {
+                    if matches!(pt.token, Token::Semicolon) {
+                        self.panic_mode = false;
+                        return;
+                    }
                 }
             }
 
@@ -946,6 +965,26 @@ impl<'a> Parser<'a> {
 /// - Complex programs: ~8μs
 /// - O(n) complexity where n = number of tokens
 pub fn parse(tokens: &[Token], source: &str) -> Result<Program, String> {
+    // Convert tokens to positioned tokens for backwards compatibility
+    let positioned_tokens: Vec<PositionedToken> = tokens
+        .iter()
+        .map(|t| PositionedToken::new(t.clone(), 1, 1))
+        .collect();
+    let mut parser = Parser::new(positioned_tokens, source);
+    parser.parse_program()
+}
+
+/// Parse positioned tokens (with line/column info) into an AST program.
+///
+/// This function provides accurate error reporting with correct line and column numbers
+/// by using tokens that carry their source position information.
+///
+/// # Performance
+///
+/// - Simple functions: ~600ns
+/// - Complex programs: ~8μs
+/// - O(n) complexity where n = number of tokens
+pub fn parse_positioned(tokens: &[PositionedToken], source: &str) -> Result<Program, String> {
     let mut parser = Parser::new(tokens.to_vec(), source);
     parser.parse_program()
 }
@@ -954,6 +993,14 @@ pub fn parse(tokens: &[Token], source: &str) -> Result<Program, String> {
 mod tests {
     use super::*;
     use crate::lexer::tokenize;
+
+    // Helper function to convert tokens to positioned tokens for testing
+    fn to_positioned(tokens: Vec<Token>) -> Vec<PositionedToken> {
+        tokens
+            .into_iter()
+            .map(|t| PositionedToken::new(t, 1, 1))
+            .collect()
+    }
 
     #[test]
     fn test_parse_empty() {
@@ -1541,7 +1588,7 @@ fn other() { return 42; }
             Token::RBrace,
             Token::Eof,
         ];
-        let mut parser = Parser::new(tokens, "let x = 1; fn foo() {} ");
+        let mut parser = Parser::new(to_positioned(tokens), "let x = 1; fn foo() {} ");
         parser.position = 0;
         parser.synchronize();
         // Should stop at 'let' keyword (first token is a sync point)
@@ -1559,7 +1606,7 @@ fn other() { return 42; }
             Token::RBrace,
             Token::Eof,
         ];
-        let mut parser = Parser::new(tokens, "let x = 1} ");
+        let mut parser = Parser::new(to_positioned(tokens), "let x = 1} ");
         parser.position = 0;
         parser.synchronize();
         // Should stop at 'let' keyword (first token is a sync point)
@@ -1577,7 +1624,7 @@ fn other() { return 42; }
             Token::Semicolon,
             Token::Eof,
         ];
-        let mut parser = Parser::new(tokens, "let x = 1; ");
+        let mut parser = Parser::new(to_positioned(tokens), "let x = 1; ");
         assert!(!parser.panic_mode);
         parser.record_error("Test error".to_string());
         assert!(parser.panic_mode);
@@ -1599,7 +1646,7 @@ fn other() { return 42; }
             Token::Semicolon,
             Token::Eof,
         ];
-        let mut parser = Parser::new(tokens, "oops let x = 1; ");
+        let mut parser = Parser::new(to_positioned(tokens), "oops let x = 1; ");
         let result = parser.parse_program();
         // Should collect error and continue parsing, but return error due to API compatibility
         assert!(result.is_err());
@@ -1706,7 +1753,7 @@ fn other() { return 42; }
             Token::Semicolon,
             Token::Eof,
         ];
-        let mut parser = Parser::new(tokens, "let x = ;");
+        let mut parser = Parser::new(to_positioned(tokens), "let x = ;");
         let result = parser.parse_program();
         assert!(result.is_err());
         // Should only record first error due to panic mode
@@ -1770,7 +1817,7 @@ fn third() { let z = 15; }
             // No sync points, should reach EOF
             Token::Eof,
         ];
-        let mut parser = Parser::new(tokens, "invalid 1");
+        let mut parser = Parser::new(to_positioned(tokens), "invalid 1");
         parser.synchronize();
         assert!(!parser.panic_mode);
         assert_eq!(parser.current(), &Token::Eof);
@@ -1820,7 +1867,7 @@ fn third() { let z = 15; }
             Token::RBrace,
             Token::Eof,
         ];
-        let mut parser = Parser::new(tokens, "fn test() { let x = 5 }");
+        let mut parser = Parser::new(to_positioned(tokens), "fn test() { let x = 5 }");
         parser.panic_mode = true;
         parser.synchronize();
         assert!(!parser.panic_mode); // Should be cleared after sync
@@ -1831,7 +1878,7 @@ fn third() { let z = 15; }
         // Parser should continue parsing after error
         let input = "fn test() { let x = 5 let y = 10; }";
         let tokens = tokenize(input).unwrap();
-        let mut parser = Parser::new(tokens.clone(), input);
+        let mut parser = Parser::new(to_positioned(tokens.clone()), input);
         let result = parser.parse_program();
         assert!(result.is_err());
         // Parser collected at least one error
@@ -1863,5 +1910,77 @@ fn third() { let z = 15; }
         let tokens = tokenize(input).unwrap();
         let result = parse(&tokens, input);
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parse_with_leading_blank_line() {
+        let input = "\n\nfn test() {\n    print(\"hello\");\n}";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_ok(), "Should parse file with leading blank line");
+    }
+
+    #[test]
+    fn test_parse_file_starting_with_comment() {
+        let input = "// This is a comment\nfn test() {\n    print(\"hello\");\n}";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_ok(), "Should parse file starting with comment");
+    }
+
+    #[test]
+    fn test_parse_file_starting_with_blank_and_comment() {
+        let input = "\n// Comment after blank line\nfn test() {\n    print(\"hello\");\n}";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(
+            result.is_ok(),
+            "Should parse file with blank line and comment"
+        );
+    }
+
+    #[test]
+    fn test_parse_with_crlf_line_endings() {
+        // Test with Windows-style CRLF line endings
+        let input = "\r\n\r\n// TESTING THINGS\r\nfn assert(cond: bool, msg: str) {\r\n    print(\"hello\");\r\n}";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_ok(), "Should parse file with CRLF line endings");
+    }
+
+    #[test]
+    fn test_parse_signal_first() {
+        let input = "signal test_signal();\n\nfn test() {\n    print(\"hello\");\n}";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        if let Err(e) = &result {
+            eprintln!("Parse error: {}", e);
+        }
+        assert!(
+            result.is_ok(),
+            "Should parse file with signal declaration first"
+        );
+    }
+
+    #[test]
+    fn test_parse_multiple_blank_lines() {
+        let input = "\n\n\n\n\nfn test() {\n    print(\"hello\");\n}";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(
+            result.is_ok(),
+            "Should parse file with multiple blank lines"
+        );
+    }
+
+    #[test]
+    fn test_parse_comment_only_then_code() {
+        let input = "// Header comment\n// Another comment\n// Third comment\nfn test() {\n    print(\"hello\");\n}";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(
+            result.is_ok(),
+            "Should parse file with multiple leading comments"
+        );
     }
 }
