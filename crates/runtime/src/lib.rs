@@ -100,6 +100,8 @@ impl Value {
 pub type PropertyGetter = fn(&str) -> Result<Value, String>;
 /// Callback for setting a property on the Godot node
 pub type PropertySetter = fn(&str, Value) -> Result<(), String>;
+/// Callback for emitting a signal to the Godot node
+pub type SignalEmitter = Box<dyn Fn(&str, &[Value]) -> Result<(), String>>;
 
 /// Variable information stored in the environment
 #[derive(Debug, Clone)]
@@ -157,6 +159,10 @@ pub struct Env {
     property_getter: Option<PropertyGetter>,
     /// Callback to set properties on the Godot node (when assigning to self.property)
     property_setter: Option<PropertySetter>,
+    /// Callback to emit signals to the Godot node
+    signal_emitter: Option<SignalEmitter>,
+    /// Signal definitions: signal name -> parameter count
+    signals: HashMap<String, usize>,
 }
 
 impl Default for Env {
@@ -173,10 +179,14 @@ impl Env {
             builtin_fns: HashMap::new(),
             property_getter: None,
             property_setter: None,
+            signal_emitter: None,
+            signals: HashMap::new(),
         };
 
         // Register built-in functions
         env.builtin_fns.insert("print".to_string(), builtin_print);
+        env.builtin_fns
+            .insert("emit_signal".to_string(), builtin_emit_signal);
 
         env
     }
@@ -189,6 +199,11 @@ impl Env {
     /// Set the property setter callback for self binding
     pub fn set_property_setter(&mut self, setter: PropertySetter) {
         self.property_setter = Some(setter);
+    }
+
+    /// Set the signal emitter callback for signal emission
+    pub fn set_signal_emitter(&mut self, emitter: SignalEmitter) {
+        self.signal_emitter = Some(emitter);
     }
 
     pub fn push_scope(&mut self) {
@@ -268,7 +283,36 @@ impl Env {
         self.functions.get(name)
     }
 
-    pub fn call_builtin(&self, name: &str, args: &[Value]) -> Result<Value, String> {
+    pub fn call_builtin(&mut self, name: &str, args: &[Value]) -> Result<Value, String> {
+        // Special handling for emit_signal - needs access to signal_emitter callback
+        if name == "emit_signal" {
+            if args.is_empty() {
+                return Err("Error[E501]: emit_signal requires at least a signal name".to_string());
+            }
+
+            // First argument must be the signal name (string)
+            let signal_name = match &args[0] {
+                Value::String(s) => s,
+                _ => {
+                    return Err(
+                        "Error[E502]: emit_signal first argument must be a string".to_string()
+                    )
+                }
+            };
+
+            // Get the signal parameters (all arguments after the signal name)
+            let signal_args = &args[1..];
+
+            // Call the signal emitter callback if set
+            if let Some(emitter) = &self.signal_emitter {
+                emitter(signal_name, signal_args)?;
+            }
+            // If no emitter is set, the signal emission is a no-op (for testing without Godot)
+
+            return Ok(Value::Nil);
+        }
+
+        // Handle other built-in functions
         if let Some(func) = self.builtin_fns.get(name) {
             func(args)
         } else {
@@ -283,6 +327,21 @@ impl Env {
     /// Register or override a built-in function
     pub fn register_builtin(&mut self, name: String, func: fn(&[Value]) -> Result<Value, String>) {
         self.builtin_fns.insert(name, func);
+    }
+
+    /// Register a signal with its parameter count
+    pub fn register_signal(&mut self, name: String, param_count: usize) {
+        self.signals.insert(name, param_count);
+    }
+
+    /// Check if a signal is registered
+    pub fn has_signal(&self, name: &str) -> bool {
+        self.signals.contains_key(name)
+    }
+
+    /// Get the parameter count for a signal
+    pub fn get_signal_param_count(&self, name: &str) -> Option<usize> {
+        self.signals.get(name).copied()
     }
 }
 
@@ -303,6 +362,17 @@ fn builtin_print(args: &[Value]) -> Result<Value, String> {
         .join(" ");
 
     println!("{}", output);
+    Ok(Value::Nil)
+}
+
+fn builtin_emit_signal(_args: &[Value]) -> Result<Value, String> {
+    // NOTE: This is a stub implementation. The actual signal emission
+    // will be handled by the Godot binding layer (Step 6).
+    // At runtime, the type checker has already validated:
+    // - Signal exists
+    // - Parameter count matches
+    // - Parameter types are correct
+    // The Godot binding will replace this with actual signal emission.
     Ok(Value::Nil)
 }
 
@@ -360,6 +430,11 @@ pub fn execute(program: &ast::Program, env: &mut Env) -> Result<(), String> {
     for global in &program.global_vars {
         let value = evaluate_expr(&global.value, env)?;
         env.set_with_mutability(global.name.clone(), value, global.mutable);
+    }
+
+    // Register all signals
+    for signal in &program.signals {
+        env.register_signal(signal.name.clone(), signal.parameters.len());
     }
 
     // Register all functions
@@ -983,7 +1058,7 @@ mod tests {
 
     #[test]
     fn test_builtin_print() {
-        let env = Env::new();
+        let mut env = Env::new();
         let args = vec![Value::String("Hello".to_string()), Value::Int(42)];
         let result = env.call_builtin("print", &args);
         assert_eq!(result, Ok(Value::Nil));
@@ -1872,7 +1947,7 @@ mod tests {
     #[test]
     fn test_runtime_unknown_builtin_function_error() {
         // Test calling a non-existent builtin function
-        let env = Env::new();
+        let mut env = Env::new();
         let result = env.call_builtin("nonexistent_func", &[]);
         assert!(result.is_err());
         assert!(result
@@ -2176,5 +2251,238 @@ mod tests {
 
         let result = call_function("lt_check", &[], &mut env).unwrap();
         assert_eq!(result, Value::Bool(true));
+    }
+
+    // Signal Tests
+    #[test]
+    fn test_register_signal() {
+        let mut env = Env::new();
+        env.register_signal("health_changed".to_string(), 2);
+
+        assert!(env.has_signal("health_changed"));
+        assert_eq!(env.get_signal_param_count("health_changed"), Some(2));
+        assert!(!env.has_signal("undefined_signal"));
+    }
+
+    #[test]
+    fn test_signal_declaration_in_program() {
+        let mut env = Env::new();
+
+        let source = r#"
+            signal health_changed(old: i32, new: i32);
+            signal player_died();
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        assert!(env.has_signal("health_changed"));
+        assert_eq!(env.get_signal_param_count("health_changed"), Some(2));
+        assert!(env.has_signal("player_died"));
+        assert_eq!(env.get_signal_param_count("player_died"), Some(0));
+    }
+
+    #[test]
+    fn test_emit_signal_builtin_exists() {
+        let env = Env::new();
+        assert!(env.is_builtin("emit_signal"));
+    }
+
+    #[test]
+    fn test_emit_signal_in_function() {
+        let mut env = Env::new();
+
+        let source = r#"
+            signal health_changed(old: i32, new: i32);
+            
+            fn damage() {
+                emit_signal("health_changed", 100, 75);
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        // Call the function - emit_signal should not error (stub implementation)
+        let result = call_function("damage", &[], &mut env);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_emit_signal_with_no_params() {
+        let mut env = Env::new();
+
+        let source = r#"
+            signal player_died();
+            
+            fn die() {
+                emit_signal("player_died");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("die", &[], &mut env);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_signal_emitter_callback_invoked() {
+        use std::cell::RefCell;
+        use std::rc::Rc;
+
+        let mut env = Env::new();
+
+        // Track signal emissions
+        let emissions = Rc::new(RefCell::new(Vec::new()));
+        let emissions_clone = emissions.clone();
+
+        // Set up signal emitter callback
+        env.set_signal_emitter(Box::new(move |signal_name: &str, args: &[Value]| {
+            emissions_clone
+                .borrow_mut()
+                .push((signal_name.to_string(), args.to_vec()));
+            Ok(())
+        }));
+
+        let source = r#"
+            signal health_changed(old: i32, new: i32);
+            
+            fn take_damage() {
+                emit_signal("health_changed", 100, 75);
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        // Call function that emits signal
+        let result = call_function("take_damage", &[], &mut env);
+        assert!(result.is_ok());
+
+        // Verify callback was invoked
+        let emitted = emissions.borrow();
+        assert_eq!(emitted.len(), 1);
+        assert_eq!(emitted[0].0, "health_changed");
+        assert_eq!(emitted[0].1, vec![Value::Int(100), Value::Int(75)]);
+    }
+
+    #[test]
+    fn test_signal_emitter_callback_all_types() {
+        use std::cell::RefCell;
+        use std::rc::Rc;
+
+        let mut env = Env::new();
+
+        // Track signal emissions
+        let emissions = Rc::new(RefCell::new(Vec::new()));
+        let emissions_clone = emissions.clone();
+
+        env.set_signal_emitter(Box::new(move |signal_name: &str, args: &[Value]| {
+            emissions_clone
+                .borrow_mut()
+                .push((signal_name.to_string(), args.to_vec()));
+            Ok(())
+        }));
+
+        let source = r#"
+            signal all_types(i: i32, f: f32, b: bool, s: String);
+            
+            fn emit_all() {
+                emit_signal("all_types", 42, 3.15, true, "test");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("emit_all", &[], &mut env);
+        assert!(result.is_ok());
+
+        let emitted = emissions.borrow();
+        assert_eq!(emitted.len(), 1);
+        assert_eq!(emitted[0].0, "all_types");
+        assert_eq!(
+            emitted[0].1,
+            vec![
+                Value::Int(42),
+                Value::Float(3.15),
+                Value::Bool(true),
+                Value::String("test".to_string()),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_signal_emitter_without_callback() {
+        // Test that emit_signal works without callback set (no-op)
+        let mut env = Env::new();
+
+        let source = r#"
+            signal player_died();
+            
+            fn die() {
+                emit_signal("player_died");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        // Should not error even without callback
+        let result = call_function("die", &[], &mut env);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_signal_emitter_error_handling() {
+        let mut env = Env::new();
+
+        // Set up callback that returns an error
+        env.set_signal_emitter(Box::new(|signal_name: &str, _args: &[Value]| {
+            Err(format!("Failed to emit signal: {}", signal_name))
+        }));
+
+        let source = r#"
+            signal test_signal();
+            
+            fn test() {
+                emit_signal("test_signal");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+
+        let result = call_function("test", &[], &mut env);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .contains("Failed to emit signal: test_signal"));
+    }
+
+    #[test]
+    fn test_emit_signal_error_no_signal_name() {
+        let mut env = Env::new();
+
+        // Test calling emit_signal with no arguments
+        let result = env.call_builtin("emit_signal", &[]);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .contains("emit_signal requires at least a signal name"));
+    }
+
+    #[test]
+    fn test_emit_signal_error_invalid_signal_name_type() {
+        let mut env = Env::new();
+
+        // Test calling emit_signal with non-string first argument
+        let result = env.call_builtin("emit_signal", &[Value::Int(42)]);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .contains("emit_signal first argument must be a string"));
     }
 }

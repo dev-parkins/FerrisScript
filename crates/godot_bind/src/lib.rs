@@ -4,6 +4,10 @@ use godot::classes::{file_access::ModeFlags, FileAccess};
 use godot::prelude::*;
 use std::cell::RefCell;
 
+// Signal prototype module for v0.0.4 research
+mod signal_prototype;
+pub use signal_prototype::SignalPrototype;
+
 // Thread-local storage for node properties during script execution
 thread_local! {
     static NODE_POSITION: RefCell<Option<Vector2>> = const { RefCell::new(None) };
@@ -35,6 +39,19 @@ fn set_node_property_tls(property_name: &str, value: Value) -> Result<(), String
             }
         }
         _ => Err(format!("Property '{}' not supported", property_name)),
+    }
+}
+
+/// Convert FerrisScript Value to Godot Variant
+fn value_to_variant(value: &Value) -> Variant {
+    match value {
+        Value::Int(i) => Variant::from(*i),
+        Value::Float(f) => Variant::from(*f),
+        Value::Bool(b) => Variant::from(*b),
+        Value::String(s) => Variant::from(s.as_str()),
+        Value::Vector2 { x, y } => Variant::from(Vector2::new(*x, *y)),
+        Value::Nil => Variant::nil(),
+        Value::SelfObject => Variant::nil(), // self cannot be passed as signal parameter
     }
 }
 
@@ -94,6 +111,20 @@ impl INode2D for FerrisScriptNode {
         // Load and compile script if path is set
         if !self.script_path.is_empty() {
             self.load_script();
+        }
+
+        // Register signals with Godot if script is loaded
+        if self.script_loaded {
+            if let Some(program) = &self.program {
+                // Clone signal names to avoid borrowing issues
+                let signal_names: Vec<String> =
+                    program.signals.iter().map(|s| s.name.clone()).collect();
+
+                for signal_name in signal_names {
+                    self.base_mut().add_user_signal(&signal_name);
+                    godot_print!("Registered signal: {}", signal_name);
+                }
+            }
         }
 
         // Execute _ready function if it exists
@@ -178,6 +209,9 @@ impl FerrisScriptNode {
             *pos.borrow_mut() = Some(position);
         });
 
+        // Store the node's instance ID for signal emission
+        let instance_id = self.base().instance_id();
+
         let env = self.env.as_mut()?;
 
         // Set up 'self' variable and property callbacks
@@ -185,6 +219,21 @@ impl FerrisScriptNode {
         env.set("self".to_string(), Value::SelfObject);
         env.set_property_getter(get_node_property_tls);
         env.set_property_setter(set_node_property_tls);
+
+        // Set up signal emitter callback using instance ID
+        env.set_signal_emitter(Box::new(move |signal_name: &str, args: &[Value]| {
+            // Convert FerrisScript Values to Godot Variants
+            let variant_args: Vec<Variant> = args.iter().map(value_to_variant).collect();
+
+            // Try to get the node by instance ID and emit signal
+            match Gd::<Node2D>::try_from_instance_id(instance_id) {
+                Ok(mut node) => {
+                    node.emit_signal(signal_name, &variant_args);
+                    Ok(())
+                }
+                Err(_) => Err("Node no longer exists".to_string()),
+            }
+        }));
 
         let result = match call_function(function_name, args, env) {
             Ok(value) => Some(value),

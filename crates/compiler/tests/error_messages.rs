@@ -119,7 +119,7 @@ mod parser_errors {
 
         assert!(result.is_err());
         let error = result.unwrap_err();
-        assert!(error.contains("Expected 'fn' or 'let' at top level"));
+        assert!(error.contains("Expected 'fn', 'let', or 'signal' at top level"));
         assert!(error.contains("line"));
         assert!(error.contains("column"));
     }

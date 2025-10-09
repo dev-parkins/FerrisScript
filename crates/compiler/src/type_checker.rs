@@ -108,6 +108,8 @@ struct TypeChecker<'a> {
     scopes: Vec<HashMap<String, Type>>,
     // Function signatures
     functions: HashMap<String, FunctionSignature>,
+    // Signal signatures (signal_name -> param_types)
+    signals: HashMap<String, Vec<Type>>,
     // Current errors
     errors: Vec<String>,
     // Source code for error context
@@ -119,6 +121,7 @@ impl<'a> TypeChecker<'a> {
         let mut checker = TypeChecker {
             scopes: vec![HashMap::new()],
             functions: HashMap::new(),
+            signals: HashMap::new(),
             errors: Vec::new(),
             source,
         };
@@ -128,6 +131,16 @@ impl<'a> TypeChecker<'a> {
             "print".to_string(),
             FunctionSignature {
                 params: vec![Type::String],
+                return_type: Type::Void,
+            },
+        );
+
+        // Register emit_signal built-in function (first arg is signal name as string)
+        // Note: This is a variadic function, we'll check args dynamically
+        checker.functions.insert(
+            "emit_signal".to_string(),
+            FunctionSignature {
+                params: vec![Type::String], // At least signal name
                 return_type: Type::Void,
             },
         );
@@ -269,6 +282,11 @@ impl<'a> TypeChecker<'a> {
             }
         }
 
+        // Register all signals
+        for signal in &program.signals {
+            self.check_signal(signal);
+        }
+
         // Register all functions first
         for func in &program.functions {
             let param_types: Vec<Type> = func
@@ -373,6 +391,132 @@ impl<'a> TypeChecker<'a> {
         }
 
         self.pop_scope();
+    }
+
+    fn check_signal(&mut self, signal: &Signal) {
+        // Check for duplicate signal name
+        if self.signals.contains_key(&signal.name) {
+            let base_msg = format!(
+                "Signal '{}' is already defined at {}",
+                signal.name, signal.span
+            );
+            self.error(format_error_with_code(
+                ErrorCode::E301,
+                &base_msg,
+                self.source,
+                signal.span.line,
+                signal.span.column,
+                "Each signal must have a unique name",
+            ));
+            return;
+        }
+
+        // Validate parameter types
+        let mut param_types = Vec::new();
+        for (param_name, param_type) in &signal.parameters {
+            let ty = Type::from_string(param_type);
+
+            if ty == Type::Unknown {
+                let base_msg = format!(
+                    "Unknown type '{}' for signal parameter '{}' at {}",
+                    param_type, param_name, signal.span
+                );
+
+                let candidates = Self::list_types();
+                let suggestions = find_similar_identifiers(param_type, &candidates);
+
+                let hint = if !suggestions.is_empty() {
+                    format!("Type not recognized. Did you mean '{}'?", suggestions[0])
+                } else {
+                    "Type not recognized. Available types: i32, f32, bool, String, Vector2, Node"
+                        .to_string()
+                };
+
+                self.error(format_error_with_code(
+                    ErrorCode::E203,
+                    &base_msg,
+                    self.source,
+                    signal.span.line,
+                    signal.span.column,
+                    &hint,
+                ));
+            }
+
+            param_types.push(ty);
+        }
+
+        // Register signal
+        self.signals.insert(signal.name.clone(), param_types);
+    }
+
+    fn check_emit_signal(&mut self, signal_name: &str, args: &[Expr], span: &Span) {
+        // Look up signal
+        let signal_params = match self.signals.get(signal_name) {
+            Some(params) => params.clone(),
+            None => {
+                let base_msg = format!("Signal '{}' is not defined at {}", signal_name, span);
+                self.error(format_error_with_code(
+                    ErrorCode::E302,
+                    &base_msg,
+                    self.source,
+                    span.line,
+                    span.column,
+                    "Signal must be declared before it can be emitted",
+                ));
+                return;
+            }
+        };
+
+        // Check argument count
+        if args.len() != signal_params.len() {
+            let base_msg = format!(
+                "Signal '{}' expects {} parameters, but {} were provided at {}",
+                signal_name,
+                signal_params.len(),
+                args.len(),
+                span
+            );
+            self.error(format_error_with_code(
+                ErrorCode::E303,
+                &base_msg,
+                self.source,
+                span.line,
+                span.column,
+                &format!(
+                    "Expected {} argument(s), found {}",
+                    signal_params.len(),
+                    args.len()
+                ),
+            ));
+            return;
+        }
+
+        // Check argument types
+        for (i, (arg, expected_type)) in args.iter().zip(signal_params.iter()).enumerate() {
+            let arg_type = self.check_expr(arg);
+            if !arg_type.can_coerce_to(expected_type) {
+                let base_msg = format!(
+                    "Signal '{}' parameter {} type mismatch: expected {}, found {} at {}",
+                    signal_name,
+                    i + 1,
+                    expected_type.name(),
+                    arg_type.name(),
+                    span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E304,
+                    &base_msg,
+                    self.source,
+                    span.line,
+                    span.column,
+                    &format!(
+                        "Cannot coerce {} to {}",
+                        arg_type.name(),
+                        expected_type.name()
+                    ),
+                ));
+            }
+        }
     }
 
     fn check_stmt(&mut self, stmt: &Stmt) {
@@ -728,6 +872,43 @@ impl<'a> TypeChecker<'a> {
                 }
             }
             Expr::Call(name, args, span) => {
+                // Special handling for emit_signal
+                if name == "emit_signal" {
+                    if args.is_empty() {
+                        let base_msg =
+                            format!("emit_signal requires at least one argument at {}", span);
+                        self.error(format_error_with_code(
+                            ErrorCode::E204,
+                            &base_msg,
+                            self.source,
+                            span.line,
+                            span.column,
+                            "First argument must be the signal name as a string literal",
+                        ));
+                        return Type::Void;
+                    }
+
+                    // First argument must be a string literal (signal name)
+                    if let Expr::Literal(Literal::Str(signal_name), _) = &args[0] {
+                        // Check the signal emission with remaining args
+                        self.check_emit_signal(signal_name, &args[1..], span);
+                    } else {
+                        let base_msg = format!(
+                            "emit_signal first argument must be a string literal at {}",
+                            span
+                        );
+                        self.error(format_error_with_code(
+                            ErrorCode::E205,
+                            &base_msg,
+                            self.source,
+                            span.line,
+                            span.column,
+                            "Signal name must be known at compile time (use a string literal)",
+                        ));
+                    }
+                    return Type::Void;
+                }
+
                 if let Some(sig) = self.functions.get(name).cloned() {
                     if args.len() != sig.params.len() {
                         let base_msg = format!(
@@ -1270,5 +1451,115 @@ fn _process(delta: f32) {
         let result = check(&program, input);
         assert!(result.is_err());
         // Type checker treats unknown types as Type::Unknown, may still compile
+    }
+
+    // Signal Tests
+    #[test]
+    fn test_signal_declaration_valid() {
+        let input = "signal health_changed(old: i32, new: i32);";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_signal_no_params() {
+        let input = "signal player_died();";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_signal_duplicate_name_error() {
+        let input = r#"
+            signal player_died();
+            signal player_died();
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("already defined"));
+    }
+
+    #[test]
+    fn test_signal_undefined_type_error() {
+        let input = "signal test(param: UnknownType);";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Unknown type"));
+    }
+
+    #[test]
+    fn test_emit_signal_valid() {
+        let input = r#"
+            signal health_changed(old: i32, new: i32);
+            fn test() {
+                emit_signal("health_changed", 100, 75);
+            }
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_emit_signal_undefined_error() {
+        let input = r#"
+            fn test() {
+                emit_signal("undefined_signal");
+            }
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("not defined"));
+    }
+
+    #[test]
+    fn test_emit_signal_param_count_mismatch() {
+        let input = r#"
+            signal health_changed(old: i32, new: i32);
+            fn test() {
+                emit_signal("health_changed", 100);
+            }
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("expects 2 parameters"));
+    }
+
+    #[test]
+    fn test_emit_signal_param_type_mismatch() {
+        let input = r#"
+            signal health_changed(old: i32, new: i32);
+            fn test() {
+                emit_signal("health_changed", 100, true);
+            }
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("type mismatch"));
+    }
+
+    #[test]
+    fn test_emit_signal_type_coercion() {
+        let input = r#"
+            signal position_changed(x: f32, y: f32);
+            fn test() {
+                emit_signal("position_changed", 10, 20);
+            }
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok()); // i32 can coerce to f32
     }
 }

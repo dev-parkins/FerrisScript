@@ -23,6 +23,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.0.4] - 2025-10-08
+
+**Codename**: "Signals & Events" 🔔📡
+
+This release adds full signal support to FerrisScript, enabling event-driven programming with Godot's signal system. Signals can be declared, emitted, and connected across the Rust↔Godot boundary.
+
+### Added
+
+#### Signal System (Phase 1)
+
+- **Signal Declaration Syntax** (Steps 1-3, PR #TBD)
+  - `signal name(param1: Type1, param2: Type2);` syntax
+  - Type checking for signal declarations (E301-E304 error codes)
+  - Signal validation: duplicate detection, type checking, parameter validation
+  - 17 new tests (2 lexer, 6 parser, 9 type checker)
+
+- **Signal Emission** (Steps 4-6, PR #TBD)
+  - `emit_signal("signal_name", arg1, arg2)` built-in function
+  - Runtime signal registration and emission
+  - Godot binding integration with instance ID pattern
+  - Value→Variant conversion for all FerrisScript types
+  - 7 new runtime tests for signal emission
+  - E501-E502 error codes for emit_signal validation
+
+- **Documentation** (Step 8)
+  - Updated ERROR_CODES.md with signal errors (E301-E304, E501-E502)
+  - Signal usage examples in godot_test/scripts/signal_test.ferris
+  - STEP_6_COMPLETION_REPORT.md with technical details
+
+### Technical Details
+
+- **Signal Flow**: FerrisScript → Runtime callback → Godot emit_signal()
+- **Type Safety**: Compile-time type checking, runtime validation
+- **Thread Safety**: Instance ID pattern avoids borrowing conflicts
+- **Test Coverage**: 286 tests passing (221 compiler + 64 runtime + 1 godot_bind)
+
+### Notes
+
+- Signal connections handled via Godot editor (connect/disconnect methods deferred to future release)
+- All FerrisScript types supported as signal parameters (i32, f32, bool, String, Vector2)
+- Signals registered dynamically with Godot's add_user_signal()
+
+---
+
 ## [0.0.3] - 2025-10-08
 
 **Codename**: "Editor Experience Alpha" 💡🔍

@@ -50,7 +50,7 @@ fn foo() {
 
         // Should have collected error about invalid top-level token
         assert_eq!(errors.len(), 1);
-        assert!(errors[0].contains("Expected 'fn' or 'let' at top level"));
+        assert!(errors[0].contains("Expected 'fn', 'let', or 'signal' at top level"));
     }
 
     #[test]
@@ -160,7 +160,7 @@ fn bar() {
         let errors = parser_instance.get_errors();
 
         assert_eq!(errors.len(), 1);
-        assert!(errors[0].contains("Expected 'fn' or 'let' at top level"));
+        assert!(errors[0].contains("Expected 'fn', 'let', or 'signal' at top level"));
     }
 
     #[test]
@@ -221,7 +221,7 @@ let x = 5;
 
         // The error message should be from the first error
         let returned_error = result.unwrap_err();
-        assert!(returned_error.contains("Expected 'fn' or 'let' at top level"));
+        assert!(returned_error.contains("Expected 'fn', 'let', or 'signal' at top level"));
 
         // Internal errors collection should have recorded errors
         let errors = parser_instance.get_errors();

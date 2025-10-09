@@ -186,6 +186,15 @@ impl<'a> Parser<'a> {
                         // Continue parsing to find more errors
                     }
                 }
+            } else if matches!(self.current(), Token::Signal) {
+                match self.parse_signal_declaration() {
+                    Ok(signal) => program.signals.push(signal),
+                    Err(e) => {
+                        self.record_error(e);
+                        self.synchronize();
+                        // Continue parsing to find more errors
+                    }
+                }
             } else if matches!(self.current(), Token::Fn) {
                 match self.parse_function() {
                     Ok(function) => program.functions.push(function),
@@ -197,7 +206,7 @@ impl<'a> Parser<'a> {
                 }
             } else {
                 let base_msg = format!(
-                    "Expected 'fn' or 'let' at top level, found {} at line {}, column {}",
+                    "Expected 'fn', 'let', or 'signal' at top level, found {} at line {}, column {}",
                     self.current().name(),
                     self.current_line,
                     self.current_column
@@ -291,6 +300,93 @@ impl<'a> Parser<'a> {
             mutable,
             ty,
             value,
+            span,
+        })
+    }
+
+    fn parse_signal_declaration(&mut self) -> Result<Signal, String> {
+        let span = self.span();
+        self.expect(Token::Signal)?;
+
+        let name = match self.advance() {
+            Token::Ident(n) => n,
+            t => {
+                let base_msg = format!(
+                    "Expected signal name, found {} at line {}, column {}",
+                    t.name(),
+                    self.current_line,
+                    self.current_column
+                );
+                return Err(format_error_with_code(
+                    ErrorCode::E109,
+                    &base_msg,
+                    self.source,
+                    self.current_line,
+                    self.current_column,
+                    "Signal name must be an identifier",
+                ));
+            }
+        };
+
+        self.expect(Token::LParen)?;
+
+        let mut parameters = Vec::new();
+        while !matches!(self.current(), Token::RParen) {
+            let param_name = match self.advance() {
+                Token::Ident(n) => n,
+                t => {
+                    let base_msg = format!(
+                        "Expected parameter name, found {} at line {}, column {}",
+                        t.name(),
+                        self.current_line,
+                        self.current_column
+                    );
+                    return Err(format_error_with_code(
+                        ErrorCode::E109,
+                        &base_msg,
+                        self.source,
+                        self.current_line,
+                        self.current_column,
+                        "Signal parameter name must be an identifier",
+                    ));
+                }
+            };
+
+            self.expect(Token::Colon)?;
+
+            let param_type = match self.advance() {
+                Token::Ident(t) => t,
+                t => {
+                    let base_msg = format!(
+                        "Expected type, found {} at line {}, column {}",
+                        t.name(),
+                        self.current_line,
+                        self.current_column
+                    );
+                    return Err(format_error_with_code(
+                        ErrorCode::E110,
+                        &base_msg,
+                        self.source,
+                        self.current_line,
+                        self.current_column,
+                        "Signal parameter type must be a valid type name (e.g., i32, f32, bool)",
+                    ));
+                }
+            };
+
+            parameters.push((param_name, param_type));
+
+            if !matches!(self.current(), Token::RParen) {
+                self.expect(Token::Comma)?;
+            }
+        }
+
+        self.expect(Token::RParen)?;
+        self.expect(Token::Semicolon)?;
+
+        Ok(Signal {
+            name,
+            parameters,
             span,
         })
     }
@@ -866,6 +962,82 @@ mod tests {
         let program = parse(&tokens, source).unwrap();
         assert_eq!(program.functions.len(), 0);
         assert_eq!(program.global_vars.len(), 0);
+        assert_eq!(program.signals.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_signal_no_params() {
+        let input = "signal player_died();";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.signals.len(), 1);
+        let signal = &program.signals[0];
+        assert_eq!(signal.name, "player_died");
+        assert_eq!(signal.parameters.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_signal_one_param() {
+        let input = "signal health_changed(new_health: i32);";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.signals.len(), 1);
+        let signal = &program.signals[0];
+        assert_eq!(signal.name, "health_changed");
+        assert_eq!(signal.parameters.len(), 1);
+        assert_eq!(signal.parameters[0].0, "new_health");
+        assert_eq!(signal.parameters[0].1, "i32");
+    }
+
+    #[test]
+    fn test_parse_signal_multiple_params() {
+        let input = "signal score_changed(old: i32, new: i32, reason: String);";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.signals.len(), 1);
+        let signal = &program.signals[0];
+        assert_eq!(signal.name, "score_changed");
+        assert_eq!(signal.parameters.len(), 3);
+        assert_eq!(signal.parameters[0], ("old".to_string(), "i32".to_string()));
+        assert_eq!(signal.parameters[1], ("new".to_string(), "i32".to_string()));
+        assert_eq!(
+            signal.parameters[2],
+            ("reason".to_string(), "String".to_string())
+        );
+    }
+
+    #[test]
+    fn test_parse_signal_missing_semicolon() {
+        let input = "signal player_died()";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Expected ;"));
+    }
+
+    #[test]
+    fn test_parse_signal_missing_parens() {
+        let _input = "signal player_died;";
+        let tokens = vec![
+            Token::Signal,
+            Token::Ident("player_died".to_string()),
+            Token::Semicolon,
+            Token::Eof,
+        ];
+        let result = parse(&tokens, "signal player_died;");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Expected ("));
+    }
+
+    #[test]
+    fn test_parse_signal_invalid_param_syntax() {
+        let input = "signal test(x y);";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+        assert!(result.is_err());
     }
 
     #[test]
@@ -1432,7 +1604,7 @@ fn other() { return 42; }
         // Should collect error and continue parsing, but return error due to API compatibility
         assert!(result.is_err());
         assert_eq!(parser.errors.len(), 1);
-        assert!(parser.errors[0].contains("Expected 'fn' or 'let' at top level"));
+        assert!(parser.errors[0].contains("Expected 'fn', 'let', or 'signal' at top level"));
         // Note: parse_program returns Err with first error, so we can't check the program structure
         // The important thing is that we collected the error and continued parsing
     }
