@@ -54,6 +54,7 @@ fn process(&mut self, delta: f64) {
 ```
 
 **Applied to ALL lifecycle functions:**
+
 - `_ready()` - ✅ Now optional!
 - `_process(delta: f32)`
 - `_physics_process(delta: f32)`
@@ -64,6 +65,7 @@ fn process(&mut self, delta: f64) {
 ### 2. Fixed Immutability Issue in Test File
 
 **Before (BROKEN):**
+
 ```ferris
 let result: i32 = 0;
 if y > 40 {
@@ -74,6 +76,7 @@ if y > 40 {
 ```
 
 **After (FIXED):**
+
 ```ferris
 // Test the condition directly instead of storing in variable
 assert_test(y > 40);
@@ -84,6 +87,7 @@ assert_test(y > 40);
 ## Files Changed
 
 ### `crates/godot_bind/src/lib.rs`
+
 - ✅ Added function existence checks to `ready()` for `_ready()`
 - ✅ Added function existence checks to `process()` for `_process()`
 - ✅ Added function existence checks to `physics_process()` for `_physics_process()`
@@ -92,6 +96,7 @@ assert_test(y > 40);
 - ✅ Added function existence checks to `exit_tree()` for `_exit_tree()`
 
 ### `godot_test/scripts/v004_phase2_test.ferris`
+
 - ✅ Removed variable reassignment in Test 3
 - ✅ Changed to direct condition testing
 
@@ -114,6 +119,7 @@ assert_test(y > 40);
 ### Optional vs Required Lifecycle Functions
 
 **Optional (implement if needed):**
+
 - `_process(delta: f32)` - Called every frame
 - `_physics_process(delta: f32)` - Called every physics frame (60Hz)
 - `_input(event: InputEvent)` - Called on input events
@@ -121,6 +127,7 @@ assert_test(y > 40);
 - `_exit_tree()` - Called when removed from scene tree
 
 **Commonly Used:**
+
 - `_ready()` - Called when node is ready (initialization)
 
 ### Variable Immutability
@@ -137,11 +144,13 @@ assert_test(y > 40);
 FerrisScript currently only supports **if statements**, not **if expressions**:
 
 ❌ **Not Supported:**
+
 ```ferris
 let result = if condition { 1 } else { -1 };
 ```
 
 ✅ **Supported:**
+
 ```ferris
 let result = 0;
 if condition {

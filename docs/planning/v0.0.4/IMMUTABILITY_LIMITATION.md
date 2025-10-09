@@ -41,6 +41,7 @@ while sum < 100 {
 ### What Works
 
 ✅ **Immutable variable declarations:**
+
 ```ferris
 let x: i32 = 42;
 let y: i32 = x + 8;
@@ -48,6 +49,7 @@ let name: String = "Ferris";
 ```
 
 ✅ **Function parameters (effectively immutable):**
+
 ```ferris
 fn add(a: i32, b: i32) -> i32 {
     return a + b;  // Can't modify a or b
@@ -55,6 +57,7 @@ fn add(a: i32, b: i32) -> i32 {
 ```
 
 ✅ **If statements (but not if expressions):**
+
 ```ferris
 if condition {
     print("True branch");
@@ -64,6 +67,7 @@ if condition {
 ```
 
 ✅ **Simple while loops (no counter updates):**
+
 ```ferris
 // This works, but runs forever!
 while true {
@@ -74,12 +78,14 @@ while true {
 ### What Doesn't Work
 
 ❌ **Variable reassignment:**
+
 ```ferris
 let x = 10;
 x = 20;  // ERROR
 ```
 
 ❌ **Counter-based loops:**
+
 ```ferris
 let i = 0;
 while i < 10 {
@@ -88,12 +94,14 @@ while i < 10 {
 ```
 
 ❌ **Accumulator patterns:**
+
 ```ferris
 let sum = 0;
 sum = sum + value;  // ERROR
 ```
 
 ❌ **If expressions:**
+
 ```ferris
 let result = if x > 0 { 1 } else { -1 };  // ERROR: Expected statement
 ```
@@ -103,6 +111,7 @@ let result = if x > 0 { 1 } else { -1 };  // ERROR: Expected statement
 ### v004_phase2_test.ferris - Test 4 Skipped
 
 **Original (BROKEN):**
+
 ```ferris
 // Test 4: Loop Execution
 print("Test 4: Loop Execution");
@@ -116,6 +125,7 @@ assert_test(sum == 10);
 ```
 
 **Fixed (SKIPPED):**
+
 ```ferris
 // Test 4: Loop Execution
 print("Test 4: Loop Execution (skipped - requires mutable variables)");
@@ -127,6 +137,7 @@ print("Test 4: Loop Execution (skipped - requires mutable variables)");
 ### test_blank_line.ferris - Added _ready()
 
 **Original (BROKEN):**
+
 ```ferris
 fn test() {
     print("hello");
@@ -135,6 +146,7 @@ fn test() {
 ```
 
 **Fixed (WORKING):**
+
 ```ferris
 fn test() {
     print("hello");
@@ -150,6 +162,7 @@ fn _ready() {
 ### Phase 3 or Later: Add Mutable Variables
 
 **Option 1: Rust-style `mut` keyword**
+
 ```ferris
 let mut i: i32 = 0;  // Mutable variable
 while i < 5 {
@@ -158,6 +171,7 @@ while i < 5 {
 ```
 
 **Option 2: Different keyword**
+
 ```ferris
 var i: i32 = 0;  // JavaScript/TypeScript style
 while i < 5 {
@@ -166,6 +180,7 @@ while i < 5 {
 ```
 
 **Option 3: All variables mutable by default**
+
 ```ferris
 let i: i32 = 0;  // Mutable by default (like C/JavaScript)
 while i < 5 {

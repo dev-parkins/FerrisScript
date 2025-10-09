@@ -77,6 +77,7 @@ let context = extract_source_context_with_pointer(source, 5, Some(20), "Expected
 ```
 
 **Output** (CORRECT):
+
 ```
  3 | line 3
  4 | line 4
@@ -111,6 +112,7 @@ Content:  let result: i32 = 0
 ```
 
 Counting from position 1:
+
 - Columns 1-3: `let`
 - Column 4: space
 - Columns 5-10: `result`

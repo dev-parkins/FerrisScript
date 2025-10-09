@@ -7,6 +7,7 @@
 ### Example
 
 **User's file** (`v004_phase2_test.ferris`):
+
 ```ferris
 // Line 1: blank
 // Line 2: HI FROM COMMENT
@@ -19,6 +20,7 @@
 ```
 
 **Previous Error (WRONG)**:
+
 ```
 Expected ;, found fn at line 1, column 1
 
@@ -29,6 +31,7 @@ Expected ;, found fn at line 1, column 1
 ```
 
 **New Error (CORRECT)**:
+
 ```
 Expected ;, found fn at line 6, column 20
 
@@ -84,6 +87,7 @@ The lexer now records the line/column **before** calling `next_token()`, ensurin
 Changed parser to work with `PositionedToken` instead of `Token`:
 
 **Before:**
+
 ```rust
 pub struct Parser<'a> {
     tokens: Vec<Token>,  // No position info
@@ -94,6 +98,7 @@ pub struct Parser<'a> {
 ```
 
 **After:**
+
 ```rust
 pub struct Parser<'a> {
     tokens: Vec<PositionedToken>,  // Has position info
@@ -149,11 +154,13 @@ pub fn parse(tokens: &[Token], source: &str) -> Result<Program, String> {
 ### Core Changes
 
 **`crates/compiler/src/lexer.rs`:**
+
 - ✅ Added `PositionedToken` struct
 - ✅ Added `tokenize_all_positioned()` method
 - ✅ Added `tokenize_positioned()` public function
 
 **`crates/compiler/src/parser.rs`:**
+
 - ✅ Changed `Parser` to use `Vec<PositionedToken>`
 - ✅ Updated `advance()` to extract position from tokens
 - ✅ Updated `expect()` to use `current_position()`
@@ -162,32 +169,38 @@ pub fn parse(tokens: &[Token], source: &str) -> Result<Program, String> {
 - ✅ Updated all internal parser methods
 
 **`crates/compiler/src/lib.rs`:**
+
 - ✅ Updated `compile()` to use `tokenize_positioned()` and `parse_positioned()`
 - ✅ Added 3 error reporting tests
 
 ### Test Updates
 
 **`crates/compiler/src/parser.rs` (unit tests):**
+
 - ✅ Added `to_positioned()` helper function
 - ✅ Updated unit tests to use positioned tokens
 
 **`crates/compiler/tests/parser_error_recovery.rs` (integration tests):**
+
 - ✅ Added `to_positioned()` helper function
 - ✅ Updated all Parser::new() calls (10 instances)
 
 ## Tests Added
 
 ### 1. `test_missing_semicolon_line_7()`
+
 Tests that errors report the correct line number even with blank lines and comments before the error.
 
 **Status**: ✅ PASSING
 
 ### 2. `test_error_with_blank_lines_and_comments()`
+
 Tests that multiple blank lines and comments don't break position tracking.
 
 **Status**: ✅ PASSING
 
 ### 3. `test_multiple_errors_with_positions()`
+
 Tests that the first error in a file reports the correct line number.
 
 **Status**: ✅ PASSING
@@ -195,11 +208,13 @@ Tests that the first error in a file reports the correct line number.
 ## Verification
 
 **Command**:
+
 ```bash
 cargo test --package ferrisscript_compiler --lib multiple
 ```
 
 **Result**:
+
 ```
 test tests::test_multiple_errors_with_positions ... ok
 test result: ok. 11 passed; 0 failed
@@ -208,12 +223,14 @@ test result: ok. 11 passed; 0 failed
 ## Impact
 
 ### Before This Fix
+
 - ❌ All parser errors showed `line 1, column 1`
 - ❌ Source context showed wrong lines
 - ❌ Impossible to locate errors in large files
 - ❌ Very poor developer experience
 
 ### After This Fix
+
 - ✅ Errors show **exact line and column** numbers
 - ✅ Source context shows **correct surrounding lines**
 - ✅ Easy to locate and fix errors
@@ -222,6 +239,7 @@ test result: ok. 11 passed; 0 failed
 ## Example Error Output
 
 **Test File**:
+
 ```ferris
 // Line 1
 // HI FROM COMMENT
@@ -236,6 +254,7 @@ fn assert_test(cond: bool) {  // Line 8
 ```
 
 **Error Output**:
+
 ```
 Error[E100]: Expected token
 Expected ;, found fn at line 6, column 20
@@ -254,6 +273,7 @@ Expected ;, found fn at line 6, column 20
 ## Performance Impact
 
 **Minimal** - PositionedToken is just a wrapper:
+
 - Token: ~16-32 bytes (enum with data)
 - PositionedToken: +16 bytes (two usizes)
 - Total overhead: ~16 bytes per token
@@ -264,7 +284,9 @@ The trade-off is **absolutely worth it** for correct error reporting.
 ## Future Enhancements
 
 ### 1. Span-Based Tracking
+
 Instead of just start position, track the full span (start + end):
+
 ```rust
 pub struct Span {
     pub start_line: usize,
@@ -275,22 +297,27 @@ pub struct Span {
 ```
 
 This would enable:
+
 - Highlighting entire error regions
 - Better multi-line error reporting
 - More precise IDE integration
 
 ### 2. Source Maps
+
 For generated code or macro expansion, maintain source maps to original locations.
 
 ### 3. Better Error Recovery
+
 Use position information to suggest better sync points during error recovery.
 
 ## Compatibility
 
 ### Breaking Changes
+
 **None for end users** - The public `compile()` API is unchanged.
 
 ### Internal API Changes
+
 - `Parser::new()` now requires `Vec<PositionedToken>` instead of `Vec<Token>`
 - New `parse_positioned()` function added
 - Old `parse()` function still works (converts to positioned tokens internally)

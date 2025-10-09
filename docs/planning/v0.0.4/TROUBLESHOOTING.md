@@ -21,6 +21,7 @@
    - Script provided: `rebuild_godot_extension.ps1`
 
 3. **Verify Files**
+
    ```powershell
    # Check DLL exists
    ls godot_test\ferrisscript_godot_bind.dll
@@ -44,27 +45,33 @@
 ### 📋 Common Issues
 
 #### Extension Not Loading
+
 **Symptoms**: No messages about FerrisScript in Output panel
 
 **Solutions**:
+
 - Check `ferrisscript.gdextension` file is in `godot_test/` directory
 - Verify DLL path in `.gdextension` matches actual DLL location
 - Check for error messages in Godot's Output panel
 - Try `Project > Reload Current Project`
 
 #### DLL Version Mismatch
+
 **Symptoms**: "Failed to load extension" or "Incompatible version"
 
 **Solutions**:
+
 - Rebuild with `cargo build --package ferrisscript_godot_bind --release`
 - Copy DLL: `Copy-Item target\release\ferrisscript_godot_bind.dll godot_test\ -Force`
 - Delete `.godot/` folder
 - Restart Godot
 
 #### Wrong Base Class
+
 **Symptoms**: Node appears but has unexpected properties
 
 **Note**: `FerrisScriptNode` inherits from `Node2D` (has position, rotation, scale)
+
 - If you need a pure `Node`, modify `crates/godot_bind/src/lib.rs` line 87
 - Change `#[class(base=Node2D)]` to `#[class(base=Node)]`
 - Rebuild
@@ -72,11 +79,13 @@
 ### 🚀 Quick Rebuild Script
 
 Run `rebuild_godot_extension.ps1`:
+
 ```powershell
 .\rebuild_godot_extension.ps1
 ```
 
 This will:
+
 1. Check if Godot is running (warns you to close it)
 2. Clean `.godot/` cache
 3. Rebuild the DLL
@@ -86,6 +95,7 @@ This will:
 ### 📝 Extension Configuration
 
 Current `ferrisscript.gdextension`:
+
 ```ini
 [configuration]
 entry_symbol = "gdext_rust_init"
@@ -106,12 +116,14 @@ windows.release.x86_64 = "res://ferrisscript_godot_bind.dll"
    - Note any error messages
 
 2. **Verify DLL**
+
    ```powershell
    # Check DLL exists and is recent
    Get-Item godot_test\ferrisscript_godot_bind.dll | Select Name, LastWriteTime, Length
    ```
 
 3. **Check Extension Registration**
+
    ```powershell
    # After opening Godot once, check this file
    Get-Content godot_test\.godot\extension_list.cfg
@@ -137,6 +149,7 @@ Once the node is available:
    - Scripts must have functions (no top-level executable code)
    - Call `run_tests()` or similar from `_ready()`
    - Example:
+
      ```ferris
      fn _ready() {
          run_tests();
@@ -160,10 +173,12 @@ If FerrisScriptNode still doesn't appear:
 2. Verify you're on Windows x64 (or rebuild for your platform)
 3. Check for antivirus blocking the DLL
 4. Try building in debug mode:
+
    ```powershell
    cargo build --package ferrisscript_godot_bind
    # Update .gdextension to point to target/debug/ferrisscript_godot_bind.dll
    ```
+
 5. Check Godot's log file in `%APPDATA%\Godot\app_userdata\`
 
 ### 📚 Reference

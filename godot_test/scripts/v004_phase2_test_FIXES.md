@@ -7,6 +7,7 @@
 **Problem**: Function definitions had no parameters, but were being called with arguments.
 
 #### Fixed: `assert_test`
+
 ```ferris
 // ❌ Before (wrong)
 fn assert_test() {
@@ -28,6 +29,7 @@ fn assert_test(cond: bool) {
 ```
 
 #### Fixed: `add`
+
 ```ferris
 // ❌ Before (wrong)
 fn add() {
@@ -100,6 +102,7 @@ fn _ready() {
 **Explanation**: FerrisScript doesn't support explicit `-> void` syntax. Instead:
 
 - ✅ **Implicit void**: Functions without return type are automatically `void`
+
   ```ferris
   fn assert_test(cond: bool) {  // Implicitly returns void
       print("test");
@@ -107,6 +110,7 @@ fn _ready() {
   ```
 
 - ✅ **Explicit return type**: Use `-> i32`, `-> f32`, `-> bool`
+
   ```ferris
   fn add(a: i32, b: i32) -> i32 {  // Explicitly returns i32
       return a + b;
@@ -114,6 +118,7 @@ fn _ready() {
   ```
 
 - ❌ **Cannot write `-> void`**: This is not recognized
+
   ```ferris
   fn test() -> void {  // ERROR: Unknown type 'void'
       print("test");
@@ -125,6 +130,7 @@ This matches how Rust and many other languages work - void is implicit for funct
 ## Supported Types
 
 Currently, FerrisScript supports these types:
+
 - `i32` - 32-bit integer
 - `f32` - 32-bit float
 - `bool` - Boolean
@@ -177,6 +183,7 @@ fn _exit_tree() {
 5. Set Script Path: `res://scripts/v004_phase2_test.ferris`
 6. Run the scene (F5)
 7. Check Output panel - you should see:
+
    ```
    Test 1: Variable Assignment and Retrieval
    PASS
