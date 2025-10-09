@@ -7,6 +7,7 @@
 ## Background
 
 FerrisScript needs to support Godot signals with the following syntax:
+
 ```ferris
 signal health_changed(old: i32, new: i32);
 signal player_died();
@@ -27,6 +28,7 @@ The challenge is integrating this with godot-rust 0.4's signal system.
 **Question**: Does godot-rust 0.4 require `#[signal]` attributes, or can signals be registered dynamically at runtime?
 
 **Known from gdext docs**:
+
 - godot-rust 0.4 uses `#[signal]` attribute on associated functions in `#[godot_api]` impl blocks
 - Static approach: `#[signal] fn health_changed(old: i32, new: i32);`
 - Dynamic approach: `Object::add_user_signal()` from Godot's ClassDB API
@@ -42,6 +44,7 @@ The challenge is integrating this with godot-rust 0.4's signal system.
 **Question**: How do we marshal FerrisScript types to Godot signal parameters?
 
 **FerrisScript Types → Godot Types**:
+
 - `i32` → `Variant::from(i32)`
 - `f32` → `Variant::from(f32)`
 - `bool` → `Variant::from(bool)`
@@ -59,6 +62,7 @@ The challenge is integrating this with godot-rust 0.4's signal system.
 **Question**: How do we emit dynamically registered signals?
 
 **Known approaches**:
+
 1. **Static signals**: `self.emit_signal("signal_name".into(), &[variant1, variant2])`
 2. **Dynamic signals**: Same API, but signal must be registered first with `add_user_signal()`
 
@@ -73,6 +77,7 @@ The challenge is integrating this with godot-rust 0.4's signal system.
 **Question**: Can other nodes connect to dynamically registered signals?
 
 **Godot API**:
+
 ```gdscript
 # In GDScript
 node.connect("signal_name", callable)
@@ -80,6 +85,7 @@ node.disconnect("signal_name", callable)
 ```
 
 **godot-rust equivalent**:
+
 ```rust
 node.connect("signal_name".into(), callable);
 node.disconnect("signal_name".into(), callable);
@@ -143,6 +149,7 @@ fn builtin_emit_signal(args: &[Value]) -> Result<Value, String> {
 ```
 
 **Challenges**:
+
 1. ⚠️ **Runtime-to-Godot callback**: `builtin_emit_signal()` runs in pure Rust runtime, needs access to Godot node
 2. ✅ **Parameter marshalling**: Straightforward `Value` → `Variant` conversion
 3. ⚠️ **Thread safety**: Need to ensure signals are registered before emission
@@ -164,6 +171,7 @@ impl FerrisScriptNode {
 ```
 
 **Challenges**:
+
 1. ❌ **Requires build-time codegen**: FerrisScript is interpreted, not compiled
 2. ❌ **No flexibility**: Can't load different scripts with different signals
 3. ❌ **Complex build process**: Need proc macros or build scripts
@@ -177,11 +185,13 @@ impl FerrisScriptNode {
 ### Problem
 
 The runtime's `builtin_emit_signal()` function is called from FerrisScript code:
+
 ```ferris
 emit_signal("health_changed", 100, 75);
 ```
 
 But this function has signature:
+
 ```rust
 fn builtin_emit_signal(args: &[Value]) -> Result<Value, String>
 ```
@@ -216,6 +226,7 @@ fn builtin_emit_signal(args: &[Value]) -> Result<Value, String> {
 ```
 
 In Godot binding:
+
 ```rust
 fn emit_signal_callback(signal_name: &str, args: &[Value]) -> Result<(), String> {
     // Access node via thread-local storage
@@ -399,7 +410,7 @@ fn value_to_variant(value: &Value) -> Variant {
 
 ## Next Steps (Updated)
 
-### Phase 2: Integration (Step 6) - Now Much Simpler!
+### Phase 2: Integration (Step 6) - Now Much Simpler
 
 1. ✅ ~~Add parameter type mapping~~ - NOT NEEDED!
 2. Add signal registration loop in `FerrisScriptNode::ready()`
@@ -422,6 +433,7 @@ fn value_to_variant(value: &Value) -> Variant {
 ✅ **Dynamic signal registration is FULLY SUPPORTED and SIMPLER than expected!**
 
 The godot-rust 0.4 API naturally supports our use case:
+
 - No compile-time signal declarations needed
 - No parameter type specification at registration
 - Clean, minimal API surface

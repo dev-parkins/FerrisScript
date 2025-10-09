@@ -27,6 +27,7 @@ self.base_mut().add_user_signal("health_changed");  // Done!
 ```
 
 **Impact**:
+
 - ✅ No need to marshal parameter types at registration
 - ✅ No complex PropertyInfo dictionaries
 - ✅ Signals are inherently untyped (Variant-based)
@@ -39,6 +40,7 @@ self.base_mut().add_user_signal("health_changed");  // Done!
 **Status**: ✅ Compiles successfully
 
 **Test Code**:
+
 ```rust
 // Register
 self.base_mut().add_user_signal("player_died");
@@ -181,11 +183,13 @@ fn emit_signal_callback(signal_name: &str, args: &[Value]) -> Result<(), String>
 ## Implementation Checklist (Step 6)
 
 ### Phase 1: Runtime Callback Setup
+
 - [ ] Add `SignalEmitter` callback type to `ferrisscript_runtime::Env`
 - [ ] Implement `set_signal_emitter()` method
 - [ ] Update `builtin_emit_signal()` to use callback
 
 ### Phase 2: Godot Binding Integration
+
 - [ ] Add signal registration loop in `FerrisScriptNode::ready()`
 - [ ] Implement `emit_signal_callback()` function
 - [ ] Add thread-local node storage
@@ -193,6 +197,7 @@ fn emit_signal_callback(signal_name: &str, args: &[Value]) -> Result<(), String>
 - [ ] Connect callback in `call_script_function_with_self()`
 
 ### Phase 3: Testing
+
 - [ ] Create test .ferris script with signals
 - [ ] Add test scene in godot_test project
 - [ ] Test signal emission from FerrisScript

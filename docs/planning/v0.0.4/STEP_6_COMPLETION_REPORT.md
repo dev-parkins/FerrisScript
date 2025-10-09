@@ -1,23 +1,30 @@
 # Step 6 Implementation Summary: Signal Integration Complete
 
 ## Overview
+
 Successfully implemented full signal integration between FerrisScript runtime and Godot engine. Signals can now be declared, emitted, and received across the Rust↔Godot boundary.
 
 ## Implementation Details
 
 ### Phase 1: Runtime Callback Setup ✅
+
 **Files Modified:**
+
 - `crates/runtime/src/lib.rs`
 
 **Changes:**
+
 1. **Added SignalEmitter Type** (line ~103):
+
    ```rust
    pub type SignalEmitter = Box<dyn Fn(&str, &[Value]) -> Result<(), String>>;
    ```
+
    - Uses boxed closure instead of function pointer to allow capturing environment
    - Takes signal name and parameter array, returns Result
 
 2. **Extended Env Struct** (line ~163):
+
    ```rust
    pub struct Env {
        // ... existing fields ...
@@ -27,6 +34,7 @@ Successfully implemented full signal integration between FerrisScript runtime an
    ```
 
 3. **Added set_signal_emitter Method** (line ~207):
+
    ```rust
    pub fn set_signal_emitter(&mut self, emitter: SignalEmitter) {
        self.signal_emitter = Some(emitter);
@@ -50,11 +58,15 @@ Successfully implemented full signal integration between FerrisScript runtime an
    - Updated existing tests to use `mut env`
 
 ### Phase 2: Godot Binding Integration ✅
+
 **Files Modified:**
+
 - `crates/godot_bind/src/lib.rs`
 
 **Changes:**
+
 1. **Added value_to_variant Helper** (line ~47):
+
    ```rust
    fn value_to_variant(value: &Value) -> Variant {
        match value {
@@ -70,6 +82,7 @@ Successfully implemented full signal integration between FerrisScript runtime an
    ```
 
 2. **Updated ready() Method** (line ~131):
+
    ```rust
    fn ready(&mut self) {
        if !self.script_path.is_empty() {
@@ -121,10 +134,13 @@ Successfully implemented full signal integration between FerrisScript runtime an
    ```
 
 ### Phase 3: Test File Creation ✅
+
 **Files Created:**
+
 - `godot_test/scripts/signal_test.ferris`
 
 **Content:**
+
 - Declares 3 signals: `health_changed(old, new)`, `player_died()`, `score_updated(score)`
 - Implements `take_damage(damage)` function that emits health_changed
 - Implements `add_score(points)` function that emits score_updated
@@ -133,6 +149,7 @@ Successfully implemented full signal integration between FerrisScript runtime an
 ## Test Results
 
 ### Unit Tests: ✅ ALL PASSING
+
 - **Compiler Tests**: 221 passing
   - Includes 2 lexer tests, 6 parser tests, 9 type checker tests
 - **Runtime Tests**: 64 passing (up from 58)
@@ -142,30 +159,36 @@ Successfully implemented full signal integration between FerrisScript runtime an
 - **Total**: 286 tests passing
 
 ### Code Quality: ✅ CLEAN
+
 - **cargo clippy**: No warnings (--workspace --all-targets -D warnings)
 - **cargo build**: Successful compilation
 - **No dead code warnings**: All functions properly used
 
 ## Error Codes Added
+
 - **E501**: emit_signal requires at least a signal name
 - **E502**: emit_signal first argument must be a string
 
 ## Technical Highlights
 
 ### Instance ID Pattern
+
 Instead of storing Gd<FerrisScriptNode> in thread-local storage (which causes borrowing issues), we:
+
 1. Capture the node's instance_id before function execution
 2. Pass instance_id to the closure (can be cloned/moved)
 3. Inside callback, retrieve node using `Gd::<Node2D>::try_from_instance_id()`
 4. Emit signal directly on retrieved node
 
 **Benefits:**
+
 - No borrowing conflicts
 - No thread-local storage complexity
 - Clean lifetime management
 - Thread-safe by design
 
 ### Signal Registration Flow
+
 ```
 FerrisScript Source
     ↓
@@ -179,6 +202,7 @@ Signal registered in Godot's signal system
 ```
 
 ### Signal Emission Flow
+
 ```
 FerrisScript: emit_signal("name", arg1, arg2)
     ↓
@@ -194,7 +218,9 @@ Godot signal system dispatches to connected slots
 ```
 
 ## Next Steps (Step 7)
+
 For full signal support, we need to implement:
+
 1. `connect(signal_name, target_node, method_name)` - Connect FerrisScript signal to Godot method
 2. `disconnect(signal_name, target_node, method_name)` - Disconnect signal
 3. Research godot-rust 0.4 connect/disconnect API
@@ -202,12 +228,14 @@ For full signal support, we need to implement:
 5. Add tests for code-based connections
 
 ## Files Changed Summary
+
 - ✅ `crates/runtime/src/lib.rs` - Signal emitter callback infrastructure
 - ✅ `crates/godot_bind/src/lib.rs` - Godot signal integration
 - ✅ `crates/godot_bind/src/signal_prototype.rs` - Removed duplicate code, fixed clippy warnings
 - ✅ `godot_test/scripts/signal_test.ferris` - Test script for manual Godot testing
 
 ## Commit Message (Suggested)
+
 ```
 feat: Implement signal emission for FerrisScript v0.0.4 (Step 6)
 
