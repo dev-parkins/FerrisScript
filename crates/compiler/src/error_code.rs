@@ -658,4 +658,29 @@ mod tests {
         println!("E200 URL: {}", url);
         assert!(url.contains("#e200-type-mismatch"));
     }
+
+    #[test]
+    fn test_all_semantic_errors() {
+        // Test semantic error codes (E301-E305) including lifecycle validation
+        let codes = vec![
+            ErrorCode::E301,
+            ErrorCode::E302,
+            ErrorCode::E303,
+            ErrorCode::E304,
+            ErrorCode::E305,
+        ];
+        for code in codes {
+            assert_eq!(code.category(), ErrorCategory::Semantic);
+            assert!(!code.as_str().is_empty());
+            assert!(!code.description().is_empty());
+        }
+
+        // Specifically test E305 (lifecycle function signature validation)
+        assert_eq!(ErrorCode::E305.as_str(), "E305");
+        assert_eq!(
+            ErrorCode::E305.description(),
+            "Invalid lifecycle function signature"
+        );
+        assert_eq!(ErrorCode::E305.category(), ErrorCategory::Semantic);
+    }
 }

@@ -1840,4 +1840,138 @@ fn _process(delta: f32) {
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("must have no parameters"));
     }
+
+    // Additional lifecycle function edge case tests for coverage
+
+    #[test]
+    fn test_input_function_error_code_e305() {
+        // Test that _input validation uses E305 error code
+        let input = r#"fn _input(wrong_type: i32) {
+    print("test");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("E305"));
+        assert!(error.contains("must be of type InputEvent"));
+    }
+
+    #[test]
+    fn test_physics_process_function_error_code_e305() {
+        // Test that _physics_process validation uses E305 error code
+        let input = r#"fn _physics_process(wrong_type: i32) {
+    print("test");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("E305"));
+        assert!(error.contains("must be of type f32"));
+    }
+
+    #[test]
+    fn test_enter_tree_function_error_code_e305() {
+        // Test that _enter_tree validation uses E305 error code
+        let input = r#"fn _enter_tree(extra: i32) {
+    print("test");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("E305"));
+        assert!(error.contains("must have no parameters"));
+    }
+
+    #[test]
+    fn test_exit_tree_function_error_code_e305() {
+        // Test that _exit_tree validation uses E305 error code
+        let input = r#"fn _exit_tree(extra: i32) {
+    print("test");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("E305"));
+        assert!(error.contains("must have no parameters"));
+    }
+
+    #[test]
+    fn test_multiple_lifecycle_functions() {
+        // Test that multiple lifecycle functions can coexist
+        let input = r#"
+fn _input(event: InputEvent) {
+    print("Input");
+}
+
+fn _physics_process(delta: f32) {
+    print("Physics");
+}
+
+fn _enter_tree() {
+    print("Enter");
+}
+
+fn _exit_tree() {
+    print("Exit");
+}
+"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_lifecycle_function_with_body() {
+        // Test that lifecycle functions can have complex bodies
+        let input = r#"
+fn _physics_process(delta: f32) {
+    let velocity: f32 = 100.0;
+    let position: f32 = velocity * delta;
+    if position > 500.0 {
+        print("Out of bounds");
+    }
+}
+"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_input_function_no_param_error_message() {
+        // Test specific error message for _input with no params
+        let input = r#"fn _input() {
+    print("test");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("must have exactly 1 parameter"));
+        assert!(error.contains("found 0"));
+    }
+
+    #[test]
+    fn test_physics_process_no_param_error_message() {
+        // Test specific error message for _physics_process with no params
+        let input = r#"fn _physics_process() {
+    print("test");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("must have exactly 1 parameter"));
+        assert!(error.contains("found 0"));
+    }
 }
