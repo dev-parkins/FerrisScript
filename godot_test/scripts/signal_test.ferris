@@ -1,0 +1,35 @@
+// Signal Test for FerrisScript v0.0.4
+// Tests signal declaration and emission
+
+// Declare signals
+signal health_changed(old_health: i32, new_health: i32);
+signal player_died();
+signal score_updated(score: i32);
+
+// Function that emits signals
+fn take_damage(damage: i32) {
+    let old_health: i32 = 100;
+    let new_health: i32 = old_health - damage;
+    emit_signal("health_changed", old_health, new_health);
+    
+    if new_health <= 0 {
+        emit_signal("player_died");
+    }
+}
+
+fn add_score(points: i32) {
+    emit_signal("score_updated", points);
+}
+
+// Called when node enters scene tree
+fn _ready() {
+    print("Signal Test Ready!");
+    print("Available signals: health_changed, player_died, score_updated");
+}
+
+// Called every frame
+fn _process(delta: f32) {
+    // Test signals can be called from process
+    // Uncomment to test:
+    // take_damage(10);
+}

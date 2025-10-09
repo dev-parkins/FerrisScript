@@ -144,10 +144,18 @@ pub enum ErrorCode {
     /// Incompatible types in assignment
     E219,
 
-    // Semantic Errors (E300-E399) - Reserved for future semantic analysis
-    // These will be implemented when semantic analyzer is added
-    // E300: Unreachable code
-    // E301: Unused variable (warning)
+    // Semantic Errors (E300-E399) - Signal-related errors and future semantic analysis
+    /// Signal already defined (duplicate signal name)
+    E301,
+    /// Signal not defined when trying to emit
+    E302,
+    /// Signal parameter count mismatch in emit_signal
+    E303,
+    /// Signal parameter type mismatch in emit_signal
+    E304,
+    // Future semantic errors:
+    // E305: Unreachable code
+    // E306: Unused variable (warning)
     // E302: Unused function (warning)
     // E303: Dead code (warning)
     // E304: Invalid break/continue (not in loop)
@@ -235,6 +243,12 @@ impl ErrorCode {
             ErrorCode::E217 => "E217",
             ErrorCode::E218 => "E218",
             ErrorCode::E219 => "E219",
+
+            // Semantic Errors
+            ErrorCode::E301 => "E301",
+            ErrorCode::E302 => "E302",
+            ErrorCode::E303 => "E303",
+            ErrorCode::E304 => "E304",
 
             // Runtime Errors
             ErrorCode::E400 => "E400",
@@ -354,6 +368,12 @@ impl ErrorCode {
             ErrorCode::E218 => "Type annotation required",
             ErrorCode::E219 => "Incompatible types in assignment",
 
+            // Semantic Errors
+            ErrorCode::E301 => "Signal already defined",
+            ErrorCode::E302 => "Signal not defined",
+            ErrorCode::E303 => "Signal parameter count mismatch",
+            ErrorCode::E304 => "Signal parameter type mismatch",
+
             // Runtime Errors
             ErrorCode::E400 => "Division by zero",
             ErrorCode::E401 => "Index out of bounds",
@@ -421,6 +441,11 @@ impl ErrorCode {
             | ErrorCode::E217
             | ErrorCode::E218
             | ErrorCode::E219 => ErrorCategory::Type,
+
+            // Semantic Errors
+            ErrorCode::E301 | ErrorCode::E302 | ErrorCode::E303 | ErrorCode::E304 => {
+                ErrorCategory::Semantic
+            }
 
             // Runtime Errors
             ErrorCode::E400
