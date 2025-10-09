@@ -1983,4 +1983,498 @@ fn third() { let z = 15; }
             "Should parse file with multiple leading comments"
         );
     }
+
+    // ========================================================================
+    // PHASE 2: PARSER EDGE CASE TESTS
+    // ========================================================================
+    // These tests cover parser-specific edge cases including:
+    // - Dangling-else ambiguity
+    // - Deeply nested constructs
+    // - Invalid nesting patterns
+    // - Operator precedence edge cases
+    // - Missing delimiters and recovery
+    // - Expression parsing boundaries
+
+    #[test]
+    fn test_parser_dangling_else_ambiguity() {
+        // Classic dangling-else: which if does the else belong to?
+        // FerrisScript requires braces, which eliminates this ambiguity
+        let input = "fn test() { if (true) { if (false) { let x = 1; } else { let y = 2; } } }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // Should parse successfully - braces make nesting unambiguous
+        assert!(result.is_ok(), "Parser should handle nested if-else");
+    }
+
+    #[test]
+    fn test_parser_deeply_nested_if_statements() {
+        // Test deeply nested if-else chains (10 levels deep)
+        let input = "fn test() {
+            if (a) { if (b) { if (c) { if (d) { if (e) {
+                if (f) { if (g) { if (h) { if (i) { if (j) {
+                    let x = 42;
+                } } } } }
+            } } } } }
+        }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should handle deeply nested if statements");
+    }
+
+    #[test]
+    fn test_parser_deeply_nested_expressions() {
+        // Test deeply nested arithmetic expressions
+        let input = "fn test() { let x = 1 + (2 * (3 - (4 / (5 + (6 - (7 * (8 + 9))))))); }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should handle deeply nested expressions");
+    }
+
+    #[test]
+    fn test_parser_mixed_operators_precedence() {
+        // Test complex operator precedence scenarios
+        let input = "fn test() { let x = 1 + 2 * 3 - 4 / 2 + 5 * 6 - 7; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should handle mixed operator precedence");
+    }
+
+    #[test]
+    fn test_parser_comparison_and_logical_precedence() {
+        // Test precedence between comparison and logical operators
+        // a < b && c > d || e == f
+        let input = "fn test() { if (a < b && c > d || e == f) { let x = 1; } }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(
+            result.is_ok(),
+            "Should handle comparison and logical precedence"
+        );
+    }
+
+    #[test]
+    fn test_parser_unary_operators_precedence() {
+        // Test unary operators with various precedence scenarios
+        let input = "fn test() { let x = -a + !b && -c * d; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should handle unary operator precedence");
+    }
+
+    #[test]
+    fn test_parser_missing_closing_brace_in_function() {
+        // Test missing closing brace - should error but not panic
+        let input = "fn test() { let x = 5;";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err(), "Should error on missing closing brace");
+    }
+
+    #[test]
+    fn test_parser_missing_opening_brace_in_function() {
+        // Test missing opening brace
+        let input = "fn test() let x = 5; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err(), "Should error on missing opening brace");
+    }
+
+    #[test]
+    fn test_parser_mismatched_braces() {
+        // Test mismatched brace types (though lexer handles this)
+        let input = "fn test() { if (true) { let x = 5; } ";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err(), "Should error on mismatched braces");
+    }
+
+    #[test]
+    fn test_parser_missing_semicolon_after_statement() {
+        // Test missing semicolon in statement sequence
+        let input = "fn test() { let x = 5 let y = 10; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err(), "Should error on missing semicolon");
+    }
+
+    #[test]
+    fn test_parser_missing_comma_in_function_params() {
+        // Test missing comma between function parameters
+        let input = "fn test(a: int b: float) { let x = a; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err(), "Should error on missing comma in params");
+    }
+
+    #[test]
+    fn test_parser_trailing_comma_in_function_params() {
+        // Test trailing comma in function parameters (may or may not be allowed)
+        let input = "fn test(a: int, b: float,) { let x = a; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // Document current behavior - likely errors
+        // Future: Could allow trailing commas
+        match result {
+            Err(err) => {
+                assert!(err.contains("Expected") || err.contains("Unexpected"));
+            }
+            Ok(_) => {
+                // If trailing commas are supported, this is fine
+            }
+        }
+    }
+
+    #[test]
+    fn test_parser_empty_function_body() {
+        // Test function with empty body (just braces)
+        let input = "fn test() { }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should allow empty function body");
+    }
+
+    #[test]
+    fn test_parser_empty_if_body() {
+        // Test if statement with empty body
+        let input = "fn test() { if (true) { } }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should allow empty if body");
+    }
+
+    #[test]
+    fn test_parser_empty_while_body() {
+        // Test while loop with empty body
+        let input = "fn test() { while (true) { } }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should allow empty while body");
+    }
+
+    #[test]
+    fn test_parser_if_without_braces_error() {
+        // Test if statement without braces (should error - braces required)
+        let input = "fn test() { if (true) let x = 1; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // FerrisScript requires braces for if bodies
+        assert!(result.is_err(), "Should error on if without braces");
+    }
+
+    #[test]
+    fn test_parser_nested_while_loops() {
+        // Test nested while loops
+        let input = "fn test() { while (a) { while (b) { while (c) { let x = 1; } } } }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should handle nested while loops");
+    }
+
+    #[test]
+    fn test_parser_if_else_if_else_chain() {
+        // Test long if-else-if-else chain (nested else { if pattern)
+        // FerrisScript requires braces after else, so else-if is nested
+        let input = "fn test() {
+            if (a) { let x = 1; }
+            else { if (b) { let x = 2; }
+            else { if (c) { let x = 3; }
+            else { if (d) { let x = 4; }
+            else { let x = 5; } } } }
+        }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should handle nested if-else chains");
+    }
+
+    #[test]
+    fn test_parser_expression_as_statement() {
+        // Test expressions used as statements (function calls, field access)
+        let input = "fn test() { foo(); bar.baz; x + y; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should allow expressions as statements");
+    }
+
+    #[test]
+    fn test_parser_chained_comparisons() {
+        // Test chained comparison expressions (not all languages support this)
+        // In most languages: a < b < c parses as (a < b) < c
+        let input = "fn test() { if (a < b < c) { let x = 1; } }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // This should parse as (a < b) < c, which may be semantically invalid
+        // but syntactically valid
+        assert!(
+            result.is_ok(),
+            "Should parse chained comparisons syntactically"
+        );
+    }
+
+    #[test]
+    fn test_parser_invalid_assignment_target() {
+        // Test assignment to invalid lvalue (literal)
+        let input = "fn test() { 5 = x; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // Parser may or may not catch this (might be type checker's job)
+        // Document behavior
+        match result {
+            Err(err) => {
+                assert!(err.contains("Expected") || err.contains("assignment"));
+            }
+            Ok(_) => {
+                // If parser allows it, type checker should catch it
+            }
+        }
+    }
+
+    #[test]
+    fn test_parser_missing_condition_in_if() {
+        // Test if statement with missing condition
+        let input = "fn test() { if { let x = 1; } }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err(), "Should error on missing if condition");
+    }
+
+    #[test]
+    fn test_parser_missing_condition_in_while() {
+        // Test while loop with missing condition
+        let input = "fn test() { while { let x = 1; } }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err(), "Should error on missing while condition");
+    }
+
+    #[test]
+    fn test_parser_return_in_nested_blocks() {
+        // Test return statements in various nested contexts
+        let input = "fn test() -> int {
+            if (true) {
+                while (false) {
+                    if (x) {
+                        return 42;
+                    }
+                }
+            }
+            return 0;
+        }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should handle return in nested blocks");
+    }
+
+    #[test]
+    fn test_parser_multiple_consecutive_operators() {
+        // Test multiple operators in sequence (error case)
+        let input = "fn test() { let x = 5 + + 3; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // Should parse as 5 + (+3) with unary plus
+        // Or error depending on implementation
+        match result {
+            Err(err) => {
+                assert!(err.contains("Expected") || err.contains("Unexpected"));
+            }
+            Ok(_) => {
+                // May parse as unary operator - that's fine
+            }
+        }
+    }
+
+    #[test]
+    fn test_parser_operator_at_end_of_expression() {
+        // Test operator with missing right operand
+        let input = "fn test() { let x = 5 +; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(
+            result.is_err(),
+            "Should error on operator with missing operand"
+        );
+    }
+
+    #[test]
+    fn test_parser_unclosed_parentheses() {
+        // Test unclosed parentheses in expression
+        let input = "fn test() { let x = (5 + 3; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err(), "Should error on unclosed parentheses");
+    }
+
+    #[test]
+    fn test_parser_extra_closing_parenthesis() {
+        // Test extra closing parenthesis
+        let input = "fn test() { let x = (5 + 3)); }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err(), "Should error on extra closing parenthesis");
+    }
+
+    #[test]
+    fn test_parser_nested_function_definitions() {
+        // Test nested function definitions (not typically allowed)
+        let input = "fn outer() { fn inner() { let x = 5; } }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // ⚠️ CURRENT LIMITATION: Nested functions not supported
+        // Future enhancement: Could support closures/nested functions
+        assert!(result.is_err(), "Nested functions not currently supported");
+    }
+
+    #[test]
+    fn test_parser_function_with_no_params_no_parens() {
+        // Test function definition without parentheses
+        let input = "fn test { let x = 5; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(
+            result.is_err(),
+            "Should error on missing parameter parentheses"
+        );
+    }
+
+    #[test]
+    fn test_parser_very_long_function_body() {
+        // Test function with many statements (stress test)
+        let mut statements = Vec::new();
+        for i in 0..100 {
+            statements.push(format!("let x{} = {};", i, i));
+        }
+        let input = format!("fn test() {{ {} }}", statements.join(" "));
+        let tokens = tokenize(&input).unwrap();
+        let result = parse(&tokens, &input);
+
+        assert!(
+            result.is_ok(),
+            "Should handle functions with many statements"
+        );
+    }
+
+    #[test]
+    fn test_parser_global_statement_invalid() {
+        // Test invalid statement at global scope (only fns and globals allowed)
+        let input = "if (true) { let x = 5; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(
+            result.is_err(),
+            "Should error on if statement at global scope"
+        );
+    }
+
+    #[test]
+    fn test_parser_while_at_global_scope() {
+        // Test while loop at global scope (should error)
+        let input = "while (true) { let x = 5; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(
+            result.is_err(),
+            "Should error on while loop at global scope"
+        );
+    }
+
+    #[test]
+    fn test_parser_return_at_global_scope() {
+        // Test return statement at global scope (should error)
+        let input = "return 42;";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err(), "Should error on return at global scope");
+    }
+
+    #[test]
+    fn test_parser_mixed_valid_and_invalid_top_level() {
+        // Test mix of valid and invalid top-level declarations
+        let input = "fn valid() { } if (true) { } fn another() { }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // Should error on the if statement, but may continue parsing
+        assert!(
+            result.is_err(),
+            "Should error on invalid top-level statement"
+        );
+    }
+
+    #[test]
+    fn test_parser_field_access_on_call_result() {
+        // Test field access on function call result
+        let input = "fn test() { let x = get_object().field; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should parse field access on call result");
+    }
+
+    #[test]
+    fn test_parser_chained_method_calls() {
+        // Test chained method/function calls
+        // ⚠️ CURRENT LIMITATION: Method chaining on call results not supported
+        // obj.method1().method2() would require field access on call expressions
+        let input = "fn test() { obj.method1().method2(); }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        // Future enhancement: Support chaining method calls
+        assert!(
+            result.is_err(),
+            "Method chaining on call results not currently supported"
+        );
+    }
+
+    #[test]
+    fn test_parser_assignment_to_field_access() {
+        // Test assignment to field access (lvalue)
+        let input = "fn test() { obj.field = 42; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should parse assignment to field");
+    }
+
+    #[test]
+    fn test_parser_compound_assignment_to_field() {
+        // Test compound assignment to field access
+        let input = "fn test() { obj.field += 10; }";
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_ok(), "Should parse compound assignment to field");
+    }
 }
