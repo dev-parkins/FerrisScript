@@ -131,6 +131,27 @@ impl Token {
     }
 }
 
+/// A token with its source location information.
+///
+/// This structure wraps a `Token` with its line and column position in the source code,
+/// enabling accurate error reporting and debugging.
+#[derive(Debug, Clone, PartialEq)]
+pub struct PositionedToken {
+    pub token: Token,
+    pub line: usize,
+    pub column: usize,
+}
+
+impl PositionedToken {
+    pub fn new(token: Token, line: usize, column: usize) -> Self {
+        PositionedToken {
+            token,
+            line,
+            column,
+        }
+    }
+}
+
 struct Lexer<'a> {
     input: Vec<char>,
     source: &'a str, // Keep original source for error context
@@ -521,6 +542,22 @@ impl<'a> Lexer<'a> {
         }
         Ok(tokens)
     }
+
+    fn tokenize_all_positioned(&mut self) -> Result<Vec<PositionedToken>, String> {
+        let mut tokens = Vec::new();
+        loop {
+            // Capture position before tokenizing (start of token)
+            let line = self.line;
+            let column = self.column;
+            let token = self.next_token()?;
+            let is_eof = matches!(token, Token::Eof);
+            tokens.push(PositionedToken::new(token, line, column));
+            if is_eof {
+                break;
+            }
+        }
+        Ok(tokens)
+    }
 }
 
 /// Tokenize FerrisScript source code into a vector of tokens.
@@ -562,6 +599,35 @@ impl<'a> Lexer<'a> {
 pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
     let mut lexer = Lexer::new(input);
     lexer.tokenize_all()
+}
+
+/// Tokenize FerrisScript source code into positioned tokens with line/column information.
+///
+/// This function is similar to `tokenize()` but returns tokens with their source positions,
+/// enabling accurate error reporting and debugging. Each token knows where it came from
+/// in the source code.
+///
+/// # Arguments
+///
+/// * `input` - The complete FerrisScript source code
+///
+/// # Returns
+///
+/// * `Ok(Vec<PositionedToken>)` - Tokens with position info, ending with `Token::Eof`
+/// * `Err(String)` - Error message with line/column info if tokenization fails
+///
+/// # Examples
+///
+/// ```no_run
+/// use ferrisscript_compiler::lexer::tokenize_positioned;
+///
+/// let source = "let x: i32 = 42;";
+/// let tokens = tokenize_positioned(source).unwrap();
+/// // Each token knows its line and column in the source
+/// ```
+pub fn tokenize_positioned(input: &str) -> Result<Vec<PositionedToken>, String> {
+    let mut lexer = Lexer::new(input);
+    lexer.tokenize_all_positioned()
 }
 
 #[cfg(test)]

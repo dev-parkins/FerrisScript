@@ -8,6 +8,14 @@
 mod recovery_tests {
     use ferrisscript_compiler::{lexer, parser};
 
+    // Helper function to convert tokens to positioned tokens for testing
+    fn to_positioned(tokens: Vec<lexer::Token>) -> Vec<lexer::PositionedToken> {
+        tokens
+            .into_iter()
+            .map(|t| lexer::PositionedToken::new(t, 1, 1))
+            .collect()
+    }
+
     #[test]
     fn test_multiple_missing_semicolons() {
         // Test that parser finds multiple missing semicolons
@@ -17,7 +25,7 @@ let y = 2
 let z = 3;
 "#;
         let tokens = lexer::tokenize(source).unwrap();
-        let mut parser_instance = parser::Parser::new(tokens, source);
+        let mut parser_instance = parser::Parser::new(to_positioned(tokens), source);
         let result = parser_instance.parse_program();
 
         // Should report error but have collected multiple issues
@@ -41,7 +49,7 @@ fn foo() {
 }
 "#;
         let tokens = lexer::tokenize(source).unwrap();
-        let mut parser_instance = parser::Parser::new(tokens, source);
+        let mut parser_instance = parser::Parser::new(to_positioned(tokens), source);
         let result = parser_instance.parse_program();
 
         // Should report first error
@@ -64,7 +72,7 @@ fn bar() {
 fn baz {}
 "#;
         let tokens = lexer::tokenize(source).unwrap();
-        let mut parser_instance = parser::Parser::new(tokens, source);
+        let mut parser_instance = parser::Parser::new(to_positioned(tokens), source);
         let result = parser_instance.parse_program();
 
         // Should report error
@@ -92,7 +100,7 @@ let z 10;
 fn bar() {}
 "#;
         let tokens = lexer::tokenize(source).unwrap();
-        let mut parser_instance = parser::Parser::new(tokens, source);
+        let mut parser_instance = parser::Parser::new(to_positioned(tokens), source);
         let result = parser_instance.parse_program();
 
         // Should report error
@@ -111,7 +119,7 @@ let x = 1
 let y = 2;
 "#;
         let tokens = lexer::tokenize(source).unwrap();
-        let mut parser_instance = parser::Parser::new(tokens, source);
+        let mut parser_instance = parser::Parser::new(to_positioned(tokens), source);
         let result = parser_instance.parse_program();
 
         // Should report error for missing semicolon
@@ -136,7 +144,7 @@ fn bar() {
 }
 "#;
         let tokens = lexer::tokenize(source).unwrap();
-        let mut parser_instance = parser::Parser::new(tokens, source);
+        let mut parser_instance = parser::Parser::new(to_positioned(tokens), source);
         let result = parser_instance.parse_program();
 
         // Should report error
@@ -152,7 +160,7 @@ fn bar() {
         // Test that parser handles EOF after error gracefully
         let source = "invalid_stuff";
         let tokens = lexer::tokenize(source).unwrap();
-        let mut parser_instance = parser::Parser::new(tokens, source);
+        let mut parser_instance = parser::Parser::new(to_positioned(tokens), source);
         let result = parser_instance.parse_program();
 
         // Should report error about invalid top-level
@@ -174,7 +182,7 @@ fn foo() {
 let z = 3;
 "#;
         let tokens = lexer::tokenize(source).unwrap();
-        let mut parser_instance = parser::Parser::new(tokens, source);
+        let mut parser_instance = parser::Parser::new(to_positioned(tokens), source);
         let result = parser_instance.parse_program();
 
         // Should report error for missing semicolon
@@ -195,7 +203,7 @@ fn foo() {
 }
 "#;
         let tokens = lexer::tokenize(source).unwrap();
-        let mut parser_instance = parser::Parser::new(tokens, source);
+        let mut parser_instance = parser::Parser::new(to_positioned(tokens), source);
         let result = parser_instance.parse_program();
 
         // Should succeed with no errors
@@ -213,7 +221,7 @@ bad2
 let x = 5;
 "#;
         let tokens = lexer::tokenize(source).unwrap();
-        let mut parser_instance = parser::Parser::new(tokens, source);
+        let mut parser_instance = parser::Parser::new(to_positioned(tokens), source);
         let result = parser_instance.parse_program();
 
         // Should return error

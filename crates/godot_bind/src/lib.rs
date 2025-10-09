@@ -131,87 +131,111 @@ impl INode2D for FerrisScriptNode {
 
         // Execute _ready function if it exists
         if self.script_loaded {
-            self.call_script_function("_ready", &[]);
+            if let Some(env) = &self.env {
+                if env.get_function("_ready").is_some() {
+                    self.call_script_function("_ready", &[]);
+                }
+            }
         }
     }
 
     fn process(&mut self, delta: f64) {
-        // Execute _process function if script is loaded
+        // Execute _process function if script is loaded and function exists
         if self.script_loaded {
-            // Convert delta to Float (f32 for FerrisScript)
-            let delta_value = Value::Float(delta as f32);
-            self.call_script_function_with_self("_process", &[delta_value]);
+            if let Some(env) = &self.env {
+                if env.get_function("_process").is_some() {
+                    // Convert delta to Float (f32 for FerrisScript)
+                    let delta_value = Value::Float(delta as f32);
+                    self.call_script_function_with_self("_process", &[delta_value]);
+                }
+            }
         }
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
-        // Execute _input function if script is loaded
+        // Execute _input function if script is loaded and function exists
         if self.script_loaded {
-            // Convert Godot InputEvent to FerrisScript InputEventHandle
-            // NOTE: Simplified implementation for Phase 2.1
-            // - Currently checks hardcoded common actions (ui_* actions)
-            // - Stores action name strings, not full Godot event reference
-            // - Full InputEvent API (position, button_index, etc.) deferred to Phase 5/6
-            // See: docs/planning/v0.0.4/KNOWN_LIMITATIONS.md - "InputEvent Simplified API"
-            let action_pressed = if event.is_action_pressed("ui_accept") {
-                Some("ui_accept".to_string())
-            } else if event.is_action_pressed("ui_cancel") {
-                Some("ui_cancel".to_string())
-            } else if event.is_action_pressed("ui_left") {
-                Some("ui_left".to_string())
-            } else if event.is_action_pressed("ui_right") {
-                Some("ui_right".to_string())
-            } else if event.is_action_pressed("ui_up") {
-                Some("ui_up".to_string())
-            } else if event.is_action_pressed("ui_down") {
-                Some("ui_down".to_string())
-            } else {
-                None
-            };
+            if let Some(env) = &self.env {
+                if env.get_function("_input").is_some() {
+                    // Convert Godot InputEvent to FerrisScript InputEventHandle
+                    // NOTE: Simplified implementation for Phase 2.1
+                    // - Currently checks hardcoded common actions (ui_* actions)
+                    // - Stores action name strings, not full Godot event reference
+                    // - Full InputEvent API (position, button_index, etc.) deferred to Phase 5/6
+                    // See: docs/planning/v0.0.4/KNOWN_LIMITATIONS.md - "InputEvent Simplified API"
+                    let action_pressed = if event.is_action_pressed("ui_accept") {
+                        Some("ui_accept".to_string())
+                    } else if event.is_action_pressed("ui_cancel") {
+                        Some("ui_cancel".to_string())
+                    } else if event.is_action_pressed("ui_left") {
+                        Some("ui_left".to_string())
+                    } else if event.is_action_pressed("ui_right") {
+                        Some("ui_right".to_string())
+                    } else if event.is_action_pressed("ui_up") {
+                        Some("ui_up".to_string())
+                    } else if event.is_action_pressed("ui_down") {
+                        Some("ui_down".to_string())
+                    } else {
+                        None
+                    };
 
-            let action_released = if event.is_action_released("ui_accept") {
-                Some("ui_accept".to_string())
-            } else if event.is_action_released("ui_cancel") {
-                Some("ui_cancel".to_string())
-            } else if event.is_action_released("ui_left") {
-                Some("ui_left".to_string())
-            } else if event.is_action_released("ui_right") {
-                Some("ui_right".to_string())
-            } else if event.is_action_released("ui_up") {
-                Some("ui_up".to_string())
-            } else if event.is_action_released("ui_down") {
-                Some("ui_down".to_string())
-            } else {
-                None
-            };
+                    let action_released = if event.is_action_released("ui_accept") {
+                        Some("ui_accept".to_string())
+                    } else if event.is_action_released("ui_cancel") {
+                        Some("ui_cancel".to_string())
+                    } else if event.is_action_released("ui_left") {
+                        Some("ui_left".to_string())
+                    } else if event.is_action_released("ui_right") {
+                        Some("ui_right".to_string())
+                    } else if event.is_action_released("ui_up") {
+                        Some("ui_up".to_string())
+                    } else if event.is_action_released("ui_down") {
+                        Some("ui_down".to_string())
+                    } else {
+                        None
+                    };
 
-            let input_event_handle = InputEventHandle::new(action_pressed, action_released);
-            let input_event_value = Value::InputEvent(input_event_handle);
+                    let input_event_handle = InputEventHandle::new(action_pressed, action_released);
+                    let input_event_value = Value::InputEvent(input_event_handle);
 
-            self.call_script_function_with_self("_input", &[input_event_value]);
+                    self.call_script_function_with_self("_input", &[input_event_value]);
+                }
+            }
         }
     }
 
     fn physics_process(&mut self, delta: f64) {
-        // Execute _physics_process function if script is loaded
+        // Execute _physics_process function if script is loaded and function exists
         if self.script_loaded {
-            // Convert delta to Float (f32 for FerrisScript)
-            let delta_value = Value::Float(delta as f32);
-            self.call_script_function_with_self("_physics_process", &[delta_value]);
+            if let Some(env) = &self.env {
+                if env.get_function("_physics_process").is_some() {
+                    // Convert delta to Float (f32 for FerrisScript)
+                    let delta_value = Value::Float(delta as f32);
+                    self.call_script_function_with_self("_physics_process", &[delta_value]);
+                }
+            }
         }
     }
 
     fn enter_tree(&mut self) {
-        // Execute _enter_tree function if script is loaded
+        // Execute _enter_tree function if script is loaded and function exists
         if self.script_loaded {
-            self.call_script_function("_enter_tree", &[]);
+            if let Some(env) = &self.env {
+                if env.get_function("_enter_tree").is_some() {
+                    self.call_script_function("_enter_tree", &[]);
+                }
+            }
         }
     }
 
     fn exit_tree(&mut self) {
-        // Execute _exit_tree function if script is loaded
+        // Execute _exit_tree function if script is loaded and function exists
         if self.script_loaded {
-            self.call_script_function("_exit_tree", &[]);
+            if let Some(env) = &self.env {
+                if env.get_function("_exit_tree").is_some() {
+                    self.call_script_function("_exit_tree", &[]);
+                }
+            }
         }
     }
 }
@@ -220,8 +244,12 @@ impl INode2D for FerrisScriptNode {
 impl FerrisScriptNode {
     /// Load and compile the FerrisScript file
     fn load_script(&mut self) {
+        godot_print!("=== FERRISSCRIPT DEBUG: load_script() called ===");
+
         let path_gstring = self.script_path.clone();
         let path = path_gstring.to_string();
+
+        godot_print!("DEBUG: Loading script: {}", path);
 
         // Use Godot's FileAccess to read the file (handles res:// paths correctly)
         let file = match FileAccess::open(&path_gstring, ModeFlags::READ) {
@@ -237,6 +265,30 @@ impl FerrisScriptNode {
 
         // Read the entire file as a string
         let source = file.get_as_text().to_string();
+
+        // Debug: Log first 100 characters and byte representation
+        let debug_len = source.len().min(100);
+        let debug_str = &source[..debug_len];
+        let debug_bytes: Vec<String> = debug_str
+            .bytes()
+            .take(40)
+            .map(|b| format!("{:02X}", b))
+            .collect();
+        godot_print!("DEBUG: Script first {} chars: {:?}", debug_len, debug_str);
+        godot_print!("DEBUG: First 40 bytes: {}", debug_bytes.join(" "));
+
+        // Debug: Try to tokenize and show first 5 tokens
+        use ferrisscript_compiler::lexer::tokenize;
+        match tokenize(&source) {
+            Ok(tokens) => {
+                let token_preview: Vec<String> =
+                    tokens.iter().take(10).map(|t| format!("{:?}", t)).collect();
+                godot_print!("DEBUG: First 10 tokens: {}", token_preview.join(", "));
+            }
+            Err(e) => {
+                godot_error!("DEBUG: Tokenization failed: {}", e);
+            }
+        }
 
         // Compile the script
         let program = match compile(&source) {

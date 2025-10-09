@@ -91,8 +91,8 @@ pub mod type_checker;
 /// - Visual pointer to error location
 /// - Helpful hint about the issue
 pub fn compile(source: &str) -> Result<ast::Program, String> {
-    let tokens = lexer::tokenize(source)?;
-    let ast = parser::parse(&tokens, source)?;
+    let positioned_tokens = lexer::tokenize_positioned(source)?;
+    let ast = parser::parse_positioned(&positioned_tokens, source)?;
     type_checker::check(&ast, source)?;
     Ok(ast)
 }
@@ -186,4 +186,98 @@ mod tests {
     //     let source = std::fs::read_to_string(example_path("callbacks.ferris")).unwrap();
     //     assert!(compile(&source).is_ok());
     // }
+
+    // Error reporting tests (verify correct line/column reporting)
+    #[test]
+    fn test_missing_semicolon_line_7() {
+        // Test case for error reporting fix
+        // Previously reported: "Expected ; at line 1, column 1"
+        // Should report: "Expected ; at line 7, column X"
+        let source = r#"
+// HI FROM COMMENT
+
+
+let thing:bool = true;
+let result: i32 = 0
+
+fn assert_test(cond: bool) {
+    if cond {
+        print("PASS");
+    }
+}
+"#;
+
+        let result = compile(source);
+        assert!(result.is_err(), "Expected compilation to fail");
+
+        let error = result.unwrap_err();
+
+        // Error should mention line 6 (where the missing semicolon is)
+        assert!(
+            error.contains("line 6"),
+            "Error should mention line 6, but got: {}",
+            error
+        );
+
+        // Error should mention the semicolon
+        assert!(
+            error.contains("Expected ;") || error.contains("Semicolon"),
+            "Error should mention semicolon, but got: {}",
+            error
+        );
+
+        // Error should NOT report line 1, column 1 (the bug we fixed)
+        assert!(
+            !error.contains("line 1, column 1"),
+            "Error should not report line 1, column 1 (this was the bug)"
+        );
+    }
+
+    #[test]
+    fn test_error_with_blank_lines_and_comments() {
+        // Test that blank lines and comments don't break position tracking
+        let source = r#"
+
+
+// Comment 1
+// Comment 2
+
+let x: i32 = 10
+
+fn test() {
+    print("test");
+}
+"#;
+
+        let result = compile(source);
+        assert!(result.is_err());
+
+        let error = result.unwrap_err();
+
+        // Should report error around line 8 (where let x is)
+        assert!(
+            error.contains("line 7") || error.contains("line 8") || error.contains("line 9"),
+            "Error should report correct line number, but got: {}",
+            error
+        );
+    }
+
+    #[test]
+    fn test_multiple_errors_with_positions() {
+        let source = r#"let a: i32 = 1
+let b: i32 = 2
+let c: i32 = 3"#;
+
+        let result = compile(source);
+        assert!(result.is_err());
+
+        let error = result.unwrap_err();
+
+        // First error should be on line 1
+        assert!(
+            error.contains("line 1"),
+            "Should report line 1 error, but got: {}",
+            error
+        );
+    }
 }

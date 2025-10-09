@@ -15,6 +15,28 @@ use crate::error_code::ErrorCode;
 /// # Returns
 /// A string with formatted lines including line numbers (e.g., "  3 | fn add() {")
 pub fn extract_source_context(source: &str, error_line: usize) -> String {
+    extract_source_context_with_pointer(source, error_line, None, "")
+}
+
+/// Extract source context with optional error pointer
+///
+/// Shows lines around the error location with proper formatting and line numbers.
+/// If column and hint are provided, inserts a caret pointer after the error line.
+///
+/// # Arguments
+/// * `source` - The complete source code
+/// * `error_line` - The 1-based line number where the error occurred
+/// * `error_column` - Optional 1-based column number for the caret pointer
+/// * `hint` - Hint message to show with the pointer
+///
+/// # Returns
+/// A string with formatted lines, including the pointer if column is provided
+pub fn extract_source_context_with_pointer(
+    source: &str,
+    error_line: usize,
+    error_column: Option<usize>,
+    hint: &str,
+) -> String {
     let lines: Vec<&str> = source.lines().collect();
     let total_lines = lines.len();
 
@@ -39,6 +61,14 @@ pub fn extract_source_context(source: &str, error_line: usize) -> String {
             line_content,
             width = line_num_width
         ));
+
+        // Insert pointer right after the error line
+        if line_num == error_line {
+            if let Some(column) = error_column {
+                let pointer = format_error_pointer(column, line_num_width, hint);
+                result.push_str(&pointer);
+            }
+        }
     }
 
     result
@@ -169,26 +199,19 @@ pub fn format_error_with_code(
     column: usize,
     hint: &str,
 ) -> String {
-    let context = extract_source_context(source, line);
-
-    // Calculate line number width from the context
-    let lines: Vec<&str> = source.lines().collect();
-    let end_line = (line + 2).min(lines.len());
-    let line_num_width = end_line.to_string().len().max(2);
-
-    let pointer = format_error_pointer(column, line_num_width, hint);
+    // Extract context with pointer included at the right position
+    let context = extract_source_context_with_pointer(source, line, Some(column), hint);
 
     // Add documentation link
     let docs_url = code.get_docs_url();
     let docs_note = format!("   = note: see {} for more information\n", docs_url);
 
     format!(
-        "Error[{}]: {}\n{}\n\n{}{}{}",
+        "Error[{}]: {}\n{}\n\n{}{}",
         code.as_str(),
         code.description(),
         base_message,
         context,
-        pointer,
         docs_note
     )
 }
