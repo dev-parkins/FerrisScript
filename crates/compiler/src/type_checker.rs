@@ -388,6 +388,9 @@ impl<'a> TypeChecker<'a> {
     }
 
     fn check_function(&mut self, func: &Function) {
+        // Validate lifecycle function signatures
+        self.validate_lifecycle_function(func);
+
         self.push_scope();
 
         // Add parameters to scope
@@ -402,6 +405,46 @@ impl<'a> TypeChecker<'a> {
         }
 
         self.pop_scope();
+    }
+
+    fn validate_lifecycle_function(&mut self, func: &Function) {
+        // Validate _input() lifecycle function signature
+        if func.name.as_str() == "_input" {
+            // _input must have exactly 1 parameter of type InputEvent
+            if func.params.len() != 1 {
+                let base_msg = format!(
+                    "Lifecycle function '_input' must have exactly 1 parameter, found {} at {}",
+                    func.params.len(),
+                    func.span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E305,
+                    &base_msg,
+                    self.source,
+                    func.span.line,
+                    func.span.column,
+                    "Expected signature: fn _input(event: InputEvent)",
+                ));
+            } else {
+                let param_type = Type::from_string(&func.params[0].ty);
+                if param_type != Type::InputEvent {
+                    let base_msg = format!(
+                        "Lifecycle function '_input' parameter must be of type InputEvent, found {} at {}",
+                        func.params[0].ty,
+                        func.span
+                    );
+                    self.error(format_error_with_code(
+                        ErrorCode::E305,
+                        &base_msg,
+                        self.source,
+                        func.span.line,
+                        func.span.column,
+                        &format!("Expected type 'InputEvent', found '{}'", func.params[0].ty),
+                    ));
+                }
+            }
+        }
+        // Other lifecycle functions will be validated here in future phases
     }
 
     fn check_signal(&mut self, signal: &Signal) {
@@ -1572,5 +1615,56 @@ fn _process(delta: f32) {
         let tokens = tokenize(input).unwrap();
         let program = parse(&tokens, input).unwrap();
         assert!(check(&program, input).is_ok()); // i32 can coerce to f32
+    }
+
+    // Phase 2.1: InputEvent and _input() lifecycle function tests
+
+    #[test]
+    fn test_input_function_valid() {
+        let input = r#"fn _input(event: InputEvent) {
+    print("Input received");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_input_function_wrong_param_count() {
+        // Test with no parameters
+        let input = r#"fn _input() {
+    print("Input received");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .contains("must have exactly 1 parameter"));
+
+        // Test with two parameters
+        let input2 = r#"fn _input(event: InputEvent, extra: i32) {
+    print("Input received");
+}"#;
+        let tokens2 = tokenize(input2).unwrap();
+        let program2 = parse(&tokens2, input2).unwrap();
+        let result2 = check(&program2, input2);
+        assert!(result2.is_err());
+        assert!(result2
+            .unwrap_err()
+            .contains("must have exactly 1 parameter"));
+    }
+
+    #[test]
+    fn test_input_function_wrong_param_type() {
+        let input = r#"fn _input(delta: f32) {
+    print("Input received");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("must be of type InputEvent"));
     }
 }

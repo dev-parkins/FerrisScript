@@ -153,13 +153,15 @@ pub enum ErrorCode {
     E303,
     /// Signal parameter type mismatch in emit_signal
     E304,
+    /// Invalid lifecycle function signature
+    E305,
     // Future semantic errors:
-    // E305: Unreachable code
-    // E306: Unused variable (warning)
-    // E302: Unused function (warning)
-    // E303: Dead code (warning)
-    // E304: Invalid break/continue (not in loop)
-    // E305: Invalid return (not in function)
+    // E306: Unreachable code
+    // E307: Unused variable (warning)
+    // E308: Unused function (warning)
+    // E309: Dead code (warning)
+    // E310: Invalid break/continue (not in loop)
+    // E311: Invalid return (not in function)
 
     // Runtime Errors (E400-E499)
     /// Division by zero
@@ -249,6 +251,7 @@ impl ErrorCode {
             ErrorCode::E302 => "E302",
             ErrorCode::E303 => "E303",
             ErrorCode::E304 => "E304",
+            ErrorCode::E305 => "E305",
 
             // Runtime Errors
             ErrorCode::E400 => "E400",
@@ -373,6 +376,7 @@ impl ErrorCode {
             ErrorCode::E302 => "Signal not defined",
             ErrorCode::E303 => "Signal parameter count mismatch",
             ErrorCode::E304 => "Signal parameter type mismatch",
+            ErrorCode::E305 => "Invalid lifecycle function signature",
 
             // Runtime Errors
             ErrorCode::E400 => "Division by zero",
@@ -443,9 +447,11 @@ impl ErrorCode {
             | ErrorCode::E219 => ErrorCategory::Type,
 
             // Semantic Errors
-            ErrorCode::E301 | ErrorCode::E302 | ErrorCode::E303 | ErrorCode::E304 => {
-                ErrorCategory::Semantic
-            }
+            ErrorCode::E301
+            | ErrorCode::E302
+            | ErrorCode::E303
+            | ErrorCode::E304
+            | ErrorCode::E305 => ErrorCategory::Semantic,
 
             // Runtime Errors
             ErrorCode::E400
