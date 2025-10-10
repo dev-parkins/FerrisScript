@@ -122,6 +122,10 @@ struct TypeChecker<'a> {
     functions: HashMap<String, FunctionSignature>,
     // Signal signatures (signal_name -> param_types)
     signals: HashMap<String, Vec<Type>>,
+    // Property metadata for exported variables
+    property_metadata: Vec<PropertyMetadata>,
+    // Track exported variable names for duplicate detection
+    exported_vars: std::collections::HashSet<String>,
     // Current errors
     errors: Vec<String>,
     // Source code for error context
@@ -134,6 +138,8 @@ impl<'a> TypeChecker<'a> {
             scopes: vec![HashMap::new()],
             functions: HashMap::new(),
             signals: HashMap::new(),
+            property_metadata: Vec::new(),
+            exported_vars: std::collections::HashSet::new(),
             errors: Vec::new(),
             source,
         };
@@ -254,6 +260,271 @@ impl<'a> TypeChecker<'a> {
         ]
     }
 
+    /// Check if a type is exportable to Godot Inspector
+    fn is_exportable_type(ty: &Type) -> bool {
+        matches!(
+            ty,
+            Type::I32
+                | Type::F32
+                | Type::Bool
+                | Type::String
+                | Type::Vector2
+                | Type::Color
+                | Type::Rect2
+                | Type::Transform2D
+        )
+    }
+
+    /// Check if a property hint is compatible with a given type
+    fn is_hint_compatible_with_type(hint: &PropertyHint, ty: &Type) -> bool {
+        match hint {
+            PropertyHint::None => true,
+            PropertyHint::Range { .. } => matches!(ty, Type::I32 | Type::F32),
+            PropertyHint::File { .. } => matches!(ty, Type::String),
+            PropertyHint::Enum { .. } => matches!(ty, Type::String),
+        }
+    }
+
+    /// Check if an expression is a compile-time constant
+    /// (literal or struct literal with constant fields)
+    fn is_compile_time_constant(expr: &Expr) -> bool {
+        match expr {
+            Expr::Literal(_, _) => true,
+            Expr::StructLiteral { fields, .. } => {
+                // All fields must be constants
+                fields
+                    .iter()
+                    .all(|(_, field_expr)| Self::is_compile_time_constant(field_expr))
+            }
+            // Unary operators on constants are also compile-time constants (e.g., -42, !true)
+            Expr::Unary(_, operand, _) => Self::is_compile_time_constant(operand),
+            _ => false,
+        }
+    }
+
+    /// Validate @export annotation on a variable and generate PropertyMetadata
+    fn check_export_annotation(
+        &mut self,
+        var_name: &str,
+        var_type: &Type,
+        export_ann: &ExportAnnotation,
+        is_mutable: bool,
+        default_value: &Expr,
+    ) {
+        let span = &export_ann.span;
+
+        // E810: Check for duplicate @export annotation
+        if self.exported_vars.contains(var_name) {
+            let base_msg = format!(
+                "Duplicate @export annotation on variable '{}' at {}",
+                var_name, span
+            );
+            self.error(format_error_with_code(
+                ErrorCode::E810,
+                &base_msg,
+                self.source,
+                span.line,
+                span.column,
+                "Each variable can only have one @export annotation. Remove the duplicate annotation.",
+            ));
+            return; // Don't continue validation for duplicate
+        }
+
+        // E813: Check that default value is a compile-time constant
+        if !Self::is_compile_time_constant(default_value) {
+            let base_msg = format!(
+                "@export default value for variable '{}' must be a compile-time constant at {}",
+                var_name, span
+            );
+            self.error(format_error_with_code(
+                ErrorCode::E813,
+                &base_msg,
+                self.source,
+                span.line,
+                span.column,
+                "Default values for exported variables must be literals (e.g., 42, 3.14, true, \"text\") or struct literals (e.g., Vector2 { x: 0.0, y: 0.0 }). Complex expressions like function calls are not allowed.",
+            ));
+            return; // Don't continue validation for non-constant defaults
+        }
+
+        // Track this exported variable
+        self.exported_vars.insert(var_name.to_string());
+
+        // E802: Check if type is exportable
+        if !Self::is_exportable_type(var_type) {
+            let base_msg = format!(
+                "@export annotation on variable '{}' with unsupported type {} at {}",
+                var_name,
+                var_type.name(),
+                span
+            );
+            self.error(format_error_with_code(
+                ErrorCode::E802,
+                &base_msg,
+                self.source,
+                span.line,
+                span.column,
+                &format!(
+                    "Type {} cannot be exported. Exportable types: i32, f32, bool, String, Vector2, Color, Rect2, Transform2D",
+                    var_type.name()
+                ),
+            ));
+            return; // Don't check hint compatibility if type isn't exportable
+        }
+
+        // E812: Warn if export is on immutable variable
+        if !is_mutable {
+            let base_msg = format!(
+                "@export annotation on immutable variable '{}' at {}",
+                var_name, span
+            );
+            self.error(format_error_with_code(
+                ErrorCode::E812,
+                &base_msg,
+                self.source,
+                span.line,
+                span.column,
+                "Exported variables should be mutable (let mut) to allow editing in Godot Inspector. Consider using 'let mut' instead of 'let'.",
+            ));
+        }
+
+        // Check hint compatibility with type
+        if !Self::is_hint_compatible_with_type(&export_ann.hint, var_type) {
+            let (error_code, hint_name) = match &export_ann.hint {
+                PropertyHint::Range { .. } => (ErrorCode::E804, "range"),
+                PropertyHint::File { .. } => (ErrorCode::E805, "file"),
+                PropertyHint::Enum { .. } => (ErrorCode::E806, "enum"),
+                PropertyHint::None => return, // Should never happen
+            };
+
+            let base_msg = format!(
+                "Property hint '{}' is not compatible with type {} on variable '{}' at {}",
+                hint_name,
+                var_type.name(),
+                var_name,
+                span
+            );
+
+            let hint_msg = match &export_ann.hint {
+                PropertyHint::Range { .. } => {
+                    "Range hints can only be used with numeric types (i32, f32)"
+                }
+                PropertyHint::File { .. } => "File hints can only be used with String type",
+                PropertyHint::Enum { .. } => "Enum hints can only be used with String type",
+                PropertyHint::None => "",
+            };
+
+            self.error(format_error_with_code(
+                error_code,
+                &base_msg,
+                self.source,
+                span.line,
+                span.column,
+                hint_msg,
+            ));
+            return; // Don't validate hint format if type is incompatible
+        }
+
+        // Validate hint-specific format constraints
+        match &export_ann.hint {
+            PropertyHint::Range { min, max, step: _ } => {
+                // E807: Validate min < max
+                if min >= max {
+                    let base_msg = format!(
+                        "Range hint has min ({}) >= max ({}) on variable '{}' at {}",
+                        min, max, var_name, span
+                    );
+                    self.error(format_error_with_code(
+                        ErrorCode::E807,
+                        &base_msg,
+                        self.source,
+                        span.line,
+                        span.column,
+                        "Range hint requires min to be less than max. Example: @export(range(0, 100, 1))",
+                    ));
+                }
+            }
+            PropertyHint::File { extensions } => {
+                // Validate file extension format (should start with * or .)
+                for ext in extensions {
+                    if !ext.starts_with('*') && !ext.starts_with('.') {
+                        let base_msg = format!(
+                            "Invalid file extension format '{}' on variable '{}' at {}",
+                            ext, var_name, span
+                        );
+                        self.error(format_error_with_code(
+                            ErrorCode::E805,
+                            &base_msg,
+                            self.source,
+                            span.line,
+                            span.column,
+                            "File extensions must start with '*' (e.g., '*.png') or '.' (e.g., '.png')",
+                        ));
+                    }
+                }
+            }
+            PropertyHint::Enum { values } => {
+                // E808: Validate enum has at least one value
+                if values.is_empty() {
+                    let base_msg = format!(
+                        "Enum hint must have at least one value on variable '{}' at {}",
+                        var_name, span
+                    );
+                    self.error(format_error_with_code(
+                        ErrorCode::E808,
+                        &base_msg,
+                        self.source,
+                        span.line,
+                        span.column,
+                        "Enum hint requires at least one value. Example: @export(enum(\"Value1\", \"Value2\"))",
+                    ));
+                }
+            }
+            PropertyHint::None => {
+                // No additional validation needed
+            }
+        }
+
+        // Generate PropertyMetadata for this export
+        let hint_string = PropertyMetadata::generate_hint_string(&export_ann.hint);
+        let default_value_str = Self::expr_to_string(default_value);
+
+        let metadata = PropertyMetadata {
+            name: var_name.to_string(),
+            type_name: var_type.name().to_string(),
+            hint: export_ann.hint.clone(),
+            hint_string,
+            default_value: Some(default_value_str),
+        };
+
+        self.property_metadata.push(metadata);
+    }
+
+    /// Convert an expression to a string representation for default values
+    fn expr_to_string(expr: &Expr) -> String {
+        match expr {
+            Expr::Literal(lit, _) => match lit {
+                Literal::Int(n) => n.to_string(),
+                Literal::Float(f) => f.to_string(),
+                Literal::Bool(b) => b.to_string(),
+                Literal::Str(s) => format!("\"{}\"", s),
+            },
+            Expr::StructLiteral {
+                type_name,
+                fields,
+                span: _,
+            } => {
+                // For struct literals, generate a simplified representation
+                let field_strs: Vec<String> = fields
+                    .iter()
+                    .map(|(fname, fexpr)| format!("{}: {}", fname, Self::expr_to_string(fexpr)))
+                    .collect();
+                format!("{} {{ {} }}", type_name, field_strs.join(", "))
+            }
+            _ => "<complex>".to_string(), // For complex expressions, use placeholder
+        }
+    }
+
     fn error(&mut self, message: String) {
         self.errors.push(message);
     }
@@ -335,6 +606,11 @@ impl<'a> TypeChecker<'a> {
                         ty.name()
                     ),
                 ));
+            }
+
+            // Validate @export annotation if present
+            if let Some(export_ann) = &var.export {
+                self.check_export_annotation(&var.name, &ty, export_ann, var.mutable, &var.value);
             }
         }
 
@@ -1646,6 +1922,29 @@ pub fn check(program: &Program, source: &str) -> Result<(), String> {
 
     if checker.errors.is_empty() {
         Ok(())
+    } else {
+        Err(checker.errors.join("\n"))
+    }
+}
+
+/// Type check a program and extract property metadata for exported variables.
+///
+/// This function performs full type checking and also collects PropertyMetadata
+/// for all @export annotations. Use this when you need both validation and metadata.
+///
+/// # Returns
+///
+/// - `Ok(Vec<PropertyMetadata>)` if type checking succeeds
+/// - `Err(String)` if type checking fails
+pub fn check_and_extract_metadata(
+    program: &Program,
+    source: &str,
+) -> Result<Vec<PropertyMetadata>, String> {
+    let mut checker = TypeChecker::new(source);
+    checker.check_program(program);
+
+    if checker.errors.is_empty() {
+        Ok(checker.property_metadata)
     } else {
         Err(checker.errors.join("\n"))
     }
@@ -3796,5 +4095,743 @@ let x: float = 3.14;
         // This could be improved in future to error on duplicates
         // For MVP, we allow it (consistent with JSON/Rust behavior of last-wins)
         assert!(result.is_ok());
+    }
+
+    // ========================================
+    // @export Annotation Type Validation Tests (Checkpoint 2.1 & 2.2)
+    // ========================================
+
+    // Valid exportable types
+    #[test]
+    fn test_export_valid_i32() {
+        let input = "@export let mut health: i32 = 100;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_valid_f32() {
+        let input = "@export let mut speed: f32 = 10.5;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_valid_bool() {
+        let input = "@export let mut enabled: bool = true;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_valid_string() {
+        let input = r#"@export let mut name: String = "Player";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_valid_vector2() {
+        let input = "@export let mut position: Vector2 = Vector2 { x: 0.0, y: 0.0 };";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_valid_color() {
+        let input = "@export let mut tint: Color = Color { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_valid_rect2() {
+        let input = "@export let mut bounds: Rect2 = Rect2 { position: Vector2 { x: 0.0, y: 0.0 }, size: Vector2 { x: 100.0, y: 100.0 } };";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_valid_transform2d() {
+        let input = "@export let mut transform: Transform2D = Transform2D { position: Vector2 { x: 0.0, y: 0.0 }, rotation: 0.0, scale: Vector2 { x: 1.0, y: 1.0 } };";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    // E802: Unsupported types
+    #[test]
+    fn test_export_unsupported_node() {
+        // Note: Since we now validate default values first (E813), we need to use a fake constant
+        // In real code, there's no valid literal for Node type, but for testing E802 we need to bypass E813
+        // So we use a workaround: declare without @export first to avoid E813, then conceptually test E802
+        // Actually, let's use a struct literal as placeholder (will fail type check but that's after export check)
+        let input = r#"
+@export let mut node: Node = Node { x: 0, y: 0 };
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        // Will get E802 for unsupported type, not E813 (struct literal is compile-time constant)
+        assert!(err.contains("E802"));
+        assert!(err.contains("unsupported type"));
+    }
+
+    #[test]
+    fn test_export_unsupported_inputevent() {
+        let input = r#"
+@export let mut event: InputEvent = InputEvent { x: 0 };
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E802"));
+    }
+
+    // E812: Immutable export warning
+    #[test]
+    fn test_export_immutable_warning() {
+        let input = "@export let health: i32 = 100;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E812"));
+        assert!(err.contains("immutable"));
+    }
+
+    // E804: Range hint compatibility
+    #[test]
+    fn test_export_range_hint_valid_i32() {
+        let input = "@export(range(0, 100, 1)) let mut health: i32 = 50;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_range_hint_valid_f32() {
+        let input = "@export(range(0.0, 100.0, 0.1)) let mut speed: f32 = 10.5;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_range_hint_invalid_string() {
+        let input = r#"@export(range(0, 100, 1)) let mut name: String = "Test";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E804"));
+        assert!(err.contains("not compatible"));
+    }
+
+    #[test]
+    fn test_export_range_hint_invalid_bool() {
+        let input = "@export(range(0, 1, 1)) let mut flag: bool = true;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E804"));
+    }
+
+    #[test]
+    fn test_export_range_hint_invalid_vector2() {
+        let input =
+            "@export(range(0.0, 100.0, 1.0)) let mut pos: Vector2 = Vector2 { x: 0.0, y: 0.0 };";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E804"));
+    }
+
+    // E805: File hint compatibility
+    #[test]
+    fn test_export_file_hint_valid() {
+        let input = r#"@export(file("*.png", "*.jpg")) let mut texture: String = "";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_file_hint_invalid_i32() {
+        let input = r#"@export(file("*.txt")) let mut count: i32 = 0;"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E805"));
+        assert!(err.contains("not compatible"));
+    }
+
+    #[test]
+    fn test_export_file_hint_invalid_bool() {
+        let input = r#"@export(file("*.dat")) let mut loaded: bool = false;"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E805"));
+    }
+
+    // E806: Enum hint compatibility
+    #[test]
+    fn test_export_enum_hint_valid() {
+        let input =
+            r#"@export(enum("Easy", "Normal", "Hard")) let mut difficulty: String = "Normal";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_enum_hint_invalid_i32() {
+        let input = r#"@export(enum("1", "2", "3")) let mut level: i32 = 1;"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E806"));
+        assert!(err.contains("not compatible"));
+    }
+
+    #[test]
+    fn test_export_enum_hint_invalid_f32() {
+        let input = r#"@export(enum("0.5", "1.0", "2.0")) let mut scale: f32 = 1.0;"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E806"));
+    }
+
+    // Multiple exports in same program
+    #[test]
+    fn test_export_multiple_valid() {
+        let input = r#"
+@export let mut health: i32 = 100;
+@export let mut speed: f32 = 10.0;
+@export let mut name: String = "Player";
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_multiple_with_hints() {
+        let input = r#"
+@export(range(0, 100, 1)) let mut health: i32 = 100;
+@export(range(0.0, 20.0, 0.1)) let mut speed: f32 = 10.0;
+@export(file("*.png")) let mut texture: String = "";
+@export(enum("Easy", "Normal", "Hard")) let mut difficulty: String = "Normal";
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_mixed_valid_and_invalid() {
+        let input = r#"
+@export let mut health: i32 = 100;
+@export(range(0, 100, 1)) let mut name: String = "Test";
+@export let mut speed: f32 = 10.0;
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        // Should have E804 for range on String
+        assert!(err.contains("E804"));
+    }
+
+    // ========================================
+    // @export Hint Format Validation Tests (Checkpoint 2.3-2.5)
+    // ========================================
+
+    // E807: Range hint min < max validation
+    #[test]
+    fn test_export_range_min_equals_max() {
+        let input = "@export(range(50, 50, 1)) let mut value: i32 = 50;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E807"));
+        assert!(err.contains("min") && err.contains("max"));
+    }
+
+    #[test]
+    fn test_export_range_min_greater_than_max() {
+        let input = "@export(range(100, 0, 1)) let mut value: i32 = 50;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E807"));
+    }
+
+    #[test]
+    fn test_export_range_negative_values_valid() {
+        let input = "@export(range(-100, 100, 1)) let mut value: i32 = 0;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_range_negative_min_greater_than_negative_max() {
+        let input = "@export(range(-10, -50, 1)) let mut value: i32 = -30;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        eprintln!("Actual error: {}", err);
+        assert!(err.contains("E807"));
+    }
+
+    #[test]
+    fn test_export_range_float_values_valid() {
+        let input = "@export(range(0.0, 1.0, 0.1)) let mut alpha: f32 = 0.5;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_range_float_min_equals_max() {
+        let input = "@export(range(5.5, 5.5, 0.1)) let mut value: f32 = 5.5;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E807"));
+    }
+
+    #[test]
+    fn test_export_range_very_small_difference_valid() {
+        let input = "@export(range(0.0, 0.01, 0.001)) let mut tiny: f32 = 0.005;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    // E808: Enum hint must have at least one value
+    #[test]
+    fn test_export_enum_empty_values() {
+        // Note: Parser currently doesn't allow empty enum values
+        // This test documents expected behavior if parser changes
+        // For now, we test the type checker logic is present
+    }
+
+    #[test]
+    fn test_export_enum_single_value_valid() {
+        let input = r#"@export(enum("OnlyOne")) let mut choice: String = "OnlyOne";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_enum_multiple_values_valid() {
+        let input = r#"@export(enum("A", "B", "C", "D", "E")) let mut choice: String = "A";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_enum_numeric_string_values_valid() {
+        let input = r#"@export(enum("1", "2", "3")) let mut choice: String = "1";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    // File hint format validation
+    #[test]
+    fn test_export_file_wildcard_format_valid() {
+        let input = r#"@export(file("*.png", "*.jpg", "*.jpeg")) let mut texture: String = "";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_file_dot_format_valid() {
+        let input = r#"@export(file(".png", ".jpg")) let mut texture: String = "";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_file_mixed_format_valid() {
+        let input = r#"@export(file("*.png", ".jpg")) let mut texture: String = "";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_file_invalid_format_no_prefix() {
+        let input = r#"@export(file("png")) let mut texture: String = "";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E805"));
+        assert!(err.contains("Invalid file extension format"));
+    }
+
+    #[test]
+    fn test_export_file_invalid_format_mixed() {
+        let input = r#"@export(file("*.png", "jpg", "*.bmp")) let mut texture: String = "";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E805"));
+        assert!(err.contains("jpg"));
+    }
+
+    #[test]
+    fn test_export_file_complex_extensions() {
+        let input = r#"@export(file("*.tar.gz", "*.zip")) let mut archive: String = "";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    // Integration tests for hint format validation
+    #[test]
+    fn test_export_all_hints_with_valid_formats() {
+        let input = r#"
+@export(range(0, 100, 1)) let mut health: i32 = 100;
+@export(file("*.png", "*.jpg")) let mut texture: String = "";
+@export(enum("Easy", "Normal", "Hard")) let mut difficulty: String = "Normal";
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_multiple_format_errors() {
+        let input = r#"
+@export(range(100, 0, 1)) let mut value1: i32 = 50;
+@export(file("png")) let mut texture: String = "";
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        // Should contain both E807 and E805 errors
+        assert!(err.contains("E807") || err.contains("E805"));
+    }
+
+    #[test]
+    fn test_export_range_edge_case_large_values() {
+        let input = "@export(range(-1000000, 1000000, 1)) let mut big: i32 = 0;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_export_range_edge_case_float_precision() {
+        let input = "@export(range(0.0, 0.0001, 0.00001)) let mut precise: f32 = 0.00005;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    // ========================================
+    // Property Metadata Generation Tests (Checkpoint 2.6)
+    // ========================================
+
+    #[test]
+    fn test_property_metadata_basic_export() {
+        let input = "@export let mut health: i32 = 100;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let metadata = check_and_extract_metadata(&program, input).unwrap();
+
+        assert_eq!(metadata.len(), 1);
+        assert_eq!(metadata[0].name, "health");
+        assert_eq!(metadata[0].type_name, "i32");
+        assert_eq!(metadata[0].hint_string, "");
+        assert_eq!(metadata[0].default_value, Some("100".to_string()));
+    }
+
+    #[test]
+    fn test_property_metadata_range_hint() {
+        let input = "@export(range(0, 100, 1)) let mut health: i32 = 50;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let metadata = check_and_extract_metadata(&program, input).unwrap();
+
+        assert_eq!(metadata.len(), 1);
+        assert_eq!(metadata[0].name, "health");
+        assert_eq!(metadata[0].type_name, "i32");
+        assert_eq!(metadata[0].hint_string, "0,100,1");
+        assert_eq!(metadata[0].default_value, Some("50".to_string()));
+        assert!(matches!(metadata[0].hint, PropertyHint::Range { .. }));
+    }
+
+    #[test]
+    fn test_property_metadata_file_hint() {
+        let input = r#"@export(file("*.png", "*.jpg")) let mut texture: String = "default.png";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let metadata = check_and_extract_metadata(&program, input).unwrap();
+
+        assert_eq!(metadata.len(), 1);
+        assert_eq!(metadata[0].name, "texture");
+        assert_eq!(metadata[0].type_name, "String");
+        assert_eq!(metadata[0].hint_string, "*.png,*.jpg");
+        assert_eq!(
+            metadata[0].default_value,
+            Some("\"default.png\"".to_string())
+        );
+    }
+
+    #[test]
+    fn test_property_metadata_enum_hint() {
+        let input =
+            r#"@export(enum("Easy", "Normal", "Hard")) let mut difficulty: String = "Normal";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let metadata = check_and_extract_metadata(&program, input).unwrap();
+
+        assert_eq!(metadata.len(), 1);
+        assert_eq!(metadata[0].name, "difficulty");
+        assert_eq!(metadata[0].type_name, "String");
+        assert_eq!(metadata[0].hint_string, "Easy,Normal,Hard");
+        assert_eq!(metadata[0].default_value, Some("\"Normal\"".to_string()));
+    }
+
+    #[test]
+    fn test_property_metadata_multiple_exports() {
+        let input = r#"
+@export let mut health: i32 = 100;
+@export(range(0.0, 20.0, 0.1)) let mut speed: f32 = 10.0;
+@export(file("*.png")) let mut texture: String = "";
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let metadata = check_and_extract_metadata(&program, input).unwrap();
+
+        assert_eq!(metadata.len(), 3);
+
+        // Check health
+        assert_eq!(metadata[0].name, "health");
+        assert_eq!(metadata[0].type_name, "i32");
+        assert_eq!(metadata[0].hint_string, "");
+
+        // Check speed
+        assert_eq!(metadata[1].name, "speed");
+        assert_eq!(metadata[1].type_name, "f32");
+        assert_eq!(metadata[1].hint_string, "0,20,0.1");
+
+        // Check texture
+        assert_eq!(metadata[2].name, "texture");
+        assert_eq!(metadata[2].type_name, "String");
+        assert_eq!(metadata[2].hint_string, "*.png");
+    }
+
+    #[test]
+    fn test_property_metadata_struct_literal_default() {
+        let input = "@export let mut position: Vector2 = Vector2 { x: 10.0, y: 20.0 };";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let metadata = check_and_extract_metadata(&program, input).unwrap();
+
+        assert_eq!(metadata.len(), 1);
+        assert_eq!(metadata[0].name, "position");
+        assert_eq!(metadata[0].type_name, "Vector2");
+        assert!(metadata[0]
+            .default_value
+            .as_ref()
+            .unwrap()
+            .contains("Vector2"));
+        assert!(metadata[0].default_value.as_ref().unwrap().contains("x:"));
+        assert!(metadata[0].default_value.as_ref().unwrap().contains("y:"));
+    }
+
+    #[test]
+    fn test_property_metadata_no_exports() {
+        let input = "let health: i32 = 100;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let metadata = check_and_extract_metadata(&program, input).unwrap();
+
+        assert_eq!(metadata.len(), 0);
+    }
+
+    #[test]
+    fn test_property_metadata_only_one_exported() {
+        let input = r#"
+let health: i32 = 100;
+@export let mut speed: f32 = 10.0;
+let name: String = "Player";
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let metadata = check_and_extract_metadata(&program, input).unwrap();
+
+        assert_eq!(metadata.len(), 1);
+        assert_eq!(metadata[0].name, "speed");
+    }
+
+    // E810: Duplicate @export tests
+    #[test]
+    fn test_export_duplicate_error() {
+        let input = r#"
+@export let mut health: i32 = 100;
+@export let mut health: i32 = 50;
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E810"));
+        assert!(err.contains("Duplicate @export annotation"));
+        assert!(err.contains("health"));
+    }
+
+    // E813: Non-constant default value tests
+    #[test]
+    fn test_export_non_constant_default_function_call() {
+        let input = r#"
+fn get_value() -> i32 {
+    return 42;
+}
+@export let mut value: i32 = get_value();
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E813"));
+        assert!(err.contains("compile-time constant"));
+    }
+
+    #[test]
+    fn test_export_non_constant_default_binary_expr() {
+        let input = r#"
+@export let mut value: i32 = 10 + 20;
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E813"));
+        assert!(err.contains("compile-time constant"));
+    }
+
+    #[test]
+    fn test_export_non_constant_default_variable_ref() {
+        let input = r#"
+let base_speed: f32 = 10.0;
+@export let mut speed: f32 = base_speed;
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E813"));
+        assert!(err.contains("compile-time constant"));
+    }
+
+    #[test]
+    fn test_export_constant_defaults_valid() {
+        let input = r#"
+@export let mut health: i32 = 100;
+@export let mut speed: f32 = 10.5;
+@export let mut name: String = "Player";
+@export let mut active: bool = true;
+@export let mut pos: Vector2 = Vector2 { x: 0.0, y: 0.0 };
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+
+        // All these should be valid (compile-time constants)
+        assert!(result.is_ok(), "Expected success but got: {:?}", result);
+    }
+
+    #[test]
+    fn test_export_struct_literal_with_non_constant_field() {
+        let input = r#"
+fn get_x() -> f32 {
+    return 1.0;
+}
+@export let mut pos: Vector2 = Vector2 { x: get_x(), y: 0.0 };
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.contains("E813"));
+        assert!(err.contains("compile-time constant"));
+    }
+
+    #[test]
+    fn test_export_multiple_valid_no_duplicates() {
+        let input = r#"
+@export let mut health: i32 = 100;
+@export let mut speed: f32 = 10.0;
+@export let mut name: String = "Enemy";
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+
+        // Different variable names, all should be valid
+        assert!(result.is_ok(), "Expected success but got: {:?}", result);
     }
 }

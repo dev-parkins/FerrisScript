@@ -83,6 +83,8 @@ pub struct Program {
     pub signals: Vec<Signal>,
     /// Function definitions
     pub functions: Vec<Function>,
+    /// Property metadata for exported variables (generated during type checking)
+    pub property_metadata: Vec<PropertyMetadata>,
 }
 
 impl Default for Program {
@@ -97,6 +99,7 @@ impl Program {
             global_vars: Vec::new(),
             signals: Vec::new(),
             functions: Vec::new(),
+            property_metadata: Vec::new(),
         }
     }
 }
@@ -152,6 +155,51 @@ pub struct ExportAnnotation {
     pub hint: PropertyHint,
     /// Source location
     pub span: Span,
+}
+
+/// Property metadata for exported variables.
+///
+/// Generated during type checking and stored in the Program for runtime access.
+/// Contains all information needed to expose properties to Godot Inspector.
+///
+/// # Examples
+///
+/// ```text
+/// // For: @export(range(0, 100, 1)) let mut health: i32 = 100;
+/// PropertyMetadata {
+///     name: "health".to_string(),
+///     type_name: "i32".to_string(),
+///     hint: PropertyHint::Range { min: 0.0, max: 100.0, step: 1.0 },
+///     hint_string: "0,100,1".to_string(),
+///     default_value: Some("100".to_string()),
+/// }
+/// ```
+#[derive(Debug, Clone, PartialEq)]
+pub struct PropertyMetadata {
+    /// Property name (variable name)
+    pub name: String,
+    /// Type name (i32, f32, bool, String, Vector2, Color, Rect2, Transform2D)
+    pub type_name: String,
+    /// Property hint (range, file, enum, or none)
+    pub hint: PropertyHint,
+    /// Godot-compatible hint string ("0,100,1" or "Easy,Normal,Hard" or "*.png,*.jpg")
+    pub hint_string: String,
+    /// Default value as string representation (for Inspector reset)
+    pub default_value: Option<String>,
+}
+
+impl PropertyMetadata {
+    /// Generate Godot-compatible hint_string from PropertyHint
+    pub fn generate_hint_string(hint: &PropertyHint) -> String {
+        match hint {
+            PropertyHint::None => String::new(),
+            PropertyHint::Range { min, max, step } => {
+                format!("{},{},{}", min, max, step)
+            }
+            PropertyHint::File { extensions } => extensions.join(","),
+            PropertyHint::Enum { values } => values.join(","),
+        }
+    }
 }
 
 /// Global variable declaration.
