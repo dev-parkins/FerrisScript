@@ -7,6 +7,7 @@ This document outlines a comprehensive strategy for testing and stress-testing t
 ## Executive Summary
 
 **Purpose**: Validate the test harness can handle:
+
 - Invalid inputs and malformed data
 - Edge cases in metadata parsing and output validation
 - Performance under load (large test suites)
@@ -22,6 +23,7 @@ This document outlines a comprehensive strategy for testing and stress-testing t
 ### 1.1 Invalid Metadata Formats
 
 **Test Cases**:
+
 ```ferrisscript
 // TEST: missing_category
 // No CATEGORY directive - should default to "unit"
@@ -61,6 +63,7 @@ This document outlines a comprehensive strategy for testing and stress-testing t
 ```
 
 **Implementation**:
+
 - Add unit tests to `metadata_parser.rs::tests`
 - Test parsing errors return appropriate ParseError variants
 - Test validation catches inconsistencies
@@ -68,6 +71,7 @@ This document outlines a comprehensive strategy for testing and stress-testing t
 ### 1.2 Edge Cases in Metadata Blocks
 
 **Test Cases**:
+
 - Multiple metadata blocks in single file (should work)
 - Metadata block at end of file without code
 - Metadata block with no assertions (valid for basic tests)
@@ -78,6 +82,7 @@ This document outlines a comprehensive strategy for testing and stress-testing t
 - Comments within metadata block structure
 
 **Implementation**:
+
 ```rust
 #[test]
 fn test_parse_metadata_with_many_assertions() {
@@ -102,6 +107,7 @@ fn test_parse_metadata_mixed_line_endings() {
 ### 2.1 Malformed Godot Output
 
 **Test Cases**:
+
 ```
 // Empty output
 stdout: ""
@@ -146,6 +152,7 @@ stdout: "Logging spam..." * 100000
 ```
 
 **Implementation**:
+
 - Add unit tests to `output_parser.rs::tests`
 - Test error extraction handles empty/malformed input
 - Test marker extraction with missing/corrupted markers
@@ -154,6 +161,7 @@ stdout: "Logging spam..." * 100000
 ### 2.2 Assertion Validation Edge Cases
 
 **Test Cases**:
+
 - Assertion text appears multiple times in output (should match first)
 - Assertion text is substring of another (e.g., "Error" vs "ErrorCode")
 - Case sensitivity in assertions
@@ -163,6 +171,7 @@ stdout: "Logging spam..." * 100000
 - Assertions with newlines or special formatting
 
 **Implementation**:
+
 ```rust
 #[test]
 fn test_assertion_substring_ambiguity() {
@@ -185,6 +194,7 @@ fn test_assertion_substring_ambiguity() {
 ### 3.1 Invalid Scene Configurations
 
 **Test Cases**:
+
 - Missing script file
 - Script file with syntax errors
 - Invalid node names (special characters, spaces)
@@ -196,6 +206,7 @@ fn test_assertion_substring_ambiguity() {
 - Script paths with spaces, unicode, special chars
 
 **Implementation**:
+
 - Test scene generation with invalid inputs
 - Test error messages are informative
 - Test cleanup happens even on failures
@@ -203,6 +214,7 @@ fn test_assertion_substring_ambiguity() {
 ### 3.2 File System Edge Cases
 
 **Test Cases**:
+
 - Read-only directories (can't write scene files)
 - Insufficient disk space
 - File name collisions
@@ -218,6 +230,7 @@ fn test_assertion_substring_ambiguity() {
 ### 4.1 Formatting Edge Cases
 
 **Test Cases**:
+
 - Empty test suite (no tests)
 - All tests passing (100% success)
 - All tests failing (0% success)
@@ -231,6 +244,7 @@ fn test_assertion_substring_ambiguity() {
 - Terminal width variations (80 vs 120 vs 200 chars)
 
 **Implementation**:
+
 ```rust
 #[test]
 fn test_report_with_no_tests() {
@@ -251,6 +265,7 @@ fn test_report_with_very_long_test_names() {
 ### 4.2 Statistics Accuracy
 
 **Test Cases**:
+
 - Verify counts are correct across categories
 - Verify percentages are accurate
 - Verify timing information is reasonable
@@ -266,6 +281,7 @@ fn test_report_with_very_long_test_names() {
 **Test Cases**:
 
 **Scenario 1: Happy Path**
+
 ```ferrisscript
 // TEST: integration_happy_path
 // CATEGORY: integration
@@ -281,9 +297,11 @@ fn _ready() {
     print("Step 3 complete");
 }
 ```
+
 Expected: Parse metadata → Build scene → Run test → Validate → Generate report → All pass
 
 **Scenario 2: Partial Failure**
+
 ```ferrisscript
 // TEST: integration_partial_fail
 // CATEGORY: unit
@@ -298,9 +316,11 @@ fn _ready() {
     // Missing "Found node C"
 }
 ```
+
 Expected: Report shows 2/3 assertions passed, test fails
 
 **Scenario 3: Error Demo Success**
+
 ```ferrisscript
 // TEST: integration_error_demo
 // CATEGORY: error_demo
@@ -311,9 +331,11 @@ fn _ready() {
     let node = get_node("MissingNode"); // Intentional error
 }
 ```
+
 Expected: Parse metadata → Run test → Extract error → Match expected → Pass
 
 **Scenario 4: Multiple Tests Per File**
+
 ```ferrisscript
 // TEST: test_a
 // CATEGORY: unit
@@ -330,11 +352,13 @@ fn _ready() {
     print("Test B ran");
 }
 ```
+
 Expected: Both tests tracked separately, both pass
 
 ### 5.2 TestRunner Integration
 
 **Test Cases**:
+
 - Run single test file
 - Run all tests in directory
 - Run tests with filtering (category, name pattern)
@@ -351,11 +375,13 @@ Expected: Both tests tracked separately, both pass
 ### 6.1 Large Test Suites
 
 **Performance Targets**:
+
 - 100 test files: < 10 seconds total
 - 1000 test files: < 2 minutes total
 - Single file with 100 tests: < 5 seconds
 
 **Test Cases**:
+
 ```bash
 # Generate test suite
 for i in {1..100}; do
@@ -371,6 +397,7 @@ time ferris-test --all
 ```
 
 **Metrics to Track**:
+
 - Total execution time
 - Memory usage (peak and average)
 - File I/O operations
@@ -381,6 +408,7 @@ time ferris-test --all
 ### 6.2 Memory Stress
 
 **Test Cases**:
+
 - Very large assertion lists (10,000 assertions)
 - Very large output buffers (100MB+ of output)
 - Many tests in single run (memory accumulation)
@@ -388,6 +416,7 @@ time ferris-test --all
 - Memory leaks in test harness components
 
 **Implementation**:
+
 ```rust
 #[test]
 fn test_memory_with_large_assertions() {
@@ -411,12 +440,14 @@ fn test_memory_with_large_assertions() {
 ### 7.1 Operating System Variations
 
 **Platforms to Test**:
+
 - Windows 11 (primary dev platform)
 - Windows 10
 - Ubuntu 22.04 LTS
 - macOS (Monterey+)
 
 **Platform-Specific Issues**:
+
 - Path separators (\ vs /)
 - Line endings (CRLF vs LF)
 - Case sensitivity in file names
@@ -429,6 +460,7 @@ fn test_memory_with_large_assertions() {
 ### 7.2 PowerShell vs Bash
 
 **Test Cases**:
+
 - Script runner works in both shells
 - Path handling (Windows paths in PowerShell, Unix in Bash)
 - Exit codes propagate correctly
@@ -444,22 +476,26 @@ fn test_memory_with_large_assertions() {
 **Test Cases**:
 
 **Godot Not Found**:
+
 - Test harness detects Godot is missing
 - Provides helpful error message
 - Suggests installation steps
 - Exits cleanly
 
 **Invalid Configuration**:
+
 - ferris-test.toml is malformed
 - Provides helpful error message pointing to line
 - Falls back to defaults where possible
 
 **Scene Generation Fails**:
+
 - Continue with other tests
 - Report which tests couldn't run
 - Don't crash entire test suite
 
 **Timeout Handling**:
+
 - Test runs forever (infinite loop)
 - Test harness kills it after timeout
 - Reports timeout error
@@ -468,6 +504,7 @@ fn test_memory_with_large_assertions() {
 ### 8.2 Error Message Quality
 
 **Quality Criteria**:
+
 - Error messages are clear and actionable
 - Include file names and line numbers
 - Suggest fixes where possible
@@ -475,6 +512,7 @@ fn test_memory_with_large_assertions() {
 - Provide context (what was being attempted)
 
 **Test Cases**:
+
 ```rust
 #[test]
 fn test_error_message_quality() {
@@ -496,14 +534,15 @@ fn test_error_message_quality() {
 **Strategy**: Maintain a comprehensive test suite that runs on every commit.
 
 **Components**:
+
 1. **Unit Tests** (current: 38 tests)
    - Expand to 100+ tests covering all edge cases
-   
+
 2. **Integration Tests**
    - Full end-to-end scenarios
    - Real Godot execution (in CI)
    - Example files as test fixtures
-   
+
 3. **Snapshot Tests**
    - Capture report output for known test suites
    - Detect unintended formatting changes
@@ -517,6 +556,7 @@ fn test_error_message_quality() {
 ### 9.2 Continuous Integration
 
 **CI Pipeline**:
+
 ```yaml
 test_harness_tests:
   - cargo test -p ferrisscript_test_harness
@@ -542,6 +582,7 @@ stress_tests:
 **Properties to Test**:
 
 **Property 1: Parsing Idempotency**
+
 ```rust
 #[test]
 fn prop_metadata_parse_serialize_roundtrip() {
@@ -552,6 +593,7 @@ fn prop_metadata_parse_serialize_roundtrip() {
 ```
 
 **Property 2: Output Validation Consistency**
+
 ```rust
 #[test]
 fn prop_assertion_validation_is_consistent() {
@@ -562,6 +604,7 @@ fn prop_assertion_validation_is_consistent() {
 ```
 
 **Property 3: Report Generation Determinism**
+
 ```rust
 #[test]
 fn prop_report_generation_is_deterministic() {
@@ -576,6 +619,7 @@ fn prop_report_generation_is_deterministic() {
 ## 11. Testing Priorities
 
 ### Phase 1 (Immediate - Current Sprint)
+
 - [x] Basic unit tests for all modules (38 tests)
 - [ ] Edge case tests for metadata parser (10+ tests)
 - [ ] Edge case tests for output parser (10+ tests)
@@ -583,6 +627,7 @@ fn prop_report_generation_is_deterministic() {
 - [ ] Integration test for error demo
 
 ### Phase 2 (Near-term)
+
 - [ ] Report generator edge cases
 - [ ] Scene builder error handling
 - [ ] Large test suite stress test (100 files)
@@ -590,6 +635,7 @@ fn prop_report_generation_is_deterministic() {
 - [ ] Error message quality audit
 
 ### Phase 3 (Future)
+
 - [ ] Memory stress testing
 - [ ] Performance benchmarking suite
 - [ ] Property-based testing implementation
@@ -601,6 +647,7 @@ fn prop_report_generation_is_deterministic() {
 ## 12. Test Implementation Checklist
 
 ### Current Coverage (38/500+ target tests)
+
 - ✅ metadata_parser: 9 tests
 - ✅ output_parser: 11 tests
 - ✅ report_generator: 15 tests
@@ -614,6 +661,7 @@ fn prop_report_generation_is_deterministic() {
 ### Recommended Next Tests (Priority Order)
 
 1. **Metadata Parser Edge Cases** (metadata_parser.rs)
+
    ```rust
    test_parse_metadata_with_1000_assertions()
    test_parse_metadata_mixed_line_endings()
@@ -626,6 +674,7 @@ fn prop_report_generation_is_deterministic() {
    ```
 
 2. **Output Parser Robustness** (output_parser.rs)
+
    ```rust
    test_extract_error_from_empty_output()
    test_extract_error_from_truncated_output()
@@ -636,6 +685,7 @@ fn prop_report_generation_is_deterministic() {
    ```
 
 3. **Report Generator Formatting** (report_generator.rs)
+
    ```rust
    test_report_with_1000_tests()
    test_report_with_very_long_names()
@@ -645,6 +695,7 @@ fn prop_report_generation_is_deterministic() {
    ```
 
 4. **Integration Tests** (new file: tests/integration_tests.rs)
+
    ```rust
    test_end_to_end_happy_path()
    test_end_to_end_partial_failure()
@@ -660,11 +711,13 @@ fn prop_report_generation_is_deterministic() {
 ### 13.1 AFL/cargo-fuzz Integration
 
 **Targets for Fuzzing**:
+
 1. Metadata parser (parse arbitrary strings)
 2. Output parser (parse arbitrary Godot output)
 3. Scene generator (fuzz scene structures)
 
 **Implementation**:
+
 ```toml
 [dependencies]
 cargo-fuzz = "0.11"
@@ -688,11 +741,13 @@ fuzz_target!(|data: &[u8]| {
 ### 14.1 Example Code Validation
 
 **Strategy**: All code examples in documentation should:
+
 - Actually compile
 - Actually run
 - Produce expected output
 
 **Implementation**:
+
 - Use `#[doc]` tests in Rust
 - Add examples to test suite
 - Validate README examples in CI
@@ -704,6 +759,7 @@ fuzz_target!(|data: &[u8]| {
 ### 15.1 Test Health Metrics
 
 **Metrics to Track**:
+
 - Total test count (target: 500+)
 - Test coverage (target: 90%+)
 - Average test execution time (target: <100ms)
@@ -714,6 +770,7 @@ fuzz_target!(|data: &[u8]| {
 ### 15.2 Performance Metrics
 
 **Metrics to Track**:
+
 - Test harness startup time
 - Metadata parsing time per file
 - Scene generation time per test
@@ -728,6 +785,7 @@ fuzz_target!(|data: &[u8]| {
 This comprehensive testing strategy provides a roadmap for ensuring the test harness is robust, reliable, and performant. Implementation should be prioritized based on risk and impact, starting with edge cases in core components (metadata parser, output parser) and expanding to integration and stress testing.
 
 **Next Steps**:
+
 1. Implement Phase 1 tests (metadata and output parser edge cases)
 2. Create integration test framework
 3. Set up stress testing infrastructure
