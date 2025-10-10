@@ -4,6 +4,7 @@ members = [
     "crates/compiler",
     "crates/runtime",
     "crates/godot_bind",
+    "crates/test_harness",
 ]
 
 [workspace.package]

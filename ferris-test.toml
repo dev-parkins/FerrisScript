@@ -1,0 +1,16 @@
+# FerrisScript Test Harness Configuration
+
+# Path to Godot console executable for headless testing
+godot_executable = "Y:\\cpark\\Projects\\Godot\\Godot_v4.5-dev4_win64.exe\\Godot_v4.5-dev4_win64_console.exe"
+
+# Path to the Godot project directory
+project_path = "./godot_test"
+
+# Timeout in seconds for each test execution
+timeout_seconds = 30
+
+# Output format: "console", "json", or "tap"
+output_format = "console"
+
+# Enable verbose output
+verbose = true
