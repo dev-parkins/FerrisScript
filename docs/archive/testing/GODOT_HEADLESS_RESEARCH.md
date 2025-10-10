@@ -53,10 +53,10 @@ func _ready():
 
 ### 2. **CLI Integration**
 
-* Create a Cargo subcommand:
+- Create a Cargo subcommand:
   `cargo ferris test --headless`
 
-* Steps:
+- Steps:
 
   1. Ensure Godot executable path is known (`godot` in PATH or via env var).
   2. Build the FerrisScript compiler/runtime if needed.
@@ -65,6 +65,7 @@ func _ready():
      ```bash
      godot --headless --quit --path ./game --scene res://tests/TestRunner.tscn
      ```
+
   4. Capture and parse stdout.
   5. Emit summarized output (e.g. JSON or TAP).
 
@@ -74,14 +75,14 @@ func _ready():
 
 Add a Rust-side parser for console output:
 
-* Parse lines like:
+- Parse lines like:
 
   ```
   [FerrisTest] Running physics_test...
   [FerrisTest] PASS: physics_test
   [FerrisTest] FAIL: input_bindings
   ```
-* Collect into a struct:
+- Collect into a struct:
 
   ```rust
   struct TestResult {
@@ -90,18 +91,18 @@ Add a Rust-side parser for console output:
       message: Option<String>,
   }
   ```
-* Serialize to JSON summary for CI or VS Code Copilot integration.
+- Serialize to JSON summary for CI or VS Code Copilot integration.
 
 ---
 
 ### 4. **Copilot Automation Hooks**
 
-* Copilot Agent can:
+- Copilot Agent can:
 
-  * Trigger `cargo ferris test --headless`
-  * Capture and display output inline.
-  * Suggest fixes or new tests based on failures.
-  * Optionally open relevant `.ferris` source files automatically.
+  - Trigger `cargo ferris test --headless`
+  - Capture and display output inline.
+  - Suggest fixes or new tests based on failures.
+  - Optionally open relevant `.ferris` source files automatically.
 
 You can describe this to Copilot as:
 
@@ -136,9 +137,9 @@ cargo ferris test --headless
 
 Copilot then:
 
-* Parses this.
-* Displays inline results.
-* Optionally proposes a patch or test rerun.
+- Parses this.
+- Displays inline results.
+- Optionally proposes a patch or test rerun.
 
 ---
 
@@ -168,29 +169,29 @@ Copilot then:
 
 ## ✅ Deliverables
 
-* [ ] `cargo ferris test --headless` command
-* [ ] `TestRunner.tscn` and script for running tests
-* [ ] Output parser (Rust side)
-* [ ] VS Code / Copilot integration hooks
-* [ ] Docs: “Headless Testing Workflow”
+- [ ] `cargo ferris test --headless` command
+- [ ] `TestRunner.tscn` and script for running tests
+- [ ] Output parser (Rust side)
+- [ ] VS Code / Copilot integration hooks
+- [ ] Docs: “Headless Testing Workflow”
 
 ---
 
 ## 📘 Notes for Copilot
 
-* Assume Godot 4.5 or newer.
-* Assume FerrisScript is already compiled into the project’s build path.
-* Use `std::process::Command` for running Godot.
-* Use regex or line-based parsing for test results.
-* Keep output structured and machine-readable.
+- Assume Godot 4.5 or newer.
+- Assume FerrisScript is already compiled into the project’s build path.
+- Use `std::process::Command` for running Godot.
+- Use regex or line-based parsing for test results.
+- Keep output structured and machine-readable.
 
 ---
 
 ## 🔮 Future Expansion
 
-* Add `--ci` flag for JSON-only output.
-* Add coverage hooks for FerrisScript AST analysis.
-* Enable deterministic replay mode for regression testing.
+- Add `--ci` flag for JSON-only output.
+- Add coverage hooks for FerrisScript AST analysis.
+- Enable deterministic replay mode for regression testing.
 
 ---
 
