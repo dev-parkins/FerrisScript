@@ -22,7 +22,7 @@
 
 | Feature | Unit (Runtime) | Unit (Compiler) | Integration (Examples) | Headless | Edge Cases Covered |
 |---------|----------------|-----------------|------------------------|----------|-------------------|
-| **get_node()** |
+| **get_node()** | | | | | |
 | Basic usage | ✅ `test_call_get_node_function` | ✅ `test_get_node_valid` | ✅ `node_query_basic.ferris` | ✅ Implicit in Phase 2 | Simple child path |
 | Wrong arg count | ❌ | ✅ `test_get_node_wrong_arg_count` | ❌ | ❌ | 0, 2+ args |
 | Wrong arg type | ❌ | ✅ `test_get_node_wrong_arg_type` | ❌ | ❌ | Non-string arg |
@@ -36,12 +36,12 @@
 | Empty string path | ❌ | ❌ | ❌ | ❌ | **GAP** |
 | Unicode in path | ❌ | ❌ | ❌ | ❌ | **GAP** |
 | Path with spaces | ❌ | ❌ | ❌ | ❌ | **GAP** |
-| **get_parent()** |
+| **get_parent()** | | | | | |
 | Basic usage | ✅ `test_call_get_parent_function` | ✅ `test_get_parent_valid` | ✅ `node_query_basic.ferris` | ✅ Implicit | Returns parent |
 | With args (error) | ❌ | ✅ `test_get_parent_with_args` | ❌ | ❌ | Expects 0 args |
 | No callback set | ❌ | ❌ | ❌ | ❌ | **GAP** |
 | At root node | ❌ | ❌ | ❌ | ❌ | **GAP** |
-| **has_node()** |
+| **has_node()** | | | | | |
 | Basic usage (exists) | ✅ `test_call_has_node_function` | ✅ `test_has_node_valid` | ✅ `node_query_validation.ferris` | ✅ Implicit | Returns true |
 | Node doesn't exist | ⚠️ Same test | ❌ | ⚠️ Same example | ❌ | Returns false |
 | Wrong arg count | ❌ | ✅ `test_has_node_wrong_arg_count` | ❌ | ❌ | 0, 2+ args |
@@ -49,7 +49,7 @@
 | No callback set | ❌ | ❌ | ❌ | ❌ | **GAP** |
 | Nested paths | ❌ | ❌ | ⚠️ Optional in validation example | ❌ | "Enemies/Boss" |
 | Edge case paths | ❌ | ❌ | ❌ | ❌ | **GAP** |
-| **find_child()** |
+| **find_child()** | | | | | |
 | Basic usage | ✅ `test_call_find_child_function` | ✅ `test_find_child_valid` | ✅ `node_query_search.ferris` | ✅ Implicit | Recursive search |
 | Wrong arg count | ❌ | ✅ `test_find_child_wrong_arg_count` | ❌ | ❌ | 0, 2+ args |
 | Wrong arg type | ❌ | ✅ `test_find_child_wrong_arg_type` | ❌ | ❌ | Non-string arg |
@@ -71,7 +71,7 @@
 
 | Feature | Unit (Runtime) | Unit (Compiler) | Integration (Examples) | Headless | Edge Cases Covered |
 |---------|----------------|-----------------|------------------------|----------|-------------------|
-| **signal Declaration** |
+| **signal Declaration** | | | | | |
 | No params | ✅ `test_signal_declaration_in_program` | ✅ `test_signal_no_params` | ✅ `signals.ferris` | ❌ | Basic declaration |
 | With params | ✅ `test_register_signal` | ✅ `test_signal_declaration_valid` | ✅ `signals.ferris` | ❌ | Typed parameters |
 | Duplicate signal | ❌ | ✅ `test_signal_duplicate_name_error` | ❌ | ❌ | Error E401 |
@@ -79,7 +79,7 @@
 | Invalid syntax | ❌ | ✅ Multiple parser tests | ❌ | ❌ | Missing parens, semicolon |
 | Signal ordering | ❌ | ❌ | ⚠️ signals.ferris shows top | ❌ | Must be at top? |
 | Many signals | ❌ | ❌ | ❌ | ❌ | **GAP** |
-| **emit_signal()** |
+| **emit_signal()** | | | | | |
 | Basic emission | ✅ `test_emit_signal_in_function` | ✅ `test_emit_signal_valid` | ✅ `signals.ferris` | ❌ | With params |
 | No params | ✅ `test_emit_signal_with_no_params` | ⚠️ Implied | ✅ `signals.ferris` | ❌ | player_died |
 | Builtin exists | ✅ `test_emit_signal_builtin_exists` | ❌ | ❌ | ❌ | Function available |
