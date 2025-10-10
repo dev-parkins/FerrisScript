@@ -88,7 +88,7 @@ impl TestHarness {
         &self,
         script_name: &str,
         script_content: &str,
-        _script_path: &Path,
+        script_path: &Path,
     ) -> anyhow::Result<PathBuf> {
         // Create scenes directory if it doesn't exist
         let scenes_dir = self.config.project_path.join("tests/generated");
@@ -97,6 +97,18 @@ impl TestHarness {
         // Generate scene file path
         let scene_filename = format!("test_{}.tscn", script_name.replace(".ferris", ""));
         let scene_path = scenes_dir.join(&scene_filename);
+
+        // Copy script to project scripts directory
+        let scripts_dir = self.config.project_path.join("scripts");
+        std::fs::create_dir_all(&scripts_dir)?;
+        let dest_script = scripts_dir.join(script_name);
+        
+        // Remove destination if it exists to avoid file lock issues
+        if dest_script.exists() {
+            let _ = std::fs::remove_file(&dest_script);
+        }
+        
+        std::fs::copy(script_path, &dest_script)?;
 
         // Build scene based on script requirements
         let script_res_path = format!("res://scripts/{}", script_name);

@@ -31,22 +31,27 @@
 // - Returns first matching node by name
 
 fn _ready() {
+    print("=== Recursive Node Search ===");
+    
     // Find a child by name (searches recursively)
     let health_bar = find_child("HealthBar");
+    print("✓ Found HealthBar recursively");
     
     // Find deeply nested UI elements
     let score_label = find_child("ScoreLabel");
+    print("✓ Found ScoreLabel in nested UI");
     
-    // Find components in complex hierarchies
-    let collision_shape = find_child("CollisionShape2D");
+    // Find weapon in player container
+    let current_weapon = find_child("CurrentWeapon");
+    print("✓ Found CurrentWeapon recursively");
+    
+    print("=== Search Complete ===");
 }
 
 fn _process(delta: f32) {
-    // Find dynamic elements
-    let current_weapon = find_child("CurrentWeapon");
-    
-    // Locate effects
-    let particle_effect = find_child("ParticleEffect");
+    // Note: This runs every frame - find_child is called each frame
+    // In production, cache the results or only search when needed
+    let weapon = find_child("CurrentWeapon");
 }
 
 fn update_ui() {

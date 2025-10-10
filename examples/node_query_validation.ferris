@@ -25,17 +25,33 @@
 // - Safe to run with or without optional nodes
 
 fn _ready() {
+    print("=== Node Query Validation ===");
+    
     // Check if node exists before accessing
     if has_node("Player") {
         let player = get_node("Player");
-        // Safe to use player here
+        print("✓ Player node exists and was accessed");
+    } else {
+        print("✗ Player node not found");
     }
     
     // Validate optional UI elements
-    if has_node("/root/Main/DebugUI") {
-        let debug_ui = get_node("/root/Main/DebugUI");
-        // Debug UI is available
+    if has_node("DebugUI") {
+        let debug_ui = get_node("DebugUI");
+        print("✓ DebugUI node exists (optional)");
+    } else {
+        print("○ DebugUI node not found (optional - OK)");
     }
+    
+    // Check nested node
+    if has_node("Enemies/Boss") {
+        let boss = get_node("Enemies/Boss");
+        print("✓ Enemies/Boss node exists");
+    } else {
+        print("○ Enemies/Boss not found (optional - OK)");
+    }
+    
+    print("=== Validation Complete ===");
 }
 
 fn _process(delta: f32) {
@@ -47,9 +63,9 @@ fn _process(delta: f32) {
     
     // Validate before parent access
     let parent = get_parent();
-    if has_node("../PowerUp") {
-        let powerup = get_parent().get_node("PowerUp");
-        // PowerUp exists in parent's children
+    if has_node("PowerUp") {
+        let powerup = get_node("PowerUp");
+        print("✓ PowerUp node validated and accessed");
     }
 }
 

@@ -150,11 +150,16 @@ pub fn parse_scene_requirements(ferris_content: &str) -> Option<SceneBuilder> {
             {
                 main_node_found = true;
                 // Main will be added by test_runner as a child of TestRunner
-            } else if trimmed.contains("├─") || trimmed.contains("│") {
-                // Extract node name
+            } else if trimmed.contains("├─") || trimmed.contains("└─") || trimmed.contains("│") {
+                // Extract node name (handles ├─, └─, or │ prefixes)
                 if let Some(node_name) = extract_node_name(trimmed) {
-                    let parent = if trimmed.contains("│    ") {
-                        // Nested under another node
+                    // Skip if it's Main (already handled above)
+                    if node_name == "Main" || node_name.contains("Main (") {
+                        continue;
+                    }
+                    
+                    let parent = if trimmed.contains("│    ") || trimmed.contains("     ") {
+                        // Nested under another node (indented)
                         "Main/UI"
                     } else {
                         "Main"
@@ -174,17 +179,25 @@ pub fn parse_scene_requirements(ferris_content: &str) -> Option<SceneBuilder> {
 
 fn extract_node_name(line: &str) -> Option<String> {
     // Remove tree characters and extract node name
-    let cleaned = line
+    let mut cleaned = line
         .replace("├─", "")
         .replace("│", "")
         .replace("└─", "")
         .replace("(attach this script here)", "")
+        .replace("(optional container)", "")
         .replace("(optional)", "")
         .replace("(required)", "")
+        .replace("(can be deeply nested)", "")
+        .replace("(nodes can be at any depth)", "")
         .trim()
         .to_string();
+    
+    // Remove anything in parentheses as a catch-all
+    if let Some(paren_start) = cleaned.find('(') {
+        cleaned = cleaned[..paren_start].trim().to_string();
+    }
 
-    if !cleaned.is_empty() && !cleaned.contains("/root") {
+    if !cleaned.is_empty() && !cleaned.contains("/root") && !cleaned.contains("...") {
         Some(cleaned)
     } else {
         None

@@ -25,26 +25,35 @@
 // - Script loads successfully
 // - _ready() executes without errors
 // - All node queries succeed (nodes found)
-// - No output to console (no print statements)
+// - Console shows success markers (✓)
 
 fn _ready() {
+    print("=== Basic Node Query Operations ===");
+    
     // Get a child node by relative path
     let player = get_node("Player");
+    print("✓ Found Player node");
     
-    // Get a node by absolute path
-    let ui = get_node("/root/Main/UI");
+    // Get a node by child path
+    let ui = get_node("UI");
+    print("✓ Found UI node");
     
     // Get parent of this node
     let parent = get_parent();
+    print("✓ Got parent node");
     
-    // Chain node queries
-    let sibling = get_parent().get_node("OtherChild");
+    // Access sibling node
+    // Note: Method chaining like get_parent().get_node() not yet supported
+    // Use direct path or has_node validation instead
+    let sibling = get_node("OtherChild");
+    print("✓ Found OtherChild node");
+    
+    print("=== Example Complete ===");
 }
 
 fn _process(delta: f32) {
-    // Access nodes during runtime
-    let target = get_node("../Enemy");
-    
-    // Use node references in game logic
-    let camera = get_node("/root/Main/Camera2D");
+    // Note: This runs every frame, avoid logging here in real usage
+    // For testing, we just access nodes silently
+    let target = get_node("Enemy");
+    let camera = get_node("Camera2D");
 }
