@@ -1,3 +1,13 @@
+//Godot Scene Tree Setup:
+// /root
+//   └─ Main (attach this script here)
+//        ├─ Player
+//        ├─ UI
+//        │    └─ HUD
+//        │         └─ HealthBar
+//        ├─ OptionalFeature (optional)
+//        └─ RequiredSystem (required)
+
 // Example: Error Handling Best Practices
 // Demonstrates safe node query patterns
 

@@ -1,5 +1,13 @@
 // Example: Node Query Validation
 // Demonstrates has_node() for safe node access
+//Godot Scene Tree Setup:
+// /root
+//   └─ Main (attach this script here)
+//        ├─ Player
+//        ├─ DebugUI (optional)
+//        ├─ Enemies
+//        │    └─ Boss (may be spawned dynamically)
+//        ├─ PowerUp (child of Main or parent node)
 
 fn _ready() {
     // Check if node exists before accessing

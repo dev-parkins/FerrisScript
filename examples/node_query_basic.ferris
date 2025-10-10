@@ -1,3 +1,11 @@
+//Godot Scene Tree Setup:
+// /root
+//   └─ Main (attach this script here)
+//        ├─ Player
+//        ├─ UI
+//        ├─ Camera2D
+//        ├─ Enemy
+//        └─ OtherChild
 // Example: Basic Node Query Operations
 // Demonstrates get_node() and get_parent() usage
 

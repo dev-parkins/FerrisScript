@@ -1,5 +1,17 @@
 // Example: Node Search with find_child()
 // Demonstrates recursive child searching
+// Godot Scene Tree Setup:
+// /root
+//   └─ Main (attach this script here)
+//        ├─ HealthBar
+//        ├─ ScoreLabel
+//        ├─ CollisionShape2D
+//        ├─ CurrentWeapon
+//        ├─ ParticleEffect
+//        ├─ HealthDisplay
+//        ├─ ManaDisplay
+//        └─ StaminaDisplay
+// (All nodes may be nested at any depth under Main)
 
 fn _ready() {
     // Find a child by name (searches recursively)
