@@ -19,7 +19,9 @@ pub use metadata_parser::{
     Assertion, AssertionKind, MetadataParser, ParseError, TestCategory, TestExpectation,
     TestMetadata,
 };
-pub use output_parser::{OutputParser, TestMarker, TestMarkerKind, TestResults};
+pub use output_parser::{
+    AssertionResult, OutputParser, TestMarker, TestMarkerKind, TestResults, TestValidationResult,
+};
 pub use scene_builder::SceneBuilder;
 pub use test_config::{OutputFormat, TestConfig};
 pub use test_runner::{TestHarness, TestResult};
