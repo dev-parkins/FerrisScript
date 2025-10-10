@@ -80,19 +80,19 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 | Version | Status | Focus | Timeline | Premium Requests |
 |---------|--------|-------|----------|------------------|
 | **v0.0.4** | 🔄 Current | Runtime stability + lifecycle | 2-3 weeks | 4-6 remaining |
-| **v0.0.5** | 📋 Next | LSP Alpha (CRITICAL) | 3-4 weeks | 11-16 |
+| **v0.0.5** | 📋 Next | LSP Alpha + safety fix 🛡️ | 3-4 weeks | 12-17 ⬆️ |
 | **v0.0.6** | 📋 Planned | Language features (arrays/for) | 2-3 weeks | 8-12 |
-| **v0.0.7** | 📋 Planned | Godot API expansion | 2-3 weeks | 8-11 |
+| **v0.0.7** | 📋 Planned | Godot API + node safety 🛡️ | 2-3 weeks | 9-12 ⬆️ |
 | **v0.1.0** | 🎯 Milestone | Metadata + polish | 2-3 weeks | 6-9 |
-| **v0.2.0** | � Planned | Editor plugins + hot reload | 5-7 weeks ⬆️ | 16-21 ⬆️ |
+| **v0.2.0** | 🚀 Planned | Editor plugins + hot reload | 5-7 weeks ⬆️ | 16-21 ⬆️ |
 | **v0.3.0** | ⏸️ Conditional | Scene contracts + parallelism | 8-12 weeks | 25-36 |
 | **v0.4.0+** | 🌱 Community | Ecosystem & modding | 12+ weeks | 50+ |
 
-**Total to v0.1.0**: ~10-15 weeks, ~37-54 premium requests ⬆️ (increased due to manifest complexity)
+**Total to v0.1.0**: ~10-15 weeks, ~39-56 premium requests ⬆️ (increased due to manifest complexity + node safety)
 
-**Total to v0.2.0**: ~19-28 weeks, ~59-81 premium requests ⬆️ (hot reload + profiling added)
+**Total to v0.2.0**: ~19-28 weeks, ~61-83 premium requests ⬆️ (hot reload + profiling + node safety added)
 
-**Total to v0.3.0**: ~27-40 weeks, ~84-117 premium requests (if pursuing conditional features)
+**Total to v0.3.0**: ~27-40 weeks, ~86-119 premium requests (if pursuing conditional features)
 
 **⚠️ Note**: v0.3.0+ features require community validation before committing. Timeline assumes user demand exists.
 
@@ -129,9 +129,9 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ---
 
-### v0.0.5: LSP Alpha (HIGHEST PRIORITY)
+### v0.0.5: LSP Alpha + Safety Fix (HIGHEST PRIORITY)
 
-**Goal**: First-class editor support with real-time diagnostics
+**Goal**: First-class editor support with real-time diagnostics + node safety
 
 **Why This Matters**:
 
@@ -139,8 +139,17 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 - 🔥 Differentiates FerrisScript from GDScript
 - 🔥 Attracts Rust developers to Godot
 - 🔥 Enables productivity with basic language features
+- 🛡️ Safety fix prevents crashes from freed nodes
 
 **Phases**:
+
+0. **Node Invalidation Phase 1** (1 PR) 🛡️ NEW
+   - Basic validity checking for NodeHandle
+   - Prevents crashes from freed nodes
+   - Better error messages
+   - **Effort**: 1-2 hours
+   - **Priority**: HIGH (safety issue)
+   - **Timing**: Week 1 (before LSP work starts)
 
 1. **LSP Server Foundation** (2-3 PRs)
    - Create `ferrisscript_lsp` crate
@@ -226,27 +235,36 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ---
 
-### v0.0.7: Godot API Expansion
+### v0.0.7: Godot API Expansion + Node Safety
 
-**Goal**: Comprehensive type coverage for 2D game development
+**Goal**: Comprehensive type coverage for 2D game development + robust node references
 
 **Features**:
 
-1. **Core Math Types** (3-4 PRs)
+1. **Node Invalidation Phase 2** (1 PR) 🛡️ NEW
+   - ObjectID-based weak references
+   - Migrate from string-based tracking
+   - Automatic handle cleanup
+   - **Effort**: 3-4 hours
+   - **Priority**: MEDIUM (robustness improvement)
+   - **Rationale**: Fits thematically with Godot API work
+
+2. **Core Math Types** (3-4 PRs)
    - Vector2 enhancements
    - Vector3
    - Color
    - Rect2
    - Transform2D
 
-2. **Node Query Functions** (3-4 PRs)
-   - `get_node(path: String) -> Node`
-   - `has_node(path: String) -> bool`
-   - `find_child(name: String) -> Node`
-   - `get_parent() -> Node`
-   - `get_children() -> [Node]`
+3. **Node Query Functions** (3-4 PRs)
+   - ✅ `get_node(path: String) -> Node` (v0.0.4)
+   - ✅ `has_node(path: String) -> bool` (v0.0.4)
+   - ✅ `find_child(name: String) -> Node` (v0.0.4)
+   - ✅ `get_parent() -> Node` (v0.0.4)
+   - Enhanced with ObjectID safety (Phase 2)
+   - `get_children() -> [Node]` (NEW)
 
-3. **Resource Types** (2-3 PRs)
+4. **Resource Types** (2-3 PRs)
    - Resource base type
    - Texture2D
    - AudioStream
@@ -254,6 +272,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 **Deliverables**:
 
+- Node invalidation Phase 2 complete
 - All Godot types implemented
 - Rust-side wrappers
 - FerrisScript bindings
@@ -261,9 +280,9 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 - Performance validation
 
 **Timeline**: 2-3 weeks  
-**Estimated Premium Requests**: 8-11
+**Estimated Premium Requests**: 9-12 ⬆️ (increased by 1 PR for node safety)
 
-**Dependencies**: Arrays (v0.0.6) for `get_children()`
+**Dependencies**: Arrays (v0.0.6) for `get_children()`, Phase 1 (v0.0.5) for validity checking
 
 ---
 

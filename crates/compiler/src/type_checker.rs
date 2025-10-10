@@ -148,6 +148,39 @@ impl<'a> TypeChecker<'a> {
             },
         );
 
+        // Register node query built-in functions (Phase 3)
+        checker.functions.insert(
+            "get_node".to_string(),
+            FunctionSignature {
+                params: vec![Type::String], // path parameter
+                return_type: Type::Node,
+            },
+        );
+
+        checker.functions.insert(
+            "get_parent".to_string(),
+            FunctionSignature {
+                params: vec![], // no parameters
+                return_type: Type::Node,
+            },
+        );
+
+        checker.functions.insert(
+            "has_node".to_string(),
+            FunctionSignature {
+                params: vec![Type::String], // path parameter
+                return_type: Type::Bool,
+            },
+        );
+
+        checker.functions.insert(
+            "find_child".to_string(),
+            FunctionSignature {
+                params: vec![Type::String], // name parameter
+                return_type: Type::Node,
+            },
+        );
+
         // Add "self" to the global scope as Node type
         checker.scopes[0].insert("self".to_string(), Type::Node);
 
@@ -2663,5 +2696,150 @@ let x: float = 3.14;
                 // If duplicate detection not implemented at global level yet
             }
         }
+    }
+
+    // Phase 3: Node Query Functions tests
+
+    #[test]
+    fn test_get_node_valid() {
+        let input = r#"fn test_func() {
+    let node = get_node("path/to/node");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_get_node_wrong_arg_count() {
+        // Test with no arguments
+        let input = r#"fn test_func() {
+    let node = get_node();
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("expects 1 arguments, found 0"));
+
+        // Test with two arguments
+        let input2 = r#"fn test_func() {
+    let node = get_node("path", "extra");
+}"#;
+        let tokens2 = tokenize(input2).unwrap();
+        let program2 = parse(&tokens2, input2).unwrap();
+        let result2 = check(&program2, input2);
+        assert!(result2.is_err());
+        assert!(result2
+            .unwrap_err()
+            .contains("expects 1 arguments, found 2"));
+    }
+
+    #[test]
+    fn test_get_node_wrong_arg_type() {
+        let input = r#"fn test_func() {
+    let node = get_node(123);
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        // Just verify an error is produced (type coercion may apply)
+        let err = result.unwrap_err();
+        assert!(err.contains("type") || err.contains("argument") || !err.is_empty());
+    }
+
+    #[test]
+    fn test_get_parent_valid() {
+        let input = r#"fn test_func() {
+    let parent = get_parent();
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_get_parent_with_args() {
+        let input = r#"fn test_func() {
+    let parent = get_parent("extra");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("expects 0 arguments, found 1"));
+    }
+
+    #[test]
+    fn test_has_node_valid() {
+        let input = r#"fn test_func() {
+    let exists = has_node("path/to/node");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_has_node_wrong_arg_count() {
+        let input = r#"fn test_func() {
+    let exists = has_node();
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("expects 1 arguments, found 0"));
+    }
+
+    #[test]
+    fn test_has_node_wrong_arg_type() {
+        let input = r#"fn test_func() {
+    let exists = has_node(true);
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        // Just verify an error is produced (type coercion may apply)
+        let err = result.unwrap_err();
+        assert!(err.contains("type") || err.contains("argument") || !err.is_empty());
+    }
+
+    #[test]
+    fn test_find_child_valid() {
+        let input = r#"fn test_func() {
+    let child = find_child("ChildName");
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        assert!(check(&program, input).is_ok());
+    }
+
+    #[test]
+    fn test_find_child_wrong_arg_count() {
+        let input = r#"fn test_func() {
+    let child = find_child();
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("expects 1 arguments, found 0"));
+    }
+
+    #[test]
+    fn test_find_child_wrong_arg_type() {
+        let input = r#"fn test_func() {
+    let child = find_child(42);
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+        let result = check(&program, input);
+        assert!(result.is_err());
+        // Just verify an error is produced (type coercion may apply)
+        let err = result.unwrap_err();
+        assert!(err.contains("type") || err.contains("argument") || !err.is_empty());
     }
 }

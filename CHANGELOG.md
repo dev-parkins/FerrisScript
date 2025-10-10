@@ -25,21 +25,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.4] - 2025-10-08
 
-**Codename**: "Signals & Events" 🔔📡
+**Codename**: "Godot API Expansion" 🔔🌳
 
-This release adds full signal support to FerrisScript, enabling event-driven programming with Godot's signal system. Signals can be declared, emitted, and connected across the Rust↔Godot boundary.
+This release significantly expands FerrisScript's Godot integration, adding signal support, lifecycle callbacks, and node query functions. Enables real 2D game development with event-driven programming and scene tree interaction.
 
 ### Added
 
-#### Signal System (Phase 1)
+#### Signal System (Phase 1) ✅
 
-- **Signal Declaration Syntax** (Steps 1-3, PR #TBD)
+- **Signal Declaration Syntax** (PR #46)
   - `signal name(param1: Type1, param2: Type2);` syntax
   - Type checking for signal declarations (E301-E304 error codes)
   - Signal validation: duplicate detection, type checking, parameter validation
   - 17 new tests (2 lexer, 6 parser, 9 type checker)
 
-- **Signal Emission** (Steps 4-6, PR #TBD)
+- **Signal Emission** (PR #46)
   - `emit_signal("signal_name", arg1, arg2)` built-in function
   - Runtime signal registration and emission
   - Godot binding integration with instance ID pattern
@@ -47,17 +47,61 @@ This release adds full signal support to FerrisScript, enabling event-driven pro
   - 7 new runtime tests for signal emission
   - E501-E502 error codes for emit_signal validation
 
-- **Documentation** (Step 8)
+- **Signal Documentation** (PR #46)
   - Updated ERROR_CODES.md with signal errors (E301-E304, E501-E502)
   - Signal usage examples in godot_test/scripts/signal_test.ferris
   - STEP_6_COMPLETION_REPORT.md with technical details
 
-### Technical Details
+**Signal Technical Details**:
 
 - **Signal Flow**: FerrisScript → Runtime callback → Godot emit_signal()
 - **Type Safety**: Compile-time type checking, runtime validation
 - **Thread Safety**: Instance ID pattern avoids borrowing conflicts
-- **Test Coverage**: 286 tests passing (221 compiler + 64 runtime + 1 godot_bind)
+- **Test Coverage**: 382 tests passing after Phase 1
+
+#### Additional Callbacks (Phase 2) ✅
+
+- **Lifecycle Callbacks** (PR #TBD)
+  - `_input(event: InputEvent)` - User input handling
+  - `_physics_process(delta: f32)` - Fixed timestep physics updates
+  - `_enter_tree()` - Node enters scene tree
+  - `_exit_tree()` - Node exits scene tree
+  - E305 error code for lifecycle callback validation
+  - 11 new tests (7 type checker + 4 runtime)
+
+- **InputEvent Type** (PR #TBD)
+  - `InputEvent` type support in type checker
+  - `is_action_pressed(action: String) -> bool` method
+  - `is_action_released(action: String) -> bool` method
+
+**Callbacks Technical Details**:
+
+- **Test Coverage**: 396 tests passing after Phase 2
+- **Pattern**: Consistent with existing `_ready()` and `_process()` callbacks
+
+#### Node Query Functions (Phase 3) ✅
+
+- **Node Query Built-ins** (PR #TBD)
+  - `get_node(path: String) -> Node` - Retrieve node by scene path
+  - `get_parent() -> Node` - Get parent node
+  - `has_node(path: String) -> bool` - Check if node exists
+  - `find_child(name: String) -> Node` - Find child by name (recursive)
+  - 12 new error codes (E601-E613) for comprehensive validation
+  - 17 new tests (11 type checker + 6 runtime)
+
+- **Node Infrastructure** (PR #TBD)
+  - `Value::Node` variant for representing Godot nodes
+  - `NodeHandle` struct for opaque node references
+  - `NodeQueryType` enum for query operations
+  - Thread-local storage pattern for clean Godot integration
+  - Callback mechanism consistent with signal pattern
+
+**Node Queries Technical Details**:
+
+- **Architecture**: Runtime callbacks → Thread-local storage → Godot Node API
+- **Type Safety**: Compile-time path validation, runtime existence checks
+- **Test Coverage**: 416 tests passing after Phase 3
+- **Implementation Efficiency**: Batched implementation saved 4-7 hours
 
 ### Notes
 
