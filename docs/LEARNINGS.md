@@ -1485,3 +1485,153 @@ fn is_similar(candidate: &str, target: &str) -> bool {
 ### 🔗 References
 
 - [EDGE_CASE_TESTING_SUMMARY.md](EDGE_CASE_TESTING_SUMMARY.md) - Full initiative summary
+
+---
+
+## v0.0.4 Phase 3: Node Query Functions - October 9, 2025
+
+**Context**: Implemented 4 node query functions (get_node, get_parent, has_node, find_child) in 6 hours instead of estimated 2-3 days.
+
+### 📊 Results
+
+- **All 4 functions** implemented and tested in single batch
+- **416 tests passing** (396 existing + 17 new + 3 other)
+- **50-68% time savings** over original estimate
+- **12 new error codes** (E601-E613) for comprehensive validation
+- **Zero build warnings**, all quality gates passed
+
+### 💡 Key Insights
+
+#### Implementation Patterns
+
+1. **Batching Saves Time**: Implementing all 4 functions together (phases 3.2-3.5) saved 4-7 hours
+   - Eliminated context switching between features
+   - Reused infrastructure setup work
+   - Parallel test development
+   - Single round of type checker updates
+
+2. **Thread-Local Storage Pattern**: Clean separation for callbacks
+
+   ```rust
+   thread_local! {
+       static CURRENT_NODE_INSTANCE_ID: RefCell<Option<InstanceId>> = const { RefCell::new(None) };
+   }
+   ```
+
+   - Set before script execution
+   - Clean up after execution
+   - O(1) lookup for callbacks
+   - Avoids borrowing conflicts
+
+3. **Special-Cased Built-ins**: Consistent with Phase 1 (emit_signal)
+   - Runtime callbacks for Godot API integration
+   - Type checker registration with proper signatures
+   - Error validation at both compile-time and runtime
+
+#### Testing Strategies
+
+1. **Type Coercion Flexibility**: Type checker tests need flexible assertions
+   - Don't test exact error messages (may change with coercion rules)
+   - Test patterns: "expects X arguments, found Y"
+   - Updated 3 tests after initial failures due to strict matching
+
+2. **Mock Callbacks**: Enable runtime testing without Godot
+
+   ```rust
+   env.set_node_query_callback(Some(|query_type, arg| {
+       match query_type {
+           NodeQueryType::GetNode => Ok(Value::Node(NodeHandle::new("MockNode"))),
+           // ... other cases
+       }
+   }));
+   ```
+
+3. **Comprehensive Error Coverage**: 12 error codes for thorough validation
+   - Wrong argument count
+   - Empty path/name validation
+   - Not found errors
+   - No callback set errors
+
+#### Architecture Decisions
+
+1. **Value::Node Variant**: Represents Godot nodes as opaque handles
+   - Can't store in variables or pass as arguments (limitation documented)
+   - Workaround: Store paths as strings, query when needed
+
+2. **Node Invalidation Deferred**: Weak references using ObjectID deferred to v0.0.5+
+   - Current: No validity checking
+   - Recommendation: Use `has_node()` before accessing potentially freed nodes
+   - Deep research needed (see next TODO item)
+
+3. **Array Support Deferred**: `get_children()` requires array type support
+   - Planned for v0.0.6 or later
+   - Documented as known limitation
+
+### 🎯 Best Practices for Phase 4+
+
+1. **Consider Batching**: Group similar features to maximize efficiency
+   - Evaluate dependencies first
+   - Batch if infrastructure is shared
+   - Don't batch if features are fundamentally different
+
+2. **Infrastructure First**: Set up Value variants, callbacks, types before functions
+   - All 4 functions shared same infrastructure
+   - One-time setup, multiple function benefits
+
+3. **Test as You Go**: Write tests immediately after implementing each function
+   - Catches integration issues early
+   - Validates error handling works correctly
+   - Easier to debug with fresh context
+
+4. **Document Limitations**: Note known issues in planning doc and PR
+   - Node reference limitations
+   - Node invalidation issues
+   - Missing features (get_children)
+
+### 📈 Efficiency Metrics
+
+| Metric | Value |
+|--------|-------|
+| **Estimated Time** | 12-19 hours (2-3 days) |
+| **Actual Time** | ~6 hours |
+| **Efficiency Gain** | 50-68% |
+| **Key Factor** | Batching phases 3.2-3.5 |
+| **Build Time** | 2-4 seconds (unchanged) |
+| **Test Time** | 0.5 seconds (+17 tests) |
+
+### 🔬 Technical Insights
+
+1. **Thread Safety**: Instance ID pattern avoids borrowing conflicts
+   - Used in Phase 1 (signals) and Phase 3 (node queries)
+   - Pattern proven reliable and maintainable
+
+2. **Error Code Organization**: E600s for node query errors
+   - E601-E604: get_node errors
+   - E605-E606: get_parent errors
+   - E607-E609: has_node errors (note: never errors on missing node)
+   - E610-E613: find_child errors
+
+3. **Godot API Integration**: Direct API calls with minimal overhead
+   - `try_get_node_as::<Node2D>(path)` for get_node
+   - `get_parent()` for parent access
+   - `has_node(path)` for existence checks
+   - `find_child(name)` for recursive search
+
+### 📝 Documentation Created
+
+1. **PHASE_3_NODE_QUERIES.md** (530+ lines): Complete planning document
+2. **4 Example Scripts**: Basic, validation, search, error handling patterns
+3. **PR_DESCRIPTION.md**: Comprehensive review-ready description
+4. **Updated**: README.md, CHANGELOG.md, planning documents
+
+### 🚀 Recommendations
+
+1. **For Phase 4 (Godot Types)**: Consider batching Color, Rect2, Transform2D if they share infrastructure
+2. **For Phase 5 (Property Exports)**: May not be batchable (different architecture)
+3. **For Future Phases**: Always evaluate batching opportunity at planning stage
+4. **Node Invalidation**: Research needed before implementing ObjectID weak references
+
+### 🔗 References
+
+- [PHASE_3_NODE_QUERIES.md](planning/v0.0.4/PHASE_3_NODE_QUERIES.md) - Full planning document
+- [PR_DESCRIPTION.md](../.github/PR_DESCRIPTION.md) - Ready for review

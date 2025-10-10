@@ -1,0 +1,41 @@
+// Example: Node Search with find_child()
+// Demonstrates recursive child searching
+
+fn _ready() {
+    // Find a child by name (searches recursively)
+    let health_bar = find_child("HealthBar");
+    
+    // Find deeply nested UI elements
+    let score_label = find_child("ScoreLabel");
+    
+    // Find components in complex hierarchies
+    let collision_shape = find_child("CollisionShape2D");
+}
+
+fn _process(delta: f32) {
+    // Find dynamic elements
+    let current_weapon = find_child("CurrentWeapon");
+    
+    // Locate effects
+    let particle_effect = find_child("ParticleEffect");
+}
+
+fn update_ui() {
+    // Find and update UI components
+    let health_display = find_child("HealthDisplay");
+    let mana_display = find_child("ManaDisplay");
+    let stamina_display = find_child("StaminaDisplay");
+}
+
+fn check_equipment() {
+    // Find equipped items
+    let helmet = find_child("Helmet");
+    let chest_armor = find_child("ChestArmor");
+    let weapon = find_child("Weapon");
+    
+    // Validate equipment exists
+    if has_node("Equipment") {
+        let equipment_node = get_node("Equipment");
+        let shield = find_child("Shield");
+    }
+}

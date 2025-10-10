@@ -74,6 +74,8 @@ pub enum Value {
     SelfObject,
     /// Opaque handle to a Godot InputEvent
     InputEvent(InputEventHandle),
+    /// Opaque handle to a Godot Node
+    Node(NodeHandle),
 }
 
 /// Opaque handle to a Godot InputEvent.
@@ -123,6 +125,49 @@ impl InputEventHandle {
     }
 }
 
+/// Opaque handle to a Godot Node.
+///
+/// This type wraps a Godot Node reference in an opaque way, allowing FerrisScript
+/// code to reference nodes in the scene tree.
+///
+/// # Supported Operations
+///
+/// - Can be returned from `get_node()`, `get_parent()`, `find_child()`
+/// - Can be passed to other functions expecting Node type
+///
+/// # Limitations
+///
+/// - Node handle may be invalidated if the node is freed
+/// - Properties must be accessed via built-in functions
+/// - Direct property access (e.g., `node.position`) deferred to future phase
+///
+/// # Example (FerrisScript)
+///
+/// ```ferris
+/// fn _ready() {
+///     let player: Node = get_node("../Player");
+///     let parent: Node = get_parent();
+/// }
+/// ```
+#[derive(Debug, Clone, PartialEq)]
+pub struct NodeHandle {
+    // Opaque storage - actual implementation provided by godot_bind
+    // For now, we'll store a node path identifier for debugging
+    pub(crate) node_id: String,
+}
+
+impl NodeHandle {
+    /// Create a new Node handle with identifier
+    pub fn new(node_id: String) -> Self {
+        NodeHandle { node_id }
+    }
+
+    /// Get the node identifier (for debugging)
+    pub fn id(&self) -> &str {
+        &self.node_id
+    }
+}
+
 impl Value {
     /// Coerce value to float if possible
     pub fn to_float(&self) -> Option<f32> {
@@ -151,6 +196,21 @@ pub type PropertyGetter = fn(&str) -> Result<Value, String>;
 pub type PropertySetter = fn(&str, Value) -> Result<(), String>;
 /// Callback for emitting a signal to the Godot node
 pub type SignalEmitter = Box<dyn Fn(&str, &[Value]) -> Result<(), String>>;
+/// Callback for querying nodes in the scene tree
+pub type NodeQueryCallback = fn(&str, NodeQueryType) -> Result<Value, String>;
+
+/// Type of node query operation
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NodeQueryType {
+    /// Get node by path (absolute or relative)
+    GetNode,
+    /// Get parent node
+    GetParent,
+    /// Check if node exists (returns bool)
+    HasNode,
+    /// Find child by name (recursive search)
+    FindChild,
+}
 
 /// Variable information stored in the environment
 #[derive(Debug, Clone)]
@@ -210,6 +270,8 @@ pub struct Env {
     property_setter: Option<PropertySetter>,
     /// Callback to emit signals to the Godot node
     signal_emitter: Option<SignalEmitter>,
+    /// Callback to query nodes in the scene tree
+    node_query_callback: Option<NodeQueryCallback>,
     /// Signal definitions: signal name -> parameter count
     signals: HashMap<String, usize>,
 }
@@ -229,6 +291,7 @@ impl Env {
             property_getter: None,
             property_setter: None,
             signal_emitter: None,
+            node_query_callback: None,
             signals: HashMap::new(),
         };
 
@@ -253,6 +316,11 @@ impl Env {
     /// Set the signal emitter callback for signal emission
     pub fn set_signal_emitter(&mut self, emitter: SignalEmitter) {
         self.signal_emitter = Some(emitter);
+    }
+
+    /// Set the node query callback for scene tree queries
+    pub fn set_node_query_callback(&mut self, callback: NodeQueryCallback) {
+        self.node_query_callback = Some(callback);
     }
 
     pub fn push_scope(&mut self) {
@@ -361,6 +429,74 @@ impl Env {
             return Ok(Value::Nil);
         }
 
+        // Special handling for node query functions - need access to node_query_callback
+        if name == "get_node" {
+            if args.len() != 1 {
+                return Err(
+                    "Error[E601]: get_node requires exactly one argument (path: String)"
+                        .to_string(),
+                );
+            }
+            let path = match &args[0] {
+                Value::String(s) => s,
+                _ => return Err("Error[E602]: get_node argument must be a string".to_string()),
+            };
+            if path.is_empty() {
+                return Err("Error[E603]: Node path cannot be empty".to_string());
+            }
+            if let Some(callback) = self.node_query_callback {
+                return callback(path, NodeQueryType::GetNode);
+            }
+            return Err("Error[E604]: Node query not available (no Godot context)".to_string());
+        }
+
+        if name == "get_parent" {
+            if !args.is_empty() {
+                return Err("Error[E605]: get_parent takes no arguments".to_string());
+            }
+            if let Some(callback) = self.node_query_callback {
+                return callback("", NodeQueryType::GetParent);
+            }
+            return Err("Error[E606]: Node query not available (no Godot context)".to_string());
+        }
+
+        if name == "has_node" {
+            if args.len() != 1 {
+                return Err(
+                    "Error[E607]: has_node requires exactly one argument (path: String)"
+                        .to_string(),
+                );
+            }
+            let path = match &args[0] {
+                Value::String(s) => s,
+                _ => return Err("Error[E608]: has_node argument must be a string".to_string()),
+            };
+            if let Some(callback) = self.node_query_callback {
+                return callback(path, NodeQueryType::HasNode);
+            }
+            return Err("Error[E609]: Node query not available (no Godot context)".to_string());
+        }
+
+        if name == "find_child" {
+            if args.len() != 1 {
+                return Err(
+                    "Error[E610]: find_child requires exactly one argument (name: String)"
+                        .to_string(),
+                );
+            }
+            let name_str = match &args[0] {
+                Value::String(s) => s,
+                _ => return Err("Error[E611]: find_child argument must be a string".to_string()),
+            };
+            if name_str.is_empty() {
+                return Err("Error[E612]: Child name cannot be empty".to_string());
+            }
+            if let Some(callback) = self.node_query_callback {
+                return callback(name_str, NodeQueryType::FindChild);
+            }
+            return Err("Error[E613]: Node query not available (no Godot context)".to_string());
+        }
+
         // Handle other built-in functions
         if let Some(func) = self.builtin_fns.get(name) {
             func(args)
@@ -370,7 +506,12 @@ impl Env {
     }
 
     pub fn is_builtin(&self, name: &str) -> bool {
+        // Check both registered built-ins and special handled functions
         self.builtin_fns.contains_key(name)
+            || matches!(
+                name,
+                "emit_signal" | "get_node" | "get_parent" | "has_node" | "find_child"
+            )
     }
 
     /// Register or override a built-in function
@@ -407,6 +548,7 @@ fn builtin_print(args: &[Value]) -> Result<Value, String> {
             Value::Nil => "nil".to_string(),
             Value::SelfObject => "self".to_string(),
             Value::InputEvent(_) => "InputEvent".to_string(),
+            Value::Node(handle) => format!("Node({})", handle.id()),
         })
         .collect::<Vec<_>>()
         .join(" ");
@@ -2725,5 +2867,163 @@ mod tests {
         let result = call_function("_physics_process", &[], &mut env);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("expects 1 arguments, got 0"));
+    }
+
+    // Phase 3: Node Query Functions tests
+
+    #[test]
+    fn test_call_get_node_function() {
+        let source = r#"
+            fn test_get() {
+                let node = get_node("path/to/node");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Mock callback for get_node
+        fn mock_node_query(path: &str, query_type: NodeQueryType) -> Result<Value, String> {
+            match query_type {
+                NodeQueryType::GetNode => Ok(Value::Node(NodeHandle::new(path.to_string()))),
+                _ => Err("Unexpected query type".to_string()),
+            }
+        }
+        env.set_node_query_callback(mock_node_query);
+
+        // Call the test function
+        let result = call_function("test_get", &[], &mut env);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Nil);
+    }
+
+    #[test]
+    fn test_call_get_parent_function() {
+        let source = r#"
+            fn test_parent() {
+                let parent = get_parent();
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Mock callback for get_parent
+        fn mock_node_query(_path: &str, query_type: NodeQueryType) -> Result<Value, String> {
+            match query_type {
+                NodeQueryType::GetParent => {
+                    Ok(Value::Node(NodeHandle::new("<parent>".to_string())))
+                }
+                _ => Err("Unexpected query type".to_string()),
+            }
+        }
+        env.set_node_query_callback(mock_node_query);
+
+        // Call the test function
+        let result = call_function("test_parent", &[], &mut env);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Nil);
+    }
+
+    #[test]
+    fn test_call_has_node_function() {
+        let source = r#"
+            fn test_has() {
+                let exists = has_node("path/to/node");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Mock callback for has_node
+        fn mock_node_query(_path: &str, query_type: NodeQueryType) -> Result<Value, String> {
+            match query_type {
+                NodeQueryType::HasNode => Ok(Value::Bool(true)),
+                _ => Err("Unexpected query type".to_string()),
+            }
+        }
+        env.set_node_query_callback(mock_node_query);
+
+        // Call the test function
+        let result = call_function("test_has", &[], &mut env);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Nil);
+    }
+
+    #[test]
+    fn test_call_find_child_function() {
+        let source = r#"
+            fn test_find() {
+                let child = find_child("ChildName");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Mock callback for find_child
+        fn mock_node_query(name: &str, query_type: NodeQueryType) -> Result<Value, String> {
+            match query_type {
+                NodeQueryType::FindChild => {
+                    Ok(Value::Node(NodeHandle::new(format!("<child:{}>", name))))
+                }
+                _ => Err("Unexpected query type".to_string()),
+            }
+        }
+        env.set_node_query_callback(mock_node_query);
+
+        // Call the test function
+        let result = call_function("test_find", &[], &mut env);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Nil);
+    }
+
+    #[test]
+    fn test_node_query_error_handling() {
+        let source = r#"
+            fn test_error() {
+                let node = get_node("");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Mock callback that always errors
+        fn mock_node_query(_path: &str, _query_type: NodeQueryType) -> Result<Value, String> {
+            Err("Node not found".to_string())
+        }
+        env.set_node_query_callback(mock_node_query);
+
+        // Call should fail due to empty path (E602: Path cannot be empty)
+        let result = call_function("test_error", &[], &mut env);
+        assert!(result.is_err());
+        // Error might be E602 (empty path) or callback error
+        let err = result.unwrap_err();
+        assert!(err.contains("E602") || err.contains("Node not found") || err.contains("empty"));
+    }
+
+    #[test]
+    fn test_node_query_without_callback() {
+        let source = r#"
+            fn test_no_callback() {
+                let node = get_node("path");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Call without setting callback should fail
+        let result = call_function("test_no_callback", &[], &mut env);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("E604"));
     }
 }

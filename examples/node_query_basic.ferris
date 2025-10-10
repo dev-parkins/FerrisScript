@@ -1,0 +1,24 @@
+// Example: Basic Node Query Operations
+// Demonstrates get_node() and get_parent() usage
+
+fn _ready() {
+    // Get a child node by relative path
+    let player = get_node("Player");
+    
+    // Get a node by absolute path
+    let ui = get_node("/root/Main/UI");
+    
+    // Get parent of this node
+    let parent = get_parent();
+    
+    // Chain node queries
+    let sibling = get_parent().get_node("OtherChild");
+}
+
+fn _process(delta: f32) {
+    // Access nodes during runtime
+    let target = get_node("../Enemy");
+    
+    // Use node references in game logic
+    let camera = get_node("/root/Main/Camera2D");
+}

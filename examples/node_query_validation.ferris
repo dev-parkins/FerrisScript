@@ -1,0 +1,39 @@
+// Example: Node Query Validation
+// Demonstrates has_node() for safe node access
+
+fn _ready() {
+    // Check if node exists before accessing
+    if has_node("Player") {
+        let player = get_node("Player");
+        // Safe to use player here
+    }
+    
+    // Validate optional UI elements
+    if has_node("/root/Main/DebugUI") {
+        let debug_ui = get_node("/root/Main/DebugUI");
+        // Debug UI is available
+    }
+}
+
+fn _process(delta: f32) {
+    // Check for dynamically spawned nodes
+    if has_node("Enemies/Boss") {
+        let boss = get_node("Enemies/Boss");
+        // Boss is active, run boss logic
+    }
+    
+    // Validate before parent access
+    let parent = get_parent();
+    if has_node("../PowerUp") {
+        let powerup = get_parent().get_node("PowerUp");
+        // PowerUp exists in parent's children
+    }
+}
+
+fn spawn_enemy() {
+    // Check if spawn point exists
+    if has_node("SpawnPoints/Point1") {
+        let spawn = get_node("SpawnPoints/Point1");
+        // Spawn enemy at this location
+    }
+}

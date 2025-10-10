@@ -11,6 +11,8 @@ pub use signal_prototype::SignalPrototype;
 // Thread-local storage for node properties during script execution
 thread_local! {
     static NODE_POSITION: RefCell<Option<Vector2>> = const { RefCell::new(None) };
+    /// Store the current node's instance ID for node query operations
+    static CURRENT_NODE_INSTANCE_ID: RefCell<Option<InstanceId>> = const { RefCell::new(None) };
 }
 
 /// Property getter for self binding (called from runtime)
@@ -42,6 +44,70 @@ fn set_node_property_tls(property_name: &str, value: Value) -> Result<(), String
     }
 }
 
+/// Node query callback for scene tree operations (called from runtime)
+fn node_query_callback_tls(
+    path_or_name: &str,
+    query_type: ferrisscript_runtime::NodeQueryType,
+) -> Result<Value, String> {
+    use ferrisscript_runtime::{NodeHandle, NodeQueryType};
+
+    CURRENT_NODE_INSTANCE_ID.with(|instance_id_cell| {
+        let instance_id = instance_id_cell
+            .borrow()
+            .ok_or_else(|| "Node instance ID not available".to_string())?;
+
+        // Get the node from instance ID
+        let node = Gd::<Node2D>::try_from_instance_id(instance_id)
+            .map_err(|_| "Node no longer exists".to_string())?;
+
+        match query_type {
+            NodeQueryType::GetNode => {
+                // Try to get the node by path
+                let target_node = node.try_get_node_as::<Node2D>(path_or_name);
+                match target_node {
+                    Some(_) => {
+                        // For now, return a NodeHandle with the path as identifier
+                        // ⚠️ ASSUMPTION: Simplified NodeHandle implementation
+                        // In future, may need to store actual Godot node reference
+                        Ok(Value::Node(NodeHandle::new(path_or_name.to_string())))
+                    }
+                    None => Err(format!("Node not found: {}", path_or_name)),
+                }
+            }
+            NodeQueryType::GetParent => {
+                let parent = node.get_parent();
+                match parent {
+                    Some(_) => {
+                        // Return NodeHandle with "parent" identifier
+                        Ok(Value::Node(NodeHandle::new("<parent>".to_string())))
+                    }
+                    None => Err("Node has no parent".to_string()),
+                }
+            }
+            NodeQueryType::HasNode => {
+                // Check if node exists at path
+                let has_node = node.has_node(path_or_name);
+                Ok(Value::Bool(has_node))
+            }
+            NodeQueryType::FindChild => {
+                // Find child by name (recursive search)
+                // Godot's find_child takes only the name pattern
+                let child = node.find_child(path_or_name);
+                match child {
+                    Some(_) => {
+                        // Return NodeHandle with child name as identifier
+                        Ok(Value::Node(NodeHandle::new(format!(
+                            "<child:{}>",
+                            path_or_name
+                        ))))
+                    }
+                    None => Err(format!("Child node not found: {}", path_or_name)),
+                }
+            }
+        }
+    })
+}
+
 /// Convert FerrisScript Value to Godot Variant
 fn value_to_variant(value: &Value) -> Variant {
     match value {
@@ -53,6 +119,7 @@ fn value_to_variant(value: &Value) -> Variant {
         Value::Nil => Variant::nil(),
         Value::SelfObject => Variant::nil(), // self cannot be passed as signal parameter
         Value::InputEvent(_) => Variant::nil(), // InputEvent cannot be passed as signal parameter
+        Value::Node(_) => Variant::nil(),    // Node cannot be passed as signal parameter
     }
 }
 
@@ -69,6 +136,7 @@ fn godot_print_builtin(args: &[Value]) -> Result<Value, String> {
             Value::Nil => "nil".to_string(),
             Value::SelfObject => "self".to_string(),
             Value::InputEvent(_) => "InputEvent".to_string(),
+            Value::Node(handle) => format!("Node({})", handle.id()),
         })
         .collect::<Vec<_>>()
         .join(" ");
@@ -360,6 +428,12 @@ impl FerrisScriptNode {
             }
         }));
 
+        // Set up node query callback - store instance ID in thread-local for access
+        CURRENT_NODE_INSTANCE_ID.with(|id| {
+            *id.borrow_mut() = Some(instance_id);
+        });
+        env.set_node_query_callback(node_query_callback_tls);
+
         let result = match call_function(function_name, args, env) {
             Ok(value) => Some(value),
             Err(e) => {
@@ -375,6 +449,11 @@ impl FerrisScriptNode {
             if let Some(new_position) = *pos.borrow() {
                 self.base_mut().set_position(new_position);
             }
+        });
+
+        // Clear node instance ID from thread-local storage
+        CURRENT_NODE_INSTANCE_ID.with(|id| {
+            *id.borrow_mut() = None;
         });
 
         result

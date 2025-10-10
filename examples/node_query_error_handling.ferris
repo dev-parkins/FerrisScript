@@ -1,0 +1,65 @@
+// Example: Error Handling Best Practices
+// Demonstrates safe node query patterns
+
+fn _ready() {
+    // GOOD: Validate before accessing
+    if has_node("Player") {
+        let player = get_node("Player");
+        // player is guaranteed to exist
+    }
+    
+    // BAD: Direct access without validation
+    // let player = get_node("Player"); // May error if Player doesn't exist
+    
+    // GOOD: Check parent exists
+    let parent = get_parent();
+    // Parent always exists unless this is root
+    
+    // GOOD: Validate complex paths
+    if has_node("UI/HUD/HealthBar") {
+        let health_bar = get_node("UI/HUD/HealthBar");
+        // Full path validated
+    }
+}
+
+fn safe_node_access() {
+    // Pattern 1: Optional node access
+    if has_node("OptionalFeature") {
+        let feature = get_node("OptionalFeature");
+        // Use feature
+    }
+    // Continue execution even if node doesn't exist
+    
+    // Pattern 2: Required node validation
+    if !has_node("RequiredSystem") {
+        // Log error or handle missing required node
+        print("ERROR: RequiredSystem node not found!");
+    }
+    let system = get_node("RequiredSystem");
+}
+
+fn dynamic_nodes() {
+    // Check for dynamically spawned nodes
+    if has_node("Projectiles/Bullet_001") {
+        let bullet = get_node("Projectiles/Bullet_001");
+        // Bullet exists, update it
+    }
+    
+    // Search for named children without knowing structure
+    let target_marker = find_child("TargetMarker");
+    // find_child() searches recursively
+}
+
+fn hierarchy_navigation() {
+    // Get parent for relative navigation
+    let parent = get_parent();
+    
+    // Check sibling nodes
+    if has_node("../Sibling") {
+        let sibling = get_parent().get_node("Sibling");
+        // Access sibling through parent
+    }
+    
+    // Navigate up hierarchy safely
+    let grandparent = get_parent().get_parent();
+}
