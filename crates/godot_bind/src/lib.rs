@@ -312,12 +312,8 @@ impl INode2D for FerrisScriptNode {
 impl FerrisScriptNode {
     /// Load and compile the FerrisScript file
     fn load_script(&mut self) {
-        godot_print!("=== FERRISSCRIPT DEBUG: load_script() called ===");
-
         let path_gstring = self.script_path.clone();
         let path = path_gstring.to_string();
-
-        godot_print!("DEBUG: Loading script: {}", path);
 
         // Use Godot's FileAccess to read the file (handles res:// paths correctly)
         let file = match FileAccess::open(&path_gstring, ModeFlags::READ) {
@@ -333,30 +329,6 @@ impl FerrisScriptNode {
 
         // Read the entire file as a string
         let source = file.get_as_text().to_string();
-
-        // Debug: Log first 100 characters and byte representation
-        let debug_len = source.len().min(100);
-        let debug_str = &source[..debug_len];
-        let debug_bytes: Vec<String> = debug_str
-            .bytes()
-            .take(40)
-            .map(|b| format!("{:02X}", b))
-            .collect();
-        godot_print!("DEBUG: Script first {} chars: {:?}", debug_len, debug_str);
-        godot_print!("DEBUG: First 40 bytes: {}", debug_bytes.join(" "));
-
-        // Debug: Try to tokenize and show first 5 tokens
-        use ferrisscript_compiler::lexer::tokenize;
-        match tokenize(&source) {
-            Ok(tokens) => {
-                let token_preview: Vec<String> =
-                    tokens.iter().take(10).map(|t| format!("{:?}", t)).collect();
-                godot_print!("DEBUG: First 10 tokens: {}", token_preview.join(", "));
-            }
-            Err(e) => {
-                godot_error!("DEBUG: Tokenization failed: {}", e);
-            }
-        }
 
         // Compile the script
         let program = match compile(&source) {
