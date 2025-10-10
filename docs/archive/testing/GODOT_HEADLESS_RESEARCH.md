@@ -82,6 +82,7 @@ Add a Rust-side parser for console output:
   [FerrisTest] PASS: physics_test
   [FerrisTest] FAIL: input_bindings
   ```
+
 - Collect into a struct:
 
   ```rust
@@ -91,6 +92,7 @@ Add a Rust-side parser for console output:
       message: Option<String>,
   }
   ```
+
 - Serialize to JSON summary for CI or VS Code Copilot integration.
 
 ---
