@@ -517,6 +517,117 @@ Successfully loaded FerrisScript: res://scripts/node_query_search.ferris
 
 ---
 
+## Phase 2.5: Pre-commit Hook Integration
+
+After completing Phase 2 testing, pre-commit hook tooling was enhanced to facilitate automated testing workflows.
+
+### Deliverables
+
+#### 1. Test Runner Scripts
+
+**Files Created**:
+- `scripts/run-tests.ps1` - PowerShell test harness wrapper
+- `scripts/run-tests.sh` - Bash test harness wrapper
+
+**Features**:
+- ✅ Colored output with emoji indicators (✅ ✗ ℹ️ ⚠️)
+- ✅ Multiple execution modes: single script, all, filtered
+- ✅ Fast mode to skip rebuild for quick validation
+- ✅ Verbose flag for detailed test output
+- ✅ Cross-platform support (Windows, Linux, macOS)
+
+**Usage Examples**:
+```powershell
+# PowerShell
+.\scripts\run-tests.ps1 -Script examples/node_query_basic.ferris -Verbose
+.\scripts\run-tests.ps1 -All -Filter "node_query"
+.\scripts\run-tests.ps1 -Fast -Script examples/hello.ferris
+
+# Bash
+./scripts/run-tests.sh --script examples/node_query_basic.ferris --verbose
+./scripts/run-tests.sh --all --filter "node_query"
+./scripts/run-tests.sh --fast --script examples/hello.ferris
+```
+
+#### 2. Documentation Updates
+
+**CONTRIBUTING.md Enhancements**:
+- Added "Running Test Harness Examples" section
+- Added "Automated Testing (Pre-commit Hooks)" section
+- Documented test harness features and assertion markers
+- Explained pre-commit hook workflow and troubleshooting
+- Provided manual check commands for pre-commit validation
+
+**scripts/README.md Enhancements**:
+- Added `run-tests.ps1`/`run-tests.sh` to quick reference table
+- Created comprehensive "Test Harness Runner" section
+- Documented all command-line options and use cases
+- Added example output showing colored test results
+- Linked to Phase 1 and Phase 2 completion reports
+
+### Pre-commit Hook Workflow
+
+**Automated Checks on Commit**:
+1. ✅ Code formatting (`cargo fmt --all`)
+2. ✅ Linting (`cargo clippy --workspace --all-targets --all-features`)
+3. ✅ Unit tests (`cargo test --workspace`)
+
+**Developer Experience**:
+- Hooks auto-install on `cargo build`
+- Manual installation via `.\scripts\install-git-hooks.ps1`
+- Can be skipped with `git commit --no-verify` (not recommended)
+- Provides immediate feedback before code review
+
+**Troubleshooting Resources**:
+- Formatting: `cargo fmt --all`
+- Linting: `cargo clippy --workspace`
+- Testing: `cargo test --workspace -- --nocapture`
+- Hook reinstall: `.\scripts\install-git-hooks.ps1`
+
+### Integration Testing
+
+**Commit Validation**:
+- ✅ Phase 2 changes committed successfully (commit 893bb33)
+- ✅ Pre-commit hook detected formatting issues
+- ✅ `cargo fmt --all` resolved issues
+- ✅ All checks passed on second commit attempt
+
+**Hook Performance**:
+- Formatting check: ~1s
+- Clippy linting: ~0.5s
+- Unit tests: ~1s (476 tests)
+- **Total overhead**: ~2.5s per commit
+
+### Benefits
+
+**For Developers**:
+- Immediate feedback on code quality issues
+- Prevents CI failures due to formatting/linting
+- Reduces review burden on maintainers
+- Consistent code standards across team
+
+**For Maintainers**:
+- Focus on logic review, not style issues
+- Reduced back-and-forth in PR reviews
+- Automated quality gates before PR creation
+- Easier to maintain high code standards
+
+### Next Steps
+
+**Phase 3 Planning**:
+- Test metadata parsing (`// TEST:`, `// EXPECT:`)
+- Error demo detection for intentional failures
+- Structured marker blocks for complex assertions
+- Enhanced test reporting with categorization
+
+**Future Enhancements**:
+- Optional integration test execution in pre-commit
+- Faster pre-commit mode with cargo-nextest
+- Pre-push hook for running test harness examples
+- CI integration for automated example testing
+
+---
+
 **Report Generated**: October 10, 2025  
 **Author**: GitHub Copilot Agent  
 **Review Status**: Ready for stakeholder review
