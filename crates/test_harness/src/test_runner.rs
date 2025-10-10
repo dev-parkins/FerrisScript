@@ -102,12 +102,12 @@ impl TestHarness {
         let scripts_dir = self.config.project_path.join("scripts");
         std::fs::create_dir_all(&scripts_dir)?;
         let dest_script = scripts_dir.join(script_name);
-        
+
         // Remove destination if it exists to avoid file lock issues
         if dest_script.exists() {
             let _ = std::fs::remove_file(&dest_script);
         }
-        
+
         std::fs::copy(script_path, &dest_script)?;
 
         // Build scene based on script requirements

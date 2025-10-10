@@ -150,14 +150,15 @@ pub fn parse_scene_requirements(ferris_content: &str) -> Option<SceneBuilder> {
             {
                 main_node_found = true;
                 // Main will be added by test_runner as a child of TestRunner
-            } else if trimmed.contains("├─") || trimmed.contains("└─") || trimmed.contains("│") {
+            } else if trimmed.contains("├─") || trimmed.contains("└─") || trimmed.contains("│")
+            {
                 // Extract node name (handles ├─, └─, or │ prefixes)
                 if let Some(node_name) = extract_node_name(trimmed) {
                     // Skip if it's Main (already handled above)
                     if node_name == "Main" || node_name.contains("Main (") {
                         continue;
                     }
-                    
+
                     let parent = if trimmed.contains("│    ") || trimmed.contains("     ") {
                         // Nested under another node (indented)
                         "Main/UI"
@@ -191,7 +192,7 @@ fn extract_node_name(line: &str) -> Option<String> {
         .replace("(nodes can be at any depth)", "")
         .trim()
         .to_string();
-    
+
     // Remove anything in parentheses as a catch-all
     if let Some(paren_start) = cleaned.find('(') {
         cleaned = cleaned[..paren_start].trim().to_string();
