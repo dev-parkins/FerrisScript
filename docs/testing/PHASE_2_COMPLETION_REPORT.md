@@ -11,6 +11,7 @@
 Phase 2 successfully extended the headless testing infrastructure to comprehensively test all FerrisScript node query functions. All 3 node query example scripts now pass automated tests, with enhanced scene generation supporting nested hierarchies and improved node name parsing.
 
 ### Key Achievements
+
 - ✅ 3/3 node query examples passing (100% success rate)
 - ✅ Fixed method chaining compatibility issues in all examples
 - ✅ Enhanced scene parser to handle complex tree diagrams
@@ -41,6 +42,7 @@ Phase 2 successfully extended the headless testing infrastructure to comprehensi
 **Purpose**: Demonstrate `get_node()` and `get_parent()` basic usage
 
 **Scene Hierarchy**:
+
 ```
 TestRunner (Node2D)
 └─ Main (FerrisScriptNode)
@@ -52,6 +54,7 @@ TestRunner (Node2D)
 ```
 
 **Test Execution**:
+
 ```
 Running test: node_query_basic.ferris
 Generated scene: "./godot_test\tests/generated\test_node_query_basic.tscn"
@@ -63,12 +66,14 @@ Failed: 0 ✗
 ```
 
 **Output Markers**:
+
 - ✓ Found Player node
 - ✓ Found UI node
 - ✓ Got parent node
 - ✓ Found OtherChild node
 
 **Fixes Applied**:
+
 - Removed unsupported method chaining: `get_parent().get_node("Child")`
 - Changed absolute paths `/root/Main/UI` to relative paths `UI`
 - Added validation print statements for testability
@@ -80,6 +85,7 @@ Failed: 0 ✗
 **Purpose**: Demonstrate `has_node()` for safe conditional node access
 
 **Scene Hierarchy**:
+
 ```
 TestRunner (Node2D)
 └─ Main (FerrisScriptNode)
@@ -89,6 +95,7 @@ TestRunner (Node2D)
 ```
 
 **Test Execution**:
+
 ```
 Running test: node_query_validation.ferris
 Generated scene: "./godot_test\tests/generated\test_node_query_validation.tscn"
@@ -100,11 +107,13 @@ Failed: 0 ✗
 ```
 
 **Output Markers**:
+
 - ✓ Player node exists and was accessed
 - ✓ DebugUI node exists (optional)
 - ○ Enemies/Boss not found (optional - OK)
 
 **Fixes Applied**:
+
 - Removed chained method call in validation block
 - Simplified parent access patterns
 - Added explicit pass/fail/info markers
@@ -116,6 +125,7 @@ Failed: 0 ✗
 **Purpose**: Demonstrate `find_child()` recursive searching
 
 **Scene Hierarchy**:
+
 ```
 TestRunner (Node2D)
 └─ Main (FerrisScriptNode)
@@ -127,6 +137,7 @@ TestRunner (Node2D)
 ```
 
 **Test Execution**:
+
 ```
 Running test: node_query_search.ferris
 Generated scene: "./godot_test\tests/generated\test_node_query_search.tscn"
@@ -138,11 +149,13 @@ Failed: 0 ✗
 ```
 
 **Output Markers**:
+
 - ✓ Found HealthBar recursively
 - ✓ Found ScoreLabel in nested UI
 - ✓ Found CurrentWeapon recursively
 
 **Fixes Applied**:
+
 - Simplified script to only test nodes shown in tree diagram
 - Removed references to undeclared nodes (CollisionShape2D, ParticleEffect, etc.)
 - Focused on demonstrating recursive search capability
@@ -156,6 +169,7 @@ Failed: 0 ✗
 **Problem**: Parser missed last child nodes marked with `└─`
 
 **Solution**: Enhanced tree diagram parsing
+
 ```rust
 // OLD: Only detected ├─ and │
 else if trimmed.contains("├─") || trimmed.contains("│") {
@@ -173,16 +187,19 @@ else if trimmed.contains("├─") || trimmed.contains("└─") || trimmed.cont
 **Problem**: Parenthetical notes like "(optional container)" included in node names
 
 **Before**:
+
 ```
 [node name="UI (optional container)" type="Node2D" parent="Main"]  ❌
 ```
 
 **After**:
+
 ```
 [node name="UI" type="Node2D" parent="Main"]  ✅
 ```
 
 **Solution**: Enhanced `extract_node_name()` function
+
 ```rust
 // Remove common parenthetical annotations
 .replace("(optional container)", "")
@@ -204,11 +221,13 @@ if let Some(paren_start) = cleaned.find('(') {
 ### 3. Script File Management
 
 **Problem**: File locking errors when running batch tests
+
 ```
 Failed to run: The process cannot access the file because it is being used by another process.
 ```
 
 **Solution**: Delete-before-copy pattern
+
 ```rust
 // Remove destination if it exists to avoid file lock issues
 if dest_script.exists() {
@@ -268,6 +287,7 @@ std::fs::copy(script_path, &dest_script)?;
 ### Issue #1: Method Chaining Not Supported
 
 **Symptoms**: Compilation error E100
+
 ```
 Error[E100]: Expected token
 Expected ;, found ( at line 41, column 40
@@ -278,6 +298,7 @@ Expected ;, found ( at line 41, column 40
 **Workaround**: Use direct paths or intermediate variables
 
 **Example**:
+
 ```ferrisscript
 // ❌ Broken
 let sibling = get_parent().get_node("OtherChild");
@@ -293,6 +314,7 @@ let sibling = get_node("OtherChild");
 ### Issue #2: Absolute Path Assumptions
 
 **Symptoms**: Runtime errors
+
 ```
 ERROR: Node not found: /root/Main/UI
 ```
@@ -306,6 +328,7 @@ ERROR: Node not found: /root/Main/UI
 ### Issue #3: File Locking in Batch Tests
 
 **Symptoms**:
+
 ```
 The process cannot access the file because it is being used by another process. (os error 32)
 ```
@@ -382,12 +405,14 @@ The process cannot access the file because it is being used by another process. 
 **Objective**: Automate test execution before commits
 
 **Tasks**:
+
 1. Create `scripts/run-tests.ps1` wrapper
 2. Update `.git/hooks/pre-commit` to run node_query tests
 3. Document workflow in `CONTRIBUTING.md`
 4. Add `--fast` flag for quick validation
 
 **Success Criteria**:
+
 - Pre-commit hook runs automatically
 - Fails commit if tests don't pass
 - Provides clear output to developer
@@ -398,6 +423,7 @@ The process cannot access the file because it is being used by another process. 
 ### Phase 3: Structured Test Protocol (Future)
 
 **Objectives**:
+
 - Test metadata system (`// TEST:`, `// EXPECT:`)
 - Distinguish error demos from real failures
 - Structured `[FS_TEST]` marker blocks
@@ -410,6 +436,7 @@ The process cannot access the file because it is being used by another process. 
 ### Phase 4: CI/CD Integration (Future)
 
 **Objectives**:
+
 - GitHub Actions workflow
 - Automated testing on PR
 - Coverage reporting
@@ -424,6 +451,7 @@ The process cannot access the file because it is being used by another process. 
 Phase 2 successfully achieved 100% test coverage of node query functions with robust automated testing infrastructure. All examples now work correctly within language constraints, and the test harness handles complex scene hierarchies reliably.
 
 **Key Wins**:
+
 - ✅ 3/3 examples passing (100%)
 - ✅ Enhanced scene parser
 - ✅ Improved file handling
@@ -437,6 +465,7 @@ Phase 2 successfully achieved 100% test coverage of node query functions with ro
 ## Appendix: Complete Test Output
 
 ### Full Verbose Output - node_query_basic.ferris
+
 ```
 Running test: node_query_basic.ferris
 Generated scene: "./godot_test\tests/generated\test_node_query_basic.tscn"
@@ -464,6 +493,7 @@ Successfully loaded FerrisScript: res://scripts/node_query_basic.ferris
 ```
 
 ### Full Verbose Output - node_query_validation.ferris
+
 ```
 Running test: node_query_validation.ferris
 Generated scene: "./godot_test\tests/generated\test_node_query_validation.tscn"
@@ -490,6 +520,7 @@ Successfully loaded FerrisScript: res://scripts/node_query_validation.ferris
 ```
 
 ### Full Verbose Output - node_query_search.ferris
+
 ```
 Running test: node_query_search.ferris
 Generated scene: "./godot_test\tests/generated\test_node_query_search.tscn"
@@ -526,10 +557,12 @@ After completing Phase 2 testing, pre-commit hook tooling was enhanced to facili
 #### 1. Test Runner Scripts
 
 **Files Created**:
+
 - `scripts/run-tests.ps1` - PowerShell test harness wrapper
 - `scripts/run-tests.sh` - Bash test harness wrapper
 
 **Features**:
+
 - ✅ Colored output with emoji indicators (✅ ✗ ℹ️ ⚠️)
 - ✅ Multiple execution modes: single script, all, filtered
 - ✅ Fast mode to skip rebuild for quick validation
@@ -537,6 +570,7 @@ After completing Phase 2 testing, pre-commit hook tooling was enhanced to facili
 - ✅ Cross-platform support (Windows, Linux, macOS)
 
 **Usage Examples**:
+
 ```powershell
 # PowerShell
 .\scripts\run-tests.ps1 -Script examples/node_query_basic.ferris -Verbose
@@ -552,6 +586,7 @@ After completing Phase 2 testing, pre-commit hook tooling was enhanced to facili
 #### 2. Documentation Updates
 
 **CONTRIBUTING.md Enhancements**:
+
 - Added "Running Test Harness Examples" section
 - Added "Automated Testing (Pre-commit Hooks)" section
 - Documented test harness features and assertion markers
@@ -559,6 +594,7 @@ After completing Phase 2 testing, pre-commit hook tooling was enhanced to facili
 - Provided manual check commands for pre-commit validation
 
 **scripts/README.md Enhancements**:
+
 - Added `run-tests.ps1`/`run-tests.sh` to quick reference table
 - Created comprehensive "Test Harness Runner" section
 - Documented all command-line options and use cases
@@ -568,17 +604,20 @@ After completing Phase 2 testing, pre-commit hook tooling was enhanced to facili
 ### Pre-commit Hook Workflow
 
 **Automated Checks on Commit**:
+
 1. ✅ Code formatting (`cargo fmt --all`)
 2. ✅ Linting (`cargo clippy --workspace --all-targets --all-features`)
 3. ✅ Unit tests (`cargo test --workspace`)
 
 **Developer Experience**:
+
 - Hooks auto-install on `cargo build`
 - Manual installation via `.\scripts\install-git-hooks.ps1`
 - Can be skipped with `git commit --no-verify` (not recommended)
 - Provides immediate feedback before code review
 
 **Troubleshooting Resources**:
+
 - Formatting: `cargo fmt --all`
 - Linting: `cargo clippy --workspace`
 - Testing: `cargo test --workspace -- --nocapture`
@@ -587,12 +626,14 @@ After completing Phase 2 testing, pre-commit hook tooling was enhanced to facili
 ### Integration Testing
 
 **Commit Validation**:
+
 - ✅ Phase 2 changes committed successfully (commit 893bb33)
 - ✅ Pre-commit hook detected formatting issues
 - ✅ `cargo fmt --all` resolved issues
 - ✅ All checks passed on second commit attempt
 
 **Hook Performance**:
+
 - Formatting check: ~1s
 - Clippy linting: ~0.5s
 - Unit tests: ~1s (476 tests)
@@ -601,12 +642,14 @@ After completing Phase 2 testing, pre-commit hook tooling was enhanced to facili
 ### Benefits
 
 **For Developers**:
+
 - Immediate feedback on code quality issues
 - Prevents CI failures due to formatting/linting
 - Reduces review burden on maintainers
 - Consistent code standards across team
 
 **For Maintainers**:
+
 - Focus on logic review, not style issues
 - Reduced back-and-forth in PR reviews
 - Automated quality gates before PR creation
@@ -615,12 +658,14 @@ After completing Phase 2 testing, pre-commit hook tooling was enhanced to facili
 ### Next Steps
 
 **Phase 3 Planning**:
+
 - Test metadata parsing (`// TEST:`, `// EXPECT:`)
 - Error demo detection for intentional failures
 - Structured marker blocks for complex assertions
 - Enhanced test reporting with categorization
 
 **Future Enhancements**:
+
 - Optional integration test execution in pre-commit
 - Faster pre-commit mode with cargo-nextest
 - Pre-push hook for running test harness examples

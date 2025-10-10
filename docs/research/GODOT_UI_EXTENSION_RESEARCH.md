@@ -250,8 +250,8 @@ func _on_run_tests_pressed():
 
 Later phases can include:
 
-* **LSP Bridge:** Connect your `ferris-lsp` server to Godot’s code editor via `EditorPlugin` socket APIs.
-* **Inline Diagnostics:** Parse `cargo ferris check` output → highlight lines in script editor.
+- **LSP Bridge:** Connect your `ferris-lsp` server to Godot’s code editor via `EditorPlugin` socket APIs.
+- **Inline Diagnostics:** Parse `cargo ferris check` output → highlight lines in script editor.
 
 ---
 
@@ -259,7 +259,7 @@ Later phases can include:
 
 1. Enable your plugin:
 
-   * In Godot Editor → Project → Project Settings → Plugins → “FerrisScript Integration” → Enable.
+   - In Godot Editor → Project → Project Settings → Plugins → “FerrisScript Integration” → Enable.
 2. Test the dock panel.
 3. Run commands (`cargo ferris build`, etc.).
 4. Connect it with your Rust backend for signals/inspector reflection.
@@ -283,13 +283,13 @@ Later phases can include:
 
 ## 💡 Next Steps
 
-* [ ] Scaffold `addons/ferrisscript/` plugin structure
-* [ ] Integrate Rust `FerrisBridge` via cargo-godot
-* [ ] Add dock panel buttons for build/test/reload
-* [ ] Add Inspector metadata panel for FerrisScriptNode
-* [ ] Integrate headless test runner CLI
-* [ ] Add runtime reload + build logs in dock
-* [ ] Prepare for LSP integration in later phase (v0.9+)
+- [ ] Scaffold `addons/ferrisscript/` plugin structure
+- [ ] Integrate Rust `FerrisBridge` via cargo-godot
+- [ ] Add dock panel buttons for build/test/reload
+- [ ] Add Inspector metadata panel for FerrisScriptNode
+- [ ] Integrate headless test runner CLI
+- [ ] Add runtime reload + build logs in dock
+- [ ] Prepare for LSP integration in later phase (v0.9+)
 
 ---
 

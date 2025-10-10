@@ -34,11 +34,13 @@ Phase 2 extends the headless testing infrastructure to comprehensively test all 
 **Problem**: `get_parent().get_node("Child")` causes syntax error
 
 **Example**: `node_query_basic.ferris` line 41
+
 ```ferrisscript
 let sibling = get_parent().get_node("OtherChild");  // ❌ E100: Expected ;
 ```
 
 **Workaround**: Use intermediate variables
+
 ```ferrisscript
 let parent = get_parent();
 let sibling = parent.get_node("OtherChild");  // ✅ Works
@@ -51,10 +53,12 @@ let sibling = parent.get_node("OtherChild");  // ✅ Works
 **Problem**: Tests designed to demonstrate error handling (✗ markers) count as failures
 
 **Example**: `node_query_error_handling.ferris`
+
 - Intentional: `✗ RequiredSystem node not found!` (testing missing node behavior)
 - Actual output: Test marked as FAILED
 
 **Solution**: Add test metadata system
+
 - `// TEST: error_handling` - Mark as error demo
 - `// EXPECT: fail` - Failure is expected
 - Update pass/fail logic to check annotations
@@ -62,6 +66,7 @@ let sibling = parent.get_node("OtherChild");  // ✅ Works
 ### 3. Scene Requirements Parser Limitations
 
 **Current**: Only parses tree diagrams with specific format
+
 ```
 // └─ Main
 //   ├─ Player
@@ -71,6 +76,7 @@ let sibling = parent.get_node("OtherChild");  // ✅ Works
 ```
 
 **Missing**:
+
 - Indentation-based hierarchy
 - Node type specifications (Node2D, Control, etc.)
 - Optional node markers handling
@@ -82,10 +88,12 @@ let sibling = parent.get_node("OtherChild");  // ✅ Works
 ### Task 1: Fix Method Chaining Issues
 
 **Files to Update**:
+
 - `examples/node_query_basic.ferris` (line 41)
 - Any other examples using chained calls
 
 **Changes**:
+
 ```ferrisscript
 // OLD (broken):
 let sibling = get_parent().get_node("OtherChild");
@@ -100,17 +108,20 @@ let sibling = parent.get_node("OtherChild");
 **New Feature**: Test annotations in comments
 
 **Syntax**:
+
 ```ferrisscript
 // TEST: error_handling
 // EXPECT: pass=5, fail=2, info=3
 ```
 
 **Parser Changes**:
+
 - `output_parser.rs`: Add `parse_test_metadata()` function
 - Extract TEST and EXPECT directives from script comments
 - Compare actual results against expectations
 
 **Updated `TestResult`**:
+
 ```rust
 pub struct TestResult {
     // ... existing fields ...
@@ -132,6 +143,7 @@ pub struct TestResult {
 | `node_query_error_handling.ferris` | 5 + optional | Medium | Mixed (error demo) |
 
 **Execution**:
+
 ```powershell
 # Run individually
 cargo run --release --bin ferris-test -- --script examples/node_query_basic.ferris
@@ -148,6 +160,7 @@ cargo run --release --bin ferris-test -- --all --filter "node_query"
 **Improvements**:
 
 1. **Better Node Type Detection**
+
    ```rust
    // Detect from comments:
    // - Control named "HUD"  → type = "Control"
@@ -155,11 +168,13 @@ cargo run --release --bin ferris-test -- --all --filter "node_query"
    ```
 
 2. **Optional Node Support**
+
    ```rust
    // (optional) or [optional] marker → don't fail if missing
    ```
 
 3. **Indentation-Based Parsing**
+
    ```rust
    // Support both:
    // └─ Main        (tree format)
@@ -171,6 +186,7 @@ cargo run --release --bin ferris-test -- --all --filter "node_query"
 **Current Limitation**: Only detects ✓ ✗ ○ symbols
 
 **Enhancement**: Structured markers
+
 ```ferrisscript
 fn _ready() {
     // [TEST_START: node_access]
@@ -183,6 +199,7 @@ fn _ready() {
 ```
 
 **Benefits**:
+
 - Clear test boundaries
 - Named test cases
 - Better error isolation
@@ -198,12 +215,14 @@ fn _ready() {
 ## Metrics
 
 **Target Coverage**:
+
 - 4 scripts tested ✅
 - 40+ node query operations validated
 - 3 hierarchy patterns verified (flat, nested, mixed)
 - 2 error handling patterns demonstrated
 
 **Performance**:
+
 - All tests complete in <5 seconds
 - Scene generation <50ms per script
 - Output parsing <10ms per script
@@ -211,16 +230,19 @@ fn _ready() {
 ## Next Steps After Phase 2
 
 **Phase 3**: Structured Test Protocol
+
 - Implement `[FS_TEST]` marker blocks
 - Test isolation and parallel execution
 - Snapshot comparison
 
 **Phase 4**: CI/CD Integration
+
 - GitHub Actions workflow
 - Automated testing on PR
 - Coverage reporting
 
 **Phase 5**: Advanced Features
+
 - Benchmarking
 - Watch mode
 - Interactive runner
