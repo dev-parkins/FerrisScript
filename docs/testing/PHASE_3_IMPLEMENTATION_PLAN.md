@@ -24,17 +24,20 @@ Phase 3 introduces a structured test protocol system that extends the headless t
 ### Current Limitations (Phase 2)
 
 **Simple Print-Based Assertions**:
+
 ```ferrisscript
 print("✓ Found Player node");  // Manual marker - no programmatic validation
 ```
 
 **No Test Metadata**:
+
 - Can't distinguish error demos from real failures
 - No way to specify expected behaviors
 - No test categorization or organization
 - No multi-step test scenarios
 
 **Limited Reporting**:
+
 - Binary pass/fail per script
 - No test categories or grouping
 - Minimal diagnostic information
@@ -43,6 +46,7 @@ print("✓ Found Player node");  // Manual marker - no programmatic validation
 ### Phase 3 Solutions
 
 **Structured Metadata**:
+
 ```ferrisscript
 // TEST: node_query_basic_get_node
 // CATEGORY: unit
@@ -53,6 +57,7 @@ print("✓ Found Player node");  // Manual marker - no programmatic validation
 ```
 
 **Error Demo Support**:
+
 ```ferrisscript
 // TEST: error_handling_invalid_node
 // CATEGORY: error_demo
@@ -61,6 +66,7 @@ print("✓ Found Player node");  // Manual marker - no programmatic validation
 ```
 
 **Rich Reporting**:
+
 ```
 ========================================
 Test Summary - node_query_basic.ferris
@@ -105,30 +111,35 @@ Total: 6/6 passed ✓
 ### Module Responsibilities
 
 **1. MetadataParser** (`metadata_parser.rs`)
+
 - Parse `// TEST:`, `// CATEGORY:`, `// EXPECT:`, `// ASSERT:` directives
 - Extract test definitions from FerrisScript files
 - Support multi-line metadata blocks
 - Validate metadata syntax
 
 **2. AssertionValidator** (`assertion_validator.rs`)
+
 - Match expected assertions against actual output
 - Support multiple assertion types (exact, contains, regex)
 - Handle optional assertions (○ markers)
 - Track assertion pass/fail state
 
 **3. TestResultAggregator** (`test_result.rs`)
+
 - Aggregate results by category (unit, integration, error_demo)
 - Calculate statistics (total, passed, failed, skipped)
 - Build structured result objects for reporting
 - Track test execution metadata (duration, errors)
 
 **4. Enhanced OutputParser** (extend existing)
+
 - Parse assertion blocks from Godot output
 - Extract error messages for error demos
 - Support structured output formats
 - Handle multi-line assertions
 
 **5. CategoryReportGenerator** (`report_generator.rs`)
+
 - Generate categorized test reports
 - Format output with sections and summaries
 - Colorized output for CLI
@@ -141,16 +152,19 @@ Total: 6/6 passed ✓
 ### Core Directives
 
 #### TEST Directive
+
 Defines a unique test identifier.
 
 **Syntax**: `// TEST: <test_name>`
 
 **Example**:
+
 ```ferrisscript
 // TEST: node_query_basic_get_node
 ```
 
 **Rules**:
+
 - Must be first directive in test block
 - Test name must be unique within file
 - Snake_case naming convention
@@ -159,16 +173,19 @@ Defines a unique test identifier.
 ---
 
 #### CATEGORY Directive
+
 Classifies test type for reporting.
 
 **Syntax**: `// CATEGORY: <category_type>`
 
 **Valid Categories**:
+
 - `unit` - Unit tests (single function/feature)
 - `integration` - Integration tests (multiple components)
 - `error_demo` - Error demonstration examples
 
 **Example**:
+
 ```ferrisscript
 // CATEGORY: unit
 ```
@@ -178,16 +195,19 @@ Classifies test type for reporting.
 ---
 
 #### DESCRIPTION Directive
+
 Human-readable test description.
 
 **Syntax**: `// DESCRIPTION: <description_text>`
 
 **Example**:
+
 ```ferrisscript
 // DESCRIPTION: Verify get_node() retrieves child nodes correctly
 ```
 
 **Rules**:
+
 - Optional but recommended
 - Single line only
 - Used in test reports for context
@@ -195,13 +215,16 @@ Human-readable test description.
 ---
 
 #### EXPECT Directive
+
 Defines expected test outcome.
 
-**Syntax**: 
+**Syntax**:
+
 - `// EXPECT: success` - Test should pass
 - `// EXPECT: error` - Test should fail (for error demos)
 
 **Example**:
+
 ```ferrisscript
 // EXPECT: success
 ```
@@ -211,11 +234,13 @@ Defines expected test outcome.
 ---
 
 #### EXPECT_ERROR Directive
+
 Specifies expected error message (for error demos only).
 
 **Syntax**: `// EXPECT_ERROR: <error_substring>`
 
 **Example**:
+
 ```ferrisscript
 // CATEGORY: error_demo
 // EXPECT: error
@@ -223,6 +248,7 @@ Specifies expected error message (for error demos only).
 ```
 
 **Rules**:
+
 - Only valid with `EXPECT: error`
 - Uses substring matching (not exact match)
 - Case-sensitive
@@ -230,11 +256,13 @@ Specifies expected error message (for error demos only).
 ---
 
 #### ASSERT Directive
+
 Defines expected output assertions.
 
 **Syntax**: `// ASSERT: <expected_output>`
 
 **Example**:
+
 ```ferrisscript
 // ASSERT: Found Player node
 // ASSERT: Found UI node
@@ -242,6 +270,7 @@ Defines expected output assertions.
 ```
 
 **Rules**:
+
 - Can have multiple assertions per test
 - Uses substring matching against Godot output
 - Order-independent by default
@@ -250,16 +279,19 @@ Defines expected output assertions.
 ---
 
 #### ASSERT_OPTIONAL Directive
+
 Defines optional assertions (won't fail if missing).
 
 **Syntax**: `// ASSERT_OPTIONAL: <expected_output>`
 
 **Example**:
+
 ```ferrisscript
 // ASSERT_OPTIONAL: DebugUI node exists (optional)
 ```
 
 **Rules**:
+
 - Won't cause test failure if not found
 - Reported as "○" in output
 - Useful for conditional features
@@ -337,6 +369,7 @@ fn _ready() {
 **File**: `crates/test_harness/src/metadata_parser.rs`
 
 **Structures**:
+
 ```rust
 pub struct TestMetadata {
     pub name: String,
@@ -371,6 +404,7 @@ pub enum AssertionKind {
 ```
 
 **Functions**:
+
 ```rust
 pub fn parse_metadata(source: &str) -> Result<Vec<TestMetadata>, ParseError>;
 pub fn extract_test_block(lines: &[&str]) -> Option<TestMetadata>;
@@ -378,6 +412,7 @@ pub fn parse_directive(line: &str) -> Option<Directive>;
 ```
 
 **Acceptance Criteria**:
+
 - ✅ Parses all directive types
 - ✅ Handles multiple test blocks per file
 - ✅ Validates metadata syntax
@@ -391,6 +426,7 @@ pub fn parse_directive(line: &str) -> Option<Directive>;
 **File**: `crates/test_harness/src/output_parser.rs`
 
 **New Functions**:
+
 ```rust
 pub fn validate_assertions(
     output: &str, 
@@ -406,6 +442,7 @@ pub fn match_expected_error(
 ```
 
 **Structures**:
+
 ```rust
 pub struct AssertionResult {
     pub assertion: Assertion,
@@ -415,6 +452,7 @@ pub struct AssertionResult {
 ```
 
 **Acceptance Criteria**:
+
 - ✅ Matches assertions against output
 - ✅ Extracts error messages from Godot output
 - ✅ Supports substring matching
@@ -428,6 +466,7 @@ pub struct AssertionResult {
 **File**: `crates/test_harness/src/assertion_validator.rs`
 
 **Functions**:
+
 ```rust
 pub fn validate_test(
     metadata: &TestMetadata,
@@ -446,6 +485,7 @@ pub fn validate_error_demo(
 ```
 
 **Structures**:
+
 ```rust
 pub struct TestValidationResult {
     pub test_name: String,
@@ -458,6 +498,7 @@ pub struct TestValidationResult {
 ```
 
 **Acceptance Criteria**:
+
 - ✅ Validates all assertions
 - ✅ Handles error demo validation
 - ✅ Returns detailed results
@@ -471,6 +512,7 @@ pub struct TestValidationResult {
 **File**: `crates/test_harness/src/test_result.rs`
 
 **Structures**:
+
 ```rust
 pub struct TestSuiteResult {
     pub file_name: String,
@@ -489,6 +531,7 @@ pub struct CategoryResults {
 ```
 
 **Functions**:
+
 ```rust
 pub fn aggregate_results(
     results: Vec<TestValidationResult>
@@ -500,6 +543,7 @@ pub fn calculate_statistics(
 ```
 
 **Acceptance Criteria**:
+
 - ✅ Groups results by category
 - ✅ Calculates statistics per category
 - ✅ Tracks overall suite metrics
@@ -513,6 +557,7 @@ pub fn calculate_statistics(
 **File**: `crates/test_harness/src/report_generator.rs`
 
 **Functions**:
+
 ```rust
 pub fn generate_report(suite_result: &TestSuiteResult) -> String;
 pub fn format_category_section(results: &CategoryResults) -> String;
@@ -521,6 +566,7 @@ pub fn generate_summary_table(suite_result: &TestSuiteResult) -> String;
 ```
 
 **Report Format**:
+
 ```
 ========================================
 Test Results: node_query_basic.ferris
@@ -564,6 +610,7 @@ Total Time: 498ms
 ```
 
 **Acceptance Criteria**:
+
 - ✅ Categorized output sections
 - ✅ Colorized CLI output
 - ✅ Detailed assertion breakdown
@@ -577,6 +624,7 @@ Total Time: 498ms
 **File**: `crates/test_harness/src/test_runner.rs`
 
 **Changes**:
+
 1. Parse metadata before running test
 2. Pass metadata to output parser
 3. Use assertion validator for results
@@ -584,6 +632,7 @@ Total Time: 498ms
 5. Return structured results
 
 **New Flow**:
+
 ```rust
 pub fn run_test(script_path: &Path) -> Result<TestSuiteResult> {
     // 1. Parse metadata from script
@@ -613,6 +662,7 @@ pub fn run_test(script_path: &Path) -> Result<TestSuiteResult> {
 ```
 
 **Acceptance Criteria**:
+
 - ✅ Parses metadata before execution
 - ✅ Validates all tests in file
 - ✅ Returns structured results
@@ -624,12 +674,14 @@ pub fn run_test(script_path: &Path) -> Result<TestSuiteResult> {
 ### Task 7: Update Examples with Metadata
 
 **Files to Update**:
+
 1. `examples/node_query_basic.ferris`
 2. `examples/node_query_validation.ferris`
 3. `examples/node_query_search.ferris`
 4. `examples/node_query_error_handling.ferris` (create if needed)
 
 **Example Update**:
+
 ```ferrisscript
 // TEST: node_query_basic_get_node
 // CATEGORY: unit
@@ -646,6 +698,7 @@ fn _ready() {
 ```
 
 **New Error Demo Example**:
+
 ```ferrisscript
 // TEST: error_demo_invalid_node
 // CATEGORY: error_demo
@@ -660,6 +713,7 @@ fn _ready() {
 ```
 
 **Acceptance Criteria**:
+
 - ✅ All examples have TEST metadata
 - ✅ Categories assigned correctly
 - ✅ Assertions match output
@@ -673,6 +727,7 @@ fn _ready() {
 **File**: `crates/test_harness/src/main.rs`
 
 **New Flags**:
+
 ```rust
 #[derive(Parser)]
 struct Cli {
@@ -703,6 +758,7 @@ enum OutputFormat {
 ```
 
 **Usage Examples**:
+
 ```bash
 # Show only failures
 cargo run --bin ferris-test -- --all --failures-only
@@ -718,6 +774,7 @@ cargo run --bin ferris-test -- --script examples/node_query_basic.ferris --show-
 ```
 
 **Acceptance Criteria**:
+
 - ✅ All flags implemented
 - ✅ JSON export works
 - ✅ Category filtering works
@@ -731,6 +788,7 @@ cargo run --bin ferris-test -- --script examples/node_query_basic.ferris --show-
 ### Unit Tests
 
 **MetadataParser Tests**:
+
 - ✅ Parse valid metadata blocks
 - ✅ Handle invalid syntax gracefully
 - ✅ Parse multiple test blocks
@@ -738,6 +796,7 @@ cargo run --bin ferris-test -- --script examples/node_query_basic.ferris --show-
 - ✅ Reject duplicate test names
 
 **AssertionValidator Tests**:
+
 - ✅ Match exact assertions
 - ✅ Handle optional assertions
 - ✅ Validate error demos
@@ -745,6 +804,7 @@ cargo run --bin ferris-test -- --script examples/node_query_basic.ferris --show-
 - ✅ Case sensitivity
 
 **ReportGenerator Tests**:
+
 - ✅ Format categorized reports
 - ✅ Handle empty categories
 - ✅ Colorize output correctly
@@ -754,12 +814,14 @@ cargo run --bin ferris-test -- --script examples/node_query_basic.ferris --show-
 ### Integration Tests
 
 **End-to-End Tests**:
+
 1. Run test with valid metadata → expect structured report
 2. Run error demo → expect error validation
 3. Run multiple tests → expect categorized results
 4. Run with filtering → expect correct subset
 
 **Regression Tests**:
+
 - Ensure Phase 1/2 examples still work
 - Backward compatibility with simple markers
 - Performance benchmarks (< 200ms per test)
@@ -769,6 +831,7 @@ cargo run --bin ferris-test -- --script examples/node_query_basic.ferris --show-
 ## Success Criteria
 
 ### Must Have (Phase 3.0)
+
 - ✅ Parse all core directives (TEST, CATEGORY, EXPECT, ASSERT)
 - ✅ Validate assertions against output
 - ✅ Detect and validate error demos
@@ -776,12 +839,14 @@ cargo run --bin ferris-test -- --script examples/node_query_basic.ferris --show-
 - ✅ Update all examples with metadata
 
 ### Should Have (Phase 3.1)
+
 - ✅ JSON/XML export for CI integration
 - ✅ Detailed assertion breakdown
 - ✅ Performance metrics per test
 - ✅ Category filtering
 
 ### Nice to Have (Future)
+
 - ⏸️ Regex assertion matching
 - ⏸️ Multi-line assertions
 - ⏸️ Test dependencies/ordering
@@ -810,6 +875,7 @@ cargo run --bin ferris-test -- --script examples/node_query_basic.ferris --show-
 ## Dependencies
 
 **Existing Phase 1/2 Components**:
+
 - GodotRunner - No changes needed
 - SceneBuilder - No changes needed
 - OutputParser - Extend with new functions
@@ -817,6 +883,7 @@ cargo run --bin ferris-test -- --script examples/node_query_basic.ferris --show-
 - CLI - Add new flags
 
 **New Dependencies**:
+
 - None required (all std library)
 
 ---
@@ -824,14 +891,17 @@ cargo run --bin ferris-test -- --script examples/node_query_basic.ferris --show-
 ## Risk Assessment
 
 **Low Risk**:
+
 - Adding new modules (no breaking changes)
 - Backward compatible with Phase 2 tests
 
 **Medium Risk**:
+
 - Parsing complexity if metadata syntax is ambiguous
 - Mitigation: Strict syntax validation, clear error messages
 
 **High Risk**:
+
 - None identified
 
 ---
