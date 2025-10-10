@@ -1,15 +1,33 @@
-//Godot Scene Tree Setup:
+// Example: Error Handling Best Practices
+// Demonstrates safe node query patterns
+//
+// GODOT SCENE SETUP:
+// 1. Create a new 2D Scene
+// 2. Add FerrisScriptNode as root, rename to "Main"
+// 3. Attach this script to Main node
+// 4. Add child nodes to Main:
+//    - Node2D named "Player" (required for demonstration)
+//    - Node2D named "UI" → child "HUD" → child "HealthBar" (nested path test)
+//    - Node2D named "OptionalFeature" (can be omitted to test optional logic)
+//    - Node2D named "RequiredSystem" (should exist for required validation)
+//
+// Scene Tree Structure:
 // /root
-//   └─ Main (attach this script here)
+//   └─ Main (FerrisScriptNode with this script)
 //        ├─ Player
 //        ├─ UI
 //        │    └─ HUD
 //        │         └─ HealthBar
-//        ├─ OptionalFeature (optional)
-//        └─ RequiredSystem (required)
-
-// Example: Error Handling Best Practices
-// Demonstrates safe node query patterns
+//        ├─ OptionalFeature (optional - omit to see error handling)
+//        └─ RequiredSystem (required - omit to see error message)
+//
+// EXPECTED BEHAVIOR:
+// - Script prints output to Godot Output panel (View → Output)
+// - Shows ✓ for found nodes, ✗ for missing required nodes, ○ for optional/info
+// - With all nodes: All ✓ markers shown
+// - Without OptionalFeature: Shows "OptionalFeature not found (this is OK)"
+// - Without RequiredSystem: Shows "ERROR: RequiredSystem node not found!"
+// - Demonstrates safe patterns: validate with has_node() before get_node()
 
 fn _ready() {
     // GOOD: Validate before accessing

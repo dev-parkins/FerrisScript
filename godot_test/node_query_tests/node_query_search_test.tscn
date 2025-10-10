@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://3sg627kurl3v"]
+
+[node name="TestScene" type="Node"]
+
+[node name="FerrisScriptNode" type="FerrisScriptNode" parent="."]
+script_path = "res://scripts/node_query_search.ferris"
+
+[node name="HealthBar" type="Node2D" parent="FerrisScriptNode"]
+
+[node name="ScoreLabel" type="Node2D" parent="FerrisScriptNode"]
+
+[node name="CollisionShape2D" type="Node2D" parent="FerrisScriptNode"]
+
+[node name="CurrentWeapon" type="Node2D" parent="FerrisScriptNode"]
+
+[node name="ParticleEffect" type="Node2D" parent="FerrisScriptNode"]
+
+[node name="HealthDisplay" type="Node2D" parent="FerrisScriptNode"]
+
+[node name="ManaDisplay" type="Node2D" parent="FerrisScriptNode"]
+
+[node name="StaminaDisplay" type="Node2D" parent="FerrisScriptNode"]
