@@ -26,8 +26,8 @@ fn assert_error_code(source: &str, expected_code: ErrorCode) {
 /// Test that all lexical errors (E001-E003) produce correct error codes
 #[test]
 fn test_lexical_error_codes() {
-    // E001: Invalid character
-    assert_error_code("let x = 5 @ 3;", ErrorCode::E001);
+    // E001: Invalid character (changed from @ to ~ since @ is now valid for @export)
+    assert_error_code("let x = 5 ~ 3;", ErrorCode::E001);
 
     // E002: Unterminated string
     assert_error_code("let msg = \"hello;", ErrorCode::E002);
@@ -165,7 +165,7 @@ fn test_type_checking_error_codes() {
 fn test_error_code_format() {
     // All error codes should match the pattern: Error[EXXX]:
     let test_cases = vec![
-        ("let x = @;", "Error[E001]:"),
+        ("let x = ~;", "Error[E001]:"), // Changed from @ to ~ since @ is now valid for @export
         ("let x = \"unterminated", "Error[E002]:"),
         ("let x = 3.14.159;", "Error[E003]:"),
         ("x = 5;", "Error[E101]:"),

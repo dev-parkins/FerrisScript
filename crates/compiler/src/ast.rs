@@ -116,6 +116,44 @@ impl fmt::Display for Program {
     }
 }
 
+/// Property hint for exported variables.
+///
+/// Hints provide additional metadata for how properties should be displayed
+/// and edited in the Godot Inspector.
+#[derive(Debug, Clone, PartialEq)]
+pub enum PropertyHint {
+    /// No hint (default Inspector widget)
+    None,
+    /// Range hint with min, max, step
+    /// Example: `@export(range(0, 100, 1))`
+    Range { min: f32, max: f32, step: f32 },
+    /// File hint with allowed extensions
+    /// Example: `@export(file("*.png", "*.jpg"))`
+    File { extensions: Vec<String> },
+    /// Enum hint with allowed values
+    /// Example: `@export(enum("Easy", "Medium", "Hard"))`
+    Enum { values: Vec<String> },
+}
+
+/// Export annotation for Inspector-editable properties.
+///
+/// The `@export` annotation exposes a variable to the Godot Inspector,
+/// allowing it to be edited in the editor.
+///
+/// # Examples
+///
+/// ```text
+/// @export let speed: f32 = 10.0;
+/// @export(range(0, 100)) let health: i32 = 100;
+/// ```
+#[derive(Debug, Clone, PartialEq)]
+pub struct ExportAnnotation {
+    /// Optional property hint
+    pub hint: PropertyHint,
+    /// Source location
+    pub span: Span,
+}
+
 /// Global variable declaration.
 ///
 /// Represents a variable declared at the program level (outside functions).
@@ -137,6 +175,8 @@ pub struct GlobalVar {
     pub ty: Option<String>,
     /// Initializer expression
     pub value: Expr,
+    /// Optional export annotation
+    pub export: Option<ExportAnnotation>,
     /// Source location
     pub span: Span,
 }
@@ -257,6 +297,7 @@ pub enum Stmt {
         mutable: bool,
         ty: Option<String>,
         value: Expr,
+        export: Option<ExportAnnotation>,
         span: Span,
     },
     Assign {

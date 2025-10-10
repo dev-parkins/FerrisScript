@@ -47,6 +47,10 @@ pub enum Token {
     True,
     False,
     Signal,
+    Export,
+
+    // Special symbols
+    At, // @
 
     // Literals
     Ident(String),
@@ -99,6 +103,8 @@ impl Token {
             Token::True => "true",
             Token::False => "false",
             Token::Signal => "signal",
+            Token::Export => "export",
+            Token::At => "@",
             Token::Ident(_) => "identifier",
             Token::Number(_) => "number",
             Token::StringLit(_) => "string",
@@ -356,6 +362,7 @@ impl<'a> Lexer<'a> {
                 "true" => Token::True,
                 "false" => Token::False,
                 "signal" => Token::Signal,
+                "export" => Token::Export,
                 _ => Token::Ident(ident),
             };
             return Ok(token);
@@ -510,6 +517,10 @@ impl<'a> Lexer<'a> {
             ':' => {
                 self.advance();
                 Token::Colon
+            }
+            '@' => {
+                self.advance();
+                Token::At
             }
             _ => {
                 let base_msg = format!(
@@ -714,6 +725,25 @@ mod tests {
         assert_eq!(
             tokens_upper,
             vec![Token::Ident("SIGNAL".to_string()), Token::Eof]
+        );
+    }
+
+    #[test]
+    fn test_tokenize_at_symbol() {
+        let tokens = tokenize("@").unwrap();
+        assert_eq!(tokens, vec![Token::At, Token::Eof]);
+    }
+
+    #[test]
+    fn test_tokenize_export_keyword() {
+        let tokens = tokenize("export").unwrap();
+        assert_eq!(tokens, vec![Token::Export, Token::Eof]);
+
+        // Test case sensitivity
+        let tokens_upper = tokenize("Export").unwrap();
+        assert_eq!(
+            tokens_upper,
+            vec![Token::Ident("Export".to_string()), Token::Eof]
         );
     }
 
@@ -959,7 +989,7 @@ fn test() {
 
     #[test]
     fn test_error_unexpected_character() {
-        let result = tokenize("@");
+        let result = tokenize("~"); // Changed from @ to ~
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Unexpected character"));
     }
@@ -1233,8 +1263,8 @@ fn test() {
 
     #[test]
     fn test_lexer_invalid_character_at() {
-        // Test @ character (invalid)
-        let input = "let @ = 5;";
+        // Test ~ character (invalid)
+        let input = "let ~ = 5;";
         let result = tokenize(input);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Unexpected character"));

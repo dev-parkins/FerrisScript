@@ -1,8 +1,8 @@
 # FerrisScript Master Roadmap
 
 **Single Source of Truth for Version Planning**  
-**Last Updated**: October 9, 2025  
-**Current Version**: v0.0.4 (Phase 1 complete, Phase 2 in progress)
+**Last Updated**: October 10, 2025  
+**Current Version**: v0.0.4 (Phases 1-4.5 complete, Phase 5 deferred)
 
 ---
 
@@ -59,20 +59,20 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 - ✅ Lifecycle callbacks (_ready, _process, _physics_process, _input, _enter_tree, _exit_tree) - **Phase 2 COMPLETE**
 - ✅ Node queries (get_node, has_node, find_child, get_parent) - **Phase 3 COMPLETE**
 - ✅ Test harness infrastructure (headless testing with metadata protocol) - **Phase 3 COMPLETE**
+- ✅ Godot types (Vector2, Color, Rect2, Transform2D) - **Phase 4 COMPLETE**
+- ✅ Struct literal syntax (Vector2 { x: 10.0, y: 20.0 }) - **Phase 4.5 COMPLETE**
 - ✅ Basic types (i32, f32, String, bool, Node, Variant, InputEvent)
 - ✅ Functions and control flow (if/else, while, return)
 - ✅ Error reporting with context (50+ error codes)
-- ✅ 514 tests passing (390 compiler + 85 runtime + 1 godot_bind + 38 test_harness)
+- ✅ 587 tests passing (448 compiler + 100 runtime + 38 harness + 1 godot_bind)
 
 ### In Progress 🔄
 
-- 🔄 **v0.0.4 Phase 4**: Additional Godot types (Color, Rect2, Transform2D)
-- 🔄 **v0.0.4 Phase 5**: Property exports (@export annotation)
+- ⏸️ **v0.0.4 Phase 5**: Property exports (@export annotation) - **DEFERRED** (23-31 hour estimate, requires dedicated session)
 
 ### What's Missing ❌
 
-- ❌ Additional Godot types (Color, Rect2, Transform2D - Phase 4 of v0.0.4)
-- ❌ Property exports (@export - Phase 5 of v0.0.4)
+- ❌ Property exports (@export - Phase 5 of v0.0.4, deferred due to complexity)
 - ❌ LSP / editor support (coming in v0.0.5)
 - ❌ Arrays and for loops (coming in v0.0.6)
 - ❌ Advanced Godot types (Vector3, Basis, etc. - coming in v0.0.7)
@@ -105,7 +105,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ## 📦 Version Details
 
-### v0.0.4: Godot API Expansion (CURRENT - 60% Complete)
+### v0.0.4: Godot API Expansion (CURRENT - 90% Complete)
 
 **Goal**: Comprehensive Godot integration for 2D game development
 
@@ -134,28 +134,47 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 - [x] Node invalidation research (safety roadmap for v0.0.5/v0.0.7)
 - [x] 4 example scripts with metadata protocol
 
-**Phase 4** ⏸️ Not Started:
+**Phase 4** ✅ Complete (Commit 6b51076, 00e47b0):
 
-- [ ] Additional Godot types (Color, Rect2, Transform2D)
-- [ ] Field access support
-- [ ] 30+ type-specific tests
+- [x] Additional Godot types (Color, Rect2, Transform2D)
+- [x] Field access support (r/g/b/a, position/size, position/rotation/scale)
+- [x] 31 type-specific tests (8 Color + 10 Rect2 + 12 Transform2D + 1 Vector2)
+- [x] 10 error codes defined (E701-E710)
+- [x] Runtime field get/set operations
+- [x] Godot binding conversions
 
-**Phase 5** ⏸️ Not Started:
+**Phase 4.5** ✅ Complete (Commit 7624f4f, 00e47b0):
+
+- [x] Struct literal syntax parsing (`Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }`)
+- [x] Type checker validation for struct literals
+- [x] Runtime evaluation of struct literals
+- [x] 39 robustness tests (27 compiler + 12 runtime)
+- [x] 5 integration examples demonstrating real-world usage
+- [x] Checkpoint methodology documentation (50% faster than Phase 4)
+
+**Phase 5** ⏸️ Deferred:
 
 - [ ] @export annotation parsing
 - [ ] Property types and hints
 - [ ] Inspector integration
 - [ ] 20+ export tests
+- **Reason**: 23-31 hour complexity requires dedicated focus session
+- **Documentation**: EXPORT_ANNOTATION_RESEARCH.md complete
 
 **Deliverables Remaining**:
 
-- Additional Godot types for 2D development
-- Property exports for Inspector integration
-- Integration tests and examples
-- Final documentation updates
+- Property exports for Inspector integration (Phase 5 - deferred)
 
-**Timeline**: 1-2 weeks remaining  
-**Estimated Premium Requests**: 2-4 (Phases 4-5 combined)
+**What Was Delivered**:
+
+- ✅ All Godot types for 2D development (Color, Rect2, Transform2D)
+- ✅ Struct literal syntax for type construction
+- ✅ 39 robustness tests + 5 integration examples
+- ✅ Comprehensive documentation and checkpoint methodology
+
+**Timeline**: Phase 4-4.5 complete (October 10, 2025)  
+**Actual Premium Requests Used**: 3-4 (as estimated)  
+**Phase 5 Estimate**: 23-31 hours (6-8 premium requests) - requires dedicated session
 
 ---
 

@@ -29,7 +29,7 @@
 - **[Known Limitations & Design Decisions](KNOWN_LIMITATIONS.md)** - What's supported, what's deferred, and why
 - **[Phase 2 Implementation Checklist](PHASE_2_CHECKLIST.md)** - Detailed task list for Phase 2
 - **[Phase 3 Node Queries](PHASE_3_NODE_QUERIES.md)** - Complete planning document with implementation details
-- **[Godot Setup Guide](../../GODOT_SETUP_GUIDE.md)** - Installation and troubleshooting
+- **[Godot Setup Guide](../../setup/GODOT_SETUP_GUIDE.md)** - Installation and troubleshooting
 - **[Signal Visibility Issue](SIGNAL_VISIBILITY_ISSUE.md)** - Why signals don't appear in Inspector
 - **[Signal Testing Instructions](SIGNAL_TESTING_INSTRUCTIONS.md)** - Manual testing guide
 
@@ -112,8 +112,8 @@
 
 **Status**: ✅ **COMPLETE & MERGED** ([PR #51](https://github.com/dev-parkins/FerrisScript/pull/51))  
 **Priority**: High  
-**Branch**: `feature/v0.0.4-phase3-node-queries` → `develop` (merged October 10, 2025)  
-**Document**: [PHASE_3_NODE_QUERIES.md](PHASE_3_NODE_QUERIES.md), [PHASE_3_COMPLETION_REPORT.md](../testing/PHASE_3_COMPLETION_REPORT.md)  
+**Branch**: `feature/v0.0.4-phase3-node-queries` → `develop` (merged October 9, 2025)  
+**Document**: [PHASE_3_NODE_QUERIES.md](PHASE_3_NODE_QUERIES.md), [PHASE_3_COMPLETION_REPORT.md](../../archive/testing/PHASE_3_COMPLETION_REPORT.md)  
 **Actual Effort**: ~2 weeks (includes test harness infrastructure + coverage analysis)
 
 **Key Deliverables**:
@@ -183,42 +183,94 @@
 
 ---
 
-### Phase 4: Additional Godot Types
+### Phase 4: Additional Godot Types ✅
 
-**Status**: ⏸️ **NOT STARTED** (Ready to begin)  
+**Status**: ✅ **COMPLETE** (Commit 6b51076, October 10, 2025)  
 **Priority**: Medium  
-**Branch**: `feature/v0.0.4-phase4-5-godot-types-exports` (combined with Phase 5)  
-**Document**: [PHASE_4_5_EXECUTION_PLAN.md](PHASE_4_5_EXECUTION_PLAN.md) *(To be created)*  
-**Target PR**: TBD
+**Branch**: `feature/v0.0.4-phase4-5-godot-types-exports`  
+**Document**: [PHASE_4_5_EXECUTION_PLAN.md](PHASE_4_5_EXECUTION_PLAN.md), [PHASE_4_COMPLETION_AND_GAPS.md](PHASE_4_COMPLETION_AND_GAPS.md)  
+**Actual Effort**: 1 day (types + field access + validation)
 
 **Key Deliverables**:
 
-- [ ] `Color` type - RGBA colors with field access (r, g, b, a)
-- [ ] `Rect2` type - 2D rectangles with position and size fields
-- [ ] `Transform2D` type - 2D transformations (position, rotation, scale)
-- [ ] Type integration with type checker
-- [ ] Field access support for all types (dot notation)
-- [ ] Godot binding implementation (Rust ↔ Godot conversion)
-- [ ] Type-specific tests (30+ cases)
-- [ ] Example scripts demonstrating usage
+- [x] `Color` type - RGBA colors with field access (r, g, b, a)
+- [x] `Rect2` type - 2D rectangles with position and size fields
+- [x] `Transform2D` type - 2D transformations (position, rotation, scale)
+- [x] Type integration with type checker
+- [x] Field access support for all types (dot notation)
+- [x] Godot binding implementation (Rust ↔ Godot conversion)
+- [x] Type-specific tests (31 cases: 8 Color + 10 Rect2 + 12 Transform2D + 1 Vector2)
+- [x] Error codes E701-E710 defined
+- [x] Documentation updated (README, ROADMAP_MASTER)
+
+**Implementation Highlights**:
+
+- ✅ All 3 Godot types implemented following Vector2 pattern
+- ✅ Field access validation (r/g/b/a, position/size, position/rotation/scale)
+- ✅ Runtime field get/set operations
+- ✅ Godot binding conversions (to_variant, print formatting)
+- ✅ 517 tests passing (no regressions)
+- ⚠️ 30 tests commented out (awaiting struct literal syntax - Phase 4.5)
 
 **Dependencies**: Phase 3 complete ✅  
-**Estimated Effort**: 3-4 days
+**Enables**: Phase 4.5 (struct literal syntax)
 
 ---
 
-### Phase 5: Custom Property Exports
+### Phase 4.5: Struct Literal Syntax ✅
 
-**Status**: ⏸️ **NOT STARTED** (Ready to begin)  
-**Priority**: Medium  
-**Branch**: `feature/v0.0.4-phase4-5-godot-types-exports` (combined with Phase 4)  
-**Document**: [PHASE_4_5_EXECUTION_PLAN.md](PHASE_4_5_EXECUTION_PLAN.md) *(To be created)*  
-**Target PR**: TBD
+**Status**: ✅ **COMPLETE** (Commits 7624f4f, 00e47b0, October 10, 2025)  
+**Priority**: High (unblocks Phase 4 tests)  
+**Branch**: `feature/v0.0.4-phase4-5-godot-types-exports`  
+**Document**: [PHASE_4_5_MVP_CHECKPOINTS.md](PHASE_4_5_MVP_CHECKPOINTS.md), [STRUCT_LITERAL_IMPLEMENTATION_ANALYSIS.md](STRUCT_LITERAL_IMPLEMENTATION_ANALYSIS.md)  
+**Actual Effort**: 2.5 hours (MVP) + 3 hours (robustness) = 5.5 hours total
 
 **Key Deliverables**:
 
+**MVP** (Commit 7624f4f):
+
+- [x] Parser support for `Type { field: value }` syntax
+- [x] AST StructLiteral variant added
+- [x] Type checker validation for struct literals
+- [x] Runtime evaluation of struct literals
+- [x] 31 Phase 4 tests re-enabled
+- [x] 548 tests passing (+31 from Phase 4)
+
+**Robustness Testing** (Commit 00e47b0):
+
+- [x] 27 compiler edge case tests (missing fields, wrong types, extra fields, coercion)
+- [x] 12 runtime execution tests (functions, loops, conditionals, chains)
+- [x] 5 integration examples (.ferris files demonstrating real-world patterns)
+- [x] Phase 4.5 section added to LEARNINGS.md (~200 lines)
+- [x] 587 tests passing (+39 robustness tests)
+
+**Implementation Highlights**:
+
+- ✅ Checkpoint methodology (8 structured checkpoints, 50% faster than Phase 4)
+- ✅ Error code reuse strategy (E70x range for struct literals)
+- ✅ Comprehensive edge case coverage (missing fields, wrong types, coercion, nesting)
+- ✅ Integration patterns documented (functions, loops, conditionals)
+- ✅ Zero bugs found during robustness testing (good MVP quality indicator)
+- ⚠️ Nested struct literals deferred (MVP scope decision)
+- ⚠️ Godot test harness integration deferred to Phase 5
+
+**Dependencies**: Phase 4 complete ✅  
+**Enables**: Full Phase 4 functionality, Phase 5 planning
+
+---
+
+### Phase 5: Custom Property Exports ⏸️
+
+**Status**: ⏸️ **DEFERRED** (Complexity requires dedicated focus session)  
+**Priority**: Medium (v0.0.4 can release without this)  
+**Branch**: To be created in future session  
+**Document**: [EXPORT_ANNOTATION_RESEARCH.md](EXPORT_ANNOTATION_RESEARCH.md), [PHASE_5_EXECUTION_PLAN.md](PHASE_5_EXECUTION_PLAN.md) *(To be created)*  
+**Estimated Effort**: **23-31 hours** across 6 categories
+
+**Key Deliverables** (Planned):
+
 - [ ] `@export` annotation parsing (lexer + parser)
-- [ ] Property types: int, float, string, bool, Vector2
+- [ ] Property types: int, float, string, bool, Vector2, Color, Rect2, Transform2D
 - [ ] Property hints: range(min, max), file(extensions), enum(values)
 - [ ] Inspector integration (properties appear in Godot UI)
 - [ ] Property change detection (editor → runtime)
@@ -226,8 +278,31 @@
 - [ ] Inspector update tests (20+ cases)
 - [ ] Example scripts with @export annotations
 
-**Dependencies**: Phases 1-4 complete ✅ (exports may include signals and types)  
-**Estimated Effort**: 4-5 days
+**Complexity Analysis** (23-31 hours total):
+
+1. **Parser & AST** (4-6 hours): Annotation syntax, hint parsing, multi-crate coordination
+2. **Type Checker** (5-7 hours): Export validation, hint validation, type compatibility
+3. **Runtime** (3-5 hours): Property storage, get/set methods, change tracking
+4. **Godot Binding** (6-8 hours): PropertyInfo registration, Inspector updates, value conversion
+5. **Testing** (4-5 hours): 20+ tests across parser, type checker, runtime, integration
+6. **Documentation** (1-2 hours): Examples, user guide, technical documentation
+
+**Why Deferred**:
+
+- Reflection system requires coordination across 5 crates
+- Property hints need extensive validation logic
+- Inspector integration touches multiple Godot APIs
+- Requires dedicated focus session (not incremental work)
+- v0.0.4 provides substantial value without exports (signals, callbacks, queries, types)
+
+**When to Revisit**:
+
+- After v0.0.4 release and user feedback
+- Before v0.0.5 LSP work (exports useful for editor completion)
+- When dedicated 4-5 day session is available
+
+**Dependencies**: Phases 1-4.5 complete ✅  
+**Recommended Approach**: Apply checkpoint methodology from Phase 4.5 (8 structured checkpoints, 3 sub-phases)
 
 ---
 

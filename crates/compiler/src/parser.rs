@@ -195,8 +195,8 @@ impl<'a> Parser<'a> {
         let mut program = Program::new();
 
         while !matches!(self.current(), Token::Eof) {
-            // Check if it's a global let statement
-            if matches!(self.current(), Token::Let) {
+            // Check if it's a global let statement (with or without @export)
+            if matches!(self.current(), Token::Let | Token::At) {
                 match self.parse_global_var() {
                     Ok(global_var) => program.global_vars.push(global_var),
                     Err(e) => {
@@ -254,8 +254,183 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse @export annotation with optional property hints
+    ///
+    /// Supports:
+    /// - `@export` - No hint
+    /// - `@export(range(min, max, step))` - Range hint for numeric sliders
+    /// - `@export(file("*.ext1", "*.ext2"))` - File picker hint with extensions
+    /// - `@export(enum("Value1", "Value2"))` - Dropdown hint with predefined values
+    fn parse_export_annotation(&mut self) -> Result<Option<ExportAnnotation>, String> {
+        if !matches!(self.current(), Token::At) {
+            return Ok(None);
+        }
+
+        let span = self.span();
+        self.expect(Token::At)?;
+        self.expect(Token::Export)?;
+
+        // Check for property hint in parentheses
+        let hint = if matches!(self.current(), Token::LParen) {
+            self.advance(); // consume '('
+
+            // Parse hint type (identifier)
+            if let Token::Ident(hint_type) = self.current() {
+                let hint_name = hint_type.clone();
+                self.advance();
+
+                match hint_name.as_str() {
+                    "range" => {
+                        // Parse range(min, max, step)
+                        self.expect(Token::LParen)?;
+
+                        // Parse min
+                        let min = self.parse_number("range hint min value")?;
+                        self.expect(Token::Comma)?;
+
+                        // Parse max
+                        let max = self.parse_number("range hint max value")?;
+                        self.expect(Token::Comma)?;
+
+                        // Parse step
+                        let step = self.parse_number("range hint step value")?;
+
+                        self.expect(Token::RParen)?; // close range()
+                        self.expect(Token::RParen)?; // close @export()
+
+                        PropertyHint::Range { min, max, step }
+                    }
+                    "file" => {
+                        // Parse file("*.ext1", "*.ext2", ...)
+                        self.expect(Token::LParen)?;
+
+                        let mut extensions = Vec::new();
+
+                        // Parse at least one extension
+                        if let Token::StringLit(ext) = self.current() {
+                            extensions.push(ext.clone());
+                            self.advance();
+                        } else {
+                            return Err(format!(
+                                "Expected string literal for file extension, found {}",
+                                self.current().name()
+                            ));
+                        }
+
+                        // Parse additional extensions separated by commas
+                        while matches!(self.current(), Token::Comma) {
+                            self.advance(); // consume comma
+
+                            if let Token::StringLit(ext) = self.current() {
+                                extensions.push(ext.clone());
+                                self.advance();
+                            } else {
+                                return Err(format!(
+                                    "Expected string literal for file extension after comma, found {}",
+                                    self.current().name()
+                                ));
+                            }
+                        }
+
+                        self.expect(Token::RParen)?; // close file()
+                        self.expect(Token::RParen)?; // close @export()
+
+                        PropertyHint::File { extensions }
+                    }
+                    "enum" => {
+                        // Parse enum("Value1", "Value2", ...)
+                        self.expect(Token::LParen)?;
+
+                        let mut values = Vec::new();
+
+                        // Parse at least one value
+                        if let Token::StringLit(val) = self.current() {
+                            values.push(val.clone());
+                            self.advance();
+                        } else {
+                            return Err(format!(
+                                "Expected string literal for enum value, found {}",
+                                self.current().name()
+                            ));
+                        }
+
+                        // Parse additional values separated by commas
+                        while matches!(self.current(), Token::Comma) {
+                            self.advance(); // consume comma
+
+                            if let Token::StringLit(val) = self.current() {
+                                values.push(val.clone());
+                                self.advance();
+                            } else {
+                                return Err(format!(
+                                    "Expected string literal for enum value after comma, found {}",
+                                    self.current().name()
+                                ));
+                            }
+                        }
+
+                        self.expect(Token::RParen)?; // close enum()
+                        self.expect(Token::RParen)?; // close @export()
+
+                        PropertyHint::Enum { values }
+                    }
+                    _ => {
+                        return Err(format!(
+                            "Unknown property hint '{}'. Expected 'range', 'file', or 'enum'",
+                            hint_name
+                        ));
+                    }
+                }
+            } else {
+                return Err(format!(
+                    "Expected property hint name after @export(, found {}",
+                    self.current().name()
+                ));
+            }
+        } else {
+            PropertyHint::None
+        };
+
+        Ok(Some(ExportAnnotation { hint, span }))
+    }
+
+    /// Helper to parse a numeric literal for property hints
+    fn parse_number(&mut self, context: &str) -> Result<f32, String> {
+        match self.current() {
+            Token::Number(val) => {
+                let num = *val;
+                self.advance();
+                Ok(num)
+            }
+            Token::Minus => {
+                self.advance();
+                match self.current() {
+                    Token::Number(val) => {
+                        let num = -*val;
+                        self.advance();
+                        Ok(num)
+                    }
+                    _ => Err(format!(
+                        "Expected number for {}, found {}",
+                        context,
+                        self.current().name()
+                    )),
+                }
+            }
+            _ => Err(format!(
+                "Expected number for {}, found {}",
+                context,
+                self.current().name()
+            )),
+        }
+    }
+
     fn parse_global_var(&mut self) -> Result<GlobalVar, String> {
         let span = self.span();
+
+        // Check for @export annotation before 'let'
+        let export = self.parse_export_annotation()?;
+
         self.expect(Token::Let)?;
 
         let mutable = if matches!(self.current(), Token::Mut) {
@@ -319,6 +494,7 @@ impl<'a> Parser<'a> {
             mutable,
             ty,
             value,
+            export, // Parsed in Checkpoint 1.2
             span,
         })
     }
@@ -558,7 +734,7 @@ impl<'a> Parser<'a> {
         let span = self.span();
 
         match self.current() {
-            Token::Let => self.parse_let_statement(),
+            Token::Let | Token::At => self.parse_let_statement(),
             Token::If => self.parse_if_statement(),
             Token::While => self.parse_while_statement(),
             Token::Return => self.parse_return_statement(),
@@ -610,6 +786,10 @@ impl<'a> Parser<'a> {
 
     fn parse_let_statement(&mut self) -> Result<Stmt, String> {
         let span = self.span();
+
+        // Check for @export annotation before 'let'
+        let export = self.parse_export_annotation()?;
+
         self.expect(Token::Let)?;
 
         let mutable = if matches!(self.current(), Token::Mut) {
@@ -673,6 +853,7 @@ impl<'a> Parser<'a> {
             mutable,
             ty,
             value,
+            export, // Parsed in Checkpoint 1.2
             span,
         })
     }
@@ -1477,7 +1658,7 @@ fn _process(delta: f32) {
 
     #[test]
     fn test_parse_error_unexpected_token() {
-        let input = "fn test() { @ }";
+        let input = "fn test() { ~ }";
         let tokens = tokenize(input);
         assert!(tokens.is_err());
     }
@@ -1512,10 +1693,10 @@ fn _process(delta: f32) {
     #[test]
     fn test_recovery_invalid_top_level() {
         // Parser should recover from invalid top-level item
-        let input = "@ fn test() {}";
+        let input = "~ fn test() {}";
         let tokens_result = tokenize(input);
 
-        // Lexer should catch the @ symbol first
+        // Lexer should catch the ~ symbol first
         assert!(tokens_result.is_err());
     }
 
@@ -1547,20 +1728,20 @@ fn working() { let y = 10; }
     #[test]
     fn test_recovery_sync_on_fn_keyword() {
         // Parser should sync to 'fn' keyword
-        let input = "let broken = @ fn test() {}";
+        let input = "let broken = ~ fn test() {}";
         let tokens_result = tokenize(input);
 
-        // Lexer catches @ first
+        // Lexer catches ~ first
         assert!(tokens_result.is_err());
     }
 
     #[test]
     fn test_recovery_sync_on_let_keyword() {
         // Parser should sync to 'let' keyword in function body
-        let input = "fn test() { @ let x = 5; }";
+        let input = "fn test() { ~ let x = 5; }";
         let tokens_result = tokenize(input);
 
-        // Lexer catches @ first
+        // Lexer catches ~ first
         assert!(tokens_result.is_err());
     }
 
@@ -2546,5 +2727,743 @@ fn third() { let z = 15; }
         let result = parse(&tokens, input);
 
         assert!(result.is_ok(), "Should parse compound assignment to field");
+    }
+
+    // Checkpoint 1.2: Basic @export annotation tests
+    #[test]
+    fn test_parse_export_annotation_global_var() {
+        // Test @export on global variable
+        let input = "@export let speed: f32 = 10.0;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 1);
+        let global_var = &program.global_vars[0];
+        assert_eq!(global_var.name, "speed");
+        assert!(
+            global_var.export.is_some(),
+            "Global variable should have export annotation"
+        );
+
+        // Export annotation should have PropertyHint::None (hints deferred to checkpoints 1.4-1.6)
+        if let Some(export) = &global_var.export {
+            assert!(
+                matches!(export.hint, crate::ast::PropertyHint::None),
+                "Export should have no hint in checkpoint 1.2"
+            );
+        }
+    }
+
+    #[test]
+    fn test_parse_export_annotation_local_let() {
+        // Test @export on local let statement inside function
+        let input = r#"
+fn _ready() {
+    @export let health: i32 = 100;
+}
+"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.functions.len(), 1);
+        let func = &program.functions[0];
+        assert_eq!(func.body.len(), 1);
+
+        if let crate::ast::Stmt::Let {
+            name, export, ty, ..
+        } = &func.body[0]
+        {
+            assert_eq!(name, "health");
+            assert_eq!(ty, &Some("i32".to_string()));
+            assert!(
+                export.is_some(),
+                "Local let statement should have export annotation"
+            );
+
+            if let Some(exp) = export {
+                assert!(
+                    matches!(exp.hint, crate::ast::PropertyHint::None),
+                    "Export should have no hint in checkpoint 1.2"
+                );
+            }
+        } else {
+            panic!("Expected Stmt::Let");
+        }
+    }
+
+    #[test]
+    fn test_parse_no_export_annotation() {
+        // Test that variables without @export work normally
+        let input = "let normal_var: i32 = 42;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 1);
+        let global_var = &program.global_vars[0];
+        assert_eq!(global_var.name, "normal_var");
+        assert!(
+            global_var.export.is_none(),
+            "Normal variable should not have export annotation"
+        );
+    }
+
+    // Checkpoint 1.4: Range property hint tests
+    #[test]
+    fn test_parse_export_range_hint() {
+        // Test @export with range hint
+        let input = "@export(range(0.0, 100.0, 0.1)) let speed: f32 = 10.0;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 1);
+        let global_var = &program.global_vars[0];
+        assert_eq!(global_var.name, "speed");
+        assert!(global_var.export.is_some());
+
+        if let Some(export) = &global_var.export {
+            match &export.hint {
+                crate::ast::PropertyHint::Range { min, max, step } => {
+                    assert_eq!(*min, 0.0);
+                    assert_eq!(*max, 100.0);
+                    assert_eq!(*step, 0.1);
+                }
+                _ => panic!("Expected PropertyHint::Range"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_export_range_hint_negative_values() {
+        // Test @export with range hint using negative values
+        let input = "@export(range(-10.0, 10.0, 1.0)) let offset: f32 = 0.0;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 1);
+        let global_var = &program.global_vars[0];
+
+        if let Some(export) = &global_var.export {
+            match &export.hint {
+                crate::ast::PropertyHint::Range { min, max, step } => {
+                    assert_eq!(*min, -10.0);
+                    assert_eq!(*max, 10.0);
+                    assert_eq!(*step, 1.0);
+                }
+                _ => panic!("Expected PropertyHint::Range"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_export_range_hint_integer_values() {
+        // Test @export with range hint using integer values (should convert to f32)
+        let input = "@export(range(0, 100, 5)) let count: i32 = 50;";
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 1);
+        let global_var = &program.global_vars[0];
+
+        if let Some(export) = &global_var.export {
+            match &export.hint {
+                crate::ast::PropertyHint::Range { min, max, step } => {
+                    assert_eq!(*min, 0.0);
+                    assert_eq!(*max, 100.0);
+                    assert_eq!(*step, 5.0);
+                }
+                _ => panic!("Expected PropertyHint::Range"),
+            }
+        }
+    }
+
+    // Checkpoint 1.5: File property hint tests
+    #[test]
+    fn test_parse_export_file_hint_single_extension() {
+        // Test @export with file hint - single extension
+        let input = r#"@export(file("*.png")) let texture_path: String = "";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 1);
+        let global_var = &program.global_vars[0];
+        assert_eq!(global_var.name, "texture_path");
+        assert!(global_var.export.is_some());
+
+        if let Some(export) = &global_var.export {
+            match &export.hint {
+                crate::ast::PropertyHint::File { extensions } => {
+                    assert_eq!(extensions.len(), 1);
+                    assert_eq!(extensions[0], "*.png");
+                }
+                _ => panic!("Expected PropertyHint::File"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_export_file_hint_multiple_extensions() {
+        // Test @export with file hint - multiple extensions
+        let input = r#"@export(file("*.png", "*.jpg", "*.jpeg")) let image_path: String = "";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 1);
+        let global_var = &program.global_vars[0];
+
+        if let Some(export) = &global_var.export {
+            match &export.hint {
+                crate::ast::PropertyHint::File { extensions } => {
+                    assert_eq!(extensions.len(), 3);
+                    assert_eq!(extensions[0], "*.png");
+                    assert_eq!(extensions[1], "*.jpg");
+                    assert_eq!(extensions[2], "*.jpeg");
+                }
+                _ => panic!("Expected PropertyHint::File"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_export_file_hint_specific_extensions() {
+        // Test @export with file hint - specific file extensions without wildcards
+        let input = r#"@export(file(".tscn", ".scn")) let scene_path: String = "";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 1);
+        let global_var = &program.global_vars[0];
+
+        if let Some(export) = &global_var.export {
+            match &export.hint {
+                crate::ast::PropertyHint::File { extensions } => {
+                    assert_eq!(extensions.len(), 2);
+                    assert_eq!(extensions[0], ".tscn");
+                    assert_eq!(extensions[1], ".scn");
+                }
+                _ => panic!("Expected PropertyHint::File"),
+            }
+        }
+    }
+
+    // Checkpoint 1.6: Enum property hint tests
+    #[test]
+    fn test_parse_export_enum_hint_two_values() {
+        // Test @export with enum hint - two values
+        let input = r#"@export(enum("Easy", "Hard")) let difficulty: String = "Easy";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 1);
+        let global_var = &program.global_vars[0];
+        assert_eq!(global_var.name, "difficulty");
+        assert!(global_var.export.is_some());
+
+        if let Some(export) = &global_var.export {
+            match &export.hint {
+                crate::ast::PropertyHint::Enum { values } => {
+                    assert_eq!(values.len(), 2);
+                    assert_eq!(values[0], "Easy");
+                    assert_eq!(values[1], "Hard");
+                }
+                _ => panic!("Expected PropertyHint::Enum"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_export_enum_hint_multiple_values() {
+        // Test @export with enum hint - multiple values
+        let input =
+            r#"@export(enum("North", "South", "East", "West")) let direction: String = "North";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 1);
+        let global_var = &program.global_vars[0];
+
+        if let Some(export) = &global_var.export {
+            match &export.hint {
+                crate::ast::PropertyHint::Enum { values } => {
+                    assert_eq!(values.len(), 4);
+                    assert_eq!(values[0], "North");
+                    assert_eq!(values[1], "South");
+                    assert_eq!(values[2], "East");
+                    assert_eq!(values[3], "West");
+                }
+                _ => panic!("Expected PropertyHint::Enum"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_export_enum_hint_numeric_strings() {
+        // Test @export with enum hint - numeric string values
+        let input = r#"@export(enum("1", "2", "5", "10")) let multiplier: String = "1";"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 1);
+        let global_var = &program.global_vars[0];
+
+        if let Some(export) = &global_var.export {
+            match &export.hint {
+                crate::ast::PropertyHint::Enum { values } => {
+                    assert_eq!(values.len(), 4);
+                    assert_eq!(values[0], "1");
+                    assert_eq!(values[1], "2");
+                    assert_eq!(values[2], "5");
+                    assert_eq!(values[3], "10");
+                }
+                _ => panic!("Expected PropertyHint::Enum"),
+            }
+        }
+    }
+
+    // ========== Checkpoint 1.7: Error Recovery Tests ==========
+
+    #[test]
+    fn test_parse_export_error_unknown_hint_type() {
+        // Test @export with unknown hint type
+        let input = r#"@export(color(255, 0, 0)) let tint: Color = Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("Unknown property hint 'color'"));
+        assert!(error.contains("Expected 'range', 'file', or 'enum'"));
+    }
+
+    #[test]
+    fn test_parse_export_error_missing_hint_name() {
+        // Test @export with opening paren but no hint name
+        let input = r#"@export(123) let value: i32 = 0;"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("Expected property hint name after @export("));
+    }
+
+    #[test]
+    fn test_parse_export_error_range_missing_comma_after_min() {
+        // Test @export with range hint missing comma after min
+        let input = r#"@export(range(0.0 100.0, 1.0)) let value: f32 = 0.0;"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("Expected ,"));
+    }
+
+    #[test]
+    fn test_parse_export_error_range_missing_comma_after_max() {
+        // Test @export with range hint missing comma after max
+        let input = r#"@export(range(0.0, 100.0 1.0)) let value: f32 = 0.0;"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("Expected ,"));
+    }
+
+    #[test]
+    fn test_parse_export_error_range_missing_closing_paren() {
+        // Test @export with range hint missing closing parenthesis
+        let input = r#"@export(range(0.0, 100.0, 1.0) let value: f32 = 0.0;"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("Expected )"));
+    }
+
+    #[test]
+    fn test_parse_export_error_range_wrong_type_string_for_number() {
+        // Test @export with range hint using string instead of number
+        let input = r#"@export(range("zero", 100.0, 1.0)) let value: f32 = 0.0;"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("Expected number"));
+        assert!(error.contains("range hint min value"));
+    }
+
+    #[test]
+    fn test_parse_export_error_file_missing_string_literal() {
+        // Test @export with file hint missing string literal
+        let input = r#"@export(file(png, jpg)) let texture: String = "";"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("Expected string literal for file extension"));
+    }
+
+    #[test]
+    fn test_parse_export_error_file_number_instead_of_string() {
+        // Test @export with file hint using number instead of string
+        let input = r#"@export(file(123)) let texture: String = "";"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("Expected string literal for file extension"));
+    }
+
+    #[test]
+    fn test_parse_export_error_file_wrong_type_after_comma() {
+        // Test @export with file hint using wrong type after comma
+        let input = r#"@export(file("*.png", 456)) let texture: String = "";"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("Expected string literal for file extension after comma"));
+    }
+
+    #[test]
+    fn test_parse_export_error_enum_missing_string_literal() {
+        // Test @export with enum hint missing string literal
+        let input = r#"@export(enum(Easy, Hard)) let difficulty: String = "Easy";"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("Expected string literal for enum value"));
+    }
+
+    #[test]
+    fn test_parse_export_error_enum_number_instead_of_string() {
+        // Test @export with enum hint using number instead of string
+        let input = r#"@export(enum(1, 2, 3)) let level: String = "1";"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("Expected string literal for enum value"));
+    }
+
+    #[test]
+    fn test_parse_export_error_enum_wrong_type_after_comma() {
+        // Test @export with enum hint using wrong type after comma
+        let input = r#"@export(enum("Easy", true)) let difficulty: String = "Easy";"#;
+        let tokens = tokenize(input).unwrap();
+        let result = parse(&tokens, input);
+
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert!(error.contains("Expected string literal for enum value after comma"));
+    }
+
+    // ========== Checkpoint 1.8: Integration Tests ==========
+
+    #[test]
+    fn test_parse_export_multiple_annotations_same_file() {
+        // Test multiple @export annotations with different hint types in same file
+        let input = r#"
+            @export let simple: i32 = 0;
+            @export(range(0.0, 100.0, 1.0)) let speed: f32 = 10.0;
+            @export(file("*.png", "*.jpg")) let texture: String = "";
+            @export(enum("Easy", "Normal", "Hard")) let difficulty: String = "Normal";
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 4);
+
+        // Check first export (no hint)
+        assert!(program.global_vars[0].export.is_some());
+        if let Some(export) = &program.global_vars[0].export {
+            assert!(matches!(export.hint, crate::ast::PropertyHint::None));
+        }
+
+        // Check second export (range hint)
+        assert!(program.global_vars[1].export.is_some());
+        if let Some(export) = &program.global_vars[1].export {
+            match &export.hint {
+                crate::ast::PropertyHint::Range { min, max, step } => {
+                    assert_eq!(*min, 0.0);
+                    assert_eq!(*max, 100.0);
+                    assert_eq!(*step, 1.0);
+                }
+                _ => panic!("Expected PropertyHint::Range"),
+            }
+        }
+
+        // Check third export (file hint)
+        assert!(program.global_vars[2].export.is_some());
+        if let Some(export) = &program.global_vars[2].export {
+            match &export.hint {
+                crate::ast::PropertyHint::File { extensions } => {
+                    assert_eq!(extensions.len(), 2);
+                    assert_eq!(extensions[0], "*.png");
+                    assert_eq!(extensions[1], "*.jpg");
+                }
+                _ => panic!("Expected PropertyHint::File"),
+            }
+        }
+
+        // Check fourth export (enum hint)
+        assert!(program.global_vars[3].export.is_some());
+        if let Some(export) = &program.global_vars[3].export {
+            match &export.hint {
+                crate::ast::PropertyHint::Enum { values } => {
+                    assert_eq!(values.len(), 3);
+                    assert_eq!(values[0], "Easy");
+                    assert_eq!(values[1], "Normal");
+                    assert_eq!(values[2], "Hard");
+                }
+                _ => panic!("Expected PropertyHint::Enum"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_export_with_signals_and_functions() {
+        // Test @export annotations alongside signals and functions
+        let input = r#"
+            signal player_died();
+            
+            @export let health: i32 = 100;
+            @export(range(0.0, 10.0, 0.1)) let speed: f32 = 5.0;
+            
+            fn ready() {
+                let x: i32 = 0;
+            }
+            
+            @export(enum("Red", "Blue", "Green")) let team: String = "Red";
+            
+            fn process(delta: f32) {
+                @export let local_export: i32 = 0;
+            }
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        // Check signals
+        assert_eq!(program.signals.len(), 1);
+        assert_eq!(program.signals[0].name, "player_died");
+
+        // Check global exports
+        assert_eq!(program.global_vars.len(), 3);
+        assert!(program.global_vars[0].export.is_some());
+        assert!(program.global_vars[1].export.is_some());
+        assert!(program.global_vars[2].export.is_some());
+
+        // Check functions
+        assert_eq!(program.functions.len(), 2);
+        assert_eq!(program.functions[0].name, "ready");
+        assert_eq!(program.functions[1].name, "process");
+
+        // Check local export in function
+        let process_fn = &program.functions[1];
+        if let crate::ast::Stmt::Let { export, .. } = &process_fn.body[0] {
+            assert!(export.is_some());
+        } else {
+            panic!("Expected let statement with export");
+        }
+    }
+
+    #[test]
+    fn test_parse_export_mixed_with_non_exported_vars() {
+        // Test mix of exported and non-exported variables
+        let input = r#"
+            let normal_var: i32 = 0;
+            @export let exported_var: i32 = 1;
+            let another_normal: f32 = 2.0;
+            @export(range(0.0, 1.0, 0.1)) let exported_range: f32 = 0.5;
+            let final_normal: bool = true;
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 5);
+
+        // Check which are exported
+        assert!(program.global_vars[0].export.is_none());
+        assert!(program.global_vars[1].export.is_some());
+        assert!(program.global_vars[2].export.is_none());
+        assert!(program.global_vars[3].export.is_some());
+        assert!(program.global_vars[4].export.is_none());
+
+        // Verify the exported ones have correct hints
+        if let Some(export) = &program.global_vars[1].export {
+            assert!(matches!(export.hint, crate::ast::PropertyHint::None));
+        }
+
+        if let Some(export) = &program.global_vars[3].export {
+            match &export.hint {
+                crate::ast::PropertyHint::Range { min, max, step } => {
+                    assert_eq!(*min, 0.0);
+                    assert_eq!(*max, 1.0);
+                    assert_eq!(*step, 0.1);
+                }
+                _ => panic!("Expected PropertyHint::Range"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_export_all_hint_types_comprehensive() {
+        // Comprehensive test of all hint types with various edge cases
+        let input = r#"
+            @export let no_hint: i32 = 0;
+            @export(range(-100.0, 100.0, 0.5)) let negative_range: f32 = 0.0;
+            @export(range(0, 10, 1)) let integer_range: f32 = 5.0;
+            @export(file("*.png")) let single_ext: String = "";
+            @export(file("*.png", "*.jpg", "*.jpeg", "*.bmp")) let many_exts: String = "";
+            @export(file(".tscn", ".scn")) let godot_scenes: String = "";
+            @export(enum("A", "B")) let two_values: String = "A";
+            @export(enum("North", "South", "East", "West")) let directions: String = "North";
+            @export(enum("1", "10", "100", "1000")) let numeric_enum: String = "1";
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 9);
+
+        // Verify all are exported
+        for global_var in &program.global_vars {
+            assert!(
+                global_var.export.is_some(),
+                "Variable {} should be exported",
+                global_var.name
+            );
+        }
+
+        // Spot check a few specific ones
+        assert!(matches!(
+            program.global_vars[0].export.as_ref().unwrap().hint,
+            crate::ast::PropertyHint::None
+        ));
+
+        if let Some(export) = &program.global_vars[1].export {
+            match &export.hint {
+                crate::ast::PropertyHint::Range { min, max, step } => {
+                    assert_eq!(*min, -100.0);
+                    assert_eq!(*max, 100.0);
+                    assert_eq!(*step, 0.5);
+                }
+                _ => panic!("Expected PropertyHint::Range"),
+            }
+        }
+
+        if let Some(export) = &program.global_vars[4].export {
+            match &export.hint {
+                crate::ast::PropertyHint::File { extensions } => {
+                    assert_eq!(extensions.len(), 4);
+                }
+                _ => panic!("Expected PropertyHint::File"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_export_in_complex_program() {
+        // Test @export in a realistic complex program structure
+        let input = r#"signal health_changed(new_health: i32);
+signal died();
+@export let max_health: i32 = 100;
+@export(range(0.0, 20.0, 0.5)) let move_speed: f32 = 5.0;
+@export(file("*.png", "*.jpg")) let sprite_texture: String = "";
+@export(enum("Player", "Enemy", "NPC")) let entity_type: String = "Player";
+let current_health: i32 = 100;
+fn ready() {
+    current_health = max_health;
+}
+fn take_damage(amount: i32) {
+    current_health = current_health - amount;
+}
+fn process(delta: f32) {
+    let movement: Vector2 = Vector2 { x: 0.0, y: 0.0 };
+}"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        // Verify structure
+        assert_eq!(program.signals.len(), 2);
+        assert_eq!(program.global_vars.len(), 5);
+        assert_eq!(program.functions.len(), 3);
+
+        // Verify exports
+        assert!(program.global_vars[0].export.is_some());
+        assert!(program.global_vars[1].export.is_some());
+        assert!(program.global_vars[2].export.is_some());
+        assert!(program.global_vars[3].export.is_some());
+        assert!(program.global_vars[4].export.is_none()); // current_health is not exported
+
+        // Verify hint types
+        assert!(matches!(
+            program.global_vars[0].export.as_ref().unwrap().hint,
+            crate::ast::PropertyHint::None
+        ));
+        assert!(matches!(
+            program.global_vars[1].export.as_ref().unwrap().hint,
+            crate::ast::PropertyHint::Range { .. }
+        ));
+        assert!(matches!(
+            program.global_vars[2].export.as_ref().unwrap().hint,
+            crate::ast::PropertyHint::File { .. }
+        ));
+        assert!(matches!(
+            program.global_vars[3].export.as_ref().unwrap().hint,
+            crate::ast::PropertyHint::Enum { .. }
+        ));
+    }
+
+    #[test]
+    fn test_parse_export_edge_case_empty_file_after_export() {
+        // Test that parser handles export followed by EOF gracefully
+        let input = r#"@export let value: i32 = 0;"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 1);
+        assert!(program.global_vars[0].export.is_some());
+    }
+
+    #[test]
+    fn test_parse_export_edge_case_only_exports() {
+        // Test file containing only exported variables
+        let input = r#"
+            @export let a: i32 = 1;
+            @export let b: i32 = 2;
+            @export let c: i32 = 3;
+        "#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 3);
+        for global_var in &program.global_vars {
+            assert!(global_var.export.is_some());
+        }
+    }
+
+    #[test]
+    fn test_parse_export_with_comments() {
+        // Test @export with comments nearby
+        let input = r#"// Player configuration
+@export let health: i32 = 100; // Maximum health
+
+@export(range(0.0, 10.0, 0.1)) let speed: f32 = 5.0; // Movement speed
+"#;
+        let tokens = tokenize(input).unwrap();
+        let program = parse(&tokens, input).unwrap();
+
+        assert_eq!(program.global_vars.len(), 2);
+        assert!(program.global_vars[0].export.is_some());
+        assert!(program.global_vars[1].export.is_some());
     }
 }
