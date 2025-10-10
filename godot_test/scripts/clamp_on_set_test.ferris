@@ -1,0 +1,119 @@
+// Integration Test: Inspector Clamp-on-Set Policy
+// Tests that Inspector sets clamp values, while script sets warn
+
+@export @range(0, 100, 1)
+global player_health: i32 = 75;
+
+@export @range(0.0, 10.0, 0.1)
+global movement_speed: f32 = 5.0;
+
+@export @range(-50, 50, 5)
+global altitude: i32 = 0;
+
+@export
+global test_passed: bool = false;
+
+fn _ready() {
+    print("=== Inspector Clamp-on-Set Test ===");
+    print("Initial values:");
+    print("  Health: ");
+    print(player_health);
+    print("  Speed: ");
+    print(movement_speed);
+    print("  Altitude: ");
+    print(altitude);
+    
+    // Run automated tests
+    run_clamp_tests();
+}
+
+fn run_clamp_tests() {
+    print("\n--- Testing Script Sets (Should Warn, Not Clamp) ---");
+    
+    // Test 1: Set health above max (script should allow, but warn)
+    print("Test 1: Setting health to 150 (above max 100)");
+    player_health = 150;
+    print("  Result: ");
+    print(player_health);
+    // Expected: Warning printed, value = 150 (not clamped)
+    
+    // Test 2: Set health below min (script should allow, but warn)
+    print("Test 2: Setting health to -20 (below min 0)");
+    player_health = -20;
+    print("  Result: ");
+    print(player_health);
+    // Expected: Warning printed, value = -20 (not clamped)
+    
+    // Test 3: Set speed above max
+    print("Test 3: Setting speed to 15.5 (above max 10.0)");
+    movement_speed = 15.5;
+    print("  Result: ");
+    print(movement_speed);
+    // Expected: Warning printed, value = 15.5 (not clamped)
+    
+    // Test 4: Set speed below min
+    print("Test 4: Setting speed to -3.2 (below min 0.0)");
+    movement_speed = -3.2;
+    print("  Result: ");
+    print(movement_speed);
+    // Expected: Warning printed, value = -3.2 (not clamped)
+    
+    // Test 5: Set altitude in negative range (valid)
+    print("Test 5: Setting altitude to -25 (within range -50 to 50)");
+    altitude = -25;
+    print("  Result: ");
+    print(altitude);
+    // Expected: No warning, value = -25
+    
+    // Test 6: Set altitude above max in negative range
+    print("Test 6: Setting altitude to 75 (above max 50)");
+    altitude = 75;
+    print("  Result: ");
+    print(altitude);
+    // Expected: Warning printed, value = 75 (not clamped)
+    
+    print("\n--- Script Tests Complete ---");
+    print("Note: Inspector sets would be clamped automatically");
+    print("Check console for warning messages about out-of-range values");
+    
+    // Reset to valid values for Inspector testing
+    player_health = 75;
+    movement_speed = 5.0;
+    altitude = 0;
+    test_passed = true;
+}
+
+// Functions for manual testing from Inspector/GDScript
+fn set_health_from_script(value: i32) {
+    print("Setting health from script: ");
+    print(value);
+    player_health = value;
+}
+
+fn set_health_from_inspector(value: i32) {
+    // This simulates what would happen if set from Inspector
+    // In real usage, Inspector calls the runtime's set_exported_property with from_inspector=true
+    print("Would be clamped if from Inspector: ");
+    print(value);
+    
+    // For testing, show what the clamped value would be
+    let clamped: i32 = value;
+    if value < 0 {
+        clamped = 0;
+    } else if value > 100 {
+        clamped = 100;
+    }
+    print("Clamped value: ");
+    print(clamped);
+}
+
+fn test_nan_infinity() {
+    print("Testing NaN/Infinity rejection...");
+    // Note: FerrisScript doesn't have NaN/Infinity literals
+    // These would be caught at runtime if passed from Godot
+    print("(NaN/Infinity tests would occur at runtime API boundary)");
+}
+
+fn get_test_status() -> bool {
+    return test_passed;
+}

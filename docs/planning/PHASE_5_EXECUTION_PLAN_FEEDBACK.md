@@ -10,15 +10,15 @@ The plan is overall correct and well-structured — main risks are Godot binding
 
 # Things that are accurate / well done
 
-* Sub-phase breakdown (Parser → Type Checker → Runtime/Godot) — correct ordering and low-risk approach.
-* Test-first checkpoints and separating MVP from robustness tests — excellent.
-* Error-code coverage (E801–E815) — thorough and appropriate split across parser/type/runtime.
-* Explicit mention that struct literal support must be present for default values — good call.
-* Listing exact files and functions to change — actionable and precise.
+- Sub-phase breakdown (Parser → Type Checker → Runtime/Godot) — correct ordering and low-risk approach.
+- Test-first checkpoints and separating MVP from robustness tests — excellent.
+- Error-code coverage (E801–E815) — thorough and appropriate split across parser/type/runtime.
+- Explicit mention that struct literal support must be present for default values — good call.
+- Listing exact files and functions to change — actionable and precise.
 
 ---
 
-# Issues / inaccuracies / things that need attention
+## Issues / inaccuracies / things that need attention
 
 ### 1) **Godot Inspector formats & flags — needs a concrete mapping**
 
@@ -32,13 +32,13 @@ You describe `hint_string` formats but don’t lock down exact serialization for
 
 You recommended Option 1 (runtime HashMap) earlier; this plan uses HashMap in `ScriptInstance`. That works but has trade-offs:
 
-* Runtime HashMap per instance: easy and flexible but more memory, potential duplicate metadata across many instances.
-* Static (compile-time) metadata + per-instance runtime state for current values: much less memory and simpler `get_property_list()` because the engine can query the static registration.
+- Runtime HashMap per instance: easy and flexible but more memory, potential duplicate metadata across many instances.
+- Static (compile-time) metadata + per-instance runtime state for current values: much less memory and simpler `get_property_list()` because the engine can query the static registration.
 
 **Recommendation:** Use a hybrid:
 
-* **Static/compiled metadata** (shared, embedded in the Script binary) for structure: name, type, hint, hint_string, usage.
-* **Per-instance store** for *current values* and ephemeral flags (dirty, edited-by-editor).
+- **Static/compiled metadata** (shared, embedded in the Script binary) for structure: name, type, hint, hint_string, usage.
+- **Per-instance store** for *current values* and ephemeral flags (dirty, edited-by-editor).
   This reduces memory and simplifies exposing property list (no need to reconstruct hint strings per instance).
 
 **Action:** Update runtime design to plan for compile-time metadata + per-instance values.
@@ -69,9 +69,9 @@ Plan states “Range hints clamp values in runtime.” That is a policy decision
 
 Options:
 
-* **Clamp on set** (automatic) — friendly, but silently modifies values.
-* **Reject on set** (error) — strict, surfaces incorrect sets.
-* **Warn + clamp** — middle ground.
+- **Clamp on set** (automatic) — friendly, but silently modifies values.
+- **Reject on set** (error) — strict, surfaces incorrect sets.
+- **Warn + clamp** — middle ground.
 
 **Recommendation:** Default to **clamp** for Inspector UI sets (good UX), but **type-check/emit diagnostic** if script sets values programmatically out-of-range (or allow both with a configurable policy). Document exactly which choice you make.
 
@@ -91,7 +91,7 @@ Make explicit how enum values are serialized to Godot hint strings. Godot expect
 
 You mention conversions but don’t call out edge-cases:
 
-* Godot's `Variant` may represent `Vector2`, `Color`, `Transform2D`, or generic `Dictionary`. If a user edits a nested field in inspector, you must correctly convert between `Variant` and `Value`, including nested field updates without losing other fields.
+- Godot's `Variant` may represent `Vector2`, `Color`, `Transform2D`, or generic `Dictionary`. If a user edits a nested field in inspector, you must correctly convert between `Variant` and `Value`, including nested field updates without losing other fields.
 
 **Action:** Add tests that round-trip Variant→Value→Variant for all struct types and for nested partial updates (e.g., set `rect.position.x` from inspector if supported).
 
@@ -103,8 +103,8 @@ Plan doesn’t say what happens if two exports have the same name in the same sc
 
 **Action:** Add collision rules:
 
-* Duplicate in same scope → error (E810)
-* Shadowing across inheritance → either allowed with override semantics or error; pick and document.
+- Duplicate in same scope → error (E810)
+- Shadowing across inheritance → either allowed with override semantics or error; pick and document.
 
 ---
 
@@ -114,8 +114,8 @@ Your runtime tests assume Inspector presence. Running these in CI requires a hea
 
 **Action:** Add recommended approach:
 
-* Unit tests: mock godot_bind or test conversion helpers.
-* Integration tests: run a headless Godot job or use GUT/GDExtension test harness in CI.
+- Unit tests: mock godot_bind or test conversion helpers.
+- Integration tests: run a headless Godot job or use GUT/GDExtension test harness in CI.
 
 ---
 
@@ -123,8 +123,8 @@ Your runtime tests assume Inspector presence. Running these in CI requires a hea
 
 You claim “Properties persist across script reloads” — that only holds if:
 
-* You register as persistent (`PROPERTY_USAGE_STORAGE`) and/or
-* Godot serializes the property into the scene resource (when saved).
+- You register as persistent (`PROPERTY_USAGE_STORAGE`) and/or
+- Godot serializes the property into the scene resource (when saved).
 
 Make explicit how you’ll mark properties for storage and ensure default values vs modified values are handled.
 
@@ -136,8 +136,8 @@ Make explicit how you’ll mark properties for storage and ensure default values
 
 Plan uses `let` everywhere. If you support immutable exports, what happens when the Inspector tries to set them? Decide:
 
-* Disallow `@export` on immutable variables (or)
-* Allow but create setter wrapper if variable marked mutable.
+- Disallow `@export` on immutable variables (or)
+- Allow but create setter wrapper if variable marked mutable.
 
 **Action:** Add a rule (and test) for immutability: either forbid Inspector sets on immutable or generate an internal setter with a diagnostic.
 
@@ -195,8 +195,8 @@ pub struct PropertyMetadata {
 
 5. **Add rule for exported immutability**:
 
-* If `let` (immutable) and `@export` → allowed, Inspector read-only.
-* If `let mut` and `@export` → Inspector read/write.
+- If `let` (immutable) and `@export` → allowed, Inspector read-only.
+- If `let mut` and `@export` → Inspector read/write.
   Or disallow immutable exports — pick one and add tests.
 
 6. **Add duplicate-name resolution rule**: duplicate in same scope → E810; inherited override allowed with `override` annotation (future).
@@ -207,12 +207,12 @@ pub struct PropertyMetadata {
 
 # Tests to add / strengthen (explicit)
 
-* Round-trip Variant ↔ Value for all struct types and nested updates.
-* Inspector set before `_ready()` — does the runtime apply the value correctly?
-* Export of immutable variable: confirm Inspector is read-only or throws compile-time error.
-* Save scene: write exported values in scene resource → reload scene → values preserved.
-* Type coercion: setting `i32` property from Inspector with float Variant — either reject or coerce. Define behavior and test.
-* Mocked Godot test harness: unit tests for `property_hint_to_godot()` string generation.
+- Round-trip Variant ↔ Value for all struct types and nested updates.
+- Inspector set before `_ready()` — does the runtime apply the value correctly?
+- Export of immutable variable: confirm Inspector is read-only or throws compile-time error.
+- Save scene: write exported values in scene resource → reload scene → values preserved.
+- Type coercion: setting `i32` property from Inspector with float Variant — either reject or coerce. Define behavior and test.
+- Mocked Godot test harness: unit tests for `property_hint_to_godot()` string generation.
 
 ---
 

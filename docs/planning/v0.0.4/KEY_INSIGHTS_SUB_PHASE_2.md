@@ -13,6 +13,7 @@
 **Observation**: Bundling related checkpoints (2.1+2.2, 2.3+2.4+2.5, 2.7+2.8) saved significant time.
 
 **Why It Works**:
+
 - Related validation logic shares code paths
 - Single test suite covers multiple checkpoints
 - Reduces context switching overhead
@@ -27,6 +28,7 @@
 **Decision Made**: Hybrid metadata architecture (static compile-time metadata + per-instance runtime values)
 
 **Impact**:
+
 - Eliminated potential refactoring later
 - Clear separation of concerns
 - Simplified runtime implementation (Sub-Phase 3)
@@ -39,6 +41,7 @@
 ### 3. Dual API Pattern Maintains Compatibility
 
 **Pattern Used**:
+
 ```rust
 // Old API (backward compatible)
 pub fn check(program: &Program, source: &str) -> Result<(), String>
@@ -49,6 +52,7 @@ pub fn check_and_extract_metadata(program: &Program, source: &str)
 ```
 
 **Benefits**:
+
 - Zero breaking changes to existing code
 - Gradual migration path
 - Easy to test both APIs
@@ -63,10 +67,12 @@ pub fn check_and_extract_metadata(program: &Program, source: &str)
 **Challenge**: Serializing default values to strings for metadata.
 
 **Pitfall**: Incorrect pattern matching due to misunderstanding AST structure:
+
 - ❌ Assumed: `Expr::IntLiteral(n, _)`
 - ✅ Actual: `Expr::Literal(Literal::Int(n), _)`
 
 **Solution**:
+
 1. Read AST definition before implementing
 2. Use compiler errors as guide (exhaustive pattern matching)
 3. Test with actual parsed expressions
@@ -82,6 +88,7 @@ pub fn check_and_extract_metadata(program: &Program, source: &str)
 **Reality**: `-42` is semantically a constant, even if parsed as `Unary(Neg, Literal(42))`.
 
 **Fix**: Recursively check if operand is constant:
+
 ```rust
 Expr::Unary(_, operand, _) => Self::is_compile_time_constant(operand)
 ```
@@ -95,6 +102,7 @@ Expr::Unary(_, operand, _) => Self::is_compile_time_constant(operand)
 **Issue**: Tests using `self` as default value failed with E813 (non-constant) before reaching E802 (unsupported type).
 
 **Solution**: Use compile-time constant placeholders (struct literals) when testing type validation:
+
 ```rust
 // Bad (fails E813 first)
 @export let mut node: Node = self;
@@ -112,12 +120,14 @@ Expr::Unary(_, operand, _) => Self::is_compile_time_constant(operand)
 **Pattern**: Check duplicates and constants BEFORE type validation.
 
 **Rationale**:
+
 - Duplicates don't need type checking (already validated once)
 - Non-constants shouldn't generate metadata
 - Avoids wasted computation
 - Better error locality
 
 **Implementation**:
+
 ```rust
 fn check_export_annotation(...) {
     // 1. Duplicate check (E810) - return early
@@ -138,12 +148,14 @@ fn check_export_annotation(...) {
 **Design Choice**: Generate PropertyMetadata once at compile-time, store in Program AST.
 
 **Benefits for Sub-Phase 3**:
+
 - Runtime just reads static metadata (no parsing/validation)
 - Inspector can query metadata before instance creation
 - Memory efficient (one copy for all instances)
 - Clear separation: compile-time validation vs runtime values
 
 **Implementation Preview**:
+
 ```rust
 // Runtime storage (Sub-Phase 3)
 struct ScriptInstance {
@@ -161,6 +173,7 @@ struct ScriptInstance {
 **Practice**: Run full test suite after each checkpoint.
 
 **Benefits**:
+
 - Immediate feedback on regressions
 - Easier to identify source of failures
 - Confidence in forward progress
@@ -175,6 +188,7 @@ struct ScriptInstance {
 ### 10. Error Messages Should Guide Users
 
 **Good Error Message** (E813):
+
 ```
 Default values for exported variables must be literals 
 (e.g., 42, 3.14, true, "text") or struct literals 
@@ -183,6 +197,7 @@ like function calls are not allowed.
 ```
 
 **Why It Works**:
+
 - Explains what's allowed (examples)
 - Explains what's disallowed (examples)
 - Provides actionable fix
@@ -242,6 +257,7 @@ Based on Sub-Phase 2 experience:
 ### 1. Runtime Will Be Faster Than Estimated
 
 **Rationale**:
+
 - Static metadata already generated (no parsing needed)
 - HashMap operations are straightforward
 - PropertyInfo generation is template-driven
@@ -254,6 +270,7 @@ Based on Sub-Phase 2 experience:
 ### 2. Clamp-on-Set Will Be Tricky
 
 **Potential Issues**:
+
 - Needs to handle i32 and f32 differently
 - Edge cases: NaN, Infinity for floats
 - Inspector vs script sets (different policies)
@@ -267,6 +284,7 @@ Based on Sub-Phase 2 experience:
 **Challenge**: Converting FerrisScript types → Godot Variants
 
 **Questions**:
+
 - How to represent Vector2 as Variant?
 - What about nested structs?
 - Error handling for invalid conversions?
@@ -278,6 +296,7 @@ Based on Sub-Phase 2 experience:
 ### 4. Inspector Integration is End-to-End
 
 **Complexity**: Requires all pieces working together:
+
 - Storage (HashMap)
 - Metadata (PropertyMetadata)
 - get_property_list() (PropertyInfo generation)

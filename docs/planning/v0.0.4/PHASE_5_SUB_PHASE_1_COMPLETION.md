@@ -20,11 +20,14 @@
 ## ✅ Completed Checkpoints
 
 ### Checkpoint 1.1: Lexer `@` token + `export` keyword ✅
+
 **Time**: ~30 minutes  
 **Files Modified**:
+
 - `crates/compiler/src/lexer.rs`
 
 **Changes**:
+
 - Added `Token::At` for `@` symbol
 - Added `Token::Export` keyword recognition
 - Lexer correctly tokenizes `@export` sequence
@@ -35,11 +38,14 @@
 ---
 
 ### Checkpoint 1.2: Parser basic `@export` ✅
+
 **Time**: ~45 minutes  
 **Files Modified**:
+
 - `crates/compiler/src/parser.rs`
 
 **Changes**:
+
 - Added `parse_export_annotation()` method
 - Parser recognizes `@export` before variable declarations
 - Handles `@export` with no hints (PropertyHint::None)
@@ -51,11 +57,14 @@
 ---
 
 ### Checkpoint 1.3: AST nodes ✅
+
 **Time**: ~30 minutes  
 **Files Modified**:
+
 - `crates/compiler/src/ast.rs`
 
 **Changes**:
+
 - Added `PropertyHint` enum with 4 variants:
   - `None` - no hint
   - `Range { min: f32, max: f32, step: f32 }` - numeric slider
@@ -70,11 +79,14 @@
 ---
 
 ### Checkpoint 1.4: Parser `range` hint ✅
+
 **Time**: ~60 minutes  
 **Files Modified**:
+
 - `crates/compiler/src/parser.rs`
 
 **Changes**:
+
 - Extended `parse_export_annotation()` to parse `range(min, max, step)`
 - Added `parse_number()` helper method (handles positive/negative numbers)
 - Proper error messages for malformed range syntax
@@ -86,6 +98,7 @@
 **Tests**: 118 parser tests passing (up from 115)
 
 **Example Syntax**:
+
 ```rust
 @export(range(0.0, 100.0, 1.0)) let speed: f32 = 10.0;
 @export(range(-100.0, 100.0, 0.5)) let balance: f32 = 0.0;
@@ -94,11 +107,14 @@
 ---
 
 ### Checkpoint 1.5: Parser `file` hint ✅
+
 **Time**: ~30 minutes  
 **Files Modified**:
+
 - `crates/compiler/src/parser.rs`
 
 **Changes**:
+
 - Extended `parse_export_annotation()` to parse `file("*.ext1", "*.ext2", ...)`
 - Parses comma-separated list of file extensions
 - Validates at least one extension is present
@@ -107,6 +123,7 @@
 **Tests**: 121 parser tests passing (up from 118)
 
 **Example Syntax**:
+
 ```rust
 @export(file("*.png")) let single_texture: String = "";
 @export(file("*.png", "*.jpg", "*.jpeg")) let texture: String = "";
@@ -116,11 +133,14 @@
 ---
 
 ### Checkpoint 1.6: Parser `enum` hint ✅
+
 **Time**: ~30 minutes  
 **Files Modified**:
+
 - `crates/compiler/src/parser.rs`
 
 **Changes**:
+
 - Extended `parse_export_annotation()` to parse `enum("Value1", "Value2", ...)`
 - Parses comma-separated list of string values
 - Supports any string values (text or numeric strings)
@@ -129,6 +149,7 @@
 **Tests**: 124 parser tests passing (up from 121)
 
 **Example Syntax**:
+
 ```rust
 @export(enum("Easy", "Hard")) let difficulty: String = "Easy";
 @export(enum("North", "South", "East", "West")) let direction: String = "North";
@@ -138,11 +159,14 @@
 ---
 
 ### Checkpoint 1.7: Parser error recovery ✅
+
 **Time**: ~45 minutes  
 **Files Modified**:
+
 - `crates/compiler/src/parser.rs`
 
 **Changes**:
+
 - Comprehensive error handling for malformed `@export` syntax
 - Clear, helpful error messages with context
 - 11 new error tests covering:
@@ -155,6 +179,7 @@
 **Tests**: 135 parser tests passing (up from 124)
 
 **Error Examples**:
+
 ```
 "Unknown property hint 'color'. Expected 'range', 'file', or 'enum'"
 "Expected string literal for file extension, found number"
@@ -164,11 +189,14 @@
 ---
 
 ### Checkpoint 1.8: Integration tests ✅
+
 **Time**: ~45 minutes  
 **Files Modified**:
+
 - `crates/compiler/src/parser.rs`
 
 **Changes**:
+
 - 9 comprehensive integration tests:
   - Multiple annotations in same file
   - Mix with signals and functions
@@ -180,6 +208,7 @@
 **Tests**: 144 parser tests passing (up from 135)
 
 **Coverage**:
+
 - Real-world usage patterns
 - Interaction with other language features
 - Edge cases and corner scenarios
@@ -190,18 +219,21 @@
 ## 📊 Test Summary
 
 ### Test Growth
+
 - **Starting**: 112 parser tests, 453 total compiler tests
 - **Ending**: 144 parser tests, 482 total compiler tests
 - **New Tests**: 32 parser tests (20 @export-specific)
 - **Success Rate**: 100% (482/482 passing)
 
 ### Test Categories
+
 1. **Basic Parsing** (6 tests): Checkpoints 1.1-1.3
 2. **Hint Parsing** (9 tests): Checkpoints 1.4-1.6
 3. **Error Recovery** (11 tests): Checkpoint 1.7
 4. **Integration** (9 tests): Checkpoint 1.8
 
 ### Coverage Areas
+
 ✅ Lexer tokenization  
 ✅ Basic annotation parsing  
 ✅ All 4 property hint types  
@@ -214,6 +246,7 @@
 ## 🎨 Example Usage
 
 ### All Supported Syntax
+
 ```rust
 // No hint
 @export let simple: i32 = 0;
@@ -288,6 +321,7 @@ fn ready() {
 **Goal**: Type Checker & Metadata Generation (6-8 hours)
 
 **Checkpoints** (Sub-Phase 2):
+
 1. **2.1**: Export validation (valid types, scope rules)
 2. **2.2**: Hint validation (type compatibility matrix)
 3. **2.3**: Error codes E801-E815 implementation
@@ -296,6 +330,7 @@ fn ready() {
 6. **2.6**: Integration tests for type checker
 
 **Deliverables**:
+
 - Type checker validates all export rules
 - 15 error codes with clear messages
 - PropertyMetadata structure generated at compile time
@@ -341,17 +376,20 @@ fn ready() {
 ## 📈 Metrics
 
 ### Time Efficiency
+
 - **Planned**: 4-6 hours
 - **Actual**: ~4 hours
 - **Efficiency**: ✅ On target
 
 ### Quality Metrics
+
 - **Tests Passing**: 482/482 (100%)
 - **Code Coverage**: High (all new code paths tested)
 - **Error Handling**: Comprehensive (11 error tests)
 - **Integration**: Strong (9 integration tests)
 
 ### Checkpoint Velocity
+
 - Average: ~30 minutes per checkpoint
 - Fastest: Checkpoint 1.3 (AST nodes, ~30 min)
 - Slowest: Checkpoint 1.4 (Range hint, ~60 min)
@@ -362,18 +400,21 @@ fn ready() {
 ## ✨ Key Takeaways
 
 ### What Went Well
+
 1. **Checkpoint Methodology**: Breaking into 8 small checkpoints made progress steady and measurable
 2. **Test-First Approach**: Writing tests alongside implementation caught issues early
 3. **Clear Error Messages**: Investing in helpful error messages pays off in later phases
 4. **Integration Testing**: Real-world scenario tests give high confidence
 
 ### Learnings
+
 1. **Raw String Literals**: Watch for leading/trailing whitespace in test strings
 2. **AST Access Patterns**: Need to know correct field names (e.g., `Stmt` not `Statement`)
 3. **Comma-Separated Lists**: Pattern works well for both file and enum hints
 4. **Error Context**: Providing "expected vs found" messages is very helpful
 
 ### Process Improvements
+
 1. **Bundle Related Checkpoints**: Checkpoints 1.5 and 1.6 bundled efficiently
 2. **Comprehensive Testing**: Checkpoint 1.7 and 1.8 together provide excellent coverage
 3. **Documentation As You Go**: Keeping notes during implementation helps completion reports
@@ -383,12 +424,14 @@ fn ready() {
 ## 🎓 Documentation Status
 
 ### Files Created/Updated
+
 - ✅ `PHASE_5_SUB_PHASE_1_COMPLETION.md` (this document)
 - ✅ Parser implementation in `crates/compiler/src/parser.rs`
 - ✅ AST nodes in `crates/compiler/src/ast.rs`
 - ✅ Lexer tokens in `crates/compiler/src/lexer.rs`
 
 ### Files to Update (Next Steps)
+
 - 📋 `PHASE_5_EXECUTION_PLAN.md` - Update status and progress
 - 📋 `CHANGELOG.md` - Add Sub-Phase 1 completion entry
 - 📋 `docs/ARCHITECTURE.md` - Document export annotation system

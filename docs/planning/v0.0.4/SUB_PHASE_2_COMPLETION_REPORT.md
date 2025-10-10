@@ -49,10 +49,12 @@ Successfully completed Sub-Phase 2 of the Godot `@export` system in **~2 hours**
 **File**: `crates/compiler/src/type_checker.rs`
 
 **Exportable Types** (8 total):
+
 - Primitives: `i32`, `f32`, `bool`, `String`
 - Godot Types: `Vector2`, `Color`, `Rect2`, `Transform2D`
 
 **Implementation**:
+
 ```rust
 fn is_exportable_type(ty: &Type) -> bool {
     matches!(
@@ -77,6 +79,7 @@ fn is_exportable_type(ty: &Type) -> bool {
 | `enum("A", "B")` | `String` | E806 |
 
 **Implementation**:
+
 ```rust
 fn is_hint_compatible_with_type(hint: &PropertyHint, ty: &Type) -> bool {
     match hint {
@@ -93,17 +96,20 @@ fn is_hint_compatible_with_type(hint: &PropertyHint, ty: &Type) -> bool {
 ### 3. Hint Format Validation
 
 **Range Hints (E807)**:
+
 - ✅ Validates `min < max`
 - ✅ Supports negative values (`-100, 100`)
 - ✅ Handles float precision edge cases
 - **Format**: `"min,max,step"` (e.g., `"0,100,1"`)
 
 **File Hints (E805)**:
+
 - ✅ Validates extension format (`"*.png"`, `"*.jpg,*.gif"`)
 - ✅ Supports wildcard and dot formats
 - **Format**: `"*.ext,*.ext"` (comma-separated)
 
 **Enum Hints (E808)**:
+
 - ✅ Validates at least one value
 - ✅ Supports numeric strings (`"1", "2", "3"`)
 - **Format**: `"Value1,Value2,Value3"` (comma-separated, no quotes in output)
@@ -117,6 +123,7 @@ fn is_hint_compatible_with_type(hint: &PropertyHint, ty: &Type) -> bool {
 **File**: `crates/compiler/src/ast.rs`
 
 **PropertyMetadata Structure**:
+
 ```rust
 #[derive(Debug, Clone, PartialEq)]
 pub struct PropertyMetadata {
@@ -129,6 +136,7 @@ pub struct PropertyMetadata {
 ```
 
 **Generation During Type Checking**:
+
 - Metadata generated automatically during `check_export_annotation()`
 - Stored in `TypeChecker.property_metadata: Vec<PropertyMetadata>`
 - Accessed via dual API:
@@ -136,6 +144,7 @@ pub struct PropertyMetadata {
   - `check_and_extract_metadata(program, source)` - validation + metadata extraction
 
 **Expression Serialization**:
+
 ```rust
 fn expr_to_string(&self, expr: &Expr) -> String {
     match expr {
@@ -165,6 +174,7 @@ fn expr_to_string(&self, expr: &Expr) -> String {
 ### 5. Default Value Validation (E813)
 
 **Compile-Time Constant Rules**:
+
 - ✅ Literals: `42`, `3.14`, `true`, `"text"`
 - ✅ Struct literals: `Vector2 { x: 0.0, y: 0.0 }`
 - ✅ Unary on constants: `-42`, `!true`
@@ -173,6 +183,7 @@ fn expr_to_string(&self, expr: &Expr) -> String {
 - ❌ Variable references: `base_speed`
 
 **Implementation**:
+
 ```rust
 fn is_compile_time_constant(expr: &Expr) -> bool {
     match expr {
@@ -193,11 +204,13 @@ fn is_compile_time_constant(expr: &Expr) -> bool {
 ### 6. Duplicate Export Detection (E810)
 
 **Implementation**:
+
 - Added `exported_vars: HashSet<String>` to `TypeChecker` struct
 - Tracks all exported variable names
 - Detects duplicates in same scope
 
 **Validation Flow**:
+
 ```rust
 // Check for duplicate @export annotation
 if self.exported_vars.contains(var_name) {
@@ -267,11 +280,13 @@ self.exported_vars.insert(var_name.to_string());
 ## Code Quality
 
 ### Compilation
+
 - ✅ Clean compilation (0 errors, 0 warnings)
 - ✅ Clippy clean (ran in previous sessions)
 - ✅ All type annotations correct
 
 ### Architecture
+
 - ✅ Hybrid metadata pattern established
 - ✅ Dual API maintains backward compatibility
 - ✅ Clear separation of concerns (validation → metadata generation)
@@ -288,6 +303,7 @@ self.exported_vars.insert(var_name.to_string());
 **Speedup**: 71% faster
 
 **Reasons for Efficiency**:
+
 1. ✅ **Effective Bundling**: Checkpoints 2.2, 2.4, 2.5, 2.7 bundled with related checkpoints
 2. ✅ **Clear Architecture**: Hybrid metadata design decisions made upfront
 3. ✅ **Incremental Testing**: Test after each checkpoint, catch issues early
@@ -310,6 +326,7 @@ self.exported_vars.insert(var_name.to_string());
 ### API Surface
 
 **Public APIs**:
+
 ```rust
 // Existing (backward compatible)
 pub fn check(program: &Program, source: &str) -> Result<(), String>
@@ -373,7 +390,7 @@ pub struct PropertyMetadata {
 
 ### Challenges Overcome
 
-1. **Expression Serialization**: 
+1. **Expression Serialization**:
    - Initial issue: Incorrect pattern matching (`Expr::IntLiteral` vs `Expr::Literal(Literal::Int, _)`)
    - Resolution: Read AST definition carefully
 

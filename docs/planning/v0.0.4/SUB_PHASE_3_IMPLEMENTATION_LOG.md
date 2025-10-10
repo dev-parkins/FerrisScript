@@ -10,7 +10,8 @@
 
 Implement per-instance property storage and Godot Inspector integration using the hybrid metadata architecture established in Sub-Phase 2.
 
-**Key Architecture Decision**: 
+**Key Architecture Decision**:
+
 - Static PropertyMetadata stored in Program (compile-time, shared across instances)
 - Per-instance values stored in Env HashMap (runtime, unique per instance)
 - Clean separation: metadata generation (compiler) vs value storage (runtime)
@@ -26,12 +27,14 @@ Implement per-instance property storage and Godot Inspector integration using th
 **Goal**: Store per-instance exported property values + read static metadata from Program
 
 **Files to Modify**:
+
 - `crates/runtime/src/lib.rs` - Add `exported_properties: HashMap<String, Value>` to Env
 - `crates/runtime/src/lib.rs` - Add method to initialize from PropertyMetadata
 
 **Implementation Details**:
 
 1. **Add to Env struct**:
+
 ```rust
 pub struct Env {
     // ... existing fields ...
@@ -47,6 +50,7 @@ pub struct Env {
 ```
 
 2. **Initialize from Program**:
+
 ```rust
 impl Env {
     /// Initialize exported properties from Program metadata
@@ -93,6 +97,7 @@ impl Env {
 ```
 
 3. **Modify execute() to call initialize_properties**:
+
 ```rust
 pub fn execute(program: &ast::Program, env: &mut Env) -> Result<(), String> {
     // Initialize exported properties from metadata
@@ -103,10 +108,12 @@ pub fn execute(program: &ast::Program, env: &mut Env) -> Result<(), String> {
 ```
 
 **Tests to Add**:
+
 1. `test_initialize_exported_properties_from_metadata` - Verify HashMap populated with defaults
 2. `test_initialize_multiple_exported_properties` - Multiple properties with different types
 
 **Edge Cases to Consider**:
+
 - Empty property_metadata list (no exports)
 - Properties with no default value (use type defaults)
 - Struct literal defaults (may need expression evaluation)
@@ -120,11 +127,13 @@ pub fn execute(program: &ast::Program, env: &mut Env) -> Result<(), String> {
 **Goal**: Implement property get/set with clamp-on-set for range hints
 
 **Files to Modify**:
+
 - `crates/runtime/src/lib.rs` - Add `get_exported_property()`, `set_exported_property()`
 
 **Implementation Details**:
 
 1. **Property Get Method**:
+
 ```rust
 impl Env {
     /// Get an exported property value
@@ -139,6 +148,7 @@ impl Env {
 ```
 
 2. **Property Set Method with Clamp-on-Set**:
+
 ```rust
 impl Env {
     /// Set an exported property value with optional clamping
@@ -224,12 +234,14 @@ impl Env {
 ```
 
 **Tests to Add**:
+
 1. `test_get_exported_property_success` - Get initialized property
 2. `test_set_exported_property_no_clamping` - Set within range
 3. `test_set_exported_property_clamp_from_inspector` - Clamp when from Inspector
 4. `test_set_exported_property_warn_from_script` - Allow but warn when from script
 
 **Edge Cases to Consider**:
+
 - NaN and Infinity for float range clamping
 - Negative ranges (-100 to 100)
 - Setting property that doesn't exist
@@ -244,11 +256,13 @@ impl Env {
 **Goal**: Convert PropertyMetadata to Godot PropertyInfo with exact formats
 
 **Files to Modify**:
+
 - `crates/godot_bind/src/lib.rs` - Add PropertyInfo conversion helpers
 
 **Implementation Details**:
 
 1. **PropertyInfo Conversion**:
+
 ```rust
 use godot::classes::object::PropertyHint as GodotPropertyHint;
 use godot::classes::object::PropertyUsageFlags;
@@ -294,6 +308,7 @@ fn metadata_hint_to_godot_hint(hint: &PropertyHint) -> GodotPropertyHint {
 ```
 
 2. **Verify hint_string Format**:
+
 ```rust
 #[cfg(test)]
 mod tests {
@@ -338,10 +353,12 @@ mod tests {
 ```
 
 **Tests to Add**:
+
 1. `test_metadata_to_property_info_range` - Verify PropertyInfo structure for range
 2. `test_metadata_to_property_info_enum` - Verify PropertyInfo structure for enum
 
 **Edge Cases to Consider**:
+
 - Empty hint_string (PropertyHint::None)
 - Float ranges with decimals ("0.0,20.0,0.5")
 - File extensions format ("*.png,*.jpg")
@@ -353,6 +370,7 @@ mod tests {
 **Goal**: Implement GDExtension get_property_list() to expose properties to Inspector
 
 **Files to Modify**:
+
 - `crates/godot_bind/src/lib.rs` - Add get_property_list() to FerrisScriptRunner
 
 **Implementation Details**:
@@ -376,9 +394,11 @@ impl INode2D for FerrisScriptRunner {
 ```
 
 **Tests to Add**:
+
 1. `test_inspector_get_property_list` - Verify list returned with correct PropertyInfo
 
 **Edge Cases to Consider**:
+
 - No compiled program (empty list)
 - No exported properties (empty list)
 - Multiple properties with different hints
@@ -390,12 +410,14 @@ impl INode2D for FerrisScriptRunner {
 **Goal**: Full Inspector integration + Variant conversion tests
 
 **Files to Modify**:
+
 - `crates/godot_bind/src/lib.rs` - Integrate get/set with Godot's property system
 - Add comprehensive Variant ↔ Value conversion tests
 
 **Implementation Details**:
 
 1. **Integrate with Godot get/set**:
+
 ```rust
 impl INode2D for FerrisScriptRunner {
     fn get(&self, property: StringName) -> Option<Variant> {
@@ -429,6 +451,7 @@ impl INode2D for FerrisScriptRunner {
 ```
 
 2. **Variant Conversion Helpers**:
+
 ```rust
 /// Convert FerrisScript Value to Godot Variant
 fn value_to_variant(value: &Value) -> Variant {
@@ -470,9 +493,11 @@ fn variant_to_value(variant: &Variant) -> Value {
 ```
 
 **Tests to Add**:
+
 1. `test_variant_conversion_round_trip_all_types` - All 8 exportable types
 
 **Edge Cases to Consider**:
+
 - Variant conversion failures
 - Type mismatches between PropertyInfo and actual value
 - Round-trip conversion (Value → Variant → Value)
@@ -497,16 +522,19 @@ fn variant_to_value(variant: &Variant) -> Value {
 ## 🧪 Testing Strategy
 
 ### Unit Tests (Per Bundle)
+
 - Test each method in isolation
 - Mock dependencies where needed
 - Cover edge cases (NaN, Infinity, negative values, empty strings)
 
 ### Integration Tests (Checkpoint 3.8)
+
 - Full end-to-end flow: compile → execute → get/set property
 - Variant conversion round-trips
 - Inspector interaction simulation
 
 ### Test Execution Pattern
+
 1. Write tests first (TDD where appropriate)
 2. Implement feature
 3. Run tests: `cargo test --package <crate> --lib`
@@ -555,6 +583,7 @@ fn variant_to_value(variant: &Variant) -> Value {
    - `test_set_exported_property_negative_range` - Negative range clamping
 
 **Test Results**:
+
 - Runtime tests: **110/110 passing** (100 existing + 10 new)
 - Compiler tests: **543/543 passing** (no regressions from compile() change)
 - **Total**: 653 tests passing
@@ -588,6 +617,7 @@ fn variant_to_value(variant: &Variant) -> Value {
 **Efficiency**: 75% faster than estimated
 
 **Changes**:
+
 1. **crates/godot_bind/src/lib.rs** (~60 LOC added):
    - Implemented `variant_to_value()` helper function
    - Handles all 8 exportable types (i32, f32, bool, String, Vector2, Color, Rect2, Transform2D)
@@ -595,18 +625,21 @@ fn variant_to_value(variant: &Variant) -> Value {
    - Note: `value_to_variant()` already existed from signal emission system
 
 **Testing Decision**:
+
 - Variant conversion requires Godot engine initialization
 - Unit tests not suitable (godot-ffi panics without Godot running)
 - Testing will be done in integration tests (godot_test/ examples)
 - Functions already validated through existing signal emission system
 
 **PropertyInfo Generation Status**:
+
 - **DEFERRED** to Checkpoint 3.7 (get_property_list implementation)
 - Reason: PropertyInfo/PropertyHint/PropertyUsageFlags types not found in godot-rust 0.4.0 scope
 - Need to research godot-rust API for correct types/imports
 - May require different approach (Dict? Array? Different import path?)
 
 **Test Results**:
+
 - Runtime tests: **110/110 passing** (no change)
 - Compiler tests: **543/543 passing** (no change)
 - Godot bind tests: **0 tests** (integration testing only)
