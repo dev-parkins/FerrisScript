@@ -484,6 +484,43 @@ impl INode2D for FerrisScriptNode {
             }
         }
     }
+
+    // ========== Phase 5 Sub-Phase 3: Inspector Integration (Bundle 5 - Checkpoint 3.7) ==========
+
+    /// Override get_property_list() to expose FerrisScript @export properties in Godot Inspector
+    ///
+    /// This is the core Inspector integration that makes exported properties visible and editable.
+    /// Called by Godot whenever the Inspector needs to refresh property display.
+    ///
+    /// **Flow**:
+    /// 1. Godot Editor calls get_property_list() on script load/refresh
+    /// 2. Returns Vec<PropertyInfo> generated from Program.property_metadata
+    /// 3. Inspector displays properties with correct types, hints, and default values
+    /// 4. User edits trigger get() and set() calls (implemented in Bundle 7)
+    ///
+    /// **Property Types Supported** (8 types from Sub-Phase 2):
+    /// - Primitives: i32, f32, bool, String
+    /// - Godot types: Vector2, Color, Rect2, Transform2D
+    ///
+    /// **Property Hints Supported** (4 hints from Sub-Phase 2):
+    /// - None: No hint (default display)
+    /// - Range(min, max, step): Slider control for numeric types
+    /// - Enum(values): Dropdown selection for String types
+    /// - File(extensions): File picker dialog for String types
+    fn get_property_list(&mut self) -> Vec<PropertyInfo> {
+        // Only expose properties if script is successfully loaded and compiled
+        if let Some(program) = &self.program {
+            // Convert each PropertyMetadata to PropertyInfo using helper function
+            program
+                .property_metadata
+                .iter()
+                .map(metadata_to_property_info)
+                .collect()
+        } else {
+            // No script loaded or compilation failed - no properties to expose
+            Vec::new()
+        }
+    }
 }
 
 #[godot_api]
