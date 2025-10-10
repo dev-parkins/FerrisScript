@@ -239,10 +239,35 @@ fn node_query_callback_tls(
 }
 
 /// Convert FerrisScript Value to Godot Variant
+///
+/// Handles edge cases for numeric types:
+/// - NaN floats are converted to 0.0 with a warning
+/// - Infinite floats are clamped to f32::MAX/MIN with a warning
+///
+/// Invalid nested values (e.g., non-Vector2 in Rect2) return Variant::nil()
 fn value_to_variant(value: &Value) -> Variant {
     match value {
         Value::Int(i) => Variant::from(*i),
-        Value::Float(f) => Variant::from(*f),
+        Value::Float(f) => {
+            // Handle NaN and Infinity edge cases
+            if f.is_nan() {
+                godot_warn!("NaN value in Value→Variant conversion, defaulting to 0.0");
+                Variant::from(0.0f32)
+            } else if f.is_infinite() {
+                let clamped = if f.is_sign_positive() {
+                    f32::MAX
+                } else {
+                    f32::MIN
+                };
+                godot_warn!(
+                    "Infinite value in Value→Variant conversion, clamping to {}",
+                    clamped
+                );
+                Variant::from(clamped)
+            } else {
+                Variant::from(*f)
+            }
+        }
         Value::Bool(b) => Variant::from(*b),
         Value::String(s) => Variant::from(s.as_str()),
         Value::Vector2 { x, y } => Variant::from(Vector2::new(*x, *y)),
@@ -694,33 +719,78 @@ impl FerrisScriptNode {
 // These will be needed for Checkpoint 3.7 (get_property_list implementation)
 // For now, focusing on Variant conversion (Checkpoint 3.8)
 
-/// Convert Godot Variant to FerrisScript Value (Checkpoint 3.8)
+/// Convert Godot Variant to FerrisScript Value (Checkpoint 3.8 - Enhanced)
 ///
 /// Converts Inspector set operations to FerrisScript runtime values.
-/// Supports all 8 exportable types.
+/// Supports all 8 exportable types with enhanced type safety and edge case handling.
+///
+/// Type checking order (CRITICAL for correctness):
+/// 1. **Boolean** - MUST be checked before numeric types to avoid bool→int misidentification
+/// 2. Integer (i32)
+/// 3. Float (f64 → f32 with NaN/Infinity handling)
+/// 4. String, Vector2, Color, Rect2, Transform2D
+/// 5. Nil (fallback)
+///
+/// Edge case handling:
+/// - NaN from f64: Converted to 0.0f32 with warning
+/// - Infinity from f64: Clamped to f32::MAX/MIN with warning
+/// - Bool before int: Prevents Variant(1) being misidentified as int instead of true
 #[allow(dead_code)]
 fn variant_to_value(variant: &Variant) -> Value {
-    // Try different Godot types in order
+    // CRITICAL: Check bool BEFORE numeric types
+    // Reason: Godot Variant can represent bool as 1/0, checking int first would misidentify
+    if let Ok(b) = variant.try_to::<bool>() {
+        return Value::Bool(b);
+    }
+
+    // Try integer next
     if let Ok(i) = variant.try_to::<i32>() {
-        Value::Int(i)
-    } else if let Ok(f) = variant.try_to::<f64>() {
-        // Godot may use f64 internally, convert to f32
-        Value::Float(f as f32)
-    } else if let Ok(b) = variant.try_to::<bool>() {
-        Value::Bool(b)
-    } else if let Ok(s) = variant.try_to::<GString>() {
-        Value::String(s.to_string())
-    } else if let Ok(v) = variant.try_to::<Vector2>() {
-        Value::Vector2 { x: v.x, y: v.y }
-    } else if let Ok(c) = variant.try_to::<Color>() {
-        Value::Color {
+        return Value::Int(i);
+    }
+
+    // Try float with NaN/Infinity handling
+    if let Ok(f) = variant.try_to::<f64>() {
+        // Handle edge cases when converting f64 to f32
+        if f.is_nan() {
+            godot_warn!("NaN value in Variant→Value conversion, defaulting to 0.0");
+            return Value::Float(0.0);
+        }
+        if f.is_infinite() {
+            let clamped = if f.is_sign_positive() {
+                f32::MAX
+            } else {
+                f32::MIN
+            };
+            godot_warn!(
+                "Infinite value in Variant→Value conversion, clamping to {}",
+                clamped
+            );
+            return Value::Float(clamped);
+        }
+        // Safe conversion for finite values
+        return Value::Float(f as f32);
+    }
+
+    // Try other Godot types
+    if let Ok(s) = variant.try_to::<GString>() {
+        return Value::String(s.to_string());
+    }
+
+    if let Ok(v) = variant.try_to::<Vector2>() {
+        return Value::Vector2 { x: v.x, y: v.y };
+    }
+
+    if let Ok(c) = variant.try_to::<Color>() {
+        return Value::Color {
             r: c.r,
             g: c.g,
             b: c.b,
             a: c.a,
-        }
-    } else if let Ok(r) = variant.try_to::<Rect2>() {
-        Value::Rect2 {
+        };
+    }
+
+    if let Ok(r) = variant.try_to::<Rect2>() {
+        return Value::Rect2 {
             position: Box::new(Value::Vector2 {
                 x: r.position.x,
                 y: r.position.y,
@@ -729,13 +799,15 @@ fn variant_to_value(variant: &Variant) -> Value {
                 x: r.size.x,
                 y: r.size.y,
             }),
-        }
-    } else if let Ok(t) = variant.try_to::<Transform2D>() {
+        };
+    }
+
+    if let Ok(t) = variant.try_to::<Transform2D>() {
         // Extract rotation, scale, position from Transform2D
         let position = t.origin;
         let rotation = t.rotation();
         let scale = t.scale();
-        Value::Transform2D {
+        return Value::Transform2D {
             position: Box::new(Value::Vector2 {
                 x: position.x,
                 y: position.y,
@@ -745,10 +817,11 @@ fn variant_to_value(variant: &Variant) -> Value {
                 x: scale.x,
                 y: scale.y,
             }),
-        }
-    } else {
-        Value::Nil
+        };
     }
+
+    // Fallback for unrecognized types
+    Value::Nil
 }
 
 // NOTE: Tests for variant conversion and PropertyInfo generation require Godot to be
