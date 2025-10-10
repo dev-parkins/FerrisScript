@@ -194,6 +194,28 @@ pub enum ErrorCode {
     E413,
     /// Invalid function call at runtime
     E414,
+
+    // Type System Errors - Godot Types (E700-E799)
+    /// Unknown field access on Color type
+    E701,
+    /// Unknown field access on Rect2 type
+    E702,
+    /// Unknown field access on Transform2D type
+    E703,
+    /// Invalid Color construction
+    E704,
+    /// Invalid Rect2 construction
+    E705,
+    /// Invalid Transform2D construction
+    E706,
+    /// Type mismatch in Color field assignment
+    E707,
+    /// Type mismatch in Rect2 field assignment
+    E708,
+    /// Type mismatch in Transform2D field assignment
+    E709,
+    /// Nested field access on non-struct type
+    E710,
 }
 
 impl ErrorCode {
@@ -269,6 +291,18 @@ impl ErrorCode {
             ErrorCode::E412 => "E412",
             ErrorCode::E413 => "E413",
             ErrorCode::E414 => "E414",
+
+            // Type System Errors - Godot Types
+            ErrorCode::E701 => "E701",
+            ErrorCode::E702 => "E702",
+            ErrorCode::E703 => "E703",
+            ErrorCode::E704 => "E704",
+            ErrorCode::E705 => "E705",
+            ErrorCode::E706 => "E706",
+            ErrorCode::E707 => "E707",
+            ErrorCode::E708 => "E708",
+            ErrorCode::E709 => "E709",
+            ErrorCode::E710 => "E710",
         }
     }
 
@@ -394,6 +428,18 @@ impl ErrorCode {
             ErrorCode::E412 => "Complex field assignment not implemented",
             ErrorCode::E413 => "Function not found",
             ErrorCode::E414 => "Invalid function call",
+
+            // Type System Errors - Godot Types
+            ErrorCode::E701 => "Unknown field on Color",
+            ErrorCode::E702 => "Unknown field on Rect2",
+            ErrorCode::E703 => "Unknown field on Transform2D",
+            ErrorCode::E704 => "Invalid Color construction",
+            ErrorCode::E705 => "Invalid Rect2 construction",
+            ErrorCode::E706 => "Invalid Transform2D construction",
+            ErrorCode::E707 => "Type mismatch in Color field assignment",
+            ErrorCode::E708 => "Type mismatch in Rect2 field assignment",
+            ErrorCode::E709 => "Type mismatch in Transform2D field assignment",
+            ErrorCode::E710 => "Nested field access on non-struct type",
         }
     }
 
@@ -469,6 +515,18 @@ impl ErrorCode {
             | ErrorCode::E412
             | ErrorCode::E413
             | ErrorCode::E414 => ErrorCategory::Runtime,
+
+            // Type System Errors - Godot Types
+            ErrorCode::E701
+            | ErrorCode::E702
+            | ErrorCode::E703
+            | ErrorCode::E704
+            | ErrorCode::E705
+            | ErrorCode::E706
+            | ErrorCode::E707
+            | ErrorCode::E708
+            | ErrorCode::E709
+            | ErrorCode::E710 => ErrorCategory::Type,
         }
     }
 

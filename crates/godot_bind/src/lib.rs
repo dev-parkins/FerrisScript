@@ -116,6 +116,34 @@ fn value_to_variant(value: &Value) -> Variant {
         Value::Bool(b) => Variant::from(*b),
         Value::String(s) => Variant::from(s.as_str()),
         Value::Vector2 { x, y } => Variant::from(Vector2::new(*x, *y)),
+        Value::Color { r, g, b, a } => Variant::from(Color::from_rgba(*r, *g, *b, *a)),
+        Value::Rect2 { position, size } => {
+            // Extract Vector2 values from boxed Values
+            match (&**position, &**size) {
+                (Value::Vector2 { x: px, y: py }, Value::Vector2 { x: sx, y: sy }) => {
+                    Variant::from(Rect2::new(Vector2::new(*px, *py), Vector2::new(*sx, *sy)))
+                }
+                _ => Variant::nil(), // Invalid nested values
+            }
+        }
+        Value::Transform2D {
+            position,
+            rotation,
+            scale,
+        } => {
+            // Extract Vector2 values from boxed Values
+            match (&**position, &**scale) {
+                (Value::Vector2 { x: px, y: py }, Value::Vector2 { x: sx, y: sy }) => {
+                    Variant::from(Transform2D::from_angle_scale_skew_origin(
+                        *rotation,
+                        Vector2::new(*sx, *sy),
+                        0.0, // skew
+                        Vector2::new(*px, *py),
+                    ))
+                }
+                _ => Variant::nil(), // Invalid nested values
+            }
+        }
         Value::Nil => Variant::nil(),
         Value::SelfObject => Variant::nil(), // self cannot be passed as signal parameter
         Value::InputEvent(_) => Variant::nil(), // InputEvent cannot be passed as signal parameter
@@ -133,6 +161,26 @@ fn godot_print_builtin(args: &[Value]) -> Result<Value, String> {
             Value::Bool(b) => b.to_string(),
             Value::String(s) => s.clone(),
             Value::Vector2 { x, y } => format!("Vector2({}, {})", x, y),
+            Value::Color { r, g, b, a } => format!("Color({}, {}, {}, {})", r, g, b, a),
+            Value::Rect2 { position, size } => match (&**position, &**size) {
+                (Value::Vector2 { x: px, y: py }, Value::Vector2 { x: sx, y: sy }) => {
+                    format!("Rect2(Vector2({}, {}), Vector2({}, {}))", px, py, sx, sy)
+                }
+                _ => "Rect2(invalid, invalid)".to_string(),
+            },
+            Value::Transform2D {
+                position,
+                rotation,
+                scale,
+            } => match (&**position, &**scale) {
+                (Value::Vector2 { x: px, y: py }, Value::Vector2 { x: sx, y: sy }) => {
+                    format!(
+                        "Transform2D(Vector2({}, {}), {}, Vector2({}, {}))",
+                        px, py, rotation, sx, sy
+                    )
+                }
+                _ => "Transform2D(invalid, invalid, invalid)".to_string(),
+            },
             Value::Nil => "nil".to_string(),
             Value::SelfObject => "self".to_string(),
             Value::InputEvent(_) => "InputEvent".to_string(),

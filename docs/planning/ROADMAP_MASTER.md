@@ -55,22 +55,27 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 - ✅ Core compiler (lexer, parser, type checker)
 - ✅ Godot GDExtension integration
-- ✅ Signal system (declaration, registration, emit)
-- ✅ Basic types (i32, f32, String, bool, Node, Variant)
+- ✅ Signal system (declaration, registration, emit) - **Phase 1 COMPLETE**
+- ✅ Lifecycle callbacks (_ready, _process, _physics_process, _input, _enter_tree, _exit_tree) - **Phase 2 COMPLETE**
+- ✅ Node queries (get_node, has_node, find_child, get_parent) - **Phase 3 COMPLETE**
+- ✅ Test harness infrastructure (headless testing with metadata protocol) - **Phase 3 COMPLETE**
+- ✅ Basic types (i32, f32, String, bool, Node, Variant, InputEvent)
 - ✅ Functions and control flow (if/else, while, return)
-- ✅ Error reporting with context
-- ✅ 379 compiler tests passing
+- ✅ Error reporting with context (50+ error codes)
+- ✅ 514 tests passing (390 compiler + 85 runtime + 1 godot_bind + 38 test_harness)
 
 ### In Progress 🔄
 
-- 🔄 **v0.0.4 Phase 2**: Lifecycle callbacks (`_ready`, `_process`, `_physics_process`, `_input`)
-- 🔄 Roadmap consolidation and strategic planning
+- 🔄 **v0.0.4 Phase 4**: Additional Godot types (Color, Rect2, Transform2D)
+- 🔄 **v0.0.4 Phase 5**: Property exports (@export annotation)
 
 ### What's Missing ❌
 
+- ❌ Additional Godot types (Color, Rect2, Transform2D - Phase 4 of v0.0.4)
+- ❌ Property exports (@export - Phase 5 of v0.0.4)
 - ❌ LSP / editor support (coming in v0.0.5)
 - ❌ Arrays and for loops (coming in v0.0.6)
-- ❌ Advanced Godot types (Vector2/3, Color, etc. - coming in v0.0.7)
+- ❌ Advanced Godot types (Vector3, Basis, etc. - coming in v0.0.7)
 - ❌ Metadata/reflection (coming in v0.1.0)
 
 ---
@@ -100,32 +105,51 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ## 📦 Version Details
 
-### v0.0.4: Runtime Stability (CURRENT)
+### v0.0.4: Godot API Expansion (CURRENT - 60% Complete)
 
-**Goal**: Solid foundation for Godot integration
+**Goal**: Comprehensive Godot integration for 2D game development
 
-**Phase 1** ✅ Complete:
-
+**Phase 1** ✅ Complete (PR #46):
 - Signal system (declaration, registration, emit)
-- 379 tests passing
-- Edge case testing comprehensive
+- 29 new tests
+- Editor connection support
+- Signal parameters and validation
 
-**Phase 2** 🔄 In Progress:
+**Phase 2** ✅ Complete (PR #47-48):
+- [x] `_ready()`, `_process(delta: f32)` callbacks
+- [x] `_physics_process(delta: f32)` callback
+- [x] `_input(event: InputEvent)`, `_enter_tree()`, `_exit_tree()` callbacks
+- [x] InputEvent type implementation
+- [x] 11 new tests
 
-- [ ] `_ready()` callback
-- [ ] `_process(delta: f32)` callback
-- [ ] `_physics_process(delta: f32)` callback
-- [ ] `_input(event: InputEvent)` callback
+**Phase 3** ✅ Complete (PR #51):
+- [x] Node query functions (get_node, has_node, find_child, get_parent)
+- [x] 22 new tests (17 initial + 5 edge cases)
+- [x] 12 new error codes (E601-E613)
+- [x] Test harness infrastructure (38 test_harness tests, 3,500+ lines)
+- [x] Test coverage analysis (31% scenario coverage, 64 scenarios tracked)
+- [x] Node invalidation research (safety roadmap for v0.0.5/v0.0.7)
+- [x] 4 example scripts with metadata protocol
 
-**Deliverables**:
+**Phase 4** ⏸️ Not Started:
+- [ ] Additional Godot types (Color, Rect2, Transform2D)
+- [ ] Field access support
+- [ ] 30+ type-specific tests
 
-- All lifecycle callbacks working
-- Integration tests for each
-- Examples demonstrating usage
-- Documentation updated
+**Phase 5** ⏸️ Not Started:
+- [ ] @export annotation parsing
+- [ ] Property types and hints
+- [ ] Inspector integration
+- [ ] 20+ export tests
+
+**Deliverables Remaining**:
+- Additional Godot types for 2D development
+- Property exports for Inspector integration
+- Integration tests and examples
+- Final documentation updates
 
 **Timeline**: 1-2 weeks remaining  
-**Estimated Premium Requests**: 4-6
+**Estimated Premium Requests**: 2-4 (Phases 4-5 combined)
 
 ---
 
