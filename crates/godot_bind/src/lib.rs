@@ -466,15 +466,29 @@ impl FerrisScriptNode {
             return None;
         }
 
+        let instance_id = self.base().instance_id();
         let env = self.env.as_mut()?;
 
-        match call_function(function_name, args, env) {
+        // Set up node query callback - store instance ID in thread-local for access
+        CURRENT_NODE_INSTANCE_ID.with(|id| {
+            *id.borrow_mut() = Some(instance_id);
+        });
+        env.set_node_query_callback(node_query_callback_tls);
+
+        let result = match call_function(function_name, args, env) {
             Ok(value) => Some(value),
             Err(e) => {
                 godot_error!("Error calling function '{}': {}", function_name, e);
                 None
             }
-        }
+        };
+
+        // Clear node instance ID from thread-local storage
+        CURRENT_NODE_INSTANCE_ID.with(|id| {
+            *id.borrow_mut() = None;
+        });
+
+        result
     }
 
     /// Reload the script (useful for hot-reloading in development)
