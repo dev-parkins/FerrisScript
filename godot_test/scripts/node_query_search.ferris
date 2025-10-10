@@ -1,3 +1,12 @@
+// TEST: node_query_search
+// CATEGORY: unit
+// DESCRIPTION: Recursive node search with find_child()
+// EXPECT: success
+// ASSERT: Found HealthBar recursively
+// ASSERT: Found ScoreLabel in nested UI
+// ASSERT: Found CurrentWeapon recursively
+// ASSERT: Search Complete
+//
 // Example: Node Search with find_child()
 // Demonstrates recursive child searching
 //

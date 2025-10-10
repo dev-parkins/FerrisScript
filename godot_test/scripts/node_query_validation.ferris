@@ -1,3 +1,12 @@
+// TEST: node_query_validation
+// CATEGORY: unit
+// DESCRIPTION: Node query validation with has_node() for safe access
+// EXPECT: success
+// ASSERT: Player node exists and was accessed
+// ASSERT_OPTIONAL: DebugUI node exists (optional)
+// ASSERT_OPTIONAL: Enemies/Boss node exists
+// ASSERT: Validation Complete
+//
 // Example: Node Query Validation
 // Demonstrates has_node() for safe node access
 //

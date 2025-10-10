@@ -1,3 +1,13 @@
+// TEST: node_query_basic
+// CATEGORY: unit
+// DESCRIPTION: Basic node query operations with get_node() and get_parent()
+// EXPECT: success
+// ASSERT: Found Player node
+// ASSERT: Found UI node
+// ASSERT: Got parent node
+// ASSERT: Found OtherChild node
+// ASSERT: Example Complete
+//
 // Example: Basic Node Query Operations
 // Demonstrates get_node() and get_parent() usage
 //

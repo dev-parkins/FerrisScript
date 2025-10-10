@@ -1,3 +1,17 @@
+// TEST: node_query_error_handling
+// CATEGORY: integration
+// DESCRIPTION: Error handling best practices for safe node queries
+// EXPECT: success
+// ASSERT: Found Player node
+// ASSERT: Parent exists
+// ASSERT: Found HealthBar at UI/HUD/HealthBar
+// ASSERT: Safe Node Access Patterns
+// ASSERT: Dynamic Node Handling
+// ASSERT: Hierarchy Navigation
+// ASSERT: Found HealthBar via recursive search
+// ASSERT: Got parent node
+// ASSERT: Example Complete
+//
 // Example: Error Handling Best Practices
 // Demonstrates safe node query patterns
 //
