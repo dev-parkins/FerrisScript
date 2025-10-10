@@ -1,0 +1,31 @@
+// Example: Struct Literal Transform2D Scene Setup
+// TEST struct_literals_transform2d
+// CATEGORY: semantics
+// EXPECT: compile_success
+// DESCRIPTION: Demonstrates Transform2D struct literals for scene transformations
+
+fn _ready() {
+    // Create transform using struct literals
+    let spawn_pos = Vector2 { x: 400.0, y: 300.0 };
+    let spawn_scale = Vector2 { x: 1.5, y: 1.5 };
+    let spawn_transform = Transform2D { 
+        position: spawn_pos, 
+        rotation: 0.0, 
+        scale: spawn_scale 
+    };
+    
+    // Create rotated version
+    let rotated_transform = Transform2D {
+        position: spawn_pos,
+        rotation: 1.57,  // ~90 degrees in radians
+        scale: spawn_scale
+    };
+    
+    // Access nested fields
+    let x_pos = spawn_transform.position.x;
+    let scale_x = spawn_transform.scale.x;
+    let rotation = rotated_transform.rotation;
+    
+    print("Transforms initialized");
+    // ASSERT_OUTPUT: Transforms initialized
+}

@@ -3479,4 +3479,219 @@ mod tests {
         assert!(formatted.contains("Transform2D"));
         assert!(formatted.contains("0.785"));
     }
+
+    // ==================== ROBUSTNESS TESTS (Phase 4.5) ====================
+    // Tests for struct literal execution, field access chains, and runtime behavior
+
+    #[test]
+    fn test_vector2_literal_execution() {
+        // Test that Vector2 literals execute correctly
+        let mut env = Env::new();
+        let source = r#"
+            fn test() -> f32 {
+                let v = Vector2 { x: 10.0, y: 20.0 };
+                return v.x + v.y;
+            }
+        "#;
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        let result = call_function("test", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Float(30.0));
+    }
+
+    #[test]
+    fn test_color_literal_execution() {
+        // Test that Color literals execute correctly
+        let mut env = Env::new();
+        let source = r#"
+            fn test() -> f32 {
+                let c = Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 };
+                return c.r + c.g + c.b + c.a;
+            }
+        "#;
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        let result = call_function("test", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Float(2.5));
+    }
+
+    #[test]
+    fn test_rect2_literal_execution() {
+        // Test that Rect2 literals execute correctly with nested Vector2
+        let mut env = Env::new();
+        let source = r#"
+            fn test() -> f32 {
+                let pos = Vector2 { x: 10.0, y: 20.0 };
+                let size = Vector2 { x: 100.0, y: 50.0 };
+                let rect = Rect2 { position: pos, size: size };
+                return rect.position.x + rect.size.x;
+            }
+        "#;
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        let result = call_function("test", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Float(110.0));
+    }
+
+    #[test]
+    fn test_transform2d_literal_execution() {
+        // Test that Transform2D literals execute correctly with mixed types
+        let mut env = Env::new();
+        let source = r#"
+            fn test() -> f32 {
+                let pos = Vector2 { x: 100.0, y: 200.0 };
+                let scale = Vector2 { x: 2.0, y: 2.0 };
+                let t = Transform2D { position: pos, rotation: 1.57, scale: scale };
+                return t.position.x + t.rotation + t.scale.x;
+            }
+        "#;
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        let result = call_function("test", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Float(103.57));
+    }
+
+    #[test]
+    fn test_struct_literal_as_function_parameter() {
+        // Test passing struct literals as function arguments
+        let mut env = Env::new();
+        let source = r#"
+            fn add_vectors(v1: Vector2, v2: Vector2) -> f32 {
+                return v1.x + v1.y + v2.x + v2.y;
+            }
+            fn test() -> f32 {
+                return add_vectors(Vector2 { x: 1.0, y: 2.0 }, Vector2 { x: 3.0, y: 4.0 });
+            }
+        "#;
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        let result = call_function("test", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Float(10.0));
+    }
+
+    #[test]
+    fn test_struct_literal_as_return_value() {
+        // Test returning struct literals from functions
+        let mut env = Env::new();
+        let source = r#"
+            fn make_vector() -> Vector2 {
+                return Vector2 { x: 42.0, y: 84.0 };
+            }
+            fn test() -> f32 {
+                let v = make_vector();
+                return v.x + v.y;
+            }
+        "#;
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        let result = call_function("test", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Float(126.0));
+    }
+
+    #[test]
+    fn test_nested_field_access_chain() {
+        // Test deep field access chains: rect.position.x
+        let mut env = Env::new();
+        let source = r#"
+            fn test() -> f32 {
+                let pos = Vector2 { x: 5.0, y: 10.0 };
+                let size = Vector2 { x: 15.0, y: 20.0 };
+                let rect = Rect2 { position: pos, size: size };
+                return rect.position.x + rect.position.y + rect.size.x + rect.size.y;
+            }
+        "#;
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        let result = call_function("test", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Float(50.0));
+    }
+
+    #[test]
+    fn test_struct_literal_in_conditional() {
+        // Test using struct literals in if conditions
+        let mut env = Env::new();
+        let source = r#"
+            fn test() -> f32 {
+                let v = Vector2 { x: 10.0, y: 20.0 };
+                if v.x > 5.0 {
+                    return v.y;
+                }
+                return 0.0;
+            }
+        "#;
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        let result = call_function("test", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Float(20.0));
+    }
+
+    #[test]
+    fn test_struct_literal_in_while_loop() {
+        // Test using struct literals in while loops
+        let mut env = Env::new();
+        let source = r#"
+            fn test() -> f32 {
+                let mut v = Vector2 { x: 0.0, y: 0.0 };
+                while v.x < 5.0 {
+                    v.x = v.x + 1.0;
+                    v.y = v.y + 2.0;
+                }
+                return v.y;
+            }
+        "#;
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        let result = call_function("test", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Float(10.0));
+    }
+
+    #[test]
+    fn test_integer_to_float_coercion_in_struct_literal() {
+        // Test that i32 values coerce to f32 in struct literals
+        let mut env = Env::new();
+        let source = r#"
+            fn test() -> f32 {
+                let v = Vector2 { x: 10, y: 20 };
+                return v.x + v.y;
+            }
+        "#;
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        let result = call_function("test", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Float(30.0));
+    }
+
+    #[test]
+    fn test_color_literal_with_integer_components() {
+        // Test Color with integer components (common use case)
+        let mut env = Env::new();
+        let source = r#"
+            fn test() -> f32 {
+                let c = Color { r: 1, g: 0, b: 0, a: 1 };
+                return c.r + c.a;
+            }
+        "#;
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        let result = call_function("test", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Float(2.0));
+    }
+
+    #[test]
+    fn test_multiple_struct_literals_in_expression() {
+        // Test complex expressions with multiple struct literals
+        let mut env = Env::new();
+        let source = r#"
+            fn test() -> f32 {
+                let v1 = Vector2 { x: 1.0, y: 2.0 };
+                let v2 = Vector2 { x: 3.0, y: 4.0 };
+                let v3 = Vector2 { x: 5.0, y: 6.0 };
+                return v1.x + v2.y + v3.x + v3.y;
+            }
+        "#;
+        let program = compile(source).unwrap();
+        execute(&program, &mut env).unwrap();
+        let result = call_function("test", &[], &mut env).unwrap();
+        assert_eq!(result, Value::Float(16.0));
+    }
 }
