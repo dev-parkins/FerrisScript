@@ -92,8 +92,12 @@ pub mod type_checker;
 /// - Helpful hint about the issue
 pub fn compile(source: &str) -> Result<ast::Program, String> {
     let positioned_tokens = lexer::tokenize_positioned(source)?;
-    let ast = parser::parse_positioned(&positioned_tokens, source)?;
-    type_checker::check(&ast, source)?;
+    let mut ast = parser::parse_positioned(&positioned_tokens, source)?;
+
+    // Type check and extract property metadata (Phase 5)
+    let metadata = type_checker::check_and_extract_metadata(&ast, source)?;
+    ast.property_metadata = metadata;
+
     Ok(ast)
 }
 

@@ -289,6 +289,12 @@ pub struct Env {
     node_query_callback: Option<NodeQueryCallback>,
     /// Signal definitions: signal name -> parameter count
     signals: HashMap<String, usize>,
+    /// Per-instance values for exported properties (Phase 5)
+    /// Key: property name, Value: current property value
+    exported_properties: HashMap<String, Value>,
+    /// Reference to property metadata (static, from Program) (Phase 5)
+    /// Initialized during execute() from program.property_metadata
+    property_metadata: Vec<ast::PropertyMetadata>,
 }
 
 impl Default for Env {
@@ -308,6 +314,8 @@ impl Env {
             signal_emitter: None,
             node_query_callback: None,
             signals: HashMap::new(),
+            exported_properties: HashMap::new(),
+            property_metadata: Vec::new(),
         };
 
         // Register built-in functions
@@ -548,6 +556,278 @@ impl Env {
     pub fn get_signal_param_count(&self, name: &str) -> Option<usize> {
         self.signals.get(name).copied()
     }
+
+    // ========== Phase 5: Exported Property Methods ==========
+
+    /// Initialize exported properties from Program metadata (Checkpoint 3.1 & 3.2)
+    ///
+    /// Called during execute() to set up property storage with default values.
+    /// Reads static PropertyMetadata from the Program and initializes the
+    /// per-instance exported_properties HashMap.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use ferrisscript_runtime::Env;
+    /// # use ferrisscript_compiler::compile;
+    /// let source = "@export let mut health: i32 = 100;";
+    /// let program = compile(source).unwrap();
+    /// let mut env = Env::new();
+    /// env.initialize_properties(&program);
+    /// // exported_properties now contains { "health": Value::Int(100) }
+    /// ```
+    pub fn initialize_properties(&mut self, program: &ast::Program) {
+        // Clone property metadata from Program (static, shared across instances)
+        self.property_metadata = program.property_metadata.clone();
+
+        // Initialize exported_properties HashMap with default values
+        for metadata in &self.property_metadata {
+            if let Some(default_str) = &metadata.default_value {
+                let value = Self::parse_default_value(default_str, &metadata.type_name);
+                self.exported_properties
+                    .insert(metadata.name.clone(), value);
+            }
+        }
+    }
+
+    /// Parse default value string to Value (Checkpoint 3.1)
+    ///
+    /// Handles:
+    /// - Literals: `42`, `3.14`, `true`, `"text"`
+    /// - Struct literals: `Vector2 { x: 0.0, y: 0.0 }` (simplified parsing)
+    ///
+    /// For struct literals, we do basic parsing since default values are
+    /// guaranteed to be compile-time constants (validated by E813).
+    fn parse_default_value(default_str: &str, type_name: &str) -> Value {
+        match type_name {
+            "i32" => {
+                // Handle negative numbers (may have leading minus)
+                Value::Int(default_str.parse().unwrap_or(0))
+            }
+            "f32" => {
+                // Handle negative floats (may have leading minus)
+                Value::Float(default_str.parse().unwrap_or(0.0))
+            }
+            "bool" => Value::Bool(default_str.parse().unwrap_or(false)),
+            "String" => {
+                // Remove surrounding quotes if present
+                let s = default_str.trim_matches('"');
+                Value::String(s.to_string())
+            }
+            "Vector2" => {
+                // Parse "Vector2 { x: 0.0, y: 0.0 }" format
+                // Simplified parsing since format is guaranteed by compiler
+                if let Some(fields_str) = default_str.strip_prefix("Vector2 {") {
+                    if let Some(fields_str) = fields_str.strip_suffix('}') {
+                        let mut x = 0.0;
+                        let mut y = 0.0;
+                        for field in fields_str.split(',') {
+                            let parts: Vec<&str> = field.split(':').collect();
+                            if parts.len() == 2 {
+                                let name = parts[0].trim();
+                                let value = parts[1].trim();
+                                if name == "x" {
+                                    x = value.parse().unwrap_or(0.0);
+                                } else if name == "y" {
+                                    y = value.parse().unwrap_or(0.0);
+                                }
+                            }
+                        }
+                        return Value::Vector2 { x, y };
+                    }
+                }
+                Value::Vector2 { x: 0.0, y: 0.0 } // Default
+            }
+            "Color" => {
+                // Parse "Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 }" format
+                if let Some(fields_str) = default_str.strip_prefix("Color {") {
+                    if let Some(fields_str) = fields_str.strip_suffix('}') {
+                        let mut r = 0.0;
+                        let mut g = 0.0;
+                        let mut b = 0.0;
+                        let mut a = 1.0;
+                        for field in fields_str.split(',') {
+                            let parts: Vec<&str> = field.split(':').collect();
+                            if parts.len() == 2 {
+                                let name = parts[0].trim();
+                                let value = parts[1].trim();
+                                match name {
+                                    "r" => r = value.parse().unwrap_or(0.0),
+                                    "g" => g = value.parse().unwrap_or(0.0),
+                                    "b" => b = value.parse().unwrap_or(0.0),
+                                    "a" => a = value.parse().unwrap_or(1.0),
+                                    _ => {}
+                                }
+                            }
+                        }
+                        return Value::Color { r, g, b, a };
+                    }
+                }
+                Value::Color {
+                    r: 0.0,
+                    g: 0.0,
+                    b: 0.0,
+                    a: 1.0,
+                } // Default
+            }
+            // TODO: Rect2, Transform2D (complex struct literals)
+            // For now, return type defaults
+            "Rect2" => Value::Rect2 {
+                position: Box::new(Value::Vector2 { x: 0.0, y: 0.0 }),
+                size: Box::new(Value::Vector2 { x: 0.0, y: 0.0 }),
+            },
+            "Transform2D" => Value::Transform2D {
+                position: Box::new(Value::Vector2 { x: 0.0, y: 0.0 }),
+                rotation: 0.0,
+                scale: Box::new(Value::Vector2 { x: 1.0, y: 1.0 }),
+            },
+            _ => Value::Nil,
+        }
+    }
+
+    /// Get an exported property value (Checkpoint 3.3)
+    ///
+    /// Returns the current value of an exported property.
+    /// Called from Godot Inspector or GDExtension get() method.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use ferrisscript_runtime::{Env, Value};
+    /// # let mut env = Env::new();
+    /// # env.exported_properties.insert("health".to_string(), Value::Int(100));
+    /// let health = env.get_exported_property("health").unwrap();
+    /// assert_eq!(health, Value::Int(100));
+    /// ```
+    pub fn get_exported_property(&self, name: &str) -> Result<Value, String> {
+        self.exported_properties
+            .get(name)
+            .cloned()
+            .ok_or_else(|| format!("Property '{}' not found", name))
+    }
+
+    /// Set an exported property value with optional clamping (Checkpoint 3.4)
+    ///
+    /// Updates the value of an exported property. If `from_inspector` is true,
+    /// applies range clamping for properties with Range hints. If false (from script),
+    /// allows out-of-range values but emits a warning.
+    ///
+    /// # Clamp-on-Set Policy
+    ///
+    /// - **Inspector sets** (`from_inspector=true`): Automatically clamp to range
+    /// - **Script sets** (`from_inspector=false`): Warn if out of range, but allow
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use ferrisscript_runtime::{Env, Value};
+    /// # use ferrisscript_compiler::ast::{PropertyMetadata, PropertyHint};
+    /// # let mut env = Env::new();
+    /// # env.property_metadata.push(PropertyMetadata {
+    /// #     name: "health".to_string(),
+    /// #     type_name: "i32".to_string(),
+    /// #     hint: PropertyHint::Range { min: 0.0, max: 100.0, step: 1.0 },
+    /// #     hint_string: "0,100,1".to_string(),
+    /// #     default_value: Some("100".to_string()),
+    /// # });
+    /// # env.exported_properties.insert("health".to_string(), Value::Int(100));
+    /// // From Inspector: clamps 150 to 100
+    /// env.set_exported_property("health", Value::Int(150), true).unwrap();
+    /// assert_eq!(env.get_exported_property("health").unwrap(), Value::Int(100));
+    ///
+    /// // From script: allows 150 but warns
+    /// env.set_exported_property("health", Value::Int(150), false).unwrap();
+    /// assert_eq!(env.get_exported_property("health").unwrap(), Value::Int(150));
+    /// ```
+    pub fn set_exported_property(
+        &mut self,
+        name: &str,
+        value: Value,
+        from_inspector: bool,
+    ) -> Result<(), String> {
+        // Find metadata for this property
+        let metadata = self
+            .property_metadata
+            .iter()
+            .find(|m| m.name == name)
+            .ok_or_else(|| format!("Property '{}' not found", name))?;
+
+        // Apply clamping if range hint and from Inspector
+        let final_value = if from_inspector {
+            Self::clamp_if_range(metadata, value)?
+        } else {
+            // From script: warn if out of range but allow
+            Self::warn_if_out_of_range(metadata, &value);
+            value
+        };
+
+        self.exported_properties
+            .insert(name.to_string(), final_value);
+        Ok(())
+    }
+
+    /// Clamp value to range if PropertyHint is Range (Checkpoint 3.4)
+    ///
+    /// Applies min/max clamping for Range hints. Handles both i32 and f32.
+    /// Returns error for NaN or Infinity float values.
+    fn clamp_if_range(metadata: &ast::PropertyMetadata, value: Value) -> Result<Value, String> {
+        match &metadata.hint {
+            ast::PropertyHint::Range { min, max, .. } => match value {
+                Value::Int(i) => {
+                    let clamped = i.max(*min as i32).min(*max as i32);
+                    Ok(Value::Int(clamped))
+                }
+                Value::Float(f) => {
+                    // Handle NaN and Infinity
+                    if f.is_nan() {
+                        return Err(format!(
+                            "Invalid float value for {}: NaN (not a number)",
+                            metadata.name
+                        ));
+                    }
+                    if f.is_infinite() {
+                        return Err(format!(
+                            "Invalid float value for {}: {} (infinite)",
+                            metadata.name,
+                            if f.is_sign_positive() {
+                                "+Infinity"
+                            } else {
+                                "-Infinity"
+                            }
+                        ));
+                    }
+                    let clamped = f.max(*min).min(*max);
+                    Ok(Value::Float(clamped))
+                }
+                _ => Err(format!(
+                    "Range hint requires numeric value, got {:?}",
+                    value
+                )),
+            },
+            _ => Ok(value), // No clamping for other hints
+        }
+    }
+
+    /// Warn if value is out of range (for script sets) (Checkpoint 3.4)
+    ///
+    /// Emits a warning to stderr if the value is outside the range hint bounds.
+    /// This is policy for script-side assignments (allow but warn).
+    fn warn_if_out_of_range(metadata: &ast::PropertyMetadata, value: &Value) {
+        if let ast::PropertyHint::Range { min, max, .. } = &metadata.hint {
+            let out_of_range = match value {
+                Value::Int(i) => (*i as f32) < *min || (*i as f32) > *max,
+                Value::Float(f) => *f < *min || *f > *max,
+                _ => false,
+            };
+
+            if out_of_range {
+                eprintln!(
+                    "Warning: Property '{}' set to {:?}, outside range {}-{}",
+                    metadata.name, value, min, max
+                );
+            }
+        }
+    }
 }
 
 // Built-in function implementations
@@ -669,6 +949,9 @@ pub fn execute(program: &ast::Program, env: &mut Env) -> Result<(), String> {
     for signal in &program.signals {
         env.register_signal(signal.name.clone(), signal.parameters.len());
     }
+
+    // Initialize exported properties from metadata (Phase 5: Checkpoint 3.1 & 3.2)
+    env.initialize_properties(program);
 
     // Register all functions
     for func in &program.functions {
@@ -3693,5 +3976,260 @@ mod tests {
         execute(&program, &mut env).unwrap();
         let result = call_function("test", &[], &mut env).unwrap();
         assert_eq!(result, Value::Float(16.0));
+    }
+
+    // ========== Phase 5: Exported Property Tests (Bundle 1: Checkpoints 3.1 & 3.2) ==========
+
+    #[test]
+    fn test_initialize_exported_properties_from_metadata() {
+        // Test that exported properties are initialized with default values
+        let source = r#"
+@export let mut health: i32 = 100;
+@export let mut speed: f32 = 10.5;
+@export let mut enabled: bool = true;
+@export let mut name: String = "Player";
+        "#;
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+
+        // Execute should call initialize_properties
+        execute(&program, &mut env).unwrap();
+
+        // Check that properties were initialized with default values
+        assert_eq!(
+            env.get_exported_property("health").unwrap(),
+            Value::Int(100)
+        );
+        assert_eq!(
+            env.get_exported_property("speed").unwrap(),
+            Value::Float(10.5)
+        );
+        assert_eq!(
+            env.get_exported_property("enabled").unwrap(),
+            Value::Bool(true)
+        );
+        assert_eq!(
+            env.get_exported_property("name").unwrap(),
+            Value::String("Player".to_string())
+        );
+    }
+
+    #[test]
+    fn test_initialize_multiple_exported_properties() {
+        // Test multiple properties with different types and hints
+        let source = r#"
+@export(range(0, 100, 1)) let mut health: i32 = 75;
+@export(range(0.0, 20.0, 0.5)) let mut speed: f32 = 12.5;
+@export(enum("Easy", "Normal", "Hard")) let mut difficulty: String = "Normal";
+@export let mut position: Vector2 = Vector2 { x: 10.0, y: 20.0 };
+@export let mut color: Color = Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
+        "#;
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+
+        execute(&program, &mut env).unwrap();
+
+        // Verify all properties initialized correctly
+        assert_eq!(env.get_exported_property("health").unwrap(), Value::Int(75));
+        assert_eq!(
+            env.get_exported_property("speed").unwrap(),
+            Value::Float(12.5)
+        );
+        assert_eq!(
+            env.get_exported_property("difficulty").unwrap(),
+            Value::String("Normal".to_string())
+        );
+
+        // Verify Vector2 struct literal parsed correctly
+        let position = env.get_exported_property("position").unwrap();
+        if let Value::Vector2 { x, y } = position {
+            assert_eq!(x, 10.0);
+            assert_eq!(y, 20.0);
+        } else {
+            panic!("Expected Vector2, got {:?}", position);
+        }
+
+        // Verify Color struct literal parsed correctly
+        let color = env.get_exported_property("color").unwrap();
+        if let Value::Color { r, g, b, a } = color {
+            assert_eq!(r, 1.0);
+            assert_eq!(g, 0.0);
+            assert_eq!(b, 0.0);
+            assert_eq!(a, 1.0);
+        } else {
+            panic!("Expected Color, got {:?}", color);
+        }
+    }
+
+    // ========== Phase 5: Exported Property Tests (Bundle 2: Checkpoints 3.3 & 3.4) ==========
+
+    #[test]
+    fn test_get_exported_property_success() {
+        // Test getting an initialized exported property
+        let source = "@export let mut health: i32 = 100;";
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        let result = env.get_exported_property("health");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Value::Int(100));
+    }
+
+    #[test]
+    fn test_get_exported_property_not_found() {
+        // Test getting a property that doesn't exist
+        let env = Env::new();
+        let result = env.get_exported_property("nonexistent");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("not found"));
+    }
+
+    #[test]
+    fn test_set_exported_property_no_clamping() {
+        // Test setting property within range (no clamping needed)
+        let source = "@export(range(0, 100, 1)) let mut health: i32 = 100;";
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Set within range (from Inspector)
+        let result = env.set_exported_property("health", Value::Int(50), true);
+        assert!(result.is_ok());
+        assert_eq!(env.get_exported_property("health").unwrap(), Value::Int(50));
+
+        // Set within range (from script)
+        let result = env.set_exported_property("health", Value::Int(75), false);
+        assert!(result.is_ok());
+        assert_eq!(env.get_exported_property("health").unwrap(), Value::Int(75));
+    }
+
+    #[test]
+    fn test_set_exported_property_clamp_from_inspector() {
+        // Test clamping when set from Inspector
+        let source = "@export(range(0, 100, 1)) let mut health: i32 = 100;";
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Set above max (from Inspector - should clamp)
+        env.set_exported_property("health", Value::Int(150), true)
+            .unwrap();
+        assert_eq!(
+            env.get_exported_property("health").unwrap(),
+            Value::Int(100)
+        );
+
+        // Set below min (from Inspector - should clamp)
+        env.set_exported_property("health", Value::Int(-50), true)
+            .unwrap();
+        assert_eq!(env.get_exported_property("health").unwrap(), Value::Int(0));
+    }
+
+    #[test]
+    fn test_set_exported_property_warn_from_script() {
+        // Test that script sets allow out-of-range but warn (captured via stderr)
+        let source = "@export(range(0, 100, 1)) let mut health: i32 = 100;";
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Set above max (from script - should allow)
+        let result = env.set_exported_property("health", Value::Int(150), false);
+        assert!(result.is_ok());
+        assert_eq!(
+            env.get_exported_property("health").unwrap(),
+            Value::Int(150)
+        );
+
+        // Set below min (from script - should allow)
+        let result = env.set_exported_property("health", Value::Int(-50), false);
+        assert!(result.is_ok());
+        assert_eq!(
+            env.get_exported_property("health").unwrap(),
+            Value::Int(-50)
+        );
+    }
+
+    #[test]
+    fn test_set_exported_property_clamp_float_range() {
+        // Test float clamping
+        let source = "@export(range(0.0, 20.0, 0.5)) let mut speed: f32 = 10.0;";
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Set above max
+        env.set_exported_property("speed", Value::Float(25.5), true)
+            .unwrap();
+        assert_eq!(
+            env.get_exported_property("speed").unwrap(),
+            Value::Float(20.0)
+        );
+
+        // Set below min
+        env.set_exported_property("speed", Value::Float(-5.0), true)
+            .unwrap();
+        assert_eq!(
+            env.get_exported_property("speed").unwrap(),
+            Value::Float(0.0)
+        );
+    }
+
+    #[test]
+    fn test_set_exported_property_nan_infinity_error() {
+        // Test that NaN and Infinity are rejected for range hints
+        let source = "@export(range(0.0, 100.0, 1.0)) let mut value: f32 = 50.0;";
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // NaN should error
+        let result = env.set_exported_property("value", Value::Float(f32::NAN), true);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("NaN"));
+
+        // Infinity should error
+        let result = env.set_exported_property("value", Value::Float(f32::INFINITY), true);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("infinite"));
+
+        // Negative infinity should error
+        let result = env.set_exported_property("value", Value::Float(f32::NEG_INFINITY), true);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("infinite"));
+    }
+
+    #[test]
+    fn test_set_exported_property_negative_range() {
+        // Test clamping with negative ranges
+        let source = "@export(range(-100, 100, 1)) let mut offset: i32 = 0;";
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Set below min (should clamp to -100)
+        env.set_exported_property("offset", Value::Int(-150), true)
+            .unwrap();
+        assert_eq!(
+            env.get_exported_property("offset").unwrap(),
+            Value::Int(-100)
+        );
+
+        // Set above max (should clamp to 100)
+        env.set_exported_property("offset", Value::Int(150), true)
+            .unwrap();
+        assert_eq!(
+            env.get_exported_property("offset").unwrap(),
+            Value::Int(100)
+        );
+
+        // Set within range
+        env.set_exported_property("offset", Value::Int(-50), true)
+            .unwrap();
+        assert_eq!(
+            env.get_exported_property("offset").unwrap(),
+            Value::Int(-50)
+        );
     }
 }
