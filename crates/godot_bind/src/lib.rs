@@ -4,9 +4,139 @@ use godot::classes::{file_access::ModeFlags, FileAccess, InputEvent};
 use godot::prelude::*;
 use std::cell::RefCell;
 
+// PropertyInfo imports for Inspector integration (Bundle 4 - Checkpoint 3.7)
+use godot::builtin::VariantType;
+use godot::global::{PropertyHint, PropertyUsageFlags};
+use godot::meta::{ClassId, PropertyHintInfo, PropertyInfo};
+use godot::register::property::export_info_functions;
+
 // Signal prototype module for v0.0.4 research
 mod signal_prototype;
 pub use signal_prototype::SignalPrototype;
+
+/// PropertyUsage helper for exported properties (Bundle 4 - Checkpoint 3.7)
+/// In godot-rust 0.4.0, DEFAULT does not include EDITOR or STORAGE  
+/// PROPERTY_USAGE_COMMON = DEFAULT | EDITOR | STORAGE for full Inspector integration
+/// Note: PropertyUsageFlags BitOr is not const, so this is a function
+#[inline]
+fn property_usage_common() -> PropertyUsageFlags {
+    PropertyUsageFlags::DEFAULT | PropertyUsageFlags::EDITOR | PropertyUsageFlags::STORAGE
+}
+
+// ============================================================================
+// Phase 5 Sub-Phase 3: PropertyInfo Generation Helpers (Bundle 4 - Checkpoint 3.7)
+// ============================================================================
+
+/// Map FerrisScript type name to Godot VariantType
+///
+/// Supports all 8 exportable types from Phase 5 Sub-Phase 2:
+/// - Primitives: i32, f32, bool, String
+/// - Godot structs: Vector2, Color, Rect2, Transform2D
+///
+/// Returns VariantType::NIL for unknown types with a warning.
+#[allow(dead_code)]
+fn map_type_to_variant(type_name: &str) -> VariantType {
+    match type_name {
+        "i32" => VariantType::INT,
+        "f32" => VariantType::FLOAT,
+        "bool" => VariantType::BOOL,
+        "String" => VariantType::STRING,
+        "Vector2" => VariantType::VECTOR2,
+        "Color" => VariantType::COLOR,
+        "Rect2" => VariantType::RECT2,
+        "Transform2D" => VariantType::TRANSFORM2D,
+        _ => {
+            godot_warn!(
+                "Unknown FerrisScript type '{}' for export, defaulting to NIL",
+                type_name
+            );
+            VariantType::NIL
+        }
+    }
+}
+
+/// Map FerrisScript PropertyHint to Godot PropertyHintInfo
+///
+/// Uses export_info_functions helpers for robust, cross-platform hint strings.
+///
+/// Hint formats (per Godot 4.x conventions):
+/// - Range: "min,max,step" (uses export_range helper)
+/// - Enum: "Value1,Value2,Value3" (comma-separated)
+/// - File: "*.ext1;*.ext2" (semicolons for Windows compatibility)
+/// - None: empty hint string
+#[allow(dead_code)]
+fn map_hint(hint: &ast::PropertyHint) -> PropertyHintInfo {
+    match hint {
+        ast::PropertyHint::None => PropertyHintInfo {
+            hint: PropertyHint::NONE,
+            hint_string: GString::new(),
+        },
+
+        ast::PropertyHint::Range { min, max, step } => {
+            // Use export_info_functions for robust formatting
+            export_info_functions::export_range(
+                *min as f64,
+                *max as f64,
+                Some(*step as f64),
+                false, // or_greater
+                false, // or_less
+                false, // exp
+                false, // radians_as_degrees
+                false, // degrees
+                false, // hide_slider
+                None,  // suffix
+            )
+        }
+
+        ast::PropertyHint::Enum { values } => {
+            let enum_string = values.join(",");
+            PropertyHintInfo {
+                hint: PropertyHint::ENUM,
+                hint_string: GString::from(&enum_string),
+            }
+        }
+
+        ast::PropertyHint::File { extensions } => {
+            // Format extensions with wildcards and use semicolons (Windows compatibility)
+            let formatted_exts: Vec<String> = extensions
+                .iter()
+                .map(|ext| {
+                    if ext.starts_with("*.") {
+                        ext.clone()
+                    } else if ext.starts_with('.') {
+                        format!("*{}", ext)
+                    } else {
+                        format!("*.{}", ext)
+                    }
+                })
+                .collect();
+
+            let file_string = formatted_exts.join(";");
+            PropertyHintInfo {
+                hint: PropertyHint::FILE,
+                hint_string: GString::from(&file_string),
+            }
+        }
+    }
+}
+
+/// Convert FerrisScript PropertyMetadata to Godot PropertyInfo
+///
+/// This is the main conversion function that combines type and hint mapping.
+/// Uses verified API patterns:
+/// - ClassId::none() for non-object types
+/// - property_usage_common() for standard usage flags
+/// - Generates fresh PropertyInfo on each call (Godot best practice)
+#[allow(dead_code)]
+fn metadata_to_property_info(metadata: &ast::PropertyMetadata) -> PropertyInfo {
+    PropertyInfo {
+        variant_type: map_type_to_variant(&metadata.type_name),
+        class_id: ClassId::none(), // FerrisScript types are not Godot objects
+        property_name: StringName::from(&metadata.name),
+        hint_info: map_hint(&metadata.hint),
+        usage: property_usage_common(),
+    }
+}
 
 // Thread-local storage for node properties during script execution
 thread_local! {
@@ -588,3 +718,245 @@ fn variant_to_value(variant: &Variant) -> Value {
 // initialized and will be validated in integration tests (godot_test/ examples).
 // The variant_to_value() and value_to_variant() functions are already used in the
 // signal emission system and known to work correctly.
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// API Verification Test (Bundle 4 - Checkpoint 3.7)
+    /// Confirms which PropertyUsageFlags and ClassId API variants work in godot-rust 0.4.0
+    #[test]
+    fn test_property_usage_flags_api() {
+        // Test 1: Verify bitwise OR operator works on PropertyUsageFlags
+        let flags =
+            PropertyUsageFlags::DEFAULT | PropertyUsageFlags::EDITOR | PropertyUsageFlags::STORAGE;
+        // Test 2: Verify property_usage_common() helper function
+        let common = property_usage_common();
+        // API verification: if this compiles, the API patterns are correct
+        assert_eq!(flags, flags); // Non-constant assertion to avoid clippy warning
+        assert_eq!(common, common);
+    }
+
+    #[test]
+    fn test_classid_api() {
+        // Test which ClassId variant exists
+        // Try ClassId::none() first (most common in 0.4.0)
+        let class_id = ClassId::none();
+        // API verification: if above compiles, none() is correct
+        assert_eq!(class_id, ClassId::none());
+    }
+
+    // ====================
+    // map_type_to_variant Tests (Bundle 4 - Checkpoint 3.7)
+    // ====================
+
+    #[test]
+    fn test_map_type_i32() {
+        assert_eq!(map_type_to_variant("i32"), VariantType::INT);
+    }
+
+    #[test]
+    fn test_map_type_f32() {
+        assert_eq!(map_type_to_variant("f32"), VariantType::FLOAT);
+    }
+
+    #[test]
+    fn test_map_type_bool() {
+        assert_eq!(map_type_to_variant("bool"), VariantType::BOOL);
+    }
+
+    #[test]
+    fn test_map_type_string() {
+        assert_eq!(map_type_to_variant("String"), VariantType::STRING);
+    }
+
+    #[test]
+    fn test_map_type_vector2() {
+        assert_eq!(map_type_to_variant("Vector2"), VariantType::VECTOR2);
+    }
+
+    #[test]
+    fn test_map_type_color() {
+        assert_eq!(map_type_to_variant("Color"), VariantType::COLOR);
+    }
+
+    #[test]
+    fn test_map_type_rect2() {
+        assert_eq!(map_type_to_variant("Rect2"), VariantType::RECT2);
+    }
+
+    #[test]
+    fn test_map_type_transform2d() {
+        assert_eq!(map_type_to_variant("Transform2D"), VariantType::TRANSFORM2D);
+    }
+
+    #[test]
+    fn test_map_type_unknown() {
+        // Unknown type should return NIL and log a warning
+        assert_eq!(map_type_to_variant("UnknownType"), VariantType::NIL);
+    }
+
+    // ====================
+    // map_hint Tests (Bundle 4 - Checkpoint 3.7)
+    // NOTE: These tests require Godot engine to be available (GString, PropertyInfo construction)
+    // They will be validated through manual Inspector testing in Bundle 5
+    // and automated integration tests in Godot
+    // ====================
+
+    #[test]
+    fn test_map_hint_none() {
+        let hint = ast::PropertyHint::None;
+        let result = map_hint(&hint);
+        assert_eq!(result.hint, PropertyHint::NONE);
+        assert!(result.hint_string.is_empty());
+    }
+
+    #[test]
+    fn test_map_hint_range() {
+        let hint = ast::PropertyHint::Range {
+            min: 0.0,
+            max: 100.0,
+            step: 1.0,
+        };
+        let result = map_hint(&hint);
+        assert_eq!(result.hint, PropertyHint::RANGE);
+        // Verify it contains numeric values (exact format from export_range)
+        let hint_str = result.hint_string.to_string();
+        assert!(
+            hint_str.contains("0"),
+            "Range hint should contain min value"
+        );
+        assert!(
+            hint_str.contains("100"),
+            "Range hint should contain max value"
+        );
+    }
+
+    #[test]
+    fn test_map_hint_enum() {
+        let hint = ast::PropertyHint::Enum {
+            values: vec![
+                "Option1".to_string(),
+                "Option2".to_string(),
+                "Option3".to_string(),
+            ],
+        };
+        let result = map_hint(&hint);
+        assert_eq!(result.hint, PropertyHint::ENUM);
+        assert_eq!(result.hint_string.to_string(), "Option1,Option2,Option3");
+    }
+
+    #[test]
+    fn test_map_hint_file_with_dots() {
+        let hint = ast::PropertyHint::File {
+            extensions: vec![".png".to_string(), ".jpg".to_string()],
+        };
+        let result = map_hint(&hint);
+        assert_eq!(result.hint, PropertyHint::FILE);
+        assert_eq!(result.hint_string.to_string(), "*.png;*.jpg");
+    }
+
+    #[test]
+    fn test_map_hint_file_with_wildcards() {
+        let hint = ast::PropertyHint::File {
+            extensions: vec!["*.txt".to_string(), "*.md".to_string()],
+        };
+        let result = map_hint(&hint);
+        assert_eq!(result.hint, PropertyHint::FILE);
+        assert_eq!(result.hint_string.to_string(), "*.txt;*.md");
+    }
+
+    #[test]
+    fn test_map_hint_file_without_dots() {
+        let hint = ast::PropertyHint::File {
+            extensions: vec!["png".to_string(), "jpg".to_string()],
+        };
+        let result = map_hint(&hint);
+        assert_eq!(result.hint, PropertyHint::FILE);
+        assert_eq!(result.hint_string.to_string(), "*.png;*.jpg");
+    }
+
+    // ====================
+    // metadata_to_property_info Tests (Bundle 4 - Checkpoint 3.7)
+    // NOTE: These tests require Godot engine to be available
+    // Will be validated through Bundle 5 Inspector testing
+    // ====================
+
+    #[test]
+    fn test_metadata_basic_property() {
+        let metadata = ast::PropertyMetadata {
+            name: "test_prop".to_string(),
+            type_name: "i32".to_string(),
+            hint: ast::PropertyHint::None,
+            hint_string: String::new(),
+            default_value: Some("42".to_string()),
+        };
+        let result = metadata_to_property_info(&metadata);
+        assert_eq!(result.variant_type, VariantType::INT);
+        assert_eq!(result.property_name.to_string(), "test_prop");
+        assert_eq!(result.hint_info.hint, PropertyHint::NONE);
+        assert_eq!(result.class_id, ClassId::none());
+    }
+
+    #[test]
+    fn test_metadata_with_range_hint() {
+        let metadata = ast::PropertyMetadata {
+            name: "health".to_string(),
+            type_name: "f32".to_string(),
+            hint: ast::PropertyHint::Range {
+                min: 0.0,
+                max: 100.0,
+                step: 1.0,
+            },
+            hint_string: "0,100,1".to_string(),
+            default_value: Some("100.0".to_string()),
+        };
+        let result = metadata_to_property_info(&metadata);
+        assert_eq!(result.variant_type, VariantType::FLOAT);
+        assert_eq!(result.property_name.to_string(), "health");
+        assert_eq!(result.hint_info.hint, PropertyHint::RANGE);
+    }
+
+    #[test]
+    fn test_metadata_with_enum_hint() {
+        let metadata = ast::PropertyMetadata {
+            name: "state".to_string(),
+            type_name: "String".to_string(),
+            hint: ast::PropertyHint::Enum {
+                values: vec![
+                    "Idle".to_string(),
+                    "Walking".to_string(),
+                    "Running".to_string(),
+                ],
+            },
+            hint_string: "Idle,Walking,Running".to_string(),
+            default_value: Some("Idle".to_string()),
+        };
+        let result = metadata_to_property_info(&metadata);
+        assert_eq!(result.variant_type, VariantType::STRING);
+        assert_eq!(result.property_name.to_string(), "state");
+        assert_eq!(result.hint_info.hint, PropertyHint::ENUM);
+        assert_eq!(
+            result.hint_info.hint_string.to_string(),
+            "Idle,Walking,Running"
+        );
+    }
+
+    #[test]
+    fn test_metadata_with_file_hint() {
+        let metadata = ast::PropertyMetadata {
+            name: "texture_path".to_string(),
+            type_name: "String".to_string(),
+            hint: ast::PropertyHint::File {
+                extensions: vec![".png".to_string(), ".jpg".to_string()],
+            },
+            hint_string: "*.png;*.jpg".to_string(),
+            default_value: Some("res://icon.png".to_string()),
+        };
+        let result = metadata_to_property_info(&metadata);
+        assert_eq!(result.variant_type, VariantType::STRING);
+        assert_eq!(result.property_name.to_string(), "texture_path");
+        assert_eq!(result.hint_info.hint, PropertyHint::FILE);
+        assert_eq!(result.hint_info.hint_string.to_string(), "*.png;*.jpg");
+    }
+}
