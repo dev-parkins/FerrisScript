@@ -402,6 +402,7 @@ impl fmt::Display for Stmt {
 /// -velocity.y           // Unary + FieldAccess
 /// sqrt(x * x + y * y)   // Call
 /// position.x            // FieldAccess
+/// Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }  // StructLiteral
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
@@ -413,6 +414,14 @@ pub enum Expr {
     FieldAccess(Box<Expr>, String, Span),
     Assign(Box<Expr>, Box<Expr>, Span),
     CompoundAssign(Box<Expr>, CompoundOp, Box<Expr>, Span),
+    /// Struct literal: `TypeName { field1: value1, field2: value2 }`
+    /// Used for constructing Color, Rect2, Transform2D, etc.
+    /// MVP: No nested literals (e.g., Rect2 with inline Vector2)
+    StructLiteral {
+        type_name: String,
+        fields: Vec<(String, Expr)>,
+        span: Span,
+    },
 }
 
 impl Expr {
@@ -426,6 +435,7 @@ impl Expr {
             Expr::FieldAccess(_, _, s) => *s,
             Expr::Assign(_, _, s) => *s,
             Expr::CompoundAssign(_, _, _, s) => *s,
+            Expr::StructLiteral { span, .. } => *span,
         }
     }
 }
@@ -450,6 +460,18 @@ impl fmt::Display for Expr {
             Expr::FieldAccess(obj, field, _) => write!(f, "{}.{}", obj, field),
             Expr::Assign(target, value, _) => write!(f, "{} = {}", target, value),
             Expr::CompoundAssign(target, op, value, _) => write!(f, "{} {} {}", target, op, value),
+            Expr::StructLiteral {
+                type_name, fields, ..
+            } => {
+                write!(f, "{} {{ ", type_name)?;
+                for (i, (field_name, field_expr)) in fields.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "{}: {}", field_name, field_expr)?;
+                }
+                write!(f, " }}")
+            }
         }
     }
 }

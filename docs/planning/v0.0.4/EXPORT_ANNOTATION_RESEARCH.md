@@ -21,15 +21,15 @@ Here’s what that entails:
 
 Parsing `@export` annotations looks simple at first (`@export(range(0, 100))`), but it’s nontrivial because:
 
-* It’s a **decorator-like syntax** applied *before* variable declarations, meaning your parser needs to:
+- It’s a **decorator-like syntax** applied *before* variable declarations, meaning your parser needs to:
 
-  * Accept tokens before declarations (`let`, `const`).
-  * Associate those tokens with the next variable node in the AST.
-* It introduces **parenthesized arguments** (`range(0, 100)`), which must:
+  - Accept tokens before declarations (`let`, `const`).
+  - Associate those tokens with the next variable node in the AST.
+- It introduces **parenthesized arguments** (`range(0, 100)`), which must:
 
-  * Allow nested parentheses or comma-separated arguments.
-  * Support multiple variants (`range`, `file`, `enum`).
-  * Produce structured metadata (e.g., `Hint::Range { min, max, step }`).
+  - Allow nested parentheses or comma-separated arguments.
+  - Support multiple variants (`range`, `file`, `enum`).
+  - Produce structured metadata (e.g., `Hint::Range { min, max, step }`).
 
 **Complexity category:** *Grammar expansion*
 You’re essentially extending the FerrisScript grammar with a metadata DSL.
@@ -40,8 +40,8 @@ You’re essentially extending the FerrisScript grammar with a metadata DSL.
 
 The type checker must:
 
-* Ensure the variable being exported is **eligible** (e.g., `f32`, `i32`, `String`, `Vector2`, `Color`, etc.)
-* Ensure hints are **compatible** with the variable type.
+- Ensure the variable being exported is **eligible** (e.g., `f32`, `i32`, `String`, `Vector2`, `Color`, etc.)
+- Ensure hints are **compatible** with the variable type.
 
 For example:
 
@@ -51,9 +51,9 @@ For example:
 
 This means:
 
-* It must track a registry of allowed hint → type pairs.
-* It needs to **validate hint arguments** (`min < max`, correct numeric types, etc.).
-* It must produce clear diagnostics (E801–E815).
+- It must track a registry of allowed hint → type pairs.
+- It needs to **validate hint arguments** (`min < max`, correct numeric types, etc.).
+- It must produce clear diagnostics (E801–E815).
 
 **Complexity category:** *Semantic validation matrix*
 (every combination of type + hint has a unique rule)
@@ -75,9 +75,9 @@ struct PropertyMetadata {
 
 The runtime then has to:
 
-* Keep this metadata alive for **Godot to query later**.
-* Serialize it for the Inspector.
-* Handle updates (Inspector changes → runtime variable updates).
+- Keep this metadata alive for **Godot to query later**.
+- Serialize it for the Inspector.
+- Handle updates (Inspector changes → runtime variable updates).
 
 **Complexity category:** *State reflection & persistence*
 This introduces reflection-like capabilities in an otherwise static runtime.
@@ -90,15 +90,15 @@ The most complex part is integration with Godot’s inspector system.
 
 Godot expects:
 
-* A property list (`get_property_list()`)
-* Getter and setter functions for each export
-* Type and hint strings (`PROPERTY_HINT_RANGE`, etc.)
+- A property list (`get_property_list()`)
+- Getter and setter functions for each export
+- Type and hint strings (`PROPERTY_HINT_RANGE`, etc.)
 
 Your binding layer (`crates/godot_bind/src/lib.rs`) will have to:
 
-* Translate FerrisScript metadata into Godot’s C API structures.
-* Handle Godot → FerrisScript type conversions (`Variant → Value` and back).
-* Keep properties *in sync* when modified in either side.
+- Translate FerrisScript metadata into Godot’s C API structures.
+- Handle Godot → FerrisScript type conversions (`Variant → Value` and back).
+- Keep properties *in sync* when modified in either side.
 
 **Complexity category:** *Interop & reflection across two runtimes*
 Both systems have to agree on type encoding, lifetimes, and property semantics.
@@ -109,9 +109,9 @@ Both systems have to agree on type encoding, lifetimes, and property semantics.
 
 Exported properties can be tested in several states:
 
-* Static compile-time validation
-* Runtime get/set
-* Godot Inspector reflection
+- Static compile-time validation
+- Runtime get/set
+- Godot Inspector reflection
 
 That’s **3 test categories** for each feature, and your plan includes:
 
@@ -119,9 +119,9 @@ That’s **3 test categories** for each feature, and your plan includes:
 
 Each test must:
 
-* Parse and type check annotation syntax
-* Run in the runtime to verify metadata correctness
-* Simulate a Godot interaction (Inspector reflection test)
+- Parse and type check annotation syntax
+- Run in the runtime to verify metadata correctness
+- Simulate a Godot interaction (Inspector reflection test)
 
 **Complexity category:** *Multi-environment validation*
 
@@ -160,10 +160,10 @@ In short:
 
 **Deferred because:**
 
-* It introduces **complex AST + runtime reflection**.
-* It requires **cross-crate consistency** (compiler ↔ runtime ↔ godot_bind).
-* It needs **30–40% more test scaffolding** than simple type additions.
-* It would have **blocked unrelated progress (struct literal syntax)** due to parser conflicts if implemented simultaneously.
+- It introduces **complex AST + runtime reflection**.
+- It requires **cross-crate consistency** (compiler ↔ runtime ↔ godot_bind).
+- It needs **30–40% more test scaffolding** than simple type additions.
+- It would have **blocked unrelated progress (struct literal syntax)** due to parser conflicts if implemented simultaneously.
 
 ---
 
@@ -171,9 +171,9 @@ In short:
 
 When you re-enable or start Phase 5:
 
-* Start with parser + type checker only (compile-time metadata).
-* Add runtime metadata later.
-* Integrate Godot Inspector last.
+- Start with parser + type checker only (compile-time metadata).
+- Add runtime metadata later.
+- Integrate Godot Inspector last.
 
 You can track this in smaller steps:
 

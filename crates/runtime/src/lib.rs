@@ -1258,11 +1258,164 @@ fn evaluate_expr(expr: &ast::Expr, env: &mut Env) -> Result<Value, String> {
             }
         }
 
+        ast::Expr::StructLiteral {
+            type_name,
+            fields,
+            span: _,
+        } => evaluate_struct_literal(type_name, fields, env),
+
         // Compound assignment and regular assignment expressions not used in runtime
         // They are desugared to Stmt::Assign at parse time
         ast::Expr::Assign(_, _, _) | ast::Expr::CompoundAssign(_, _, _, _) => {
             Err("Error[E418]: Assignment expressions should be statements".to_string())
         }
+    }
+}
+
+/// Evaluate struct literal: `TypeName { field1: value1, field2: value2 }`
+/// Constructs Value from struct literal expression
+fn evaluate_struct_literal(
+    type_name: &str,
+    fields: &[(String, ast::Expr)],
+    env: &mut Env,
+) -> Result<Value, String> {
+    match type_name {
+        "Color" => {
+            let mut r = None;
+            let mut g = None;
+            let mut b = None;
+            let mut a = None;
+
+            for (field_name, field_expr) in fields {
+                let value = evaluate_expr(field_expr, env)?;
+                let float_val = value
+                    .to_float()
+                    .ok_or_else(|| format!("Color field '{}' must be numeric", field_name))?;
+
+                match field_name.as_str() {
+                    "r" => r = Some(float_val),
+                    "g" => g = Some(float_val),
+                    "b" => b = Some(float_val),
+                    "a" => a = Some(float_val),
+                    _ => return Err(format!("Unknown field '{}' on Color", field_name)),
+                }
+            }
+
+            Ok(Value::Color {
+                r: r.ok_or("Missing field 'r' in Color literal")?,
+                g: g.ok_or("Missing field 'g' in Color literal")?,
+                b: b.ok_or("Missing field 'b' in Color literal")?,
+                a: a.ok_or("Missing field 'a' in Color literal")?,
+            })
+        }
+
+        "Rect2" => {
+            let mut position = None;
+            let mut size = None;
+
+            for (field_name, field_expr) in fields {
+                let value = evaluate_expr(field_expr, env)?;
+                match field_name.as_str() {
+                    "position" => {
+                        if matches!(value, Value::Vector2 { .. }) {
+                            position = Some(Box::new(value));
+                        } else {
+                            return Err(format!(
+                                "Rect2 'position' must be Vector2, found {:?}",
+                                value
+                            ));
+                        }
+                    }
+                    "size" => {
+                        if matches!(value, Value::Vector2 { .. }) {
+                            size = Some(Box::new(value));
+                        } else {
+                            return Err(format!("Rect2 'size' must be Vector2, found {:?}", value));
+                        }
+                    }
+                    _ => return Err(format!("Unknown field '{}' on Rect2", field_name)),
+                }
+            }
+
+            Ok(Value::Rect2 {
+                position: position.ok_or("Missing field 'position' in Rect2 literal")?,
+                size: size.ok_or("Missing field 'size' in Rect2 literal")?,
+            })
+        }
+
+        "Transform2D" => {
+            let mut position = None;
+            let mut rotation = None;
+            let mut scale = None;
+
+            for (field_name, field_expr) in fields {
+                let value = evaluate_expr(field_expr, env)?;
+                match field_name.as_str() {
+                    "position" => {
+                        if matches!(value, Value::Vector2 { .. }) {
+                            position = Some(Box::new(value));
+                        } else {
+                            return Err(format!(
+                                "Transform2D 'position' must be Vector2, found {:?}",
+                                value
+                            ));
+                        }
+                    }
+                    "rotation" => {
+                        rotation = Some(
+                            value
+                                .to_float()
+                                .ok_or("Transform2D 'rotation' must be numeric")?,
+                        );
+                    }
+                    "scale" => {
+                        if matches!(value, Value::Vector2 { .. }) {
+                            scale = Some(Box::new(value));
+                        } else {
+                            return Err(format!(
+                                "Transform2D 'scale' must be Vector2, found {:?}",
+                                value
+                            ));
+                        }
+                    }
+                    _ => return Err(format!("Unknown field '{}' on Transform2D", field_name)),
+                }
+            }
+
+            Ok(Value::Transform2D {
+                position: position.ok_or("Missing field 'position' in Transform2D literal")?,
+                rotation: rotation.ok_or("Missing field 'rotation' in Transform2D literal")?,
+                scale: scale.ok_or("Missing field 'scale' in Transform2D literal")?,
+            })
+        }
+
+        "Vector2" => {
+            let mut x = None;
+            let mut y = None;
+
+            for (field_name, field_expr) in fields {
+                let value = evaluate_expr(field_expr, env)?;
+                let float_val = value
+                    .to_float()
+                    .ok_or_else(|| format!("Vector2 field '{}' must be numeric", field_name))?;
+
+                match field_name.as_str() {
+                    "x" => x = Some(float_val),
+                    "y" => y = Some(float_val),
+                    _ => return Err(format!("Unknown field '{}' on Vector2", field_name)),
+                }
+            }
+
+            Ok(Value::Vector2 {
+                x: x.ok_or("Missing field 'x' in Vector2 literal")?,
+                y: y.ok_or("Missing field 'y' in Vector2 literal")?,
+            })
+        }
+
+        _ => Err(format!(
+            "Type '{}' does not support struct literal syntax",
+            type_name
+        )),
     }
 }
 

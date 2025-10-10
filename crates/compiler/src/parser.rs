@@ -823,6 +823,14 @@ impl<'a> Parser<'a> {
                 let ident = name.clone();
                 self.advance();
 
+                // Check for struct literal: Identifier '{' (only if identifier starts with uppercase)
+                // This prevents parsing `if x { ... }` as a struct literal
+                if matches!(self.current(), Token::LBrace)
+                    && ident.chars().next().is_some_and(|c| c.is_uppercase())
+                {
+                    return self.parse_struct_literal(ident, span);
+                }
+
                 // Check for function call
                 if matches!(self.current(), Token::LParen) {
                     self.advance();
@@ -866,6 +874,68 @@ impl<'a> Parser<'a> {
                 self.current_column
             )),
         }
+    }
+
+    /// Parse struct literal: `TypeName { field1: expr1, field2: expr2 }`
+    /// MVP: Does NOT support nested struct literals (e.g., Rect2 { position: Vector2 { x: 0.0, y: 0.0 } })
+    /// Use variable references instead: let pos = ...; Rect2 { position: pos, ... }
+    fn parse_struct_literal(&mut self, type_name: String, span: Span) -> Result<Expr, String> {
+        // Already consumed TypeName, now expect '{'
+        self.expect(Token::LBrace)?;
+
+        let mut fields = Vec::new();
+
+        // Parse fields: field_name: expr, field_name: expr, ...
+        loop {
+            // Check for closing brace
+            if matches!(self.current(), Token::RBrace) {
+                break;
+            }
+
+            // Parse field name
+            let field_name = match self.current() {
+                Token::Ident(name) => name.clone(),
+                t => {
+                    return Err(format!(
+                        "Error[E704]: Expected field name in {} literal, found '{}' at line {}, column {}",
+                        type_name,
+                        t.name(),
+                        self.current_line,
+                        self.current_column
+                    ))
+                }
+            };
+            self.advance();
+
+            // Expect colon
+            self.expect(Token::Colon)?;
+
+            // Parse field value expression
+            // MVP: Parse simple expressions only (no nested struct literals for now)
+            let field_expr = self.parse_expression(0)?;
+
+            fields.push((field_name, field_expr));
+
+            // Check for comma or end
+            if matches!(self.current(), Token::Comma) {
+                self.advance();
+                // Allow trailing comma
+                if matches!(self.current(), Token::RBrace) {
+                    break;
+                }
+            } else {
+                // No comma means we should see closing brace
+                break;
+            }
+        }
+
+        self.expect(Token::RBrace)?;
+
+        Ok(Expr::StructLiteral {
+            type_name,
+            fields,
+            span,
+        })
     }
 
     fn get_precedence(&self, token: &Token) -> u8 {

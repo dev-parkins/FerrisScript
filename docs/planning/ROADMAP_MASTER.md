@@ -110,12 +110,14 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 **Goal**: Comprehensive Godot integration for 2D game development
 
 **Phase 1** ✅ Complete (PR #46):
+
 - Signal system (declaration, registration, emit)
 - 29 new tests
 - Editor connection support
 - Signal parameters and validation
 
 **Phase 2** ✅ Complete (PR #47-48):
+
 - [x] `_ready()`, `_process(delta: f32)` callbacks
 - [x] `_physics_process(delta: f32)` callback
 - [x] `_input(event: InputEvent)`, `_enter_tree()`, `_exit_tree()` callbacks
@@ -123,6 +125,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 - [x] 11 new tests
 
 **Phase 3** ✅ Complete (PR #51):
+
 - [x] Node query functions (get_node, has_node, find_child, get_parent)
 - [x] 22 new tests (17 initial + 5 edge cases)
 - [x] 12 new error codes (E601-E613)
@@ -132,17 +135,20 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 - [x] 4 example scripts with metadata protocol
 
 **Phase 4** ⏸️ Not Started:
+
 - [ ] Additional Godot types (Color, Rect2, Transform2D)
 - [ ] Field access support
 - [ ] 30+ type-specific tests
 
 **Phase 5** ⏸️ Not Started:
+
 - [ ] @export annotation parsing
 - [ ] Property types and hints
 - [ ] Inspector integration
 - [ ] 20+ export tests
 
 **Deliverables Remaining**:
+
 - Additional Godot types for 2D development
 - Property exports for Inspector integration
 - Integration tests and examples

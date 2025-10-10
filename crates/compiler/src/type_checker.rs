@@ -1249,6 +1249,11 @@ impl<'a> TypeChecker<'a> {
                     }
                 }
             }
+            Expr::StructLiteral {
+                type_name,
+                fields,
+                span,
+            } => self.check_struct_literal(type_name, fields, *span),
             Expr::Assign(_, _, _) | Expr::CompoundAssign(_, _, _, _) => {
                 // These shouldn't appear in expressions in this phase
                 Type::Unknown
@@ -1259,6 +1264,329 @@ impl<'a> TypeChecker<'a> {
     fn infer_expr(&mut self, expr: &Expr) -> Type {
         // Simplified inference - just check the expression
         self.check_expr(expr)
+    }
+
+    /// Check struct literal construction: `TypeName { field1: value1, field2: value2 }`
+    /// MVP: Basic validation only - all fields present, no unknown fields, correct types
+    fn check_struct_literal(
+        &mut self,
+        type_name: &str,
+        fields: &[(String, Expr)],
+        span: Span,
+    ) -> Type {
+        // Parse type from string
+        let struct_type = Type::from_string(type_name);
+
+        // Check if type is Unknown (not found)
+        if struct_type == Type::Unknown {
+            let base_msg = format!("Unknown type '{}' at {}", type_name, span);
+            self.error(format_error_with_code(
+                ErrorCode::E704,
+                &base_msg,
+                self.source,
+                span.line,
+                span.column,
+                &format!(
+                    "Type '{}' does not exist or does not support struct literal syntax",
+                    type_name
+                ),
+            ));
+            return Type::Unknown;
+        }
+
+        // Validate based on type
+        match struct_type {
+            Type::Color => self.validate_color_literal(fields, span),
+            Type::Rect2 => self.validate_rect2_literal(fields, span),
+            Type::Transform2D => self.validate_transform2d_literal(fields, span),
+            Type::Vector2 => self.validate_vector2_literal(fields, span),
+            _ => {
+                let base_msg = format!(
+                    "Type '{}' does not support struct literal syntax at {}",
+                    type_name, span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E704,
+                    &base_msg,
+                    self.source,
+                    span.line,
+                    span.column,
+                    "Only Color, Rect2, Transform2D, and Vector2 support struct literal construction",
+                ));
+                Type::Unknown
+            }
+        }
+    }
+
+    fn validate_color_literal(&mut self, fields: &[(String, Expr)], span: Span) -> Type {
+        let required_fields = ["r", "g", "b", "a"];
+
+        // Check all required fields present
+        for req in &required_fields {
+            if !fields.iter().any(|(name, _)| name == req) {
+                let base_msg = format!(
+                    "Missing required field '{}' in Color literal at {}",
+                    req, span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E704,
+                    &base_msg,
+                    self.source,
+                    span.line,
+                    span.column,
+                    "Color requires fields: r, g, b, a (all f32)",
+                ));
+                return Type::Unknown;
+            }
+        }
+
+        // Check no unknown fields
+        for (field_name, field_expr) in fields {
+            if !required_fields.contains(&field_name.as_str()) {
+                let base_msg = format!(
+                    "Unknown field '{}' on Color at {}",
+                    field_name,
+                    field_expr.span()
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E701,
+                    &base_msg,
+                    self.source,
+                    field_expr.span().line,
+                    field_expr.span().column,
+                    "Color only has fields: r, g, b, a",
+                ));
+            }
+
+            // Validate field type (should be f32 or i32)
+            let field_type = self.check_expr(field_expr);
+            if field_type != Type::F32 && field_type != Type::I32 && field_type != Type::Unknown {
+                let base_msg = format!(
+                    "Color field '{}' must be f32 or i32, found {} at {}",
+                    field_name,
+                    field_type.name(),
+                    field_expr.span()
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E707,
+                    &base_msg,
+                    self.source,
+                    field_expr.span().line,
+                    field_expr.span().column,
+                    "Color fields must be numeric (f32 or i32)",
+                ));
+            }
+        }
+
+        Type::Color
+    }
+
+    fn validate_rect2_literal(&mut self, fields: &[(String, Expr)], span: Span) -> Type {
+        let required_fields = ["position", "size"];
+
+        // Check all required fields present
+        for req in &required_fields {
+            if !fields.iter().any(|(name, _)| name == req) {
+                let base_msg = format!(
+                    "Missing required field '{}' in Rect2 literal at {}",
+                    req, span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E705,
+                    &base_msg,
+                    self.source,
+                    span.line,
+                    span.column,
+                    "Rect2 requires fields: position (Vector2), size (Vector2)",
+                ));
+                return Type::Unknown;
+            }
+        }
+
+        // Check no unknown fields
+        for (field_name, field_expr) in fields {
+            if !required_fields.contains(&field_name.as_str()) {
+                let base_msg = format!(
+                    "Unknown field '{}' on Rect2 at {}",
+                    field_name,
+                    field_expr.span()
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E702,
+                    &base_msg,
+                    self.source,
+                    field_expr.span().line,
+                    field_expr.span().column,
+                    "Rect2 only has fields: position, size",
+                ));
+            }
+
+            // Validate field type (should be Vector2)
+            let field_type = self.check_expr(field_expr);
+            if field_type != Type::Vector2 && field_type != Type::Unknown {
+                let base_msg = format!(
+                    "Rect2 field '{}' must be Vector2, found {} at {}",
+                    field_name,
+                    field_type.name(),
+                    field_expr.span()
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E708,
+                    &base_msg,
+                    self.source,
+                    field_expr.span().line,
+                    field_expr.span().column,
+                    "Rect2 fields must be Vector2",
+                ));
+            }
+        }
+
+        Type::Rect2
+    }
+
+    fn validate_transform2d_literal(&mut self, fields: &[(String, Expr)], span: Span) -> Type {
+        let required_fields = ["position", "rotation", "scale"];
+
+        // Check all required fields present
+        for req in &required_fields {
+            if !fields.iter().any(|(name, _)| name == req) {
+                let base_msg = format!(
+                    "Missing required field '{}' in Transform2D literal at {}",
+                    req, span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E706,
+                    &base_msg,
+                    self.source,
+                    span.line,
+                    span.column,
+                    "Transform2D requires fields: position (Vector2), rotation (f32), scale (Vector2)",
+                ));
+                return Type::Unknown;
+            }
+        }
+
+        // Check no unknown fields
+        for (field_name, field_expr) in fields {
+            if !required_fields.contains(&field_name.as_str()) {
+                let base_msg = format!(
+                    "Unknown field '{}' on Transform2D at {}",
+                    field_name,
+                    field_expr.span()
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E703,
+                    &base_msg,
+                    self.source,
+                    field_expr.span().line,
+                    field_expr.span().column,
+                    "Transform2D only has fields: position, rotation, scale",
+                ));
+            }
+
+            // Validate field type based on field name
+            let field_type = self.check_expr(field_expr);
+            let expected_type = match field_name.as_str() {
+                "position" | "scale" => Type::Vector2,
+                "rotation" => Type::F32,
+                _ => Type::Unknown,
+            };
+
+            if expected_type != Type::Unknown
+                && field_type != expected_type
+                && field_type != Type::Unknown
+            {
+                // Allow i32 for rotation (will be converted to f32)
+                if field_name == "rotation" && field_type == Type::I32 {
+                    continue;
+                }
+
+                let base_msg = format!(
+                    "Transform2D field '{}' must be {}, found {} at {}",
+                    field_name,
+                    expected_type.name(),
+                    field_type.name(),
+                    field_expr.span()
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E709,
+                    &base_msg,
+                    self.source,
+                    field_expr.span().line,
+                    field_expr.span().column,
+                    &format!(
+                        "Transform2D field '{}' must be of type {}",
+                        field_name,
+                        expected_type.name()
+                    ),
+                ));
+            }
+        }
+
+        Type::Transform2D
+    }
+
+    fn validate_vector2_literal(&mut self, fields: &[(String, Expr)], span: Span) -> Type {
+        let required_fields = ["x", "y"];
+
+        // Check all required fields present
+        for req in &required_fields {
+            if !fields.iter().any(|(name, _)| name == req) {
+                let base_msg = format!(
+                    "Missing required field '{}' in Vector2 literal at {}",
+                    req, span
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E704, // Reuse Color construction error code for Vector2
+                    &base_msg,
+                    self.source,
+                    span.line,
+                    span.column,
+                    "Vector2 requires fields: x, y (both f32)",
+                ));
+                return Type::Unknown;
+            }
+        }
+
+        // Check no unknown fields
+        for (field_name, field_expr) in fields {
+            if !required_fields.contains(&field_name.as_str()) {
+                let base_msg = format!(
+                    "Unknown field '{}' on Vector2 at {}",
+                    field_name,
+                    field_expr.span()
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E205, // Reuse Vector2 field access error
+                    &base_msg,
+                    self.source,
+                    field_expr.span().line,
+                    field_expr.span().column,
+                    "Vector2 only has fields: x, y",
+                ));
+            }
+
+            // Validate field type (should be f32 or i32)
+            let field_type = self.check_expr(field_expr);
+            if field_type != Type::F32 && field_type != Type::I32 && field_type != Type::Unknown {
+                let base_msg = format!(
+                    "Vector2 field '{}' must be f32 or i32, found {} at {}",
+                    field_name,
+                    field_type.name(),
+                    field_expr.span()
+                );
+                self.error(format_error_with_code(
+                    ErrorCode::E707, // Reuse Color type mismatch error
+                    &base_msg,
+                    self.source,
+                    field_expr.span().line,
+                    field_expr.span().column,
+                    "Vector2 fields must be numeric (f32 or i32)",
+                ));
+            }
+        }
+
+        Type::Vector2
     }
 }
 
@@ -2907,12 +3235,10 @@ let x: float = 3.14;
     // ===== Phase 4: Godot Types Tests =====
 
     // Phase 4: Color, Rect2, Transform2D types - field access validation
-    // NOTE: Tests temporarily disabled - awaiting struct literal syntax or Godot property type support
-    // The field access logic is implemented and working (see lines 1176-1228 in type_checker.rs)
-    // TODO: Re-enable these tests when language supports explicit type construction
+    // ✅ STRUCT LITERAL MVP IMPLEMENTED - Tests being re-enabled incrementally
+    // The field access logic AND struct literal syntax are now working
 
-    /*
-    // Color Type Tests (8 tests)
+    // Color Type Tests (8 tests) - ENABLED
     #[test]
     fn test_color_type_declaration() {
         let input = "fn test() { let c: Color = Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }; }";
@@ -2921,7 +3247,6 @@ let x: float = 3.14;
         assert!(check(&program, input).is_ok());
     }
 
-    // (More tests below)
     #[test]
     fn test_color_field_access_r() {
         let input = "fn test(c: Color) { let red: f32 = c.r; }";
@@ -2949,6 +3274,8 @@ let x: float = 3.14;
         assert!(err.contains("E701") || err.contains("has no field"));
     }
 
+    // (More Color tests - ALL ENABLED)
+
     #[test]
     fn test_color_as_parameter() {
         let input = "fn set_color(c: Color) {} fn test(my_color: Color) { set_color(my_color); }";
@@ -2958,7 +3285,7 @@ let x: float = 3.14;
     }
 
     #[test]
-    fn test_color_type_declaration() {
+    fn test_color_parameter_type() {
         let input = "fn test(c: Color) {}";
         let tokens = tokenize(input).unwrap();
         let program = parse(&tokens, input).unwrap();
@@ -2975,7 +3302,7 @@ let x: float = 3.14;
 
     #[test]
     fn test_color_field_assignment() {
-        let input = "fn test(mut c: Color) { c.r = 1.0; }";
+        let input = "fn test(c: Color) { c.r = 1.0; }";
         let tokens = tokenize(input).unwrap();
         let program = parse(&tokens, input).unwrap();
         assert!(check(&program, input).is_ok());
@@ -2983,7 +3310,7 @@ let x: float = 3.14;
 
     #[test]
     fn test_color_wrong_field_type() {
-        let input = r#"fn test(mut c: Color) { c.r = "red"; }"#;
+        let input = r#"fn test(c: Color) { c.r = "red"; }"#;
         let tokens = tokenize(input).unwrap();
         let program = parse(&tokens, input).unwrap();
         let result = check(&program, input);
@@ -3175,5 +3502,4 @@ let x: float = 3.14;
         let program = parse(&tokens, input).unwrap();
         assert!(check(&program, input).is_ok());
     }
-    */
 }

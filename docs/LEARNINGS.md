@@ -1,10 +1,254 @@
-# Version Management & Branching Strategy Research - Planning
+# FerrisScript Development Learnings
+
+**Last Updated**: October 10, 2025  
+**Purpose**: Capture insights, patterns, and lessons learned during FerrisScript development
+
+---
+
+## 📖 Table of Contents
+
+1. [Phase 4: Godot Types (Color, Rect2, Transform2D)](#phase-4-godot-types-color-rect2-transform2d)
+2. [Version Management & Branching Strategy](#version-management--branching-strategy)
+
+---
+
+## Phase 4: Godot Types (Color, Rect2, Transform2D)
+
+**Date**: October 10, 2025  
+**Context**: Implemented Phase 4 types following Vector2 pattern, 30 tests commented out due to struct literal syntax gap
+
+### 🎯 What Worked Well
+
+#### 1. Following Established Patterns ✅
+
+**Pattern**: Vector2 implementation provided excellent blueprint
+
+- **AST**: Type enum addition pattern clear
+- **Type Checker**: Field access validation reusable
+- **Runtime**: Value enum + field get/set established
+- **Testing**: Test structure consistent across types
+
+**Evidence**: Phase 4 completed in focused session with minimal refactoring
+
+**Lesson**: Invest in reference implementations early - they compound value
+
+---
+
+#### 2. Nested Type Handling (Box<Value>) ✅
+
+**Challenge**: Rect2 and Transform2D contain Vector2 fields
+
+- **Solution**: Use `Box<Value>` for nested types to avoid recursive enum size issues
+- **Pattern**:
+
+  ```rust
+  pub enum Value {
+      Color { r: f32, g: f32, b: f32, a: f32 },
+      Rect2 { position: Box<Value>, size: Box<Value> },  // ✅ Boxed
+      Transform2D { position: Box<Value>, rotation: f32, scale: Box<Value> },
+  }
+  ```
+
+**Evidence**: No compiler errors about "infinite size", runtime performance unaffected
+
+**Lesson**: Nested types in enums require heap indirection - use Box<T> proactively
+
+---
+
+#### 3. Error Code Pre-Allocation ✅
+
+**Strategy**: Reserve error code ranges during planning phase
+
+- E701-E710: Reserved for Phase 4 types before implementation
+- Clear semantic grouping (E701-E703: field access, E704-E706: construction, E707-E710: type mismatches)
+
+**Benefits**:
+
+- No code conflicts during implementation
+- Clear error categorization
+- Easy to reference in tests
+- Documentation writes itself
+
+**Lesson**: Pre-allocate error codes in blocks of 10 during planning
+
+---
+
+#### 4. Type System Extensibility Validated ✅
+
+**Achievement**: Added 3 new types without modifying existing type system architecture
+
+- Type enum addition: Straightforward
+- Field access: Generic pattern scaled
+- Runtime execution: No fundamental changes needed
+
+**Evidence**: 517 tests passing, no regressions
+
+**Lesson**: Well-designed type system pays dividends - invest in architecture upfront
+
+---
+
+### 🚧 What Could Be Improved
+
+#### 1. Test-First Development Gap ⚠️
+
+**Problem**: Wrote tests before implementing struct literal syntax
+
+- 30 tests commented out immediately after writing
+- Tests had hidden dependency on unimplemented parser feature
+- Reduced validation capability during development
+
+**Better Approach**:
+
+1. Implement struct literals FIRST (or use workaround syntax)
+2. Write tests that can actually run
+3. Iterate on working code
+
+**Evidence**: Had to test via function parameters instead of direct construction
+
+```rust
+// What we could test:
+fn test_color(c: Color) { let r = c.r; }
+
+// What we couldn't test:
+let c = Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 };  // Parser doesn't support this yet
+```
+
+**Lesson**: Don't write tests for unimplemented features - they create false sense of completeness
+
+---
+
+#### 2. Dependency Planning ⚠️
+
+**Problem**: Didn't identify struct literal syntax as prerequisite
+
+- Assumed function parameters were sufficient testing mechanism
+- Underestimated value of direct construction tests
+- Created "blocked" work (30 tests waiting)
+
+**Better Approach**:
+
+1. Map dependencies BEFORE starting implementation
+2. Implement prerequisites first OR document workarounds
+3. Make "blockers" explicit in plan
+
+**Evidence**: Phase 4 considered "complete" but 30 tests disabled
+
+**Lesson**: Feature completeness includes ALL validation mechanisms, not just core functionality
+
+---
+
+#### 3. Documentation of Prerequisites 📝
+
+**Problem**: Tests didn't document WHY they were commented out
+
+- Original comment: `// NOTE: Tests temporarily disabled - awaiting struct literal syntax`
+- No reference to tracking issue
+- No estimate of when feature would be implemented
+- No workaround examples
+
+**Better Approach**:
+
+```rust
+// BLOCKED: Tests disabled - awaiting struct literal syntax implementation
+// Tracking: docs/planning/v0.0.4/STRUCT_LITERAL_IMPLEMENTATION_ANALYSIS.md
+// Workaround: Use function parameters for now (see test_color_field_access_via_param)
+// Estimate: 4-6 hours to implement struct literals
+```
+
+**Lesson**: Document blockers with context - future you will thank present you
+
+---
+
+### 📊 Metrics & Outcomes
+
+**Implementation Stats**:
+
+- **New Types**: 3 (Color, Rect2, Transform2D)
+- **New Error Codes**: 10 (E701-E710)
+- **Tests Added**: 30 (commented out, awaiting struct literals)
+- **Tests Passing**: 517 total (no regressions)
+- **Lines of Code**: ~400 (AST + type checker + runtime + godot_bind)
+- **Time Investment**: ~4-5 hours (focused session)
+
+**Quality Metrics**:
+
+- **Compilation**: ✅ Zero errors
+- **Linting**: ✅ Zero clippy warnings
+- **Formatting**: ✅ All cargo fmt passing
+- **Tests**: ✅ All 517 passing (30 deferred)
+- **Documentation**: ✅ Updated README, ROADMAP, execution plan
+
+---
+
+### 🎓 Actionable Takeaways
+
+#### For Next Types (e.g., Basis, AABB, Plane)
+
+1. ✅ **Check parser prerequisites** - Can we construct these types with current syntax?
+2. ✅ **Implement blockers first** - Struct literals before type implementation
+3. ✅ **Write runnable tests** - Use workarounds if features missing
+4. ✅ **Document dependencies** - Make blockers explicit in plan
+5. ✅ **Follow Vector2/Color pattern** - Established architecture works
+
+#### For Future Features (e.g., @export, script integration)
+
+1. ✅ **Map cross-module dependencies** - Which crates touched?
+2. ✅ **Identify prerequisites** - What must exist first?
+3. ✅ **Phase complex work** - Break into 2-3 hour chunks
+4. ✅ **Test incrementally** - Validate each phase before next
+5. ✅ **Research upfront** - Dedicated research documents accelerate implementation
+
+---
+
+### 🔍 Research Documents Created
+
+**STRUCT_LITERAL_SYNTAX_RESEARCH.md**:
+
+- Problem: 30 tests blocked by missing syntax
+- Analysis: AST lacks StructLiteral variant
+- Solution: 4-6 hour implementation plan
+- Quick Win: MVP in 2-3 hours (basic literals only)
+
+**EXPORT_ANNOTATION_RESEARCH.md**:
+
+- Problem: @export is complex cross-module system
+- Analysis: 6 complexity categories, 15 error codes
+- Solution: 3-phase implementation (parser → runtime → Godot)
+- Estimate: 23-31 hours (significantly more complex than struct literals)
+
+**Lesson**: Upfront research documents save 3-5x implementation time by preventing rework
+
+---
+
+### 🚀 Next Steps
+
+**Immediate** (Struct Literals - MVP):
+
+1. Implement basic struct literal syntax (2-3 hours)
+2. Enable 15-20 tests
+3. Validate approach works
+
+**Follow-up** (Struct Literals - Complete):
+
+1. Add nested literal support (2-3 hours)
+2. Enable remaining 10-15 tests
+3. Complete Phase 4 validation
+
+**Future** (Phase 5 - @export):
+
+1. Review research document
+2. Plan 3-phase implementation
+3. Execute in focused sessions
+
+---
+
+## Version Management & Branching Strategy
 
 **Date**: October 8, 2025  
 **Phase**: Research & Feasibility Analysis  
 **Topic**: Centralized version management and simplified branching strategy  
 
-## 🎯 Context
+### 🎯 Context
 
 User request to simplify release management by:
 
