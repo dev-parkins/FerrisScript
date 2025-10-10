@@ -3026,4 +3026,125 @@ mod tests {
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("E604"));
     }
+
+    // Test ID: NQ-008 - Empty string path
+    #[test]
+    fn test_get_node_empty_string() {
+        let source = r#"
+            fn test_empty_path() {
+                let node = get_node("");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Mock callback (won't be called because runtime checks for empty path first)
+        fn mock_node_query(path: &str, query_type: NodeQueryType) -> Result<Value, String> {
+            match query_type {
+                NodeQueryType::GetNode => Ok(Value::Node(NodeHandle::new(path.to_string()))),
+                _ => Err("Unexpected query type".to_string()),
+            }
+        }
+        env.set_node_query_callback(mock_node_query);
+
+        let result = call_function("test_empty_path", &[], &mut env);
+        // Should error because runtime validates empty paths
+        assert!(result.is_err());
+        let error_msg = result.unwrap_err();
+        assert!(error_msg.contains("E603"));
+        assert!(error_msg.contains("Node path cannot be empty"));
+    }
+
+    // Test ID: NQ-022 - get_parent() without callback
+    #[test]
+    fn test_get_parent_without_callback() {
+        let source = r#"
+            fn test_no_callback() {
+                let parent = get_parent();
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Call without setting callback should fail
+        let result = call_function("test_no_callback", &[], &mut env);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("E606")); // No callback registered
+    }
+
+    // Test ID: NQ-035 - has_node() without callback
+    #[test]
+    fn test_has_node_without_callback() {
+        let source = r#"
+            fn test_no_callback() {
+                let exists = has_node("SomeNode");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Call without setting callback should error with E609
+        let result = call_function("test_no_callback", &[], &mut env);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("E609")); // No callback registered
+    }
+
+    // Test ID: NQ-037 - has_node() with empty string
+    #[test]
+    fn test_has_node_empty_string() {
+        let source = r#"
+            fn test_empty() {
+                let exists = has_node("");
+            }
+        "#;
+
+        let program = compile(source).unwrap();
+        let mut env = Env::new();
+        execute(&program, &mut env).unwrap();
+
+        // Mock callback that will receive empty path (runtime doesn't validate for has_node)
+        fn mock_node_query(path: &str, query_type: NodeQueryType) -> Result<Value, String> {
+            if path.is_empty() {
+                Err("Empty path not allowed".to_string())
+            } else {
+                match query_type {
+                    NodeQueryType::HasNode => Ok(Value::Bool(true)),
+                    _ => Err("Unexpected query type".to_string()),
+                }
+            }
+        }
+        env.set_node_query_callback(mock_node_query);
+
+        let result = call_function("test_empty", &[], &mut env);
+        // Callback will reject empty path, causing error
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Empty path"));
+    }
+
+    // Test ID: SIG-037 - Signal name as variable (NOT SUPPORTED)
+    // This test documents that signal names must be string literals, not variables
+    #[test]
+    fn test_emit_signal_name_as_variable() {
+        let source = r#"
+            signal player_died();
+            
+            fn test_dynamic_name() {
+                let signal_name = "player_died";
+                emit_signal(signal_name);
+            }
+        "#;
+
+        // Should fail at compile time - signal names must be string literals
+        let program = compile(source);
+        assert!(program.is_err());
+        let error_msg = program.unwrap_err();
+        assert!(error_msg.contains("E205"));
+        assert!(error_msg.contains("Signal name must be known at compile time"));
+    }
 }
