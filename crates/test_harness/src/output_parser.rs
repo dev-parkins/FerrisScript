@@ -44,14 +44,14 @@ impl OutputParser {
             marker_regex: Regex::new(r"\[FS_TEST\]\s+(\w+)\s+(\w+)(?:\s+(.+))?").unwrap(),
         }
     }
-    
+
     /// Parse test output and extract structured results
     pub fn parse(&self, script_name: &str, stdout: &str, stderr: &str) -> TestResults {
         let markers = self.extract_markers(stdout);
         let errors = self.extract_errors(stderr);
-        
+
         let (passed, failed) = self.count_results(&markers);
-        
+
         TestResults {
             script_name: script_name.to_string(),
             passed,
@@ -62,17 +62,21 @@ impl OutputParser {
             stderr: stderr.to_string(),
         }
     }
-    
+
     /// Extract structured test markers
     fn extract_markers(&self, stdout: &str) -> Vec<TestMarker> {
         let mut markers = Vec::new();
-        
+
         for line in stdout.lines() {
             if let Some(captures) = self.marker_regex.captures(line) {
                 let kind_str = captures.get(1).map(|m| m.as_str()).unwrap_or("");
-                let test_name = captures.get(2).map(|m| m.as_str()).unwrap_or("").to_string();
+                let test_name = captures
+                    .get(2)
+                    .map(|m| m.as_str())
+                    .unwrap_or("")
+                    .to_string();
                 let message = captures.get(3).map(|m| m.as_str().to_string());
-                
+
                 let kind = match kind_str {
                     "START" => TestMarkerKind::Start,
                     "PASS" => TestMarkerKind::Pass,
@@ -81,7 +85,7 @@ impl OutputParser {
                     "INFO" => TestMarkerKind::Info,
                     _ => continue,
                 };
-                
+
                 markers.push(TestMarker {
                     kind,
                     test_name,
@@ -89,7 +93,7 @@ impl OutputParser {
                 });
             }
         }
-        
+
         // Also detect implicit pass/fail from ✓ and ✗ markers
         for line in stdout.lines() {
             if line.contains("✓") || line.contains("Found") {
@@ -112,31 +116,37 @@ impl OutputParser {
                 }
             }
         }
-        
+
         markers
     }
-    
+
     /// Extract error messages from stderr
     fn extract_errors(&self, stderr: &str) -> Vec<String> {
         stderr
             .lines()
             .filter(|line| {
-                line.contains("ERROR") || 
-                line.contains("Error") || 
-                line.contains("FATAL") ||
-                line.contains("panic")
+                line.contains("ERROR")
+                    || line.contains("Error")
+                    || line.contains("FATAL")
+                    || line.contains("panic")
             })
             .map(|s| s.to_string())
             .collect()
     }
-    
+
     /// Count pass/fail results
     fn count_results(&self, markers: &[TestMarker]) -> (usize, usize) {
-        let passed = markers.iter().filter(|m| m.kind == TestMarkerKind::Pass).count();
-        let failed = markers.iter().filter(|m| m.kind == TestMarkerKind::Fail).count();
+        let passed = markers
+            .iter()
+            .filter(|m| m.kind == TestMarkerKind::Pass)
+            .count();
+        let failed = markers
+            .iter()
+            .filter(|m| m.kind == TestMarkerKind::Fail)
+            .count();
         (passed, failed)
     }
-    
+
     /// Extract test name from implicit marker message
     fn extract_test_name_from_message(&self, line: &str) -> Option<String> {
         // Try to extract meaningful test name from message
@@ -164,12 +174,12 @@ impl OutputParser {
             Some("unnamed_test".to_string())
         }
     }
-    
+
     /// Check if script loaded successfully
     pub fn script_loaded_successfully(&self, stdout: &str) -> bool {
         stdout.contains("Successfully loaded FerrisScript:")
     }
-    
+
     /// Check if script encountered compilation errors
     pub fn has_compilation_errors(&self, stdout: &str, stderr: &str) -> bool {
         stdout.contains("Failed to compile") || stderr.contains("Error")
@@ -185,24 +195,24 @@ impl Default for OutputParser {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_marker_extraction() {
         let stdout = "[FS_TEST] PASS test_one\n[FS_TEST] FAIL test_two Expected Player\n";
         let parser = OutputParser::new();
         let markers = parser.extract_markers(stdout);
-        
+
         assert_eq!(markers.len(), 2);
         assert_eq!(markers[0].kind, TestMarkerKind::Pass);
         assert_eq!(markers[1].kind, TestMarkerKind::Fail);
     }
-    
+
     #[test]
     fn test_implicit_markers() {
         let stdout = "✓ Found Player node\n✗ Player node not found!";
         let parser = OutputParser::new();
         let markers = parser.extract_markers(stdout);
-        
+
         assert!(markers.iter().any(|m| m.kind == TestMarkerKind::Pass));
         assert!(markers.iter().any(|m| m.kind == TestMarkerKind::Fail));
     }

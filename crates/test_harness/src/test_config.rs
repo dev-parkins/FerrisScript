@@ -6,16 +6,16 @@ use std::path::PathBuf;
 pub struct TestConfig {
     /// Path to Godot executable
     pub godot_executable: PathBuf,
-    
+
     /// Path to Godot project (godot_test/)
     pub project_path: PathBuf,
-    
+
     /// Timeout for individual tests (seconds)
     pub timeout_seconds: u64,
-    
+
     /// Output format (json, console, tap)
     pub output_format: OutputFormat,
-    
+
     /// Verbose output
     pub verbose: bool,
 }
@@ -32,7 +32,7 @@ impl Default for TestConfig {
     fn default() -> Self {
         Self {
             godot_executable: PathBuf::from(
-                r"Y:\cpark\Projects\Godot\Godot_v4.5-dev4_win64.exe\Godot_v4.5-dev4_win64_console.exe"
+                r"Y:\cpark\Projects\Godot\Godot_v4.5-dev4_win64.exe\Godot_v4.5-dev4_win64_console.exe",
             ),
             project_path: PathBuf::from("./godot_test"),
             timeout_seconds: 30,
@@ -49,7 +49,7 @@ impl TestConfig {
         let config: TestConfig = toml::from_str(&contents)?;
         Ok(config)
     }
-    
+
     /// Load from environment variables (overrides file config)
     pub fn with_env_overrides(mut self) -> Self {
         if let Ok(exe) = std::env::var("GODOT_EXE") {
@@ -60,7 +60,7 @@ impl TestConfig {
         }
         self
     }
-    
+
     /// Validate configuration
     pub fn validate(&self) -> anyhow::Result<()> {
         if !self.godot_executable.exists() {

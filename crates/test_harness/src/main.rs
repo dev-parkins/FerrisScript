@@ -70,7 +70,8 @@ fn main() -> anyhow::Result<()> {
         TestConfig::from_file(&PathBuf::from(config_file))?
     } else {
         // Try default config file, otherwise use defaults
-        TestConfig::from_file(&PathBuf::from("ferris-test.toml")).unwrap_or_else(|_| TestConfig::default())
+        TestConfig::from_file(&PathBuf::from("ferris-test.toml"))
+            .unwrap_or_else(|_| TestConfig::default())
     };
 
     // Apply CLI overrides
@@ -128,7 +129,7 @@ fn main() -> anyhow::Result<()> {
         Some("tap") => print_tap(&results),
         _ => {
             harness.print_summary(&results);
-            
+
             // Show detailed output if verbose
             if matches.get_flag("verbose") {
                 for result in &results {
