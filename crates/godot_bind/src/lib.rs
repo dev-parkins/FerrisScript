@@ -354,7 +354,7 @@ struct FerrisScriptExtension;
 unsafe impl ExtensionLibrary for FerrisScriptExtension {}
 
 #[derive(GodotClass)]
-#[class(base=Node2D)] // Changed from Node to Node2D for position property
+#[class(base=Node2D, tool)] // tool annotation enables Inspector/editor integration
 pub struct FerrisScriptNode {
     base: Base<Node2D>,
 
@@ -545,6 +545,31 @@ impl INode2D for FerrisScriptNode {
             // No script loaded or compilation failed - no properties to expose
             Vec::new()
         }
+    }
+
+    // ========== Phase 5 Sub-Phase 3: Property Hooks (Bundle 7 - Checkpoint 3.9) ==========
+    // Phase 1: Verification Stub - Testing that hooks are called by Inspector
+
+    /// Override get_property() to read FerrisScript exported properties from runtime storage
+    ///
+    /// **Phase 1 Verification Stub**: Currently logs calls to verify Inspector integration.
+    /// This will be replaced with full runtime integration in Phase 2.
+    ///
+    /// Called by Godot when Inspector or code reads a property value.
+    fn get_property(&self, property: StringName) -> Option<Variant> {
+        godot_print!("🔍 get_property() called for: {}", property);
+        None // Fallback to Godot for now (Phase 1 verification)
+    }
+
+    /// Override set_property() to write FerrisScript exported properties to runtime storage
+    ///
+    /// **Phase 1 Verification Stub**: Currently logs calls to verify Inspector integration.
+    /// This will be replaced with full runtime integration in Phase 2.
+    ///
+    /// Called by Godot when Inspector or code writes a property value.
+    fn set_property(&mut self, property: StringName, value: Variant) -> bool {
+        godot_print!("✏️ set_property() called for: {} = {:?}", property, value);
+        false // Fallback to Godot for now (Phase 1 verification)
     }
 }
 
