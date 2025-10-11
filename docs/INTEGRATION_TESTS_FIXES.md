@@ -15,6 +15,7 @@ Resolved 2 bugs identified in `INTEGRATION_TESTS_REPORT.md` during Phase 5 Sub-P
 **Original Behavior**: Runtime accepted any `Value` type when setting exported properties, regardless of the property's declared type.
 
 **Example**:
+
 ```rust
 // Property declared as i32
 @export let mut health: i32 = 100;
@@ -26,6 +27,7 @@ env.set_exported_property("health", Value::String("invalid".to_string()), true) 
 **Root Cause**: `set_exported_property()` function (`runtime/src/lib.rs:745`) performed range validation but skipped type validation entirely.
 
 **Impact**:
+
 - Type mismatch bugs could persist until runtime execution
 - Inspector could set wrong-typed values causing unexpected behavior
 - No compile-time or set-time protection
@@ -35,6 +37,7 @@ env.set_exported_property("health", Value::String("invalid".to_string()), true) 
 **Implementation** (Lines 864-897 in `runtime/src/lib.rs`):
 
 1. **Added `validate_type()` function**:
+
 ```rust
 fn validate_type(type_name: &str, value: &Value) -> Result<(), String> {
     let is_valid = matches!(
@@ -62,6 +65,7 @@ fn validate_type(type_name: &str, value: &Value) -> Result<(), String> {
 ```
 
 2. **Added `value_type_name()` helper**:
+
 ```rust
 fn value_type_name(value: &Value) -> &str {
     match value {
@@ -79,6 +83,7 @@ fn value_type_name(value: &Value) -> &str {
 ```
 
 3. **Modified `set_exported_property()`** (Line 763):
+
 ```rust
 pub fn set_exported_property(&mut self, name: &str, value: Value, from_inspector: bool) -> Result<(), String> {
     let metadata = self.property_metadata.iter().find(|m| m.name == name)
@@ -100,6 +105,7 @@ pub fn set_exported_property(&mut self, name: &str, value: Value, from_inspector
 ```
 
 **New Behavior**:
+
 ```rust
 // Now returns error on type mismatch
 env.set_exported_property("health", Value::String("invalid".to_string()), true)
@@ -109,6 +115,7 @@ env.set_exported_property("health", Value::String("invalid".to_string()), true)
 ### Test Updates
 
 **Test 3** (`test_property_type_conversion`):
+
 ```rust
 // BEFORE:
 assert!(result.is_ok(), "Runtime currently allows type mismatches");
@@ -121,6 +128,7 @@ assert!(err.contains("expected i32") && err.contains("f32"));
 ```
 
 **Test 6** (`test_set_property_wrong_type`):
+
 ```rust
 // BEFORE:
 assert!(result.is_ok(), "Runtime currently allows type mismatches (documented behavior)");
@@ -148,6 +156,7 @@ assert!(err.contains("expected i32") && err.contains("String"));
 **Original Behavior**: Removed properties persisted in `exported_properties` HashMap after script recompilation.
 
 **Example**:
+
 ```rust
 // Script v1: Two properties
 @export let mut health: i32 = 50;
@@ -179,6 +188,7 @@ pub fn initialize_properties(&mut self, program: &ast::Program) {
 ```
 
 **Impact**:
+
 - Memory leak potential with many hot-reloads
 - Confusing behavior: metadata says 1 property, HashMap has 2
 - Stale data accessible after property removal
@@ -206,6 +216,7 @@ pub fn initialize_properties(&mut self, program: &ast::Program) {
 ```
 
 **New Behavior**:
+
 ```rust
 // After hot-reload removing mana property
 env.get_exported_property("mana")  // ❌ Err("Property 'mana' not found")
@@ -214,6 +225,7 @@ env.get_exported_property("mana")  // ❌ Err("Property 'mana' not found")
 ### Test Updates
 
 **Test 13** (`test_remove_property_hot_reload`):
+
 ```rust
 // BEFORE:
 let result = env.get_exported_property("mana");
@@ -252,6 +264,7 @@ Running 717 tests across all crates:
 ### Integration Tests (Phase 5 Bundle 5-8)
 
 All 15 integration tests passing with validated fixes:
+
 - ✅ Test 1: compile_runtime_inspector_roundtrip
 - ✅ Test 2: multiple_properties_roundtrip
 - ✅ Test 3: property_type_conversion (FIXED - now expects error)
@@ -283,6 +296,7 @@ All 15 integration tests passing with validated fixes:
 ### Code Changes
 
 **Files Modified**:
+
 1. `crates/runtime/src/lib.rs` (+129 lines, -49 lines)
    - Added `validate_type()` function (~25 lines)
    - Added `value_type_name()` helper (~15 lines)
@@ -296,11 +310,13 @@ All 15 integration tests passing with validated fixes:
    - Updated Test 13 expectations (removed property inaccessible)
 
 **Clippy Optimizations**:
+
 - Converted match expression to `matches!` macro (clippy::match-like-matches-macro)
 
 ### Type Coverage
 
 **Supported Types in `validate_type()`**:
+
 - ✅ i32
 - ✅ f32
 - ✅ bool
@@ -317,6 +333,7 @@ All 15 integration tests passing with validated fixes:
 ## Next Steps
 
 ### Immediate (Completed ✅)
+
 - ✅ Fix type safety bug (HIGH priority)
 - ✅ Fix hot-reload cleanup bug (MEDIUM priority)
 - ✅ Update integration tests to verify fixes
@@ -324,12 +341,14 @@ All 15 integration tests passing with validated fixes:
 - ✅ Commit with descriptive message
 
 ### Short-Term (Phase 5 Sub-Phase 4)
+
 - ⏳ Set up headless Godot testing infrastructure
 - ⏳ Enable 10 ignored godot_bind tests
 - ⏳ Create HEADLESS_GODOT_SETUP.md documentation
 - ⏳ Integrate headless tests into CI/CD
 
 ### Medium-Term (Phase 5 Sub-Phase 5-6)
+
 - ⏳ Additional property edge case tests
 - ⏳ Input mutation/fuzzing tests
 - ⏳ Performance benchmarks for property operations
