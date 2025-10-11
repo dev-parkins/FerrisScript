@@ -124,12 +124,12 @@ fn test_multiple_properties_roundtrip() {
     );
 }
 
-/// Test 3: Type conversion during set_property
+/// Test 3: Property type validation (FIXED)
 ///
-/// **Purpose**: Verify type conversions work correctly
+/// **Purpose**: Verify runtime rejects type mismatches
 /// **Priority**: HIGH
-/// **Coverage**: Bundle 7 (set_exported_property type handling)
-/// **Result**: Runtime currently performs automatic Float → Int conversion
+/// **Coverage**: Bundle 7 (type validation)
+/// **Status**: FIXED - Runtime now validates types before storing
 #[test]
 fn test_property_type_conversion() {
     let source = r#"
@@ -141,26 +141,27 @@ fn test_property_type_conversion() {
     let mut env = Env::new();
     ferrisscript_runtime::execute(&program, &mut env).expect("Execution should succeed");
 
-    // Set with exact type - should succeed
-    env.set_exported_property("count", Value::Int(20), true)
-        .expect("Should set with matching type");
-    assert_eq!(env.get_exported_property("count").unwrap(), Value::Int(20));
-
-    // Set with float - runtime performs automatic conversion
-    // Note: Currently the runtime stores the value as-is (Float),
-    // which may not be ideal. This test documents the current behavior.
+    // Attempt to set integer property with float
     let result = env.set_exported_property("count", Value::Float(30.0), true);
 
-    // Runtime currently accepts Float for Int property
-    assert!(result.is_ok(), "Runtime currently allows type mismatches");
+    // FIXED: Runtime now rejects type mismatches
+    assert!(result.is_err(), "Runtime should reject type mismatch");
 
-    // NOTE: The value is stored as Float, not converted to Int
-    // This is a potential area for improvement in type safety
-    let value = env.get_exported_property("count").unwrap();
+    let err = result.unwrap_err();
     assert!(
-        matches!(value, Value::Float(30.0)),
-        "Value stored as Float (current behavior)"
+        err.contains("Type mismatch"),
+        "Error should mention type mismatch, got: {}",
+        err
     );
+    assert!(
+        err.contains("expected i32") && err.contains("f32"),
+        "Error should describe expected and actual types, got: {}",
+        err
+    );
+
+    // Original value should be unchanged
+    let value = env.get_exported_property("count").unwrap();
+    assert_eq!(value, Value::Int(10), "Original value should be preserved");
 }
 
 // ====================
@@ -222,13 +223,12 @@ fn test_set_nonexistent_property() {
     assert_eq!(env.get_exported_property("health").unwrap(), Value::Int(50));
 }
 
-/// Test 6: Set property with wrong type
+/// Test 6: Set property with wrong type (FIXED)
 ///
 /// **Purpose**: Verify type safety in property setting
 /// **Priority**: HIGH
 /// **Coverage**: Bundle 7 (type validation)
-/// **Result**: Runtime currently does NOT validate types (potential bug!)
-/// **TODO**: Consider adding type validation in set_exported_property
+/// **Status**: FIXED - Runtime now validates types
 #[test]
 fn test_set_property_wrong_type() {
     let source = r#"
@@ -243,19 +243,22 @@ fn test_set_property_wrong_type() {
     // Try to set integer property with string value
     let result = env.set_exported_property("health", Value::String("invalid".to_string()), true);
 
-    // Current behavior: Runtime accepts wrong type (no validation)
-    // This may be intentional for flexibility, but could cause runtime errors later
+    // FIXED: Runtime now rejects wrong types with descriptive error
     assert!(
-        result.is_ok(),
-        "Runtime currently allows type mismatches (documented behavior)"
+        result.is_err(),
+        "Setting property with wrong type should return error"
     );
 
-    // Value is stored as-is (String instead of Int)
-    let value = env.get_exported_property("health").unwrap();
+    let err = result.unwrap_err();
     assert!(
-        matches!(value, Value::String(_)),
-        "Wrong type is stored as-is (no type checking)"
+        err.contains("expected i32") && err.contains("String"),
+        "Error should describe type mismatch, got: {}",
+        err
     );
+
+    // Original value should be unchanged
+    let value = env.get_exported_property("health").unwrap();
+    assert_eq!(value, Value::Int(50), "Original value should be preserved");
 }
 
 /// Test 7: Set immutable property (let without mut)
@@ -519,13 +522,12 @@ fn test_remove_property_hot_reload() {
     let props = &program2.property_metadata;
     assert_eq!(props.len(), 1, "Should have 1 property after removal");
 
-    // NOTE: Current behavior - removed property still accessible from exported_properties
-    // The HashMap persists across recompilations. This may be intentional for
-    // preserving Inspector values during hot-reload, but could be confusing.
+    // FIXED: Removed property should no longer be accessible
+    // The exported_properties HashMap is now cleared during hot-reload
     let result = env.get_exported_property("mana");
     assert!(
-        result.is_ok(),
-        "Current behavior: Removed property persists in HashMap"
+        result.is_err(),
+        "Removed property should not be accessible after hot-reload"
     );
 
     // Verify remaining property still works

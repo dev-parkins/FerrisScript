@@ -565,6 +565,12 @@ impl Env {
     /// Reads static PropertyMetadata from the Program and initializes the
     /// per-instance exported_properties HashMap.
     ///
+    /// # Hot-Reload Behavior (FIXED)
+    ///
+    /// Clears existing exported_properties before re-initialization to prevent
+    /// stale properties from persisting after script recompilation. This ensures
+    /// that removed properties are no longer accessible.
+    ///
     /// # Example
     ///
     /// ```no_run
@@ -579,6 +585,9 @@ impl Env {
     pub fn initialize_properties(&mut self, program: &ast::Program) {
         // Clone property metadata from Program (static, shared across instances)
         self.property_metadata = program.property_metadata.clone();
+
+        // Clear old properties to prevent stale data after hot-reload (Hot-Reload Fix)
+        self.exported_properties.clear();
 
         // Initialize exported_properties HashMap with default values
         for metadata in &self.property_metadata {
@@ -693,9 +702,12 @@ impl Env {
     /// # Example
     ///
     /// ```no_run
-    /// # use ferrisscript_runtime::{Env, Value};
-    /// # let mut env = Env::new();
-    /// # env.exported_properties.insert("health".to_string(), Value::Int(100));
+    /// # use ferrisscript_runtime::{Env, Value, execute};
+    /// # use ferrisscript_compiler::compile;
+    /// let source = "@export let mut health: i32 = 100;";
+    /// let program = compile(source).unwrap();
+    /// let mut env = Env::new();
+    /// execute(&program, &mut env).unwrap();
     /// let health = env.get_exported_property("health").unwrap();
     /// assert_eq!(health, Value::Int(100));
     /// ```
@@ -712,6 +724,11 @@ impl Env {
     /// applies range clamping for properties with Range hints. If false (from script),
     /// allows out-of-range values but emits a warning.
     ///
+    /// # Type Validation
+    ///
+    /// Validates that the value type matches the property's declared type.
+    /// Returns an error if types are incompatible (e.g., setting String for i32).
+    ///
     /// # Clamp-on-Set Policy
     ///
     /// - **Inspector sets** (`from_inspector=true`): Automatically clamp to range
@@ -720,17 +737,12 @@ impl Env {
     /// # Example
     ///
     /// ```no_run
-    /// # use ferrisscript_runtime::{Env, Value};
-    /// # use ferrisscript_compiler::ast::{PropertyMetadata, PropertyHint};
-    /// # let mut env = Env::new();
-    /// # env.property_metadata.push(PropertyMetadata {
-    /// #     name: "health".to_string(),
-    /// #     type_name: "i32".to_string(),
-    /// #     hint: PropertyHint::Range { min: 0.0, max: 100.0, step: 1.0 },
-    /// #     hint_string: "0,100,1".to_string(),
-    /// #     default_value: Some("100".to_string()),
-    /// # });
-    /// # env.exported_properties.insert("health".to_string(), Value::Int(100));
+    /// # use ferrisscript_runtime::{Env, Value, execute};
+    /// # use ferrisscript_compiler::compile;
+    /// let source = "@export(range(0, 100, 1)) let mut health: i32 = 50;";
+    /// let program = compile(source).unwrap();
+    /// let mut env = Env::new();
+    /// execute(&program, &mut env).unwrap();
     /// // From Inspector: clamps 150 to 100
     /// env.set_exported_property("health", Value::Int(150), true).unwrap();
     /// assert_eq!(env.get_exported_property("health").unwrap(), Value::Int(100));
@@ -751,6 +763,9 @@ impl Env {
             .iter()
             .find(|m| m.name == name)
             .ok_or_else(|| format!("Property '{}' not found", name))?;
+
+        // Validate type matches (FIXED: Type safety validation)
+        Self::validate_type(&metadata.type_name, &value)?;
 
         // Apply clamping if range hint and from Inspector
         let final_value = if from_inspector {
@@ -826,6 +841,69 @@ impl Env {
                     metadata.name, value, min, max
                 );
             }
+        }
+    }
+
+    /// Validate that value type matches property's declared type (Type Safety Fix)
+    ///
+    /// Returns error if value type is incompatible with the property type.
+    /// This prevents storing wrong-typed values (e.g., String in i32 property).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use ferrisscript_runtime::{Env, Value, execute};
+    /// # use ferrisscript_compiler::compile;
+    /// let source = "@export let mut count: i32 = 0;";
+    /// let program = compile(source).unwrap();
+    /// let mut env = Env::new();
+    /// execute(&program, &mut env).unwrap();
+    ///
+    /// // Valid: i32 for i32 property
+    /// assert!(env.set_exported_property("count", Value::Int(42), true).is_ok());
+    ///
+    /// // Invalid: String for i32 property - now returns error
+    /// assert!(env.set_exported_property("count", Value::String("text".to_string()), true).is_err());
+    /// ```
+    fn validate_type(type_name: &str, value: &Value) -> Result<(), String> {
+        let is_valid = matches!(
+            (type_name, value),
+            ("i32", Value::Int(_))
+                | ("f32", Value::Float(_))
+                | ("bool", Value::Bool(_))
+                | ("String", Value::String(_))
+                | ("Vector2", Value::Vector2 { .. })
+                | ("Color", Value::Color { .. })
+                | ("Rect2", Value::Rect2 { .. })
+                | ("Transform2D", Value::Transform2D { .. })
+        );
+
+        if is_valid {
+            Ok(())
+        } else {
+            Err(format!(
+                "Type mismatch: expected {} but got {:?}",
+                type_name,
+                Self::value_type_name(value)
+            ))
+        }
+    }
+
+    /// Get the type name of a Value (helper for error messages)
+    fn value_type_name(value: &Value) -> &str {
+        match value {
+            Value::Int(_) => "i32",
+            Value::Float(_) => "f32",
+            Value::Bool(_) => "bool",
+            Value::String(_) => "String",
+            Value::Vector2 { .. } => "Vector2",
+            Value::Color { .. } => "Color",
+            Value::Rect2 { .. } => "Rect2",
+            Value::Transform2D { .. } => "Transform2D",
+            Value::Nil => "Nil",
+            Value::SelfObject => "Self",
+            Value::InputEvent(_) => "InputEvent",
+            Value::Node(_) => "Node",
         }
     }
 }
