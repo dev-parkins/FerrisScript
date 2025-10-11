@@ -72,6 +72,7 @@ fn is_exportable_type(ty: &Type) -> bool {
 ### 2. Hint Compatibility Matrix (E804-E806)
 
 **Validation Rules**:
+
 | Hint Type | Compatible Types | Error Code |
 |-----------|------------------|------------|
 | `range(min, max, step)` | `i32`, `f32` | E804 |

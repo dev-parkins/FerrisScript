@@ -83,6 +83,7 @@ fn get_property_list(&mut self) -> Vec<PropertyInfo> {
 - Clean compilation, no warnings
 
 **Edge Cases Handled**:
+
 | Edge Case | Solution |
 |-----------|----------|
 | NaN from f64 | → 0.0f32 with warning |
