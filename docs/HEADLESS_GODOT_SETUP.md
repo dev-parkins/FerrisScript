@@ -34,6 +34,7 @@ The `ferrisscript_godot_bind` crate has 10 tests that are currently ignored beca
 ## Solution: Integration Testing with Headless Godot
 
 Instead of unit tests, we use **integration tests** that:
+
 1. Build the FerrisScript GDExtension library
 2. Run Godot in headless mode (`--headless`)
 3. Load test scenes that exercise the functions
@@ -261,11 +262,13 @@ jobs:
 Once headless testing is set up, we'll have:
 
 ### Current (Unit Tests Only)
+
 - ✅ 11 passing unit tests (type mapping, basic functions)
 - ❌ 10 ignored tests (require Godot runtime)
 - **Coverage**: ~52% (11/21 tests)
 
 ### After Headless Setup
+
 - ✅ 11 passing unit tests
 - ✅ 10 passing integration tests (headless Godot)
 - **Coverage**: 100% (21/21 tests)

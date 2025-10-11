@@ -257,6 +257,7 @@ verbose = true
 ```
 
 **Environment Overrides**:
+
 - `GODOT_BIN`: Override godot_executable
 - `GODOT_PROJECT_PATH`: Override project_path
 - `GODOT_TIMEOUT`: Override timeout_seconds
@@ -264,6 +265,7 @@ verbose = true
 ### Coverage
 
 Current integration tests:
+
 - ✅ `export_properties_test.ferris` - All 8 types, 4 hint types
 - ✅ `clamp_on_set_test.ferris` - Range clamping behavior
 - ✅ `signal_test.ferris` - Signal emission
@@ -449,18 +451,21 @@ GODOT_BIN=/path/to/godot cargo test --package ferrisscript_godot_bind --test hea
 ### When to Add GDExtension Tests
 
 Add GDExtension tests when you have Rust functions that:
+
 1. Construct Godot types (`GString`, `PropertyInfo`, `Variant`, etc.)
 2. Call Godot API functions
 3. Need `godot::init()` to run
 4. Can't be unit tested due to Godot runtime requirements
 
 **Don't** add GDExtension tests for:
+
 - Pure Rust logic (use unit tests)
 - End-to-end `.ferris` script behavior (use integration tests)
 
 ### Coverage
 
 Current GDExtension tests:
+
 - ✅ Basic Godot functionality (Node creation, PropertyHint enum)
 - ⏳ FerrisScriptTestNode (planned - will test map_hint(), metadata_to_property_info())
 
@@ -516,6 +521,7 @@ cargo bench -- --baseline main
 ### Coverage
 
 Current benchmarks:
+
 - ✅ Lexer performance
 - ✅ Parser performance
 - ✅ Type checker performance
@@ -629,16 +635,19 @@ ferris-test --all
 ### Common Workflows
 
 **Pre-commit**: Run fast unit tests
+
 ```bash
 cargo test
 ```
 
 **Pre-push**: Run unit + integration tests
+
 ```bash
 cargo test && ferris-test --all
 ```
 
 **Feature validation**: Run all layers
+
 ```bash
 cargo test && \
 cargo test --test headless_integration -- --ignored --nocapture && \
@@ -646,6 +655,7 @@ ferris-test --all
 ```
 
 **CI/CD**: All automated tests
+
 ```bash
 # In GitHub Actions workflow
 cargo test --all
@@ -717,6 +727,7 @@ jobs:
 **Location**: `crates/godot_bind/src/lib.rs`
 
 **Tests**:
+
 1. `test_map_hint_none`
 2. `test_map_hint_range`
 3. `test_map_hint_enum`
@@ -743,6 +754,7 @@ jobs:
 **Should They Be Enabled?**: NO. They serve as documentation of the API but are redundant with higher-level tests. The ignore attribute correctly indicates these are low-level functions requiring Godot runtime.
 
 **Alternative Approach**: If unit testing these functions is critical, they could be refactored to:
+
 1. Extract pure logic into testable helper functions
 2. Keep Godot type construction in thin wrappers
 3. Unit test the helpers, integration test the wrappers
@@ -758,6 +770,7 @@ See: `docs/planning/v0.0.4/TESTING_STRATEGY_PHASE5.md` Section "godot_bind Tests
 **Problem**: Tests can't find Godot
 
 **Solution**:
+
 1. Check `ferris-test.toml` has correct `godot_executable` path
 2. Or set `GODOT_BIN` environment variable
 3. Ensure Godot 4.3+ is installed
@@ -775,6 +788,7 @@ export GODOT_BIN="/usr/local/bin/godot"
 **Problem**: Test exceeds timeout_seconds
 
 **Solution**:
+
 1. Increase `timeout_seconds` in `ferris-test.toml`
 2. Or set `GODOT_TIMEOUT` environment variable
 3. Check if Godot is hanging (try `--verbose` flag)
@@ -784,6 +798,7 @@ export GODOT_BIN="/usr/local/bin/godot"
 **Problem**: Godot can't find test scene
 
 **Solution**:
+
 1. Verify `project_path` points to `godot_test/`
 2. Check scene file exists (`test_godot_bind.tscn`, `test_{name}.tscn`)
 3. Ensure scene format is Godot 4.x compatible
@@ -793,6 +808,7 @@ export GODOT_BIN="/usr/local/bin/godot"
 **Problem**: Godot can't load FerrisScript GDExtension
 
 **Solution**:
+
 1. Build GDExtension: `cargo build --release`
 2. Check `godot_test/ferrisscript.gdextension` paths are correct
 3. Verify `.dll`/`.so` exists in `target/release/`
@@ -803,6 +819,7 @@ export GODOT_BIN="/usr/local/bin/godot"
 **Problem**: Parser misinterpreted output
 
 **Solution**:
+
 1. Ensure test uses `[TEST_START]`, `[PASS]`, `[FAIL]`, `[TEST_END]` markers
 2. Check for extra `[FAIL]` markers in error messages
 3. Run with `--verbose` to see full output
@@ -813,6 +830,7 @@ export GODOT_BIN="/usr/local/bin/godot"
 **Problem**: Environment differences
 
 **Solution**:
+
 1. Check CI has Godot installed
 2. Verify CI uses headless/console Godot variant
 3. Ensure GDExtension is built before tests run
