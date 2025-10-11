@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[node name="TestRunner" type="Node2D"]
+
+[node name="Main" type="FerrisScriptNode" parent="."]
+script_path = "res://scripts/node_query_validation.ferris"
+
+[node name="Player" type="Node2D" parent="Main"]
+
+[node name="DebugUI" type="Node2D" parent="Main"]
+
+[node name="Enemies" type="Node2D" parent="Main"]
+
+[node name="Boss" type="Node2D" parent="Main"]
+

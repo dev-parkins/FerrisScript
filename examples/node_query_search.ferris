@@ -1,0 +1,84 @@
+// TEST: node_query_search
+// CATEGORY: unit
+// DESCRIPTION: Recursive node search with find_child()
+// EXPECT: success
+// ASSERT: Found HealthBar recursively
+// ASSERT: Found ScoreLabel in nested UI
+// ASSERT: Found CurrentWeapon recursively
+// ASSERT: Search Complete
+//
+// Example: Node Search with find_child()
+// Demonstrates recursive child searching
+//
+// GODOT SCENE SETUP:
+// 1. Create a new 2D Scene
+// 2. Add FerrisScriptNode as root, rename to "Main"
+// 3. Attach this script to Main node
+// 4. Add child nodes anywhere in the tree under Main:
+//    - Node2D named "HealthBar" (can be deeply nested)
+//    - Label named "ScoreLabel" (can be deeply nested)
+//    - CollisionShape2D named "CollisionShape2D"
+//    - Node2D named "CurrentWeapon"
+//    - CPUParticles2D named "ParticleEffect"
+//    - Label named "HealthDisplay"
+//    - Label named "ManaDisplay"
+//    - Label named "StaminaDisplay"
+//
+// Scene Tree Structure (flexible nesting):
+// /root
+//   └─ Main (FerrisScriptNode with this script)
+//        ├─ UI (optional container)
+//        │    ├─ HealthBar
+//        │    └─ ScoreLabel
+//        ├─ Player (optional container)
+//        │    └─ CurrentWeapon
+//        └─ ... (nodes can be at any depth)
+//
+// EXPECTED BEHAVIOR:
+// - find_child() searches recursively through all descendants
+// - Finds nodes regardless of nesting depth
+// - Returns first matching node by name
+
+fn _ready() {
+    print("=== Recursive Node Search ===");
+    
+    // Find a child by name (searches recursively)
+    let health_bar = find_child("HealthBar");
+    print("✓ Found HealthBar recursively");
+    
+    // Find deeply nested UI elements
+    let score_label = find_child("ScoreLabel");
+    print("✓ Found ScoreLabel in nested UI");
+    
+    // Find weapon in player container
+    let current_weapon = find_child("CurrentWeapon");
+    print("✓ Found CurrentWeapon recursively");
+    
+    print("=== Search Complete ===");
+}
+
+fn _process(delta: f32) {
+    // Note: This runs every frame - find_child is called each frame
+    // In production, cache the results or only search when needed
+    let weapon = find_child("CurrentWeapon");
+}
+
+fn update_ui() {
+    // Find and update UI components
+    let health_display = find_child("HealthDisplay");
+    let mana_display = find_child("ManaDisplay");
+    let stamina_display = find_child("StaminaDisplay");
+}
+
+fn check_equipment() {
+    // Find equipped items
+    let helmet = find_child("Helmet");
+    let chest_armor = find_child("ChestArmor");
+    let weapon = find_child("Weapon");
+    
+    // Validate equipment exists
+    if has_node("Equipment") {
+        let equipment_node = get_node("Equipment");
+        let shield = find_child("Shield");
+    }
+}

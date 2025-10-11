@@ -613,6 +613,175 @@ cargo test test_lexer_tokenizes_keywords
 cargo test -- --nocapture
 ```
 
+### Running Test Harness Examples
+
+FerrisScript includes a headless test harness for testing examples against Godot without manual intervention. Use the convenience script to run tests:
+
+**PowerShell (Windows)**:
+
+```powershell
+# Run a specific example
+.\scripts\run-tests.ps1 -Script examples/node_query_basic.ferris -Verbose
+
+# Run all examples matching a filter
+.\scripts\run-tests.ps1 -All -Filter "node_query"
+
+# Fast mode: skip rebuild if harness is already built
+.\scripts\run-tests.ps1 -Script examples/hello.ferris -Fast
+
+# Run all examples with verbose output
+.\scripts\run-tests.ps1 -All -Verbose
+```
+
+**Bash (Linux/macOS)**:
+
+```bash
+# Run a specific example
+./scripts/run-tests.sh --script examples/node_query_basic.ferris --verbose
+
+# Run all examples matching a filter
+./scripts/run-tests.sh --all --filter "node_query"
+
+# Fast mode: skip rebuild if harness is already built
+./scripts/run-tests.sh --script examples/hello.ferris --fast
+
+# Run all examples with verbose output
+./scripts/run-tests.sh --all --verbose
+```
+
+**Direct Cargo Command**:
+
+```bash
+# Build and run test harness
+cargo build --release -p ferrisscript_test_harness
+cargo run --release --bin ferris-test -- --script examples/node_query_basic.ferris --verbose
+```
+
+**Test Harness Features**:
+
+- ✅ Headless Godot execution (no GUI needed)
+- ✅ Automatic scene generation from code comments
+- ✅ Output parsing with assertion markers (`✓`, `✗`, `○`)
+- ✅ Detailed error reporting with line numbers
+- ✅ Batch test execution with filtering
+
+See [docs/testing/](docs/testing/) for detailed test harness documentation.
+
+### Automated Testing (Pre-commit Hooks)
+
+FerrisScript uses **pre-commit hooks** to automatically validate code before commits. These hooks ensure:
+
+- ✅ Code is properly formatted (`cargo fmt`)
+- ✅ No linting warnings (`cargo clippy`)
+- ✅ All unit tests pass (`cargo test`)
+
+**Installing Pre-commit Hooks**:
+
+The hooks are automatically installed when you first run `cargo build`. If they're not active, install them manually:
+
+**PowerShell (Windows)**:
+
+```powershell
+.\scripts\install-git-hooks.ps1
+```
+
+**Bash (Linux/macOS)**:
+
+```bash
+./scripts/install-git-hooks.sh
+```
+
+**What Happens on Commit**:
+
+When you run `git commit`, the pre-commit hook will automatically:
+
+1. **Check formatting**: Verifies `cargo fmt` has been run
+2. **Run linter**: Executes `cargo clippy` with strict warnings
+3. **Run tests**: Executes quick unit tests (not integration tests)
+
+If any check fails, the commit is **blocked** and you'll see:
+
+```
+❌ Formatting issues detected
+❌ Linting warnings found
+❌ Tests failed
+```
+
+**Running Checks Manually**:
+
+You can run the same checks locally before committing:
+
+```bash
+# Format code
+cargo fmt --all
+
+# Check linting
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+# Run tests
+cargo test --workspace
+
+# Or use the pre-commit script directly (PowerShell)
+.\.git\hooks\pre-commit
+
+# Or use the pre-commit script directly (Bash)
+./.git/hooks/pre-commit
+```
+
+**Skipping Pre-commit Hooks** (Not Recommended):
+
+In rare cases where you need to commit work-in-progress code:
+
+```bash
+git commit --no-verify -m "WIP: incomplete feature"
+```
+
+⚠️ **Warning**: Skipping hooks means your code may not pass CI checks. Use sparingly and fix issues before creating a PR.
+
+**Troubleshooting Pre-commit Hooks**:
+
+**Hook not running**:
+
+```bash
+# Re-install hooks
+.\scripts\install-git-hooks.ps1  # Windows
+./scripts/install-git-hooks.sh   # Linux/macOS
+```
+
+**Formatting check fails**:
+
+```bash
+# Auto-format all code
+cargo fmt --all
+```
+
+**Clippy warnings**:
+
+```bash
+# See detailed warnings
+cargo clippy --workspace --all-targets --all-features
+
+# Fix automatically (some warnings)
+cargo clippy --fix --workspace --all-targets --all-features
+```
+
+**Tests failing**:
+
+```bash
+# Run tests with output to see failures
+cargo test --workspace -- --nocapture
+
+# Run specific failing test
+cargo test test_name -- --nocapture
+```
+
+**Why Pre-commit Hooks?**
+
+- **Catches issues early**: Before they reach CI or code review
+- **Saves time**: No waiting for CI to find formatting issues
+- **Maintains quality**: Ensures consistent code standards
+- **Reduces review burden**: Reviewers can focus on logic, not style
+
 ### Test Coverage
 
 We aim for high test coverage, especially for:

@@ -7,6 +7,7 @@ This directory contains helper scripts for development workflows.
 | Script | Purpose | Platforms |
 |--------|---------|-----------|
 | `test.sh` / `test.ps1` | Run all tests | All |
+| `run-tests.sh` / `run-tests.ps1` | Run test harness examples | All |
 | `bench.sh` / `bench.ps1` | Run benchmarks | All |
 | `format.sh` / `format.ps1` | Format code | All |
 | `coverage.sh` / `coverage.ps1` | Generate coverage | All |
@@ -49,6 +50,98 @@ Runs all tests in the workspace (182 tests).
 - Quick validation during development
 - Pre-commit testing
 - CI/CD integration
+
+---
+
+### Test Harness Runner
+
+Runs FerrisScript examples through the headless Godot test harness.
+
+**PowerShell (Windows)**:
+
+```powershell
+# Run a specific example
+.\scripts\run-tests.ps1 -Script examples/node_query_basic.ferris -Verbose
+
+# Run all examples matching a filter
+.\scripts\run-tests.ps1 -All -Filter "node_query"
+
+# Fast mode: skip rebuild if harness is already built
+.\scripts\run-tests.ps1 -Script examples/hello.ferris -Fast
+
+# Run all examples
+.\scripts\run-tests.ps1 -All
+```
+
+**Bash (Linux/macOS)**:
+
+```bash
+# Run a specific example
+./scripts/run-tests.sh --script examples/node_query_basic.ferris --verbose
+
+# Run all examples matching a filter
+./scripts/run-tests.sh --all --filter "node_query"
+
+# Fast mode: skip rebuild
+./scripts/run-tests.sh --script examples/hello.ferris --fast
+
+# Run all examples
+./scripts/run-tests.sh --all
+```
+
+**What It Does**:
+
+- Builds test harness in release mode (unless `--fast`/`-Fast`)
+- Runs FerrisScript examples through headless Godot
+- Parses output for assertion markers (`✓`, `✗`, `○`)
+- Reports test results with colored output
+- Returns exit code 0 on success, non-zero on failure
+
+**Command-Line Options**:
+
+- `--script PATH` / `-Script PATH`: Run specific example file
+- `--all` / `-All`: Run all examples in workspace
+- `--filter PATTERN` / `-Filter PATTERN`: Filter examples by name pattern
+- `--verbose` / `-Verbose`: Show detailed test output
+- `--fast` / `-Fast`: Skip rebuild, use existing test harness binary
+
+**Assertion Markers**:
+
+Examples include print statements with markers:
+
+- `✓` - Assertion passed (expected behavior confirmed)
+- `✗` - Assertion failed (unexpected behavior detected)
+- `○` - Informational (optional check, no failure if not present)
+
+**Example Output**:
+
+```
+ℹ️  Building test harness in release mode...
+✅ Build complete
+
+ℹ️  Running: cargo run --release --bin ferris-test -- --script examples/node_query_basic.ferris --verbose
+
+Running test: node_query_basic.ferris
+Test result: PASS
+  - ✓ Found Player node
+  - ✓ Found UI node
+  - ✓ Got parent node
+  - ✓ Found OtherChild node
+
+✅ All tests passed!
+```
+
+**Use Cases**:
+
+- Testing examples against real Godot runtime
+- Validating node query functionality
+- Integration testing without manual Godot setup
+- Pre-commit validation of examples
+
+**See Also**:
+
+- [docs/testing/PHASE_1_COMPLETION_REPORT.md](../docs/testing/PHASE_1_COMPLETION_REPORT.md) - Test harness architecture
+- [docs/testing/PHASE_2_COMPLETION_REPORT.md](../docs/testing/PHASE_2_COMPLETION_REPORT.md) - Node query test coverage
 
 ---
 

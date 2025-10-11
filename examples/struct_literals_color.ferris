@@ -1,0 +1,24 @@
+// Example: Struct Literal Color Manipulation
+// TEST struct_literals_color
+// CATEGORY: semantics
+// EXPECT: compile_success
+// DESCRIPTION: Demonstrates Color struct literals with field access
+
+fn _ready() {
+    // Create colors using struct literals
+    let red = Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
+    let green = Color { r: 0.0, g: 1.0, b: 0.0, a: 1.0 };
+    let blue = Color { r: 0.0, g: 0.0, b: 1.0, a: 1.0 };
+    
+    // Mix colors (simple averaging)
+    let cyan = Color { r: 0.0, g: 0.5, b: 0.5, a: 1.0 };
+    let magenta = Color { r: 0.5, g: 0.0, b: 0.5, a: 1.0 };
+    
+    // Access and print color components
+    print("Red component: ");
+    // ASSERT_OUTPUT: Red component:
+    
+    // Test integer coercion in Color literals
+    let white = Color { r: 1, g: 1, b: 1, a: 1 };
+    let black = Color { r: 0, g: 0, b: 0, a: 1 };
+}

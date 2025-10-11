@@ -1,0 +1,160 @@
+// Integration Test: Exported Properties with All Types and Hints
+// Tests all 8 exportable types and 4 hint types
+
+// Test 1: Basic Exported Properties (No Hints)
+@export
+global basic_int: i32 = 42;
+
+@export
+global basic_float: f32 = 3.14;
+
+@export
+global basic_bool: bool = true;
+
+@export
+global basic_string: String = "Hello FerrisScript";
+
+// Test 2: Range Hints (Integer and Float)
+@export @range(0, 100, 1)
+global health: i32 = 100;
+
+@export @range(0.0, 10.0, 0.5)
+global speed: f32 = 5.0;
+
+@export @range(-100, 100, 10)
+global temperature: i32 = 20;
+
+// Test 3: Enum Hints
+@export @enum("Small", "Medium", "Large")
+global size: String = "Medium";
+
+@export @enum("Red", "Green", "Blue")
+global color_name: String = "Red";
+
+// Test 4: File Hints
+@export @file("png", "jpg", "jpeg")
+global texture_path: String = "";
+
+@export @file("tres", "res")
+global resource_path: String = "";
+
+// Test 5: Godot Struct Types
+@export
+global position: Vector2 = Vector2 { x: 0.0, y: 0.0 };
+
+@export
+global color: Color = Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
+
+@export
+global bounds: Rect2 = Rect2 {
+    position: Vector2 { x: 0.0, y: 0.0 },
+    size: Vector2 { x: 100.0, y: 100.0 }
+};
+
+@export
+global transform: Transform2D = Transform2D {
+    position: Vector2 { x: 0.0, y: 0.0 },
+    rotation: 0.0,
+    scale: Vector2 { x: 1.0, y: 1.0 }
+};
+
+// Test 6: Multiple Properties with Different Hints
+@export @range(0, 360, 1)
+global rotation_degrees: i32 = 0;
+
+@export @enum("Idle", "Walking", "Running", "Jumping")
+global animation_state: String = "Idle";
+
+@export @range(0.0, 1.0, 0.1)
+global opacity: f32 = 1.0;
+
+// Test 7: Script Logic Using Exported Properties
+fn _ready() {
+    print("=== Exported Properties Test ===");
+    
+    // Test basic types
+    print("Basic Int: ");
+    print(basic_int);
+    print("Basic Float: ");
+    print(basic_float);
+    print("Basic Bool: ");
+    print(basic_bool);
+    print("Basic String: ");
+    print(basic_string);
+    
+    // Test range values
+    print("Health: ");
+    print(health);
+    print("Speed: ");
+    print(speed);
+    print("Temperature: ");
+    print(temperature);
+    
+    // Test enum values
+    print("Size: ");
+    print(size);
+    print("Color Name: ");
+    print(color_name);
+    
+    // Test file paths (may be empty)
+    print("Texture Path: ");
+    print(texture_path);
+    
+    // Test struct types
+    print("Position: ");
+    print(position);
+    print("Color: ");
+    print(color);
+    
+    print("Animation State: ");
+    print(animation_state);
+    print("Opacity: ");
+    print(opacity);
+    
+    print("=== All Properties Accessible ===");
+}
+
+fn _process(delta: f32) {
+    // Test runtime property access and modification
+    let current_health: i32 = health;
+    
+    // Properties should be mutable at runtime
+    if current_health > 0 {
+        // Health decreases over time (for testing)
+        health = current_health - 1;
+    }
+    
+    // Test rotation
+    if rotation_degrees < 360 {
+        rotation_degrees = rotation_degrees + 1;
+    } else {
+        rotation_degrees = 0;
+    }
+}
+
+// Test 8: Property Interaction Functions
+fn set_health_value(new_health: i32) {
+    health = new_health;
+    print("Health set to: ");
+    print(health);
+}
+
+fn get_health_value() -> i32 {
+    return health;
+}
+
+fn cycle_size() {
+    if size == "Small" {
+        size = "Medium";
+    } else if size == "Medium" {
+        size = "Large";
+    } else {
+        size = "Small";
+    }
+    print("Size changed to: ");
+    print(size);
+}
+
+fn set_position_xy(x: f32, y: f32) {
+    position = Vector2 { x: x, y: y };
+}

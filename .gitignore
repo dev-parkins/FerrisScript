@@ -25,6 +25,7 @@ node_modules/
 
 # Temporary files (PR bodies, scripts)
 /temp/
+.github/PR_DESCRIPTION.md
 
 # OS
 Thumbs.db

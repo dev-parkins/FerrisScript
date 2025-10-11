@@ -1,5 +1,9 @@
 # FerrisScript v0.0.4 Roadmap 🦀
 
+> **⚠️ DEPRECATED**: This document contains outdated planning information.  
+> **Please refer to [README.md](README.md) for current v0.0.4 status and tracking.**  
+> This file is retained for historical reference only.
+
 **Version**: 0.0.4 (Patch Release)  
 **Focus**: Godot API Expansion  
 **Timeline**: 3-4 weeks  

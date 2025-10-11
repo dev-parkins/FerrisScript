@@ -144,14 +144,24 @@ pub enum ErrorCode {
     /// Incompatible types in assignment
     E219,
 
-    // Semantic Errors (E300-E399) - Reserved for future semantic analysis
-    // These will be implemented when semantic analyzer is added
-    // E300: Unreachable code
-    // E301: Unused variable (warning)
-    // E302: Unused function (warning)
-    // E303: Dead code (warning)
-    // E304: Invalid break/continue (not in loop)
-    // E305: Invalid return (not in function)
+    // Semantic Errors (E300-E399) - Signal-related errors and future semantic analysis
+    /// Signal already defined (duplicate signal name)
+    E301,
+    /// Signal not defined when trying to emit
+    E302,
+    /// Signal parameter count mismatch in emit_signal
+    E303,
+    /// Signal parameter type mismatch in emit_signal
+    E304,
+    /// Invalid lifecycle function signature
+    E305,
+    // Future semantic errors:
+    // E306: Unreachable code
+    // E307: Unused variable (warning)
+    // E308: Unused function (warning)
+    // E309: Dead code (warning)
+    // E310: Invalid break/continue (not in loop)
+    // E311: Invalid return (not in function)
 
     // Runtime Errors (E400-E499)
     /// Division by zero
@@ -184,6 +194,52 @@ pub enum ErrorCode {
     E413,
     /// Invalid function call at runtime
     E414,
+
+    // Type System Errors - Godot Types (E700-E799)
+    /// Unknown field access on Color type
+    E701,
+    /// Unknown field access on Rect2 type
+    E702,
+    /// Unknown field access on Transform2D type
+    E703,
+    /// Invalid Color construction
+    E704,
+    /// Invalid Rect2 construction
+    E705,
+    /// Invalid Transform2D construction
+    E706,
+    /// Type mismatch in Color field assignment
+    E707,
+    /// Type mismatch in Rect2 field assignment
+    E708,
+    /// Type mismatch in Transform2D field assignment
+    E709,
+    /// Nested field access on non-struct type
+    E710,
+
+    // @export Annotation Errors (E800-E815)
+    /// @export used on unsupported type
+    E802,
+    /// @export must be on variable declaration
+    E803,
+    /// Range hint not compatible with type
+    E804,
+    /// File hint not compatible with type
+    E805,
+    /// Enum hint not compatible with type
+    E806,
+    /// Range hint min must be less than max
+    E807,
+    /// Enum hint must have at least one value
+    E808,
+    /// Duplicate @export annotation
+    E810,
+    /// @export on non-global scope
+    E811,
+    /// @export on immutable variable (warning)
+    E812,
+    /// @export default value must be compile-time constant
+    E813,
 }
 
 impl ErrorCode {
@@ -236,6 +292,13 @@ impl ErrorCode {
             ErrorCode::E218 => "E218",
             ErrorCode::E219 => "E219",
 
+            // Semantic Errors
+            ErrorCode::E301 => "E301",
+            ErrorCode::E302 => "E302",
+            ErrorCode::E303 => "E303",
+            ErrorCode::E304 => "E304",
+            ErrorCode::E305 => "E305",
+
             // Runtime Errors
             ErrorCode::E400 => "E400",
             ErrorCode::E401 => "E401",
@@ -252,6 +315,31 @@ impl ErrorCode {
             ErrorCode::E412 => "E412",
             ErrorCode::E413 => "E413",
             ErrorCode::E414 => "E414",
+
+            // Type System Errors - Godot Types
+            ErrorCode::E701 => "E701",
+            ErrorCode::E702 => "E702",
+            ErrorCode::E703 => "E703",
+            ErrorCode::E704 => "E704",
+            ErrorCode::E705 => "E705",
+            ErrorCode::E706 => "E706",
+            ErrorCode::E707 => "E707",
+            ErrorCode::E708 => "E708",
+            ErrorCode::E709 => "E709",
+            ErrorCode::E710 => "E710",
+
+            // @export Annotation Errors
+            ErrorCode::E802 => "E802",
+            ErrorCode::E803 => "E803",
+            ErrorCode::E804 => "E804",
+            ErrorCode::E805 => "E805",
+            ErrorCode::E806 => "E806",
+            ErrorCode::E807 => "E807",
+            ErrorCode::E808 => "E808",
+            ErrorCode::E810 => "E810",
+            ErrorCode::E811 => "E811",
+            ErrorCode::E812 => "E812",
+            ErrorCode::E813 => "E813",
         }
     }
 
@@ -354,6 +442,13 @@ impl ErrorCode {
             ErrorCode::E218 => "Type annotation required",
             ErrorCode::E219 => "Incompatible types in assignment",
 
+            // Semantic Errors
+            ErrorCode::E301 => "Signal already defined",
+            ErrorCode::E302 => "Signal not defined",
+            ErrorCode::E303 => "Signal parameter count mismatch",
+            ErrorCode::E304 => "Signal parameter type mismatch",
+            ErrorCode::E305 => "Invalid lifecycle function signature",
+
             // Runtime Errors
             ErrorCode::E400 => "Division by zero",
             ErrorCode::E401 => "Index out of bounds",
@@ -370,6 +465,31 @@ impl ErrorCode {
             ErrorCode::E412 => "Complex field assignment not implemented",
             ErrorCode::E413 => "Function not found",
             ErrorCode::E414 => "Invalid function call",
+
+            // Type System Errors - Godot Types
+            ErrorCode::E701 => "Unknown field on Color",
+            ErrorCode::E702 => "Unknown field on Rect2",
+            ErrorCode::E703 => "Unknown field on Transform2D",
+            ErrorCode::E704 => "Invalid Color construction",
+            ErrorCode::E705 => "Invalid Rect2 construction",
+            ErrorCode::E706 => "Invalid Transform2D construction",
+            ErrorCode::E707 => "Type mismatch in Color field assignment",
+            ErrorCode::E708 => "Type mismatch in Rect2 field assignment",
+            ErrorCode::E709 => "Type mismatch in Transform2D field assignment",
+            ErrorCode::E710 => "Nested field access on non-struct type",
+
+            // @export Annotation Errors
+            ErrorCode::E802 => "@export on unsupported type",
+            ErrorCode::E803 => "@export must be on variable declaration",
+            ErrorCode::E804 => "Range hint not compatible with type",
+            ErrorCode::E805 => "File hint not compatible with type",
+            ErrorCode::E806 => "Enum hint not compatible with type",
+            ErrorCode::E807 => "Range hint min must be less than max",
+            ErrorCode::E808 => "Enum hint must have at least one value",
+            ErrorCode::E810 => "Duplicate @export annotation",
+            ErrorCode::E811 => "@export on non-global scope",
+            ErrorCode::E812 => "@export on immutable variable",
+            ErrorCode::E813 => "@export default value must be compile-time constant",
         }
     }
 
@@ -422,6 +542,13 @@ impl ErrorCode {
             | ErrorCode::E218
             | ErrorCode::E219 => ErrorCategory::Type,
 
+            // Semantic Errors
+            ErrorCode::E301
+            | ErrorCode::E302
+            | ErrorCode::E303
+            | ErrorCode::E304
+            | ErrorCode::E305 => ErrorCategory::Semantic,
+
             // Runtime Errors
             ErrorCode::E400
             | ErrorCode::E401
@@ -438,6 +565,31 @@ impl ErrorCode {
             | ErrorCode::E412
             | ErrorCode::E413
             | ErrorCode::E414 => ErrorCategory::Runtime,
+
+            // Type System Errors - Godot Types
+            ErrorCode::E701
+            | ErrorCode::E702
+            | ErrorCode::E703
+            | ErrorCode::E704
+            | ErrorCode::E705
+            | ErrorCode::E706
+            | ErrorCode::E707
+            | ErrorCode::E708
+            | ErrorCode::E709
+            | ErrorCode::E710 => ErrorCategory::Type,
+
+            // @export Annotation Errors
+            ErrorCode::E802
+            | ErrorCode::E803
+            | ErrorCode::E804
+            | ErrorCode::E805
+            | ErrorCode::E806
+            | ErrorCode::E807
+            | ErrorCode::E808
+            | ErrorCode::E810
+            | ErrorCode::E811
+            | ErrorCode::E812
+            | ErrorCode::E813 => ErrorCategory::Type,
         }
     }
 
@@ -626,5 +778,30 @@ mod tests {
         let url = ErrorCode::E200.get_docs_url();
         println!("E200 URL: {}", url);
         assert!(url.contains("#e200-type-mismatch"));
+    }
+
+    #[test]
+    fn test_all_semantic_errors() {
+        // Test semantic error codes (E301-E305) including lifecycle validation
+        let codes = vec![
+            ErrorCode::E301,
+            ErrorCode::E302,
+            ErrorCode::E303,
+            ErrorCode::E304,
+            ErrorCode::E305,
+        ];
+        for code in codes {
+            assert_eq!(code.category(), ErrorCategory::Semantic);
+            assert!(!code.as_str().is_empty());
+            assert!(!code.description().is_empty());
+        }
+
+        // Specifically test E305 (lifecycle function signature validation)
+        assert_eq!(ErrorCode::E305.as_str(), "E305");
+        assert_eq!(
+            ErrorCode::E305.description(),
+            "Invalid lifecycle function signature"
+        );
+        assert_eq!(ErrorCode::E305.category(), ErrorCategory::Semantic);
     }
 }
