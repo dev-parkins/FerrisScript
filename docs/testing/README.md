@@ -30,13 +30,13 @@ FerrisScript uses a **4-layer testing strategy** where each layer validates diff
 
 ```
 ┌─────────────────────────────────────────────┐
-│   Layer 4: Manual Testing (Godot Editor)   │  ← Feature validation
+│   Layer 4: Manual Testing (Godot Editor)    │  ← Feature validation
 ├─────────────────────────────────────────────┤
-│   Layer 3: Integration Tests (.ferris)     │  ← End-to-end behavior
+│   Layer 3: Integration Tests (.ferris)      │  ← End-to-end behavior
 ├─────────────────────────────────────────────┤
-│   Layer 2: GDExtension Tests (GDScript)    │  ← Godot bindings
+│   Layer 2: GDExtension Tests (GDScript)     │  ← Godot bindings
 ├─────────────────────────────────────────────┤
-│   Layer 1: Unit Tests (Rust)               │  ← Pure logic
+│   Layer 1: Unit Tests (Rust)                │  ← Pure logic
 └─────────────────────────────────────────────┘
 ```
 
