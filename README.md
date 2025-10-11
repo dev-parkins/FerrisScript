@@ -56,7 +56,7 @@ FerrisScript (named after [Ferris 🦀](https://rustacean.net/), the Rust mascot
 | **Refactoring Safety** | High (type checker catches breaks) | Medium (manual testing needed) |
 | **Godot Integration** | Via GDExtension | Native |
 | **Hot Reload** | Planned (v0.1.0) | Yes |
-| **Maturity** | Alpha (v0.0.3) | Production-ready |
+| **Maturity** | Alpha (v0.0.4) | Production-ready |
 
 \* Performance comparison is preliminary and varies by use case. Detailed benchmarks are documented in version-specific documentation.
 
@@ -80,10 +80,13 @@ FerrisScript (named after [Ferris 🦀](https://rustacean.net/), the Rust mascot
 
 - 🦀 **Rust-Inspired Syntax** - Familiar to Rust developers, easy for beginners
 - 🎮 **Godot 4.x Integration** - Native GDExtension support via `gdext`
-- ⚡ **Static Type Checking** - Catch errors before runtime
+- ⚡ **Static Type Checking** - Catch errors before runtime (843 tests)
 - 🔒 **Immutability by Default** - Safe by default, explicit `mut` for mutations
 - 🎯 **Zero-Cost Abstractions** - Compiled to efficient runtime execution
 - 📦 **Minimal Dependencies** - Lightweight and fast compilation
+- 🎨 **@export Annotations** (v0.0.4+) - Inspector integration with property hints
+- 📊 **Godot Type Literals** (v0.0.4+) - Direct construction of `Vector2`, `Color`, `Rect2`, `Transform2D`
+- 🔔 **Signal System** - Declare and emit custom signals
 
 ## 🎨 Editor Support
 
@@ -100,15 +103,15 @@ FerrisScript has syntax highlighting and code snippets for Visual Studio Code:
 
 ```bash
 # Windows
-cp -r extensions/vscode ~/.vscode/extensions/ferrisscript-0.0.3
+cp -r extensions/vscode ~/.vscode/extensions/ferrisscript-0.0.4
 
 # Or use a symbolic link for development
-mklink /D "%USERPROFILE%\.vscode\extensions\ferrisscript-0.0.3" "path\to\FerrisScript\extensions\vscode"
+mklink /D "%USERPROFILE%\.vscode\extensions\ferrisscript-0.0.4" "path\to\FerrisScript\extensions\vscode"
 ```
 
 **Reload VS Code**: Press `Ctrl+Shift+P` → "Developer: Reload Window"
 
-### New in v0.0.3: IntelliSense Features ✨
+### IntelliSense Features ✨
 
 - **Code Completion** (Ctrl+Space): Keywords, types, built-in functions with context awareness
 - **Hover Tooltips**: Documentation and examples for keywords, types, and functions
@@ -229,6 +232,57 @@ fn _process(delta: f32) {
     }
 }
 ```
+
+### Inspector Integration (v0.0.4+)
+
+Use `@export` annotations to expose variables to Godot's Inspector:
+
+```rust
+// Basic exports
+@export let speed: f32 = 100.0;
+@export let jump_force: f32 = 500.0;
+
+// Range hints (min, max) - clamps values in Inspector
+@export(range, 0.0, 10.0) let health: f32 = 5.0;
+
+// Enum hints - dropdown selector in Inspector
+@export(enum, "Idle", "Walk", "Run") let state: String = "Idle";
+
+// File hints - file picker in Inspector
+@export(file, "*.png", "*.jpg") let texture_path: String = "";
+```
+
+**Inspector Features**:
+- **Real-time Editing**: Modify values in Inspector during gameplay
+- **Automatic Clamping**: Range hints enforce min/max bounds
+- **Type Validation**: Compile-time checks for correct hint usage
+- **Default Values**: Inspector shows initial values from script
+
+### Signal System (v0.0.4+)
+
+Declare and emit custom signals for communication between nodes:
+
+```rust
+// Declare signals at file scope
+signal health_changed(new_health: f32);
+signal player_died();
+
+let mut health: f32 = 100.0;
+
+fn take_damage(amount: f32) {
+    health = health - amount;
+    emit("health_changed", health);  // Emit with parameter
+    
+    if health <= 0.0 {
+        emit("player_died");  // Emit without parameters
+    }
+}
+```
+
+**Signal Features**:
+- **Type-Checked Parameters**: Compile-time validation of signal signatures
+- **Godot Integration**: Signals visible and connectable in Godot's Inspector
+- **Flexible Emission**: Use `emit("signal_name", params...)` in any function
 
 ### Type System
 
@@ -367,14 +421,17 @@ cargo build --package ferrisscript_godot_bind
 ### Running Tests
 
 ```bash
-# All tests
+# All tests (843 tests)
 cargo test --workspace
 
-# Compiler tests (44 tests)
+# Compiler tests (543 tests)
 cargo test --package ferrisscript_compiler
 
-# Runtime tests (26 tests)
+# Runtime tests (110 tests)
 cargo test --package ferrisscript_runtime
+
+# Test harness tests (38 tests)
+cargo test --package ferrisscript_test_harness
 
 # Watch mode (with cargo-watch)
 cargo watch -x "test --workspace"
@@ -553,38 +610,57 @@ See `godot_test/README.md` for detailed testing instructions.
 # Run all unit tests
 cargo test --workspace
 
-# Test results:
-# - Compiler: 44 tests passing
-# - Runtime: 26 tests passing
-# - Total: 70+ tests
+# Test results (v0.0.4):
+# - Compiler: 543 tests passing
+# - Runtime: 110 tests passing
+# - Test Harness: 38 tests passing
+# - Integration: 15 tests passing
+# - Total: 843 tests passing
 ```
 
-## 📊 Current Status (v0.0.2)
+See [docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md) for comprehensive testing documentation, including headless testing setup, integration testing, and test architecture.
+
+## 📊 Current Status (v0.0.4)
 
 ### ✅ Implemented Features
 
+**Core Language (Phases 1-3)**:
 - [x] Lexer with full tokenization
-- [x] Parser with operator precedence
-- [x] Type checker with static analysis
-- [x] Runtime interpreter
-- [x] Godot 4.x GDExtension integration
-- [x] `_ready()` and `_process()` callbacks
-- [x] Self binding for node property access
-- [x] Mutable variable tracking
+- [x] Parser with operator precedence and error recovery
+- [x] Type checker with static analysis (65+ error codes)
+- [x] Runtime interpreter with ~1 μs/function call
+- [x] Mutable variable tracking (immutable by default)
 - [x] Control flow (if/else, while loops)
 - [x] Function definitions and calls
-- [x] Global state persistence
+- [x] Global state persistence across frames
 
-### 🚧 Planned Features (v0.1.0+)
+**Godot Integration (Phase 4-5)**:
+- [x] Godot 4.x GDExtension integration via `gdext`
+- [x] `_ready()`, `_process()`, `_physics_process()` callbacks
+- [x] Self binding for node property access
+- [x] Signal system (declare & emit custom signals)
+- [x] Godot type literals (`Vector2`, `Color`, `Rect2`, `Transform2D`)
+- [x] @export annotations with property hints
+- [x] Inspector integration (real-time editing, clamping, validation)
+- [x] Node lifecycle functions (`_enter_tree()`, `_exit_tree()`, `_input()`)
+- [x] Node query functions (`get_node()`, `get_parent()`, `find_child()`, `has_node()`)
+
+**Quality & Testing**:
+- [x] 843 tests passing (543 compiler + 110 runtime + 38 harness + 15 integration + 137 other)
+- [x] Comprehensive error messages with hints and suggestions
+- [x] VS Code extension with syntax highlighting, snippets, and IntelliSense
+- [x] Headless testing infrastructure
+- [x] Detailed documentation and examples
+
+### 🚧 Planned Features (v0.0.5+)
 
 - [ ] Arrays and collections
 - [ ] For loops
 - [ ] String interpolation
 - [ ] More Godot types (Node3D, Input, etc.)
-- [ ] Signal system integration
 - [ ] Struct definitions
 - [ ] Match expressions
-- [ ] LSP support for IDE integration
+- [ ] LSP support for IDE integration (go-to-definition, find references, rename)
 
 ## 🤝 Contributing
 
