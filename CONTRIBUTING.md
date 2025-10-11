@@ -590,82 +590,95 @@ docs: update installation instructions for Windows
 
 ## Testing Guidelines
 
+**📚 See [docs/testing/README.md](docs/testing/README.md) for comprehensive testing documentation**
+
+### Testing Overview
+
+FerrisScript uses a **4-layer testing strategy** to ensure quality:
+
+1. **Unit Tests (Rust)** - Pure logic testing (compiler/runtime)
+2. **Integration Tests (.ferris)** - End-to-end testing with Godot
+3. **GDExtension Tests** - Godot bindings requiring runtime
+4. **Benchmark Tests** - Performance measurement
+
+**Current Status**: 843+ tests across all layers | ~82% code coverage
+
 ### Writing Tests
 
-- Every new feature should include tests
-- Bug fixes should include regression tests
-- Place tests in the same file using `#[cfg(test)]` modules
-- Use descriptive test names: `test_parser_handles_nested_functions`
+**Required for all contributions**:
+
+- ✅ Every new feature must include tests
+- ✅ Bug fixes must include regression tests
+- ✅ Tests must pass before PR is merged
+- ✅ Use descriptive test names: `test_parser_handles_nested_functions`
+
+**Test placement**:
+
+- Unit tests: `#[cfg(test)] mod tests` in same file
+- Integration tests: `.ferris` scripts in `godot_test/scripts/`
+- Benchmarks: `benches/` directory in relevant crate
+
+**Quick Links**:
+
+- [Testing Guide](docs/testing/TESTING_GUIDE.md) - Complete testing patterns ⭐ **START HERE**
+- [Test Checklist](docs/testing/README.md#testing-checklist-for-new-features) - Step-by-step checklist
+- [Test Matrices](docs/testing/README.md#test-matrices) - Systematic coverage tracking
 
 ### Running Tests
 
 ```bash
-# Run all tests
-cargo test
+# Run all tests (843+ tests)
+cargo test --workspace
 
-# Run tests for a specific crate
-cargo test -p rustyscript_compiler
+# Run specific test types
+cargo test -p ferrisscript_compiler    # Unit tests (compiler)
+cargo test -p ferrisscript_runtime     # Unit tests (runtime)
+ferris-test --all                      # Integration tests (.ferris scripts)
 
-# Run a specific test
-cargo test test_lexer_tokenizes_keywords
+# Run specific test
+cargo test test_parse_assignment
 
-# Run tests with output
+# Run with output
 cargo test -- --nocapture
 ```
 
-### Running Test Harness Examples
+### Running Integration Tests (ferris-test)
 
-FerrisScript includes a headless test harness for testing examples against Godot without manual intervention. Use the convenience script to run tests:
+FerrisScript includes a **headless test harness** (`ferris-test`) for running `.ferris` scripts against Godot without manual intervention.
 
-**PowerShell (Windows)**:
-
-```powershell
-# Run a specific example
-.\scripts\run-tests.ps1 -Script examples/node_query_basic.ferris -Verbose
-
-# Run all examples matching a filter
-.\scripts\run-tests.ps1 -All -Filter "node_query"
-
-# Fast mode: skip rebuild if harness is already built
-.\scripts\run-tests.ps1 -Script examples/hello.ferris -Fast
-
-# Run all examples with verbose output
-.\scripts\run-tests.ps1 -All -Verbose
-```
-
-**Bash (Linux/macOS)**:
+**Quick Commands**:
 
 ```bash
-# Run a specific example
-./scripts/run-tests.sh --script examples/node_query_basic.ferris --verbose
+# Run all integration tests
+ferris-test --all
 
-# Run all examples matching a filter
-./scripts/run-tests.sh --all --filter "node_query"
+# Run specific test
+ferris-test --script godot_test/scripts/signal_test.ferris
 
-# Fast mode: skip rebuild if harness is already built
-./scripts/run-tests.sh --script examples/hello.ferris --fast
+# Filter by name
+ferris-test --all --filter "node_query"
 
-# Run all examples with verbose output
-./scripts/run-tests.sh --all --verbose
+# Verbose output
+ferris-test --all --verbose
+
+# JSON format (for CI)
+ferris-test --all --format json > results.json
 ```
 
-**Direct Cargo Command**:
-
-```bash
-# Build and run test harness
-cargo build --release -p ferrisscript_test_harness
-cargo run --release --bin ferris-test -- --script examples/node_query_basic.ferris --verbose
-```
+**Configuration**: `ferris-test.toml` in workspace root
 
 **Test Harness Features**:
 
 - ✅ Headless Godot execution (no GUI needed)
-- ✅ Automatic scene generation from code comments
-- ✅ Output parsing with assertion markers (`✓`, `✗`, `○`)
-- ✅ Detailed error reporting with line numbers
-- ✅ Batch test execution with filtering
+- ✅ Test metadata parsing (TEST, CATEGORY, EXPECT, ASSERT)
+- ✅ Output marker parsing ([TEST_START], [PASS], [FAIL], [TEST_END])
+- ✅ Multiple output formats (console, JSON, JUnit)
+- ✅ Parallel test execution with timeout handling
 
-See [docs/testing/](docs/testing/) for detailed test harness documentation.
+**Documentation**:
+
+- [Testing Guide - Integration Tests](docs/testing/TESTING_GUIDE.md#pattern-2-integration-tests-ferris-scripts)
+- [Test Harness Architecture](docs/testing/TEST_HARNESS_TESTING_STRATEGY.md)
 
 ### Automated Testing (Pre-commit Hooks)
 
