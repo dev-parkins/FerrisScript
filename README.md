@@ -149,8 +149,6 @@ cargo test --workspace
    cargo build --package ferrisscript_godot_bind
    ```
 
-   > **Note for Godot 4.3+**: The project is configured with `api-4-3` feature for compatibility. If you encounter initialization errors, ensure `crates/godot_bind/Cargo.toml` has the correct API version feature enabled.
-
 2. **Open the test project:**
    - Open Godot 4.2+
    - Import project from `godot_test/project.godot`
@@ -235,42 +233,9 @@ fn _process(delta: f32) {
 FerrisScript supports the following types:
 
 - **Primitives**: `i32`, `f32`, `bool`, `String`
-- **Godot Types**: `Vector2`, `Color`, `Rect2`, `Transform2D`, `Node`, `Node2D`
+- **Godot Types**: `Vector2`, `Node`, `Node2D`
 - **Type Inference**: Literals are automatically typed
 - **Type Coercion**: `i32` → `f32` automatic conversion
-
-#### Struct Literal Syntax (v0.0.4+)
-
-Construct Godot types directly with field syntax:
-
-```rust
-// Vector2 - 2D position/velocity
-let position = Vector2 { x: 100.0, y: 200.0 };
-
-// Color - RGBA color values
-let red = Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
-
-// Rect2 - 2D rectangle (position + size)
-let pos = Vector2 { x: 0.0, y: 0.0 };
-let size = Vector2 { x: 100.0, y: 50.0 };
-let rect = Rect2 { position: pos, size: size };
-
-// Transform2D - 2D transformation (position + rotation + scale)
-let p = Vector2 { x: 100.0, y: 200.0 };
-let s = Vector2 { x: 2.0, y: 2.0 };
-let transform = Transform2D { 
-    position: p, 
-    rotation: 1.57,  // radians
-    scale: s 
-};
-```
-
-**Type Requirements**:
-
-- `Vector2`: fields `x`, `y` (both `f32`)
-- `Color`: fields `r`, `g`, `b`, `a` (all `f32`, 0.0-1.0 range)
-- `Rect2`: fields `position`, `size` (both `Vector2`)
-- `Transform2D`: fields `position`, `scale` (`Vector2`), `rotation` (`f32`)
 
 ### ⚡ Performance Characteristics
 
