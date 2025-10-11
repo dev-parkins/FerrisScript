@@ -27,16 +27,15 @@ fn test_compile_runtime_inspector_roundtrip() {
         @export(range(0, 100, 1))
         let mut health: i32 = 50;
     "#;
-    
+
     let program = compile(source).expect("Compilation should succeed");
-    
+
     // 2. Create runtime environment
     let mut env = Env::new();
-    
+
     // 3. Execute to initialize environment
-    ferrisscript_runtime::execute(&program, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program, &mut env).expect("Execution should succeed");
+
     // 4. Check property metadata (Bundle 5 - property_metadata in Program)
     let props = &program.property_metadata;
     assert_eq!(props.len(), 1, "Should have exactly one exported property");
@@ -47,18 +46,20 @@ fn test_compile_runtime_inspector_roundtrip() {
         }
         _ => panic!("Expected Range hint"),
     }
-    
+
     // 5. Get property value (Bundle 7 - get_exported_property)
-    let value = env.get_exported_property("health")
+    let value = env
+        .get_exported_property("health")
         .expect("Should get property value");
     assert_eq!(value, Value::Int(50), "Initial value should be 50");
-    
+
     // 6. Set property value from Inspector (Bundle 7 - set_exported_property)
     env.set_exported_property("health", Value::Int(75), true)
         .expect("Should set property value");
-    
+
     // 7. Verify runtime updated
-    let updated = env.get_exported_property("health")
+    let updated = env
+        .get_exported_property("health")
         .expect("Should get updated value");
     assert_eq!(updated, Value::Int(75), "Value should be updated to 75");
 }
@@ -80,29 +81,29 @@ fn test_multiple_properties_roundtrip() {
         @export
         let mut name: String = "Player";
     "#;
-    
+
     let program = compile(source).expect("Compilation should succeed");
     let mut env = Env::new();
-    ferrisscript_runtime::execute(&program, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program, &mut env).expect("Execution should succeed");
+
     // Verify all properties present in metadata
     let props = &program.property_metadata;
     assert_eq!(props.len(), 3, "Should have 3 exported properties");
-    
+
     // Verify each property accessible
-    let health = env.get_exported_property("health")
+    let health = env
+        .get_exported_property("health")
         .expect("Should get health");
     assert_eq!(health, Value::Int(50));
-    
-    let speed = env.get_exported_property("speed")
+
+    let speed = env
+        .get_exported_property("speed")
         .expect("Should get speed");
     assert_eq!(speed, Value::Float(0.5));
-    
-    let name = env.get_exported_property("name")
-        .expect("Should get name");
+
+    let name = env.get_exported_property("name").expect("Should get name");
     assert_eq!(name, Value::String("Player".to_string()));
-    
+
     // Update all properties
     env.set_exported_property("health", Value::Int(75), true)
         .expect("Should set health");
@@ -110,12 +111,9 @@ fn test_multiple_properties_roundtrip() {
         .expect("Should set speed");
     env.set_exported_property("name", Value::String("Hero".to_string()), true)
         .expect("Should set name");
-    
+
     // Verify all updates
-    assert_eq!(
-        env.get_exported_property("health").unwrap(),
-        Value::Int(75)
-    );
+    assert_eq!(env.get_exported_property("health").unwrap(), Value::Int(75));
     assert_eq!(
         env.get_exported_property("speed").unwrap(),
         Value::Float(0.8)
@@ -138,31 +136,24 @@ fn test_property_type_conversion() {
         @export
         let mut count: i32 = 10;
     "#;
-    
+
     let program = compile(source).expect("Compilation should succeed");
     let mut env = Env::new();
-    ferrisscript_runtime::execute(&program, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program, &mut env).expect("Execution should succeed");
+
     // Set with exact type - should succeed
     env.set_exported_property("count", Value::Int(20), true)
         .expect("Should set with matching type");
-    assert_eq!(
-        env.get_exported_property("count").unwrap(),
-        Value::Int(20)
-    );
-    
+    assert_eq!(env.get_exported_property("count").unwrap(), Value::Int(20));
+
     // Set with float - runtime performs automatic conversion
     // Note: Currently the runtime stores the value as-is (Float),
     // which may not be ideal. This test documents the current behavior.
     let result = env.set_exported_property("count", Value::Float(30.0), true);
-    
+
     // Runtime currently accepts Float for Int property
-    assert!(
-        result.is_ok(),
-        "Runtime currently allows type mismatches"
-    );
-    
+    assert!(result.is_ok(), "Runtime currently allows type mismatches");
+
     // NOTE: The value is stored as Float, not converted to Int
     // This is a potential area for improvement in type safety
     let value = env.get_exported_property("count").unwrap();
@@ -187,15 +178,14 @@ fn test_get_nonexistent_property() {
         @export
         let mut health: i32 = 50;
     "#;
-    
+
     let program = compile(source).expect("Compilation should succeed");
     let mut env = Env::new();
-    ferrisscript_runtime::execute(&program, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program, &mut env).expect("Execution should succeed");
+
     // Try to get property that doesn't exist
     let result = env.get_exported_property("nonexistent");
-    
+
     // Should fail gracefully, not panic
     assert!(
         result.is_err(),
@@ -214,26 +204,22 @@ fn test_set_nonexistent_property() {
         @export
         let mut health: i32 = 50;
     "#;
-    
+
     let program = compile(source).expect("Compilation should succeed");
     let mut env = Env::new();
-    ferrisscript_runtime::execute(&program, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program, &mut env).expect("Execution should succeed");
+
     // Try to set property that doesn't exist
     let result = env.set_exported_property("nonexistent", Value::Int(100), true);
-    
+
     // Should fail gracefully, not panic
     assert!(
         result.is_err(),
         "Setting nonexistent property should return error"
     );
-    
+
     // Original property should be unchanged
-    assert_eq!(
-        env.get_exported_property("health").unwrap(),
-        Value::Int(50)
-    );
+    assert_eq!(env.get_exported_property("health").unwrap(), Value::Int(50));
 }
 
 /// Test 6: Set property with wrong type
@@ -249,22 +235,21 @@ fn test_set_property_wrong_type() {
         @export
         let mut health: i32 = 50;
     "#;
-    
+
     let program = compile(source).expect("Compilation should succeed");
     let mut env = Env::new();
-    ferrisscript_runtime::execute(&program, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program, &mut env).expect("Execution should succeed");
+
     // Try to set integer property with string value
     let result = env.set_exported_property("health", Value::String("invalid".to_string()), true);
-    
+
     // Current behavior: Runtime accepts wrong type (no validation)
     // This may be intentional for flexibility, but could cause runtime errors later
     assert!(
         result.is_ok(),
         "Runtime currently allows type mismatches (documented behavior)"
     );
-    
+
     // Value is stored as-is (String instead of Int)
     let value = env.get_exported_property("health").unwrap();
     assert!(
@@ -285,14 +270,14 @@ fn test_set_immutable_property() {
         @export
         let health: i32 = 50;
     "#;
-    
+
     // Compilation should FAIL - compiler enforces mutability for @export
     let result = compile(source);
     assert!(
         result.is_err(),
         "Compiler should reject @export on immutable variable"
     );
-    
+
     let err_msg = result.unwrap_err().to_string();
     assert!(
         err_msg.contains("E812") || err_msg.contains("immutable"),
@@ -316,20 +301,16 @@ fn test_set_property_within_range() {
         @export(range(0, 100, 1))
         let mut health: i32 = 50;
     "#;
-    
+
     let program = compile(source).expect("Compilation should succeed");
     let mut env = Env::new();
-    ferrisscript_runtime::execute(&program, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program, &mut env).expect("Execution should succeed");
+
     // Set value within range - should succeed
     env.set_exported_property("health", Value::Int(75), true)
         .expect("Should set value within range");
-    
-    assert_eq!(
-        env.get_exported_property("health").unwrap(),
-        Value::Int(75)
-    );
+
+    assert_eq!(env.get_exported_property("health").unwrap(), Value::Int(75));
 }
 
 /// Test 9: Set property outside range (clamping)
@@ -343,18 +324,17 @@ fn test_set_property_outside_range_clamps() {
         @export(range(0, 100, 1))
         let mut health: i32 = 50;
     "#;
-    
+
     let program = compile(source).expect("Compilation should succeed");
     let mut env = Env::new();
-    ferrisscript_runtime::execute(&program, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program, &mut env).expect("Execution should succeed");
+
     // Set value above range - should clamp to max
     env.set_exported_property("health", Value::Int(150), true)
         .expect("Should handle out-of-range value");
-    
+
     let value = env.get_exported_property("health").unwrap();
-    
+
     // Value should be clamped to 100 (or might error - both are valid)
     match value {
         Value::Int(v) => {
@@ -366,13 +346,13 @@ fn test_set_property_outside_range_clamps() {
         }
         _ => panic!("Expected Int value"),
     }
-    
+
     // Set value below range - should clamp to min
     env.set_exported_property("health", Value::Int(-50), true)
         .expect("Should handle out-of-range value");
-    
+
     let value = env.get_exported_property("health").unwrap();
-    
+
     match value {
         Value::Int(v) => {
             assert!(
@@ -401,13 +381,13 @@ fn test_get_property_before_execution() {
         @export
         let mut health: i32 = 50;
     "#;
-    
+
     let _program = compile(source).expect("Compilation should succeed");
     let env = Env::new();
-    
+
     // Try to get property before execution
     let result = env.get_exported_property("health");
-    
+
     // Should return error since property not initialized yet
     assert!(
         result.is_err(),
@@ -426,20 +406,19 @@ fn test_from_inspector_parameter() {
         @export
         let mut health: i32 = 50;
     "#;
-    
+
     let program = compile(source).expect("Compilation should succeed");
     let mut env = Env::new();
-    ferrisscript_runtime::execute(&program, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program, &mut env).expect("Execution should succeed");
+
     // Set with from_inspector = true (Inspector edit)
     env.set_exported_property("health", Value::Int(75), true)
         .expect("Should set from Inspector");
-    
+
     // Set with from_inspector = false (script edit)
     env.set_exported_property("health", Value::Int(100), false)
         .expect("Should set from script");
-    
+
     // Both should succeed - behavior difference is internal
     assert_eq!(
         env.get_exported_property("health").unwrap(),
@@ -463,16 +442,15 @@ fn test_add_property_hot_reload() {
         @export
         let mut health: i32 = 50;
     "#;
-    
+
     let program1 = compile(source1).expect("Compilation should succeed");
     let mut env = Env::new();
-    ferrisscript_runtime::execute(&program1, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program1, &mut env).expect("Execution should succeed");
+
     // Verify initial state
     let props = &program1.property_metadata;
     assert_eq!(props.len(), 1);
-    
+
     // Hot-reload with additional property
     let source2 = r#"
         @export
@@ -481,22 +459,23 @@ fn test_add_property_hot_reload() {
         @export
         let mut mana: i32 = 30;
     "#;
-    
+
     let program2 = compile(source2).expect("Compilation should succeed");
-    ferrisscript_runtime::execute(&program2, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program2, &mut env).expect("Execution should succeed");
+
     // Verify new property list in metadata
     let props = &program2.property_metadata;
     assert_eq!(props.len(), 2, "Should have 2 properties after hot-reload");
-    
+
     // Verify new property is accessible
-    let mana = env.get_exported_property("mana")
+    let mana = env
+        .get_exported_property("mana")
         .expect("Should get new property");
     assert_eq!(mana, Value::Int(30));
-    
+
     // Verify old property still works
-    let health = env.get_exported_property("health")
+    let health = env
+        .get_exported_property("health")
         .expect("Should get old property");
     assert_eq!(health, Value::Int(50));
 }
@@ -518,30 +497,28 @@ fn test_remove_property_hot_reload() {
         @export
         let mut mana: i32 = 30;
     "#;
-    
+
     let program1 = compile(source1).expect("Compilation should succeed");
     let mut env = Env::new();
-    ferrisscript_runtime::execute(&program1, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program1, &mut env).expect("Execution should succeed");
+
     // Verify initial state
     let props = &program1.property_metadata;
     assert_eq!(props.len(), 2);
-    
+
     // Hot-reload with property removed
     let source2 = r#"
         @export
         let mut health: i32 = 50;
     "#;
-    
+
     let program2 = compile(source2).expect("Compilation should succeed");
-    ferrisscript_runtime::execute(&program2, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program2, &mut env).expect("Execution should succeed");
+
     // Verify property list updated in metadata
     let props = &program2.property_metadata;
     assert_eq!(props.len(), 1, "Should have 1 property after removal");
-    
+
     // NOTE: Current behavior - removed property still accessible from exported_properties
     // The HashMap persists across recompilations. This may be intentional for
     // preserving Inspector values during hot-reload, but could be confusing.
@@ -550,9 +527,10 @@ fn test_remove_property_hot_reload() {
         result.is_ok(),
         "Current behavior: Removed property persists in HashMap"
     );
-    
+
     // Verify remaining property still works
-    let health = env.get_exported_property("health")
+    let health = env
+        .get_exported_property("health")
         .expect("Should get remaining property");
     assert_eq!(health, Value::Int(50));
 }
@@ -573,29 +551,19 @@ fn test_many_properties() {
     for i in 0..50 {
         source.push_str(&format!("@export let mut prop{}: i32 = {};\n", i, i));
     }
-    
+
     let program = compile(&source).expect("Compilation should succeed");
     let mut env = Env::new();
-    ferrisscript_runtime::execute(&program, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program, &mut env).expect("Execution should succeed");
+
     // Verify all properties present in metadata
     let props = &program.property_metadata;
     assert_eq!(props.len(), 50, "Should have 50 exported properties");
-    
+
     // Spot check a few properties
-    assert_eq!(
-        env.get_exported_property("prop0").unwrap(),
-        Value::Int(0)
-    );
-    assert_eq!(
-        env.get_exported_property("prop25").unwrap(),
-        Value::Int(25)
-    );
-    assert_eq!(
-        env.get_exported_property("prop49").unwrap(),
-        Value::Int(49)
-    );
+    assert_eq!(env.get_exported_property("prop0").unwrap(), Value::Int(0));
+    assert_eq!(env.get_exported_property("prop25").unwrap(), Value::Int(25));
+    assert_eq!(env.get_exported_property("prop49").unwrap(), Value::Int(49));
 }
 
 /// Test 15: Rapid property access
@@ -609,25 +577,25 @@ fn test_rapid_property_access() {
         @export
         let mut health: i32 = 50;
     "#;
-    
+
     let program = compile(source).expect("Compilation should succeed");
     let mut env = Env::new();
-    ferrisscript_runtime::execute(&program, &mut env)
-        .expect("Execution should succeed");
-    
+    ferrisscript_runtime::execute(&program, &mut env).expect("Execution should succeed");
+
     // Access property 1000 times
     for _ in 0..1000 {
-        let value = env.get_exported_property("health")
+        let value = env
+            .get_exported_property("health")
             .expect("Should get property");
         assert_eq!(value, Value::Int(50));
     }
-    
+
     // Modify property 1000 times
     for i in 0..1000 {
         env.set_exported_property("health", Value::Int(i), true)
             .expect("Should set property");
     }
-    
+
     // Verify final value
     assert_eq!(
         env.get_exported_property("health").unwrap(),
