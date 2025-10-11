@@ -500,6 +500,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 **Goal**: 64-bit types, smaller integer types, and explicit type casting
 
 **Why This Matters**:
+
 - Enable large values (timestamps, entity IDs, coordinates)
 - High-precision calculations (f64 for scientific accuracy)
 - Memory optimization (u8 for colors, i16 for tile grids)
@@ -528,6 +529,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
    - Runtime checks for debug builds
 
 **Deliverables**:
+
 - All new types implemented in lexer, parser, type checker, runtime
 - Explicit casting with overflow/truncation handling
 - Comprehensive tests (~40-50 new tests)
@@ -548,6 +550,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 **Goal**: Optional overflow protection for safer game logic
 
 **Why This Matters**:
+
 - Detect overflow at runtime (prevent silent bugs)
 - Clamp values to type limits (health, score systems)
 - Explicit wrapping behavior (document intent)
@@ -576,6 +579,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
    - Allows custom overflow handling
 
 **Deliverables**:
+
 - All arithmetic safety methods implemented
 - `Option<T>` type added to type system
 - Comprehensive tests (~60-80 new tests)
@@ -596,6 +600,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 **Goal**: Professional documentation infrastructure and enhanced compiler intelligence
 
 **Why This Matters**:
+
 - Central hub for learning and API reference
 - Cross-platform syntax highlighting consistency
 - Better developer experience through warnings and linting
@@ -631,6 +636,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
    - Integration with documentation site
 
 **Deliverables**:
+
 - Live documentation website (ferrisscript.org or similar)
 - GitHub syntax highlighting enabled
 - Comprehensive warning system
