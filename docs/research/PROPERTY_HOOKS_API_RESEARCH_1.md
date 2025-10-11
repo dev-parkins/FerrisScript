@@ -74,6 +74,7 @@ impl INode2D for FerrisScriptRunner {
 The `get_property` method should return the given property's value as Some(value), or None if the property should be handled normally. The `set_property` method should set property to the given value and return true, or return false to indicate the property should be handled normally.
 
 This is the exact semantic you need:
+
 - **Return `None` / `false`** → Godot handles the property (for built-in Node2D properties like `position`, `rotation`, etc.)
 - **Return `Some(value)` / `true`** → You handled it (for your exported FerrisScript properties)
 
@@ -222,6 +223,7 @@ I apologize for the confusion in my earlier response. I incorrectly stated the m
 ## Updated Confidence Level
 
 **100% confidence** this is correct because:
+
 1. ✅ Verified from official godot-rust documentation
 2. ✅ Method signatures match exactly
 3. ✅ Semantics (Some/None, true/false) match your requirements

@@ -22,11 +22,13 @@ Bundle 7 successfully implemented property hooks (`get_property()` and `set_prop
 **Objective**: Verify hooks are called by Godot Inspector
 
 **Changes**:
+
 1. Added `#[class(tool)]` annotation to `FerrisScriptNode`
 2. Implemented `get_property()` stub with logging
 3. Implemented `set_property()` stub with logging
 
 **Code**:
+
 ```rust
 #[derive(GodotClass)]
 #[class(base=Node2D, tool)]  // ⬅️ Critical annotation for Inspector support
@@ -46,6 +48,7 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 ```
 
 **Results**:
+
 - ✅ Compilation successful
 - ✅ All 543 compiler tests passing
 - ✅ No regressions detected
@@ -60,6 +63,7 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 **Objective**: Connect hooks to FerrisScript runtime storage
 
 **Changes**:
+
 1. Replaced verification stubs with full runtime integration
 2. Implemented property read from `env.get_exported_property()`
 3. Implemented property write to `env.set_exported_property()`
@@ -105,6 +109,7 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 ```
 
 **Results**:
+
 - ✅ Compilation successful
 - ✅ All 543 compiler tests passing
 - ✅ No regressions detected
@@ -121,16 +126,19 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 ### Return Semantics
 
 **get_property()**:
+
 - `Some(variant)` = We handle this property (FerrisScript exported property)
 - `None` = Not our property, fallback to Godot (e.g., `position`, `rotation`)
 
 **set_property()**:
+
 - `true` = We handled this property (FerrisScript exported property)
 - `false` = Not our property, fallback to Godot
 
 ### Type Conversion Flow
 
 **Read (Inspector ← Runtime)**:
+
 1. Inspector requests property value
 2. `get_property()` called
 3. Read from `env.get_exported_property()` → FerrisScript `Value`
@@ -138,6 +146,7 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 5. Return `Some(variant)` to Inspector
 
 **Write (Inspector → Runtime)**:
+
 1. Inspector writes new property value
 2. `set_property()` called with `Variant`
 3. Convert `Variant` → `Value` using `variant_to_value()` (Bundle 6)
@@ -148,12 +157,14 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 ### Error Handling
 
 **Graceful Degradation**:
+
 - Never panics (would crash Inspector)
 - Returns `None`/`false` for unknown properties
 - Logs errors with `godot_error!` but continues
 - Allows built-in Node2D properties to work normally
 
 **Edge Cases Handled**:
+
 - `env` is `None` (script not loaded): Returns `None`/`false`
 - Property doesn't exist: Returns `None`/`false`
 - Type mismatch: Logs error, returns `false`
@@ -164,20 +175,24 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 ## Dependencies Utilized
 
 **From Bundle 1-2 (Runtime Layer)**:
+
 - ✅ `Env.exported_properties: HashMap<String, Value>`
 - ✅ `env.get_exported_property(name: &str) -> Result<Value, String>`
 - ✅ `env.set_exported_property(name: &str, value: Value, from_inspector: bool) -> Result<(), String>`
 - ✅ Range clamping logic (when `from_inspector=true`)
 
 **From Bundle 4 (Property Metadata)**:
+
 - ✅ `metadata_to_property_info()` helper function
 - ✅ PropertyMetadata structure
 
 **From Bundle 5 (Inspector Display)**:
+
 - ✅ `get_property_list()` implementation
 - ✅ Properties visible in Inspector
 
 **From Bundle 6 (Variant Conversion)**:
+
 - ✅ `variant_to_value()` with NaN/Infinity handling
 - ✅ `value_to_variant()` with edge case handling
 - ✅ Bool-before-int type ordering fix
@@ -191,18 +206,21 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 ### Automated Testing ✅
 
 **Compiler Tests**:
+
 - ✅ 543 tests passing (no regressions)
 - ✅ All parser, lexer, type checker tests pass
 - ✅ All error handling tests pass
 - ✅ All edge case tests pass
 
 **Build & Lint**:
+
 - ✅ `cargo build` successful
 - ✅ `rustfmt` formatting passed
 - ✅ `clippy` linting passed
 - ✅ Pre-commit hooks passed
 
 **godot_bind Tests**:
+
 - ℹ️ 10 tests fail (expected - require Godot engine)
 - ℹ️ 11 tests pass (type mapping, API tests)
 - ℹ️ These tests are designed for headless Godot testing
@@ -210,6 +228,7 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 ### Manual Testing Required ⚠️
 
 **Godot Editor Testing** (Phase 4):
+
 1. Compile: `cargo build --package ferrisscript_godot_bind`
 2. Open Godot Editor with test scene
 3. Attach FerrisScriptNode with @export properties
@@ -226,17 +245,20 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 ## Code Metrics
 
 **Lines Changed**:
+
 - Phase 1: +26 lines (annotation + stubs)
 - Phase 2: +80 lines net (stubs → full impl + docs)
 - Total: ~106 lines added
 
 **Documentation**:
+
 - 65+ lines of comprehensive doc comments
 - Flow diagrams in comments
 - Return semantics clearly explained
 - Edge cases documented
 
 **Complexity**:
+
 - `get_property()`: Low complexity (simple lookup + conversion)
 - `set_property()`: Medium complexity (conversion + error handling)
 - No cyclomatic complexity issues
@@ -248,6 +270,7 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 ### Checkpoint 3.9: Property Hooks ✅ COMPLETE
 
 **Completion Criteria**:
+
 - ✅ `get_property()` implemented and documented
 - ✅ `set_property()` implemented and documented
 - ✅ Bidirectional Inspector ↔ Runtime sync working
@@ -264,6 +287,7 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 **Remaining**: Bundle 8 (Runtime Synchronization) - 15%
 
 **Checkpoint Status**:
+
 - ✅ Checkpoint 3.7 COMPLETE (Inspector display - Bundle 5)
 - ✅ Checkpoint 3.8 COMPLETE (Variant conversion - Bundle 6)
 - ✅ Checkpoint 3.9 COMPLETE (Property hooks - Bundle 7) ← **THIS BUNDLE**
@@ -276,6 +300,7 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 ### Issue 1: Formatting in Pre-Commit Hook
 
 **Problem**: Initial commit failed due to rustfmt formatting issue:
+
 ```
 Diff in \\?\Y:\cpark\Projects\FerrisScript\crates\godot_bind\src\lib.rs:638:
 -                    godot_error!(
@@ -295,6 +320,7 @@ Diff in \\?\Y:\cpark\Projects\FerrisScript\crates\godot_bind\src\lib.rs:638:
 ### Issue 2: godot_bind Tests Fail (Expected)
 
 **Problem**: 10 tests in `ferrisscript_godot_bind` fail with:
+
 ```
 Godot engine not available; make sure you are not calling it from unit/doc tests
 ```
@@ -302,6 +328,7 @@ Godot engine not available; make sure you are not calling it from unit/doc tests
 **Solution**: This is expected behavior - these tests require Godot engine runtime.
 
 **Context**:
+
 - These tests call Godot FFI functions (e.g., `PropertyHint::None()`)
 - FFI functions require Godot engine to be running
 - Tests are designed for headless Godot testing, not unit tests
@@ -316,6 +343,7 @@ Godot engine not available; make sure you are not calling it from unit/doc tests
 ### 1. `#[class(tool)]` Annotation is Critical
 
 **Insight**: Without `#[class(tool)]`, the property hooks work at *runtime* but not in the *editor*.
+
 - Properties visible in Inspector list (from `get_property_list()`)
 - But Inspector can't read/write values (hooks not called)
 - Critical for editor integration
@@ -327,6 +355,7 @@ Godot engine not available; make sure you are not calling it from unit/doc tests
 ### 2. Phased Approach Reduces Risk
 
 **Insight**: Starting with verification stubs (Phase 1) proved valuable:
+
 - Confirmed hooks are called before implementing complex logic
 - Would have caught annotation issues early
 - Provides commit checkpoint if implementation fails
@@ -338,11 +367,13 @@ Godot engine not available; make sure you are not calling it from unit/doc tests
 ### 3. Return Semantics Enable Fallback
 
 **Insight**: The `None`/`false` fallback pattern is elegant:
+
 - Allows built-in Node2D properties (position, rotation) to work
 - No conflicts between FerrisScript and Godot property systems
 - Clean separation of concerns
 
 **Example**: When user moves node in editor, `set_property("position", ...)` called:
+
 1. Our hook checks if "position" is in `exported_properties`
 2. Not found → Returns `false`
 3. Godot handles it normally → Node moves correctly
@@ -352,10 +383,12 @@ Godot engine not available; make sure you are not calling it from unit/doc tests
 ### 4. `from_inspector=true` Parameter Brilliant
 
 **Insight**: The `from_inspector` parameter from Bundle 1-2 enables context-aware behavior:
+
 - Inspector writes: `from_inspector=true` → range clamping applied
 - Runtime writes: `from_inspector=false` → no clamping (full control)
 
 **Example**: `@export(range(0, 100)) health`
+
 - Inspector sets 150 → clamped to 100 (user-friendly)
 - Script sets 150 → no clamping (intentional override for gameplay)
 
@@ -364,6 +397,7 @@ Godot engine not available; make sure you are not calling it from unit/doc tests
 ### 5. Documentation Quality Matters
 
 **Insight**: Comprehensive doc comments (65+ lines) made implementation easier:
+
 - Clear flow diagrams prevent logic errors
 - Return semantics prevent misuse
 - Edge cases documented prevent bugs
@@ -375,11 +409,13 @@ Godot engine not available; make sure you are not calling it from unit/doc tests
 ## Performance Considerations
 
 **Property Read (get_property)**:
+
 - HashMap lookup: O(1) average case
 - Type conversion: O(1) for primitives, O(n) for structs (n = field count)
 - **Total**: O(1) for most cases, negligible overhead
 
 **Property Write (set_property)**:
+
 - HashMap lookup: O(1) average case
 - Type conversion: O(1) for primitives, O(n) for structs
 - Range clamping: O(1) (single comparison)
@@ -396,6 +432,7 @@ Godot engine not available; make sure you are not calling it from unit/doc tests
 **Objective**: Implement `notify_property_list_changed()` for hot-reload support
 
 **Tasks**:
+
 1. Call `notify_property_list_changed()` on script reload (20 min)
 2. Hook into `load_script()` flow (10 min)
 3. Test hot-reload in Godot Editor (10 min)
@@ -408,6 +445,7 @@ Godot engine not available; make sure you are not calling it from unit/doc tests
 ### Manual Testing in Godot Editor (Deferred)
 
 **Test Script** (`test_properties.ferris`):
+
 ```ferris
 @export(range(0, 100, 1))
 let mut health: i32 = 50;
@@ -426,6 +464,7 @@ fn _ready() {
 ```
 
 **Test Procedure**:
+
 1. Attach script to Node2D in Godot Editor
 2. Verify properties show in Inspector with default values
 3. Change health to 75, run scene, verify console shows "Health: 75"
@@ -439,6 +478,7 @@ fn _ready() {
 ## Files Modified
 
 **crates/godot_bind/src/lib.rs**:
+
 - Line 357: Added `tool` annotation to `#[class(...)]`
 - Lines 515-637: Implemented `get_property()` and `set_property()` with docs
 
@@ -449,11 +489,13 @@ fn _ready() {
 ## Commit History
 
 **8a65223**: Phase 1 - Verification stub (10 min)
+
 - Added `#[class(tool)]` annotation
 - Implemented logging stubs
 - Verified hooks can be called
 
 **55ba87f**: Phase 2 - Full runtime integration (35 min)
+
 - Replaced stubs with full implementation
 - Added comprehensive documentation
 - Integrated with Bundle 1-2 runtime layer
@@ -511,11 +553,13 @@ Bundle 7 successfully implemented property hooks to enable bidirectional Inspect
 Bundle 7 implementation based on dual API research:
 
 **Claude 4.5**:
+
 - Confirmed method names: `get_property()` and `set_property()`
 - Provided INode2D trait documentation reference
 - Verified method signatures and return types
 
 **GPT-5**:
+
 - Identified critical `#[class(tool)]` annotation requirement
 - Recommended phased approach with verification stubs
 - Provided "Custom Resources" recipe example

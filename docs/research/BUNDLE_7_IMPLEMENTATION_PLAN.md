@@ -10,6 +10,7 @@
 ## Executive Summary
 
 Bundle 7 blocker **RESOLVED**. Both research sources confirm the correct API:
+
 - **Methods**: `get_property()` and `set_property()` (NOT `get()` and `set()`)
 - **Trait**: Methods available via `IObject` trait (inherited by `INode2D`)
 - **Critical Addition**: Requires `#[class(tool)]` annotation for Inspector integration
@@ -74,6 +75,7 @@ impl INode2D for FerrisScriptNode {
 **Objective**: Verify hooks are actually called by Inspector
 
 **Code**:
+
 ```rust
 #[derive(GodotClass)]
 #[class(base=Node2D, tool)]  // ⬅️ ADD 'tool'
@@ -99,6 +101,7 @@ impl INode2D for FerrisScriptNode {
 ```
 
 **Testing**:
+
 1. Compile: `cargo build --package ferrisscript_godot_bind`
 2. Open Godot Editor with test scene
 3. Attach FerrisScriptNode to a Node2D
@@ -107,11 +110,13 @@ impl INode2D for FerrisScriptNode {
 6. **Expected**: Console shows "🔍 get_property()" and "✏️ set_property()" messages
 
 **Success Criteria**:
+
 - ✅ Hooks are called for exported properties
 - ✅ Hooks are called when Inspector interacts
 - ✅ Built-in properties (like `position`) still work
 
 **If Hooks NOT Called**:
+
 - Check Godot version >= 4.3 (for `get_property_list` support)
 - Verify `#[class(tool)]` annotation present
 - Check if property system priority issues (see GPT-5 note)
@@ -123,6 +128,7 @@ impl INode2D for FerrisScriptNode {
 **Objective**: Connect hooks to runtime storage
 
 **Code**:
+
 ```rust
 fn get_property(&self, property: StringName) -> Option<Variant> {
     let prop_name = property.to_string();
@@ -164,6 +170,7 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 ```
 
 **Testing**:
+
 1. Compile and test in Godot Editor
 2. Verify property reads show correct values
 3. Verify property writes update runtime storage
@@ -256,6 +263,7 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 **Manual Testing Steps**:
 
 1. **Create test script** (`test_properties.ferris`):
+
 ```ferris
 @export(range(0, 100, 1))
 let mut health: i32 = 50;
@@ -286,6 +294,7 @@ fn _ready() {
 ### Phase 5: Commit & Documentation (10 min)
 
 **Commit Message**:
+
 ```
 feat(godot): Bundle 7 - Property hooks (get/set) for Inspector integration (Checkpoint 3.9 COMPLETE)
 
@@ -319,6 +328,7 @@ Next: Bundle 8 - Runtime synchronization (notify_property_list_changed)
 ```
 
 **Update Documentation**:
+
 - Mark Bundle 7 complete in QUICK_REFERENCE.md
 - Update SESSION_SUMMARY_BUNDLES_5-6.md with Bundle 7 status
 - Update TODO list to mark Bundle 7 done
@@ -330,6 +340,7 @@ Next: Bundle 8 - Runtime synchronization (notify_property_list_changed)
 ### 🚨 Required Changes
 
 1. **Add `#[class(tool)]` annotation** to `FerrisScriptNode`:
+
 ```rust
 #[derive(GodotClass)]
 #[class(base=Node2D, tool)]  // ⬅️ ADD 'tool' here
@@ -386,7 +397,8 @@ If hooks not working:
 
 **Total**: 90 minutes (increased from 75 min due to phased approach)
 
-**Justification**: 
+**Justification**:
+
 - Phased approach adds 15 min but significantly reduces risk
 - Verification stub catches issues early
 - Comprehensive testing ensures robustness
@@ -396,12 +408,14 @@ If hooks not working:
 ## Dependencies Confirmed
 
 **Runtime Layer** (from Bundles 1-2):
+
 - ✅ `Env.exported_properties: HashMap<String, Value>` - EXISTS
 - ✅ `env.get_exported_property(name: &str) -> Result<Value, String>` - TESTED
 - ✅ `env.set_exported_property(name: &str, value: Value, from_inspector: bool) -> Result<(), String>` - TESTED
 - ✅ 10 comprehensive tests covering all scenarios
 
 **Godot Layer** (from Bundles 4-6):
+
 - ✅ `metadata_to_property_info()` - Bundle 4
 - ✅ `get_property_list()` - Bundle 5
 - ✅ `variant_to_value()` with NaN/Infinity handling - Bundle 6
@@ -453,6 +467,7 @@ After Bundle 7 complete, verify:
 **Estimated**: 45 minutes
 
 **Tasks**:
+
 1. Implement `notify_property_list_changed()` call
 2. Hook into script reload flow
 3. Test hot-reload in Godot Editor

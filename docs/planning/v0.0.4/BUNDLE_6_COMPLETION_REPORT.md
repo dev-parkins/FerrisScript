@@ -22,11 +22,13 @@ Bundle 6 successfully enhanced both variant conversion functions (`value_to_vari
 **Purpose**: Convert FerrisScript `Value` → Godot `Variant` for Inspector operations
 
 **Enhancements**:
+
 - **NaN handling**: Converts `NaN` to `0.0f32` with `godot_warn!` message
 - **Infinity handling**: Clamps positive infinity to `f32::MAX`, negative infinity to `f32::MIN`
 - **Documentation**: Added comprehensive doc comments explaining edge case handling
 
 **Code Changes**:
+
 ```rust
 Value::Float(f) => {
     // Handle NaN and Infinity edge cases
@@ -55,17 +57,20 @@ Value::Float(f) => {
 **Purpose**: Convert Godot `Variant` → FerrisScript `Value` for runtime operations
 
 **CRITICAL FIX**: Boolean type ordering
+
 - **Before**: Bool checked AFTER numeric types (line ~740)
 - **After**: Bool checked BEFORE numeric types (line ~725)
 - **Impact**: Prevents `Variant(1)` being misidentified as `Value::Int(1)` instead of `Value::Bool(true)`
 
 **Enhancements**:
+
 - **Bool-before-int ordering**: Ensures correct type identification
 - **NaN handling**: Converts `f64` NaN → `0.0f32` with warning
 - **Infinity handling**: Clamps `f64` infinity → `f32::MAX/MIN` with warning
 - **Documentation**: Extensive comments explaining type checking order and rationale
 
 **Code Changes**:
+
 ```rust
 // CRITICAL: Check bool BEFORE numeric types
 // Reason: Godot Variant can represent bool as 1/0, checking int first would misidentify
@@ -130,6 +135,7 @@ No warnings, clean compilation.
 **Compiler Tests**: 543/543 passing ✅  
 **Integration Tests**: 95/95 passing ✅  
 **godot_bind Tests**: 11/21 passing ✅  
+
 - 10 failures expected (require Godot engine runtime)  
 - Failing tests: `map_hint_*`, `metadata_*` (all require initialized Godot engine)
 
@@ -159,7 +165,8 @@ No warnings, clean compilation.
 
 **Commit**: f6159fd  
 **Branch**: feature/v0.0.4-phase4-5-godot-types-exports  
-**Message**: 
+**Message**:
+
 ```
 feat(godot): Bundle 6 - Enhanced variant conversion with NaN/Infinity handling (Checkpoint 3.8 in-progress)
 
@@ -211,6 +218,7 @@ Next: Bundle 7 - Property hooks (get/set overrides) for full Inspector read/writ
 **Options to Research**:
 
 1. **Override `get_property` and `set_property` in `#[godot_api]` impl block**:
+
    ```rust
    #[godot_api]
    impl INode2D for FerrisScriptNode {
@@ -233,16 +241,19 @@ Next: Bundle 7 - Property hooks (get/set overrides) for full Inspector read/writ
    - Or implement via `_get` and `_set` virtual methods
 
 **Required Research**:
+
 - Review godot-rust 0.4.0 API documentation for property override patterns
 - Search godot-rust examples for custom property implementations
 - Test minimal property get/set override to validate approach
 
 **Runtime Layer Status**: ✅ READY
+
 - `env.get_exported_property(name) -> Result<Value, String>` - EXISTS
 - `env.set_exported_property(name, value, from_inspector) -> Result<(), String>` - EXISTS  
 - Property storage HashMap functional and tested
 
 **Estimated Time** (once API research complete): 75 minutes
+
 - Property get override: 25 min
 - Property set override: 35 min
 - Integration testing: 10 min
@@ -284,12 +295,14 @@ Next: Bundle 7 - Property hooks (get/set overrides) for full Inspector read/writ
 ## Dependencies for Bundle 7
 
 **Ready**:
+
 - ✅ Runtime storage (`Env.exported_properties`) functional
 - ✅ Metadata structure (`Program.property_metadata`) populated
 - ✅ Variant conversion (`variant_to_value`, `value_to_variant`) robust
 - ✅ PropertyInfo generation (`metadata_to_property_info`) tested
 
 **Blocked**:
+
 - ❌ godot-rust 0.4.0 property override API pattern unclear
 - ❌ Need API documentation review before implementation
 

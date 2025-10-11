@@ -77,6 +77,7 @@ impl INode2D for FerrisScriptNode {
 ## Recommended Approach
 
 **Start with verification stub** (10 min):
+
 ```rust
 fn get_property(&self, property: StringName) -> Option<Variant> {
     godot_print!("🔍 get_property: {}", property);
@@ -106,6 +107,7 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 ## Full Details
 
 See **BUNDLE_7_IMPLEMENTATION_PLAN.md** for:
+
 - Complete code with documentation
 - Phased implementation strategy
 - Testing matrix

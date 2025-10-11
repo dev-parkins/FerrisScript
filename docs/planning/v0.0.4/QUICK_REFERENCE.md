@@ -28,12 +28,14 @@
 **Status**: Runtime layer ready, just need correct Godot binding pattern
 
 **What's Ready**:
+
 - ✅ Runtime storage: `Env.exported_properties HashMap`
 - ✅ Get method: `env.get_exported_property(name)`
 - ✅ Set method: `env.set_exported_property(name, value, from_inspector)`
 - ✅ 10 tests covering all scenarios
 
 **What's Needed**:
+
 - ❌ Godot property override pattern (get/set in INode2D or similar)
 
 ---
@@ -51,6 +53,7 @@
 ### Research Options
 
 **Option 1**: Override in `INode2D` impl
+
 ```rust
 #[godot_api]
 impl INode2D for FerrisScriptNode {
@@ -65,6 +68,7 @@ impl INode2D for FerrisScriptNode {
 ```
 
 **Option 2**: Implement via base `Object` trait
+
 ```rust
 impl IObject for FerrisScriptNode {
     fn _get(&self, property: StringName) -> Variant { ... }
@@ -73,6 +77,7 @@ impl IObject for FerrisScriptNode {
 ```
 
 **Option 3**: Use virtual methods
+
 ```rust
 fn _get_property(&self, name: &str) -> Variant { ... }
 fn _set_property(&mut self, name: &str, value: Variant) { ... }
@@ -90,6 +95,7 @@ fn _set_property(&mut self, name: &str, value: Variant) { ... }
 ## Quick Test Status
 
 **All tests passing**:
+
 - 543 compiler tests ✅
 - 11 godot_bind tests ✅ (10 require Godot engine - expected)
 - Total: 554 passing
@@ -140,12 +146,14 @@ fn _set_property(&mut self, name: &str, value: Variant) { ... }
 ## What Works Now
 
 ### Bundle 5: Inspector Display
+
 - Properties appear in Godot Inspector ✅
 - Type icons correct (int, float, bool, etc.) ✅
 - Hints displayed (range sliders, file pickers, dropdowns) ✅
 - BUT: Cannot edit yet (no get/set hooks)
 
 ### Bundle 6: Variant Conversion
+
 - NaN → 0.0f32 (with warning) ✅
 - Infinity → f32::MAX/MIN (with warning) ✅
 - Bool vs int: Correctly identified ✅
@@ -167,11 +175,13 @@ fn _set_property(&mut self, name: &str, value: Variant) { ... }
 ## Contact Points
 
 **If You Get Stuck**:
+
 1. Check BUNDLE_6_COMPLETION_REPORT.md "Bundle 7 Blocker Analysis" section
 2. Search godot-rust GitHub for similar implementations
 3. Ask in godot-rust Discord (#gdext channel)
 
 **If You Want to Test Current State**:
+
 1. Run `cargo test` (should see 554 passing)
 2. Open `godot_test/project.godot` in Godot Editor
 3. Attach FerrisScript to a Node2D
