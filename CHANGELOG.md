@@ -103,11 +103,69 @@ This release significantly expands FerrisScript's Godot integration, adding sign
 - **Test Coverage**: 416 tests passing after Phase 3
 - **Implementation Efficiency**: Batched implementation saved 4-7 hours
 
+#### Godot Types & Struct Literals (Phase 4 & 4.5) ✅
+
+- **Additional Godot Types** (Phase 4)
+  - Color type with r/g/b/a field access
+  - Rect2 type with position/size field access (nested Vector2 support)
+  - Transform2D type with position/rotation/scale fields
+  - Runtime field get/set operations
+  - Godot binding conversions for all types
+  - 31 type-specific tests + 10 error codes (E701-E710)
+
+- **Struct Literal Syntax** (Phase 4.5)
+  - Literal syntax: `Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }`
+  - Parser support for struct field initialization
+  - Type checker validation (missing fields, duplicate fields, wrong types)
+  - Runtime evaluation with integer→float coercion
+  - 39 robustness tests (27 compiler + 12 runtime)
+  - 5 integration examples demonstrating real-world usage
+  - Checkpoint methodology (50% faster than Phase 4)
+  - Support for all struct types (Vector2, Color, Rect2, Transform2D)
+
+#### Property Exports & Inspector Integration (Phase 5) ✅
+
+**Status**: COMPLETE (Sub-Phases 1-3, October 10, 2025)
+
+- **@export Annotation System** (Sub-Phase 1, ~4 hours)
+  - Parser support for `@export` annotation before variable declarations
+  - Property hint syntax: `@export(range(0, 100))`, `@export(file("*.png"))`, `@export(enum("A", "B"))`
+  - 34 parser tests covering all hint types and error recovery
+  - 8 structured checkpoints with test-first validation
+
+- **Compile-Time Validation** (Sub-Phase 2, ~2 hours)
+  - Export eligibility validation (8 types: i32, f32, bool, String, Vector2, Color, Rect2, Transform2D)
+  - Hint compatibility matrix (range for numerics, file/enum for strings)
+  - PropertyMetadata generation with Godot-compliant formatting
+  - 15 error codes (E801-E816) with comprehensive validation
+  - 61 type checker tests
+  - Hybrid metadata architecture (static compile-time + per-instance runtime values)
+
+- **Runtime & Inspector Integration** (Sub-Phase 3, ~6 hours)
+  - Per-instance property value storage (HashMap-based)
+  - Property get/set methods with range clamping
+  - Godot PropertyInfo generation from static metadata
+  - Inspector get_property_list() implementation
+  - Bidirectional Inspector ↔ Runtime synchronization
+  - Hot-reload support with property persistence
+  - 15 integration tests covering roundtrip sync
+  - 10 runtime tests + 10 godot_bind tests (ignored in headless CI)
+
+**Property Exports Technical Details**:
+
+- **Hint Formatting**: Exact Godot formats ("0,100,1" for range, "Easy,Medium,Hard" for enum, "*.png,*.jpg" for file)
+- **Clamp-on-Set Policy**: Inspector sets automatically clamp, script sets warn (E816)
+- **Immutability Support**: `let` → read-only in Inspector, `let mut` → read/write
+- **Test Coverage**: 843 tests passing (543 compiler + 110 runtime + 38 harness + 15 integration + 137 other)
+- **Efficiency**: 58% faster than estimated (12 hours actual vs 21-29 hour estimate)
+- **Documentation**: 8 bundle summaries, 3 sub-phase completion reports, comprehensive execution plan
+
 ### Notes
 
 - Signal connections handled via Godot editor (connect/disconnect methods deferred to future release)
-- All FerrisScript types supported as signal parameters (i32, f32, bool, String, Vector2)
+- All FerrisScript types supported as signal parameters (i32, f32, bool, String, Vector2, Color, Rect2, Transform2D)
 - Signals registered dynamically with Godot's add_user_signal()
+- Property exports enable full Inspector integration with type-safe Godot editor workflows
 
 ---
 

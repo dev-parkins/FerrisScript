@@ -61,22 +61,22 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 - ✅ Test harness infrastructure (headless testing with metadata protocol) - **Phase 3 COMPLETE**
 - ✅ Godot types (Vector2, Color, Rect2, Transform2D) - **Phase 4 COMPLETE**
 - ✅ Struct literal syntax (Vector2 { x: 10.0, y: 20.0 }) - **Phase 4.5 COMPLETE**
+- ✅ Property exports (@export annotation, Inspector integration) - **Phase 5 Sub-Phases 1-3 COMPLETE**
 - ✅ Basic types (i32, f32, String, bool, Node, Variant, InputEvent)
 - ✅ Functions and control flow (if/else, while, return)
-- ✅ Error reporting with context (50+ error codes)
-- ✅ 587 tests passing (448 compiler + 100 runtime + 38 harness + 1 godot_bind)
+- ✅ Error reporting with context (65+ error codes, E801-E816 for exports)
+- ✅ 843 tests passing (543 compiler + 110 runtime + 38 harness + 15 integration + 137 other)
 
 ### In Progress 🔄
 
-- ⏸️ **v0.0.4 Phase 5**: Property exports (@export annotation) - **DEFERRED** (23-31 hour estimate, requires dedicated session)
+- None (v0.0.4 feature-complete, preparing release)
 
 ### What's Missing ❌
 
-- ❌ Property exports (@export - Phase 5 of v0.0.4, deferred due to complexity)
 - ❌ LSP / editor support (coming in v0.0.5)
 - ❌ Arrays and for loops (coming in v0.0.6)
 - ❌ Advanced Godot types (Vector3, Basis, etc. - coming in v0.0.7)
-- ❌ Metadata/reflection (coming in v0.1.0)
+- ❌ Advanced metadata/reflection (coming in v0.1.0)
 
 ---
 
@@ -84,7 +84,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 | Version | Status | Focus | Timeline | Premium Requests |
 |---------|--------|-------|----------|------------------|
-| **v0.0.4** | 🔄 Current | Runtime stability + lifecycle | 2-3 weeks | 4-6 remaining |
+| **v0.0.4** | ✅ Complete | Godot API + Inspector integration | Completed Oct 10, 2025 | 6-8 used |
 | **v0.0.5** | 📋 Next | LSP Alpha + safety fix 🛡️ | 3-4 weeks | 12-17 ⬆️ |
 | **v0.0.6** | 📋 Planned | Language features (arrays/for) | 2-3 weeks | 8-12 |
 | **v0.0.7** | 📋 Planned | Godot API + node safety 🛡️ | 2-3 weeks | 9-12 ⬆️ |
@@ -152,18 +152,22 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 - [x] 5 integration examples demonstrating real-world usage
 - [x] Checkpoint methodology documentation (50% faster than Phase 4)
 
-**Phase 5** ⏸️ Deferred:
+**Phase 5** ✅ Complete (Sub-Phases 1-3, October 10, 2025):
 
-- [ ] @export annotation parsing
-- [ ] Property types and hints
-- [ ] Inspector integration
-- [ ] 20+ export tests
-- **Reason**: 23-31 hour complexity requires dedicated focus session
-- **Documentation**: EXPORT_ANNOTATION_RESEARCH.md complete
+- [x] @export annotation parsing (Sub-Phase 1: 8 checkpoints, 4 hours)
+- [x] Property types and hints validation (Sub-Phase 2: 8 checkpoints, 2 hours)
+- [x] Inspector integration and runtime sync (Sub-Phase 3: 8 checkpoints, ~6 hours)
+- [x] 51+ export tests (34 parser + 61 type checker + 10 runtime + 15 integration)
+- [x] Error codes E801-E816 for comprehensive validation
+- [x] Property hints: range, file, enum with Godot-compliant formatting
+- [x] Bidirectional Inspector ↔ Runtime synchronization
+- [x] Hot-reload support with property persistence
+- **Effort**: 12 hours actual (vs 21-29 hour estimate, 58% efficiency gain)
+- **Documentation**: Complete execution plan, 3 sub-phase completion reports, 8 bundle summaries
 
 **Deliverables Remaining**:
 
-- Property exports for Inspector integration (Phase 5 - deferred)
+- None (v0.0.4 feature-complete)
 
 **What Was Delivered**:
 
