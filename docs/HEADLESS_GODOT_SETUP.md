@@ -1,12 +1,18 @@
 # Headless Godot Testing Setup
 
+> **⚠️ ARCHIVAL NOTICE**: This document is preserved for historical reference.
+>
+> **For Current Testing Practices**: See **`docs/TESTING_GUIDE.md`** (Single Source of Truth)
+
 **Date**: 2025-10-10  
-**Status**: 🚧 In Progress  
-**Phase**: Phase 5 Sub-Phase 4
+**Status**: Archival - Superceded by TESTING_GUIDE.md  
+**Phase**: Phase 5 Sub-Phase 4 (Historical)
 
 ## Overview
 
-This document describes the headless Godot testing infrastructure for FerrisScript, enabling automated integration testing of GDExtension functionality without requiring a GUI.
+This document describes the initial architecture for GDExtension testing. The implementation now uses existing `test_harness` infrastructure and `ferris-test.toml` configuration.
+
+**Current Documentation**: `docs/TESTING_GUIDE.md` > "Pattern 3: GDExtension Testing"
 
 ## Problem Statement
 

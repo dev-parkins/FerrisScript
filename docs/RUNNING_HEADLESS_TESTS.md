@@ -1,6 +1,22 @@
 # Running Headless Godot Integration Tests
 
-This guide explains how to run the headless Godot integration tests for the `ferrisscript_godot_bind` crate.
+> **⚠️ ARCHIVAL NOTICE**: This document is preserved for historical reference.
+>
+> **For Current Testing Practices**: See **`docs/TESTING_GUIDE.md`** (Single Source of Truth)
+
+**Status**: Archival - Superceded by TESTING_GUIDE.md
+
+This guide explained how to run headless Godot integration tests for the `ferrisscript_godot_bind` crate.
+
+**Current Documentation**: See `docs/TESTING_GUIDE.md`:
+- "Pattern 3: GDExtension Testing" for the testing pattern
+- "Running Tests" section for commands
+- "Configuration" section for ferris-test.toml setup
+- "Troubleshooting" section for common issues
+
+---
+
+## Historical Content
 
 ## Prerequisites
 

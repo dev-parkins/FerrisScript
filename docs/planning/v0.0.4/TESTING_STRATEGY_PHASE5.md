@@ -1,5 +1,9 @@
 # Testing Strategy for Phase 5 Inspector Integration
 
+> **📋 PRIMARY TESTING REFERENCE**: See **`docs/TESTING_GUIDE.md`** for current testing practices.
+>
+> This document provides Phase 5-specific analysis and detailed strategy. For day-to-day testing, use TESTING_GUIDE.md.
+
 **Date**: 2025-10-10  
 **Phase**: Phase 5 Sub-Phase 3 Complete  
 **Status**: Testing Analysis & Recommendations  
@@ -17,7 +21,9 @@ Phase 5 Sub-Phase 3 introduced significant new functionality (Bundles 5-8) with 
 4. **Error boundary testing** (graceful degradation)
 5. **Performance regression testing** (benchmarks)
 
-This document provides a comprehensive testing strategy to build confidence in upcoming features and ensure system robustness.
+**For Implementation Details**: See `docs/TESTING_GUIDE.md` which consolidates all testing patterns.
+
+This document provides Phase 5-specific analysis and detailed strategy recommendations.
 
 ---
 

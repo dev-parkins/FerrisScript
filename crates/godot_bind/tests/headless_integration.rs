@@ -1,51 +1,65 @@
 //! Headless Godot Integration Tests for godot_bind
 //!
-//! These tests run actual Godot scenes in headless mode to validate
-//! GDExtension functionality that requires the Godot runtime.
+//! Tests GDExtension functions that require Godot engine runtime.
+//! Uses the existing test_harness infrastructure and ferris-test.toml configuration.
+//!
+//! ## Pattern: GDExtension Testing
+//!
+//! This demonstrates the **GDExtension Testing Pattern** for any crate that needs to test
+//! Godot bindings requiring engine initialization (godot::init()).
+//!
+//! **When to use**: Testing Rust functions that construct Godot types (GString, PropertyInfo, etc.)
+//!
+//! **How it works**:
+//! 1. Create GDScript test runner that calls your GDExtension functions
+//! 2. Run tests via existing TestConfig/GodotRunner infrastructure
+//! 3. Parse output markers ([PASS]/[FAIL]) for validation
+//!
+//! See: docs/TESTING_GUIDE.md > "GDExtension Testing Pattern"
 //!
 //! ## Running Tests
 //!
 //! ```bash
-//! # Set Godot executable path (Windows)
-//! $env:GODOT_BIN = "C:\Path\To\Godot_v4.3-stable_win64.exe"
-//!
-//! # Run tests
+//! # Uses ferris-test.toml configuration automatically
 //! cargo test --package ferrisscript_godot_bind --test headless_integration -- --ignored --nocapture
 //! ```
 //!
-//! ## Requirements
+//! ## Configuration
 //!
-//! - Godot 4.3+ executable (headless or standard)
-//! - GODOT_BIN environment variable set to executable path
-//! - FerrisScript GDExtension built (automatic via cargo)
+//! Tests use the existing ferris-test.toml at workspace root:
+//! - godot_executable: Path to Godot console executable
+//! - project_path: godot_test directory
+//! - timeout_seconds: Test timeout (default: 30)
+//!
+//! Override via environment: GODOT_BIN, GODOT_PROJECT_PATH
 
-use ferrisscript_test_harness::godot_cli::{GodotRunner, TestOutput};
+use ferrisscript_test_harness::{TestConfig, TestOutput};
 use std::path::PathBuf;
 
-/// Get Godot executable path from environment or default
-fn get_godot_exe() -> PathBuf {
-    let godot_path = std::env::var("GODOT_BIN").unwrap_or_else(|_| {
-        // Try common paths on Windows
-        if cfg!(target_os = "windows") {
-            "godot.exe".to_string()
-        } else {
-            "godot".to_string()
-        }
-    });
-
-    PathBuf::from(godot_path)
-}
-
-/// Get godot_test project path
-fn get_project_path() -> PathBuf {
-    // From crates/godot_bind/tests/ -> godot_test/
-    let manifest_dir = env!("CARGO_MANIFEST_DIR");
-    PathBuf::from(manifest_dir)
+/// Load test configuration from ferris-test.toml or environment
+fn get_test_config() -> Result<TestConfig, String> {
+    // Try to load from workspace root
+    let workspace_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .parent()
         .unwrap()
         .parent()
         .unwrap()
-        .join("godot_test")
+        .to_path_buf();
+
+    let config_path = workspace_root.join("ferris-test.toml");
+
+    let mut config = if config_path.exists() {
+        TestConfig::from_file(&config_path)
+            .map_err(|e| format!("Failed to load ferris-test.toml: {}", e))?
+    } else {
+        // Fallback to defaults
+        TestConfig::default()
+    };
+
+    // Apply environment overrides (GODOT_BIN, etc.)
+    config = config.with_env_overrides();
+
+    Ok(config)
 }
 
 /// Parse test output for pass/fail results
@@ -106,42 +120,48 @@ struct TestResults {
 /// Test basic Godot headless functionality
 ///
 /// This test validates that:
-/// - Godot executable is available
+/// - Godot executable is available (from ferris-test.toml)
 /// - Godot can run in headless mode
 /// - Test scene loads and executes
 /// - Basic GDScript functionality works
+///
+/// Uses existing test_harness infrastructure (TestConfig, GodotRunner)
 #[test]
-#[ignore = "Requires Godot executable - set GODOT_BIN env var"]
+#[ignore = "Requires Godot executable - configure in ferris-test.toml"]
 fn test_godot_headless_basic() {
-    let godot_exe = get_godot_exe();
-    let project_path = get_project_path();
+    // Load configuration from ferris-test.toml
+    let config = get_test_config().expect("Failed to load test configuration");
 
-    println!("Godot executable: {}", godot_exe.display());
-    println!("Project path: {}", project_path.display());
+    println!("Godot executable: {}", config.godot_executable.display());
+    println!("Project path: {}", config.project_path.display());
 
-    // Verify Godot executable exists (skip check if relative path - will fail later if wrong)
-    if godot_exe.is_absolute() {
+    // Verify Godot executable exists
+    if config.godot_executable.is_absolute() {
         assert!(
-            godot_exe.exists(),
-            "Godot executable not found: {}. Set GODOT_BIN environment variable.",
-            godot_exe.display()
+            config.godot_executable.exists(),
+            "Godot executable not found: {}. Configure in ferris-test.toml or set GODOT_BIN.",
+            config.godot_executable.display()
         );
     } else {
         println!(
             "Warning: Using relative Godot path '{}' - assuming it's in PATH",
-            godot_exe.display()
+            config.godot_executable.display()
         );
     }
 
     // Verify project exists
     assert!(
-        project_path.exists(),
-        "godot_test project not found at: {}",
-        project_path.display()
+        config.project_path.exists(),
+        "Project not found at: {}",
+        config.project_path.display()
     );
 
-    // Create runner
-    let runner = GodotRunner::new(godot_exe, project_path, 30);
+    // Create runner from existing test_harness
+    let runner = ferrisscript_test_harness::GodotRunner::new(
+        config.godot_executable,
+        config.project_path,
+        config.timeout_seconds,
+    );
 
     // Run test scene
     let test_scene = PathBuf::from("test_godot_bind.tscn");
