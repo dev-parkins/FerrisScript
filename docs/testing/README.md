@@ -20,7 +20,7 @@
    - **Performance Tests** → See [Benchmark Testing](#benchmark-testing)
 3. Run the tests: `cargo test --workspace` or `ferris-test --all`
 
-**Looking for specific test coverage?** → See [Test Matrices](#test-matrices)
+**Looking for specific test coverage?** → See [Test Matrices](#-test-matrices)
 
 ---
 
