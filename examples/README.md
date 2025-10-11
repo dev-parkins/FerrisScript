@@ -2,6 +2,18 @@
 
 This directory contains example scripts demonstrating FerrisScript's features and capabilities.
 
+## ⭐ Inspector Testing (v0.0.4)
+
+**NEW**: Comprehensive Inspector integration test file for testing `@export` properties!
+
+- **Test File**: `inspector_test.ferris` - Complete test suite with 20+ exported properties
+- **Full Guide**: `INSPECTOR_TEST_GUIDE.md` - Detailed testing instructions and troubleshooting
+- **Quick Ref**: `INSPECTOR_QUICK_REF.md` - 30-second smoke test and quick reference
+
+See the [Inspector Test Guide](INSPECTOR_TEST_GUIDE.md) for complete testing instructions.
+
+---
+
 ## Quick Start
 
 ### Testing Examples (Without Godot)

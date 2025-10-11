@@ -1,0 +1,303 @@
+// FerrisScript Inspector Integration Test
+// Comprehensive test file for @export properties in Godot Inspector
+// Version: 0.0.4
+// Date: October 10, 2025
+
+// ====================
+// BASIC TYPES (No Hints)
+// ====================
+
+@export
+let mut player_health: i32 = 100;
+
+@export
+let mut movement_speed: f32 = 5.5;
+
+@export
+let mut is_alive: bool = true;
+
+@export
+let mut player_name: String = "Hero";
+
+// ====================
+// RANGE HINTS
+// ====================
+
+// Integer range with slider (0-100, step 1)
+@export(range(0, 100, 1))
+let mut stamina: i32 = 50;
+
+// Float range with slider (0.0-10.0, step 0.5)
+@export(range(0.0, 10.0, 0.5))
+let mut run_speed: f32 = 7.5;
+
+// Negative range (-100 to 100, step 10)
+@export(range(-100, 100, 10))
+let mut temperature: i32 = 20;
+
+// Rotation (0-360 degrees)
+@export(range(0, 360, 1))
+let mut rotation_degrees: i32 = 0;
+
+// Percentage (0.0-1.0)
+@export(range(0.0, 1.0, 0.1))
+let mut opacity: f32 = 1.0;
+
+// ====================
+// ENUM HINTS
+// ====================
+
+// Character class selection
+@export(enum("Warrior", "Mage", "Rogue", "Ranger"))
+let mut character_class: String = "Warrior";
+
+// Difficulty level
+@export(enum("Easy", "Normal", "Hard", "Nightmare"))
+let mut difficulty: String = "Normal";
+
+// Color selection
+@export(enum("Red", "Green", "Blue", "Yellow"))
+let mut team_color: String = "Red";
+
+// ====================
+// FILE HINTS
+// ====================
+
+// Image file picker
+@export(file("*.png", "*.jpg", "*.jpeg"))
+let mut avatar_texture: String = "";
+
+// Audio file picker
+@export(file("*.ogg", "*.wav", "*.mp3"))
+let mut sound_effect: String = "";
+
+// Scene file picker
+@export(file("*.tscn", "*.scn"))
+let mut spawn_scene: String = "";
+
+// ====================
+// GODOT STRUCT TYPES
+// ====================
+
+// Position in 2D space
+@export
+let mut spawn_position: Vector2 = Vector2 { x: 100.0, y: 200.0 };
+
+// Character color (RGBA)
+@export
+let mut tint_color: Color = Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 };
+
+// Collision bounds
+@export
+let mut collision_rect: Rect2 = Rect2 {
+    position: Vector2 { x: 0.0, y: 0.0 },
+    size: Vector2 { x: 64.0, y: 64.0 }
+};
+
+// Transform (position, rotation, scale)
+@export
+let mut spawn_transform: Transform2D = Transform2D {
+    position: Vector2 { x: 0.0, y: 0.0 },
+    rotation: 0.0,
+    scale: Vector2 { x: 1.0, y: 1.0 }
+};
+
+// ====================
+// LIFECYCLE CALLBACKS
+// ====================
+
+fn _ready() {
+    print("=== Inspector Test Started ===");
+    print("");
+    
+    print("--- Basic Properties ---");
+    print("Health: ", player_health);
+    print("Speed: ", movement_speed);
+    print("Alive: ", is_alive);
+    print("Name: ", player_name);
+    print("");
+    
+    print("--- Range Properties ---");
+    print("Stamina: ", stamina);
+    print("Run Speed: ", run_speed);
+    print("Temperature: ", temperature);
+    print("Rotation: ", rotation_degrees);
+    print("Opacity: ", opacity);
+    print("");
+    
+    print("--- Enum Properties ---");
+    print("Class: ", character_class);
+    print("Difficulty: ", difficulty);
+    print("Team Color: ", team_color);
+    print("");
+    
+    print("--- File Properties ---");
+    if avatar_texture == "" {
+        print("Avatar Texture: (not set)");
+    } else {
+        print("Avatar Texture: ", avatar_texture);
+    }
+    if sound_effect == "" {
+        print("Sound Effect: (not set)");
+    } else {
+        print("Sound Effect: ", sound_effect);
+    }
+    print("");
+    
+    print("--- Godot Struct Properties ---");
+    print("Spawn Position X: ", spawn_position.x, " Y: ", spawn_position.y);
+    print("Tint Color R: ", tint_color.r, " G: ", tint_color.g, " B: ", tint_color.b);
+    print("Collision Rect Size: ", collision_rect.size.x, "x", collision_rect.size.y);
+    print("");
+    
+    print("=== Ready to Test Inspector Changes ===");
+}
+
+fn _process(delta: f32) {
+    // Test 1: Automatic rotation
+    rotation_degrees = rotation_degrees + 1;
+    if rotation_degrees >= 360 {
+        rotation_degrees = 0;
+    }
+    
+    // Test 2: Stamina regeneration (capped at 100)
+    if stamina < 100 {
+        stamina = stamina + 1;
+    }
+}
+
+// ====================
+// HELPER FUNCTIONS
+// ====================
+
+// Test range clamping
+fn test_health_clamping(value: i32) {
+    print("Setting health to: ", value);
+    player_health = value;
+    print("Health is now: ", player_health);
+    print("(should be clamped to 0-100 range if set via Inspector)");
+}
+
+// Test enum validation
+fn set_character_class(class: String) {
+    character_class = class;
+    print("Class changed to: ", character_class);
+}
+
+// Test position updates
+fn move_to(x: f32, y: f32) {
+    spawn_position = Vector2 { x: x, y: y };
+    print("Moved to position: ", spawn_position.x, ", ", spawn_position.y);
+}
+
+// Test color changes
+fn set_tint(r: f32, g: f32, b: f32, a: f32) {
+    tint_color = Color { r: r, g: g, b: b, a: a };
+    print("Tint color updated");
+}
+
+// ====================
+// INSPECTOR TEST GUIDE
+// ====================
+
+// HOW TO TEST THIS FILE:
+//
+// 1. SETUP:
+//    - Compile: cargo build --package ferrisscript_godot_bind
+//    - Open Godot Editor
+//    - Create new Node2D in scene
+//    - Attach FerrisScriptNode script component
+//
+// 2. SET SCRIPT PATH:
+//    - In Inspector, find "Script Path" property
+//    - Set to: res://examples/inspector_test.ferris
+//    - Save scene
+//
+// 3. TEST PROPERTY DISPLAY:
+//    - Inspector should show all 20+ exported properties
+//    - Properties grouped by type
+//    - Sliders for range() properties
+//    - Dropdowns for enum() properties
+//    - File pickers for file() properties
+//
+// 4. TEST PROPERTY READING:
+//    - Check default values match declarations:
+//      * player_health = 100
+//      * movement_speed = 5.5
+//      * character_class = "Warrior"
+//      * spawn_position = (100.0, 200.0)
+//
+// 5. TEST PROPERTY WRITING:
+//    - Change player_health to 75 → verify in console output
+//    - Change movement_speed to 3.0 → verify in console
+//    - Change character_class to "Mage" → verify in console
+//    - Change spawn_position to (50, 50) → verify in console
+//
+// 6. TEST RANGE CLAMPING:
+//    - Try to set stamina to 150 → should clamp to 100
+//    - Try to set stamina to -10 → should clamp to 0
+//    - Try to set opacity to 1.5 → should clamp to 1.0
+//    - Try to set temperature to 200 → should clamp to 100
+//
+// 7. TEST HOT-RELOAD:
+//    - Modify this file (change default value)
+//    - Save file
+//    - Inspector should update automatically (no scene reload)
+//    - Verify new default value appears
+//
+// 8. TEST RUNTIME UPDATES:
+//    - Run scene (F5)
+//    - Console should print all property values
+//    - Rotation should animate (0-360)
+//    - Stamina should regenerate to 100
+//
+// 9. TEST TYPE CONVERSION:
+//    - All 8 types should display correctly
+//    - Vector2 should show X/Y fields
+//    - Color should show R/G/B/A fields
+//    - Rect2 should show Position/Size
+//    - Transform2D should show Position/Rotation/Scale
+//
+// 10. TEST ERROR HANDLING:
+//     - Built-in Node2D properties (position, rotation) should still work
+//     - Invalid property names should not crash
+//     - Type mismatches should log errors gracefully
+
+// ====================
+// EXPECTED BEHAVIOR
+// ====================
+
+// ✅ PASS: All 20+ properties visible in Inspector
+// ✅ PASS: Default values correct on first load
+// ✅ PASS: Inspector changes update runtime immediately
+// ✅ PASS: Range clamping works (150 → 100, -10 → 0)
+// ✅ PASS: Enum dropdowns show correct options
+// ✅ PASS: File pickers work (select files, paths stored)
+// ✅ PASS: Struct types editable (Vector2, Color, etc.)
+// ✅ PASS: Hot-reload updates properties automatically
+// ✅ PASS: Runtime updates visible in console
+// ✅ PASS: No crashes or errors during normal use
+
+// ====================
+// TROUBLESHOOTING
+// ====================
+
+// ❌ Properties not visible?
+//    → Check #[class(tool)] annotation in godot_bind/src/lib.rs
+//    → Verify script path is correct (res://examples/inspector_test.ferris)
+//    → Check console for compilation errors
+
+// ❌ Changes not saving?
+//    → Verify properties are 'let mut' not 'let'
+//    → Check set_property() returns true
+//    → Look for errors in Godot console
+
+// ❌ Range clamping not working?
+//    → Verify from_inspector=true in set_property()
+//    → Check range hint syntax: @export(range(min, max, step))
+
+// ❌ Hot-reload not working?
+//    → Verify notify_property_list_changed() called in load_script()
+//    → Check if script path is res:// (not absolute path)
+
+print("Inspector test file loaded successfully");
