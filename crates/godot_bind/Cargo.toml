@@ -12,3 +12,6 @@ ferrisscript_runtime = { path = "../runtime" }
 
 [lib]
 crate-type = ["cdylib"]
+
+[dev-dependencies]
+ferrisscript_test_harness = { path = "../test_harness" }
