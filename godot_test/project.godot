@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="FerrisScript Test"
-run/main_scene="uid://dco5y6xcolr5f"
+run/main_scene="res://tests/generated/test_node_query_validation.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 

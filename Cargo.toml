@@ -15,3 +15,4 @@ license = "MIT"
 
 [workspace.dependencies]
 criterion = "0.7"
+ 
