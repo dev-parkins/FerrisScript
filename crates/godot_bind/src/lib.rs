@@ -548,28 +548,105 @@ impl INode2D for FerrisScriptNode {
     }
 
     // ========== Phase 5 Sub-Phase 3: Property Hooks (Bundle 7 - Checkpoint 3.9) ==========
-    // Phase 1: Verification Stub - Testing that hooks are called by Inspector
 
     /// Override get_property() to read FerrisScript exported properties from runtime storage
     ///
-    /// **Phase 1 Verification Stub**: Currently logs calls to verify Inspector integration.
-    /// This will be replaced with full runtime integration in Phase 2.
-    ///
     /// Called by Godot when Inspector or code reads a property value.
+    ///
+    /// **Flow**:
+    /// 1. Inspector or GDScript requests property value
+    /// 2. Convert StringName → String for property name lookup
+    /// 3. Check if property exists in runtime storage (env.get_exported_property)
+    /// 4. If found: Convert FerrisScript Value → Godot Variant and return Some(variant)
+    /// 5. If not found: Return None (let Godot handle built-in properties like position, rotation)
+    ///
+    /// **Return Semantics**:
+    /// - `Some(variant)` = We handled it, use this value from FerrisScript runtime
+    /// - `None` = Not our property, fallback to Godot's default handling (e.g., Node2D.position)
+    ///
+    /// **Supported Types**: All 8 exportable types from Phase 5 Sub-Phase 2:
+    /// - Primitives: i32, f32, bool, String
+    /// - Godot types: Vector2, Color, Rect2, Transform2D
+    ///
+    /// **Error Handling**:
+    /// - If env is None (script not loaded): Returns None gracefully
+    /// - If property doesn't exist: Returns None gracefully (not an error)
+    /// - Never panics (would crash Inspector)
     fn get_property(&self, property: StringName) -> Option<Variant> {
-        godot_print!("🔍 get_property() called for: {}", property);
-        None // Fallback to Godot for now (Phase 1 verification)
+        let prop_name = property.to_string();
+
+        // Check if we have a loaded environment with runtime storage
+        if let Some(env) = &self.env {
+            // Try to read property from FerrisScript runtime storage
+            if let Ok(value) = env.get_exported_property(&prop_name) {
+                // Found in runtime - convert FerrisScript Value to Godot Variant
+                // Uses value_to_variant() from Bundle 6 with NaN/Infinity handling
+                return Some(value_to_variant(&value));
+            }
+        }
+
+        // Property not found in FerrisScript runtime - let Godot handle it
+        // This allows built-in Node2D properties (position, rotation, etc.) to work normally
+        None
     }
 
     /// Override set_property() to write FerrisScript exported properties to runtime storage
     ///
-    /// **Phase 1 Verification Stub**: Currently logs calls to verify Inspector integration.
-    /// This will be replaced with full runtime integration in Phase 2.
-    ///
     /// Called by Godot when Inspector or code writes a property value.
+    ///
+    /// **Flow**:
+    /// 1. Inspector or GDScript writes new property value
+    /// 2. Convert StringName → String for property name lookup
+    /// 3. Convert Godot Variant → FerrisScript Value (handles type conversion and edge cases)
+    /// 4. Call env.set_exported_property(name, value, from_inspector=true)
+    /// 5. from_inspector=true enables automatic range clamping (e.g., health 150 → 100)
+    /// 6. Return true if successful, false if property not found or error
+    ///
+    /// **Return Semantics**:
+    /// - `true` = We handled it, property updated successfully in FerrisScript runtime
+    /// - `false` = Not our property or error, fallback to Godot's default handling
+    ///
+    /// **Range Clamping**:
+    /// When from_inspector=true, values exceeding range hints are automatically clamped:
+    /// - Example: @export(range(0, 100)) health set to 150 → clamped to 100
+    /// - Clamping logic in runtime layer (env.set_exported_property)
+    ///
+    /// **Error Handling**:
+    /// - If env is None (script not loaded): Returns false gracefully
+    /// - If property doesn't exist: Returns false gracefully
+    /// - If set operation fails: Logs error with godot_error! but doesn't panic
+    /// - Never panics (would crash Inspector)
     fn set_property(&mut self, property: StringName, value: Variant) -> bool {
-        godot_print!("✏️ set_property() called for: {} = {:?}", property, value);
-        false // Fallback to Godot for now (Phase 1 verification)
+        let prop_name = property.to_string();
+
+        // Check if we have a loaded environment with runtime storage
+        if let Some(env) = &mut self.env {
+            // Convert Godot Variant → FerrisScript Value
+            // Uses variant_to_value() from Bundle 6 with:
+            // - Bool-before-int type ordering fix
+            // - NaN/Infinity handling
+            // - Proper type conversion
+            let fs_value = variant_to_value(&value);
+
+            // Try to write property to FerrisScript runtime storage
+            // from_inspector=true enables range clamping for @export(range(...)) properties
+            match env.set_exported_property(&prop_name, fs_value, true) {
+                Ok(_) => {
+                    // Property updated successfully in runtime storage
+                    return true;
+                }
+                Err(e) => {
+                    // Property doesn't exist or type mismatch
+                    // Log error for debugging but don't panic (would crash Inspector)
+                    godot_error!("Failed to set FerrisScript property '{}': {}", prop_name, e);
+                    return false;
+                }
+            }
+        }
+
+        // env is None (script not loaded) or property not found - let Godot handle it
+        // This allows built-in Node2D properties (position, rotation, etc.) to work normally
+        false
     }
 }
 
@@ -620,6 +697,30 @@ impl FerrisScriptNode {
         self.script_loaded = true;
 
         godot_print!("Successfully loaded FerrisScript: {}", path);
+
+        // ========== Phase 5 Sub-Phase 3: Runtime Synchronization (Bundle 8 - Checkpoint 3.10) ==========
+
+        // Notify Godot Inspector that property list has changed
+        //
+        // This is critical for hot-reload support:
+        // 1. User modifies script file (add/remove @export properties)
+        // 2. Script reloads (via reload_script() or auto-reload)
+        // 3. Property list changes (different @export annotations)
+        // 4. Inspector needs to refresh to show new property list
+        //
+        // Without this call:
+        // - Inspector shows stale property list
+        // - New properties don't appear until scene reload
+        // - Removed properties still show (but don't work)
+        //
+        // With this call:
+        // - Inspector automatically refreshes on script reload
+        // - New properties appear immediately
+        // - Removed properties disappear immediately
+        // - Seamless hot-reload development experience
+        //
+        // Called after successful script load/reload to trigger Inspector refresh.
+        self.base_mut().notify_property_list_changed();
     }
 
     /// Call a function in the loaded script with self binding
