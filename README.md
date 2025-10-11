@@ -253,6 +253,7 @@ Use `@export` annotations to expose variables to Godot's Inspector:
 ```
 
 **Inspector Features**:
+
 - **Real-time Editing**: Modify values in Inspector during gameplay
 - **Automatic Clamping**: Range hints enforce min/max bounds
 - **Type Validation**: Compile-time checks for correct hint usage
@@ -280,6 +281,7 @@ fn take_damage(amount: f32) {
 ```
 
 **Signal Features**:
+
 - **Type-Checked Parameters**: Compile-time validation of signal signatures
 - **Godot Integration**: Signals visible and connectable in Godot's Inspector
 - **Flexible Emission**: Use `emit("signal_name", params...)` in any function
@@ -625,6 +627,7 @@ See [docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md) for comprehensive testing doc
 ### ✅ Implemented Features
 
 **Core Language (Phases 1-3)**:
+
 - [x] Lexer with full tokenization
 - [x] Parser with operator precedence and error recovery
 - [x] Type checker with static analysis (65+ error codes)
@@ -635,6 +638,7 @@ See [docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md) for comprehensive testing doc
 - [x] Global state persistence across frames
 
 **Godot Integration (Phase 4-5)**:
+
 - [x] Godot 4.x GDExtension integration via `gdext`
 - [x] `_ready()`, `_process()`, `_physics_process()` callbacks
 - [x] Self binding for node property access
@@ -646,6 +650,7 @@ See [docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md) for comprehensive testing doc
 - [x] Node query functions (`get_node()`, `get_parent()`, `find_child()`, `has_node()`)
 
 **Quality & Testing**:
+
 - [x] 843 tests passing (543 compiler + 110 runtime + 38 harness + 15 integration + 137 other)
 - [x] Comprehensive error messages with hints and suggestions
 - [x] VS Code extension with syntax highlighting, snippets, and IntelliSense

@@ -30,6 +30,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 **Effort**: 3-4 days (under 5-7 day estimate)
 
 **Deliverables**:
+
 - Signal declaration syntax (`signal health_changed(old: i32, new: i32);`)
 - Signal emission (`emit_signal("health_changed", old, new);`)
 - Godot editor connection support
@@ -38,6 +39,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 - 382 tests passing total
 
 **Key Documents**:
+
 - `PHASE_1_SIGNALS.md` - Complete implementation plan
 - `PHASE_1_STATUS_UPDATE.md` - Completion summary
 - `STEP_6_COMPLETION_REPORT.md` - Technical details
@@ -50,6 +52,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 **Effort**: 1 day
 
 **Deliverables**:
+
 - `_input(event: InputEvent)` - User input handling
 - `_physics_process(delta: f32)` - Fixed timestep updates
 - `_enter_tree()` / `_exit_tree()` - Scene tree lifecycle
@@ -59,6 +62,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 - 396 tests passing total
 
 **Key Documents**:
+
 - `PHASE_2_CHECKLIST.md` - Implementation checklist
 - `PHASE_2_PREP.md` - Preparation notes
 
@@ -70,6 +74,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 **Effort**: 1-2 days
 
 **Deliverables**:
+
 - `get_node(path: String) -> Node` - Retrieve nodes by path
 - `get_parent() -> Node` - Get parent node
 - `has_node(path: String) -> bool` - Check node existence
@@ -80,6 +85,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 - 416 tests passing total
 
 **Key Documents**:
+
 - `PHASE_3_NODE_QUERIES.md` - Complete planning document
 - `NODE_INVALIDATION_RESEARCH.md` - Safety analysis for future work
 - Test harness in `crates/test_harness/` (shipped with release)
@@ -92,6 +98,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 **Effort**: ~1 day
 
 **Deliverables**:
+
 - Color type (r, g, b, a fields)
 - Rect2 type (position, size fields with nested Vector2)
 - Transform2D type (position, rotation, scale fields)
@@ -102,6 +109,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 - Godot binding conversions
 
 **Key Documents**:
+
 - `PHASE_4_COMPLETION_AND_GAPS.md` - Completion summary and gaps analysis
 
 ---
@@ -112,6 +120,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 **Effort**: ~2.5 hours (MVP)
 
 **Deliverables**:
+
 - Struct literal syntax parsing (`Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }`)
 - Type checker validation (missing fields, duplicate fields, wrong types)
 - Runtime evaluation with integer→float coercion
@@ -122,6 +131,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 - 587 tests passing total
 
 **Key Documents**:
+
 - `STRUCT_LITERAL_SYNTAX_RESEARCH.md` - Syntax exploration
 - `STRUCT_LITERAL_IMPLEMENTATION_ANALYSIS.md` - Implementation strategy
 - `PHASE_4_5_EXECUTION_PLAN.md` - Execution plan
@@ -137,12 +147,14 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 **Deliverables**:
 
 #### Sub-Phase 1: Parser & AST (8 checkpoints, ~4 hours)
+
 - `@export` annotation parsing
 - Property hint syntax: `range`, `file`, `enum`
 - 34 parser tests covering all hint types
 - Error recovery for invalid syntax
 
 #### Sub-Phase 2: Type Checker & Validation (8 checkpoints, ~2 hours)
+
 - Export eligibility validation (8 types supported)
 - Hint compatibility matrix
 - PropertyMetadata generation (hybrid architecture)
@@ -151,6 +163,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 - Exact Godot hint_string formatting
 
 #### Sub-Phase 3: Runtime & Inspector (8 checkpoints, ~6 hours)
+
 - Per-instance property value storage
 - Property get/set with range clamping
 - Godot PropertyInfo generation
@@ -161,6 +174,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 - 843 tests passing total
 
 **Key Documents**:
+
 - `PHASE_5_EXECUTION_PLAN.md` - Comprehensive execution plan (1,132 lines)
 - `EXPORT_ANNOTATION_RESEARCH.md` - Initial research
 - `PHASE_5_SUB_PHASE_1_COMPLETION.md` - Sub-Phase 1 completion report
@@ -211,6 +225,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 **Discovery**: Breaking features into 8 structured checkpoints per sub-phase dramatically improved efficiency.
 
 **Benefits**:
+
 - Natural pause points every 15-30 minutes
 - Easy to resume work (clear next checkpoint)
 - Early bug detection (test after each checkpoint)
@@ -223,6 +238,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 **Discovery**: Separating MVP implementation from robustness testing accelerated delivery.
 
 **Benefits**:
+
 - MVP completes faster (don't get stuck on edge cases)
 - MVP proves feasibility early
 - Robustness testing validates production-readiness
@@ -235,6 +251,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 **Discovery**: Using static compile-time metadata + per-instance runtime values simplified Phase 5 implementation.
 
 **Benefits**:
+
 - Eliminated per-instance metadata duplication
 - Simplified Godot binding (direct static lookup)
 - Reduced runtime memory overhead
@@ -247,6 +264,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 **Discovery**: Writing tests before implementation at each checkpoint caught bugs early.
 
 **Benefits**:
+
 - Tests serve as specification
 - Clear success criteria (test passes = checkpoint done)
 - Zero bugs found during robustness = high-quality MVP
@@ -259,11 +277,13 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 **Discovery**: Allocating semantic ranges for feature families improved navigation and documentation.
 
 **Benefits**:
+
 - Easy to find related errors (all export errors start with E8)
 - Can reuse codes across similar types
 - Clear documentation patterns
 
 **Application**:
+
 - E70x: Struct literal errors
 - E80x: Export annotation errors
 - Future: E90x for arrays, E10xx for LSP, etc.
@@ -275,11 +295,13 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 ### Planning & Research
 
 **High-Level Planning**:
+
 - `ROADMAP.md` - Original v0.0.4 roadmap (deprecated, superseded by README.md)
 - `README.md` - Current v0.0.4 status and phase tracker
 - `QUICK_REFERENCE.md` - Quick reference for implementation patterns
 
 **Phase-Specific Planning**:
+
 - `PHASE_1_SIGNALS.md` - Phase 1 planning
 - `PHASE_2_CHECKLIST.md` / `PHASE_2_PREP.md` - Phase 2 planning
 - `PHASE_3_NODE_QUERIES.md` - Phase 3 complete planning
@@ -287,6 +309,7 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 - `PHASE_5_EXECUTION_PLAN.md` - Comprehensive Phase 5 plan (1,132 lines)
 
 **Research Documents**:
+
 - `SIGNAL_RESEARCH.md` / `SIGNAL_RESEARCH_SUMMARY.md` - Signal system research
 - `NODE_INVALIDATION_RESEARCH.md` - Node safety research (future v0.0.5/v0.0.7)
 - `EXPORT_ANNOTATION_RESEARCH.md` - @export initial research
@@ -297,18 +320,21 @@ v0.0.4 is now **feature-complete and released**. All planning documents, researc
 ### Completion Reports
 
 **Phase Completion**:
+
 - `STEP_6_COMPLETION_REPORT.md` - Phase 1 (signals) completion
 - `PHASE_4_COMPLETION_AND_GAPS.md` - Phase 4 completion and gap analysis
 - `PHASE_5_SUB_PHASE_1_COMPLETION.md` - Sub-Phase 1 (Parser) completion
 - `SUB_PHASE_2_COMPLETION_REPORT.md` - Sub-Phase 2 (Type Checker) completion
 
 **Bundle Summaries** (Phase 5 Sub-Phase 3):
+
 - `SESSION_SUMMARY_BUNDLES_5-6.md` - Bundles 5-6 (Inspector display + variant conversion)
 - `SESSION_SUMMARY_BUNDLES_7-8.md` - Bundles 7-8 (property hooks + runtime sync, COMPLETE)
 - `BUNDLE_6_COMPLETION_REPORT.md` - Bundle 6 details
 - `BUNDLE_7_COMPLETION_REPORT.md` - Bundle 7 details
 
 **Testing & Integration**:
+
 - `INTEGRATION_TESTS_REPORT.md` - Integration testing results (15 tests)
 - `INTEGRATION_TESTS_FIXES.md` - Bug fixes during integration testing
 - `TESTING_STRATEGY_PHASE5.md` - Phase 5 testing strategy
@@ -387,6 +413,7 @@ See `docs/planning/ROADMAP_MASTER.md` for the complete v0.0.5+ roadmap.
 ## ✅ Archive Completeness
 
 This archive contains:
+
 - [x] All planning documents (50+)
 - [x] All completion reports
 - [x] All research documents
@@ -398,6 +425,7 @@ This archive contains:
 **Nothing was lost** - all information preserved for historical reference.
 
 **Key information extracted** to main docs:
+
 - ROADMAP_MASTER.md updated with v0.0.4 status
 - CHANGELOG.md updated with release notes
 - LEARNINGS.md updated with Phase 5 insights
