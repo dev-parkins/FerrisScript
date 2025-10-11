@@ -35,8 +35,11 @@ FerrisScript is a Rust-inspired scripting language designed specifically for the
 
 ### Version Status
 
-- **v0.0.1**: Released October 2, 2025 - Initial compiler and runtime implementation
-- **v0.0.2**: In progress - Documentation improvements and community standards
+- **v0.0.1**: Released October 2, 2025 - Initial compiler and runtime
+- **v0.0.2**: Released - Documentation improvements and community standards
+- **v0.0.3**: Released - VS Code extension and error handling improvements
+- **v0.0.4**: Current (October 10, 2025) - @export annotations, signals, struct literals, node queries, testing infrastructure (843 tests)
+- **v0.0.5**: Planned - LSP alpha, arrays, for loops
 
 ### File Extensions
 

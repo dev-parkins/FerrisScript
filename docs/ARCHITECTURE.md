@@ -67,33 +67,71 @@ The project is organized as a Rust workspace with three main crates:
 ```
 FerrisScript/
 ├── crates/
-│   ├── compiler/          # Compilation pipeline
+│   ├── compiler/          # Compilation pipeline (543 tests)
 │   │   ├── src/
 │   │   │   ├── lexer.rs       # Tokenization
 │   │   │   ├── parser.rs      # Recursive descent parser
 │   │   │   ├── type_checker.rs # Type checking and validation
 │   │   │   ├── ast.rs         # AST node definitions
+│   │   │   ├── error_code.rs  # Error codes and messages
 │   │   │   └── lib.rs         # Public API (compile function)
 │   │   └── Cargo.toml
 │   │
-│   ├── runtime/           # Interpreter
+│   ├── runtime/           # Interpreter (110 tests)
 │   │   ├── src/
 │   │   │   └── lib.rs         # Environment, value types, execution
+│   │   ├── tests/
+│   │   │   └── inspector_sync_test.rs  # Integration tests
 │   │   └── Cargo.toml
 │   │
-│   └── godot_bind/        # Godot GDExtension
+│   ├── godot_bind/        # Godot GDExtension (11 tests, 10 ignored)
+│   │   ├── src/
+│   │   │   ├── lib.rs         # FerrisScriptNode, Godot callbacks
+│   │   │   ├── export_info_functions.rs  # @export annotation support
+│   │   │   └── property_export.rs        # PropertyInfo generation
+│   │   └── Cargo.toml
+│   │
+│   └── test_harness/      # Testing infrastructure (38 tests)
 │       ├── src/
-│       │   └── lib.rs         # FerrisScriptNode, Godot callbacks
+│       │   ├── main.rs        # ferris-test CLI entry point
+│       │   ├── lib.rs         # Public test harness API
+│       │   ├── godot_cli.rs   # Godot process management
+│       │   ├── output_parser.rs  # Test output parsing
+│       │   └── test_runner.rs    # Test execution engine
 │       └── Cargo.toml
 │
-├── examples/              # Example .ferris scripts
+├── examples/              # 26 example .ferris scripts
 │   ├── hello.ferris
 │   ├── move.ferris
-│   └── bounce.ferris
+│   ├── signals.ferris
+│   ├── struct_literals_*.ferris  # Godot type construction demos
+│   └── node_query_*.ferris       # Scene tree query examples
+│
+├── godot_test/            # Godot test project (17 integration tests)
+│   ├── project.godot
+│   ├── ferrisscript.gdextension
+│   └── scripts/
+│       ├── export_properties_test.ferris
+│       ├── signal_test.ferris
+│       └── process_test.ferris
+│
+├── extensions/            # Editor extensions
+│   └── vscode/           # VS Code extension (v0.0.4)
+│       ├── syntaxes/     # Syntax highlighting
+│       ├── snippets/     # Code snippets
+│       └── language-configuration.json
 │
 ├── docs/                  # Documentation
+│   ├── testing/          # Testing guides and matrices
+│   │   ├── README.md     # Testing hub
+│   │   └── TESTING_GUIDE.md  # Comprehensive guide
+│   ├── planning/         # Version roadmaps
+│   ├── ARCHITECTURE.md   # This file
+│   ├── DEVELOPMENT.md    # Dev workflow
+│   └── CONTRIBUTING.md   # Contribution guide
+│
 ├── Cargo.toml            # Workspace configuration
-└── README.md
+└── README.md             # Project overview
 ```
 
 ### Crate Dependencies
@@ -410,26 +448,143 @@ pub struct FerrisScriptNode {
 }
 ```
 
-### Lifecycle Hooks
+### Lifecycle Hooks (v0.0.4)
 
-#### `_ready()`
+FerrisScript supports the following Godot lifecycle callbacks:
 
-Called when node enters the scene tree:
+| Callback | When Called | Parameters | Purpose |
+|----------|-------------|------------|---------|
+| `_ready()` | Node enters scene tree | None | Initialization |
+| `_process(delta)` | Every frame | `delta: f32` | Frame updates |
+| `_physics_process(delta)` | Every physics tick | `delta: f32` | Physics updates |
+| `_input(event)` | Input event received | `event: InputEvent` | Input handling |
+| `_unhandled_input(event)` | Unhandled input | `event: InputEvent` | Fallback input |
+| `_enter_tree()` | Node enters tree | None | Tree entry |
+| `_exit_tree()` | Node exits tree | None | Cleanup |
+
+#### `_ready()` Execution Flow
 
 1. Load `.ferris` file from `script_path`
 2. Compile to AST (`compile(source)`)
-3. Initialize runtime environment
-4. Register Godot-specific property callbacks
-5. Call `_ready()` function in script (if defined)
+3. Type check the program
+4. Initialize runtime environment
+5. Register Godot-specific property callbacks
+6. Process @export annotations → PropertyInfo list
+7. Process signal declarations → register with Godot
+8. Call `_ready()` function in script (if defined)
 
-#### `_process(delta: f64)`
-
-Called every frame:
+#### `_process(delta: f32)` Execution Flow
 
 1. Set thread-local node properties (position, velocity, etc.)
 2. Call `_process(delta)` function in script (if defined)
 3. Retrieve updated properties from thread-local storage
-4. Apply changes to Godot node
+4. Apply changes to Godot node (position, rotation, etc.)
+
+### @export Annotations (v0.0.4)
+
+FerrisScript supports Godot Inspector integration via `@export` annotations:
+
+```rust
+// Basic export
+@export let speed: f32 = 100.0;
+
+// Range hint (min, max) - clamps values in Inspector
+@export(range, 0.0, 10.0) let health: f32 = 5.0;
+
+// Enum hint - dropdown selector
+@export(enum, "Idle", "Walk", "Run") let state: String = "Idle";
+
+// File hint - file picker
+@export(file, "*.png", "*.jpg") let texture_path: String = "";
+
+// Multiline hint - text area
+@export(multiline) let description: String = "Default text";
+
+// Color hint - color picker
+@export(color_no_alpha) let team_color: Color = Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
+```
+
+**Implementation** (`crates/godot_bind/src/export_info_functions.rs`):
+
+- Parse @export annotations during compilation
+- Convert to Godot `PropertyInfo` objects
+- Register with Godot via `_get_property_list()`
+- Implement `_get()` and `_set()` for Inspector integration
+
+### Signal System (v0.0.4)
+
+Declare and emit custom signals visible in Godot Inspector:
+
+```rust
+// Declare at file scope
+signal health_changed(new_health: f32);
+signal player_died();
+
+// Emit in any function
+fn take_damage(amount: f32) {
+    health = health - amount;
+    emit_signal("health_changed", health);
+    if health <= 0.0 {
+        emit_signal("player_died");
+    }
+}
+```
+
+**Implementation**:
+
+- Parse `signal` declarations during compilation
+- Register signals with Godot via `add_user_signal()`
+- Translate `emit_signal()` calls to Godot's signal emission
+
+### Node Query Functions (v0.0.4)
+
+Access scene tree nodes at runtime:
+
+```rust
+let player = get_node("Player");        // Get child node
+let parent = get_parent();              // Get parent node
+let child = find_child("Enemy", true); // Find descendant (recursive)
+if has_node("UI/HealthBar") {          // Check node exists
+    let health_bar = get_node("UI/HealthBar");
+}
+```
+
+**Implementation** (`crates/runtime/src/lib.rs`):
+
+- Callback-based architecture (node access via callbacks)
+- Supports relative paths (`"Child"`) and nested paths (`"UI/HUD"`)
+- Returns opaque node handles (no direct property access yet)
+
+### Struct Literal Syntax (v0.0.4)
+
+Construct Godot types directly with field syntax:
+
+```rust
+// Vector2
+let pos = Vector2 { x: 100.0, y: 200.0 };
+
+// Color (RGBA)
+let red = Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
+
+// Rect2
+let rect = Rect2 { 
+    position: Vector2 { x: 0.0, y: 0.0 }, 
+    size: Vector2 { x: 100.0, y: 50.0 } 
+};
+
+// Transform2D
+let transform = Transform2D { 
+    position: Vector2 { x: 100.0, y: 200.0 },
+    rotation: 0.0,
+    scale: Vector2 { x: 1.0, y: 1.0 }
+};
+```
+
+**Implementation** (`crates/compiler/src/parser.rs`, `crates/runtime/src/lib.rs`):
+
+- Parse struct literal syntax: `TypeName { field: value, ... }`
+- Type check field names and types
+- Construct Godot types at runtime via `gdext` API
 
 ### Property Binding
 
@@ -839,43 +994,156 @@ Currently no benchmarks. To add:
 
 ## Testing Strategy
 
-### Unit Tests
+FerrisScript uses a **4-layer testing strategy** to ensure quality across the stack:
 
-Each crate has unit tests:
+```
+┌─────────────────────────────────────────────┐
+│   Layer 4: Manual Testing (Godot Editor)   │  ← Feature validation
+├─────────────────────────────────────────────┤
+│   Layer 3: Integration Tests (.ferris)     │  ← End-to-end behavior
+├─────────────────────────────────────────────┤
+│   Layer 2: GDExtension Tests (GDScript)    │  ← Godot bindings
+├─────────────────────────────────────────────┤
+│   Layer 1: Unit Tests (Rust)               │  ← Pure logic
+└─────────────────────────────────────────────┘
+```
 
-- **Compiler**: Test lexer, parser, type checker independently
-- **Runtime**: Test expression evaluation, statement execution
-- **Godot bind**: Test property access, lifecycle hooks (harder, requires Godot)
+### Test Coverage (v0.0.4)
 
-**Example test** (`compiler/src/lib.rs`):
+| Layer | Type | Count | Location | Purpose |
+|-------|------|-------|----------|---------|
+| **Layer 1** | Unit (Compiler) | 543 | `crates/compiler/src/` | Lexer, parser, type checker |
+| **Layer 1** | Unit (Runtime) | 110 | `crates/runtime/src/` | Interpreter, execution engine |
+| **Layer 1** | Unit (GDExtension) | 11 | `crates/godot_bind/src/` | Godot bindings (10 ignored*) |
+| **Layer 1** | Unit (Test Harness) | 38 | `crates/test_harness/src/` | ferris-test CLI |
+| **Layer 2** | GDExtension | N/A | `godot_test/scripts/*.gd` | PropertyInfo, signals |
+| **Layer 3** | Integration | 15+ | `godot_test/scripts/*.ferris` | End-to-end workflows |
+| **Layer 4** | Manual | N/A | Godot Editor | Feature validation |
+| **Total** | | **843** | | **~82% coverage** |
+
+\* Some tests require Godot runtime initialization and are covered by integration tests instead.
+
+### Layer 1: Unit Tests (Rust)
+
+**Purpose**: Test pure logic without Godot dependencies
+
+**Example** (`compiler/src/lib.rs`):
 
 ```rust
 #[test]
-fn test_compile_hello() {
-    let source = std::fs::read_to_string("examples/hello.ferris").unwrap();
-    assert!(compile(&source).is_ok());
+fn test_parse_export_annotation() {
+    let source = "@export let speed: f32 = 100.0;";
+    let result = compile(&source);
+    assert!(result.is_ok());
+    assert!(result.unwrap().annotations.len() == 1);
 }
 ```
 
-### Integration Tests
+**Running**:
 
-Located in `examples/`:
+```bash
+cargo test --workspace              # All unit tests
+cargo test -p ferrisscript_compiler # Compiler only
+cargo test -p ferrisscript_runtime  # Runtime only
+```
 
-- `hello.ferris`: Basic function call
-- `move.ferris`: Variable mutation, arithmetic
-- `bounce.ferris`: Conditionals, property access
+### Layer 2: GDExtension Tests
 
-Each example has a corresponding test in `compiler/lib.rs` that compiles the script.
+**Purpose**: Test Rust code requiring Godot runtime (`godot::init()`)
 
-### Manual Testing
+**Challenges**: Many GDExtension functions require Godot initialization, which can't run in standard unit tests. Solution: Mark as `#[ignore]` and cover via Layer 3 integration tests.
 
-To test with Godot:
+**Example** (`godot_bind/src/lib.rs`):
+
+```rust
+#[test]
+#[ignore = "requires Godot runtime - tested via ferris-test"]
+fn test_export_range_property() {
+    // Test PropertyInfo generation for @export(range)
+}
+```
+
+### Layer 3: Integration Tests (.ferris scripts)
+
+**Purpose**: End-to-end testing with real Godot runtime
+
+**Tool**: `ferris-test` CLI (headless Godot runner)
+
+**Example** (`godot_test/scripts/signal_test.ferris`):
+
+```ferrisscript
+// TEST: signal_emission
+// CATEGORY: integration
+// EXPECT: success
+// ASSERT: Signal emitted correctly
+
+export fn _ready() {
+    print("[TEST_START]");
+    signal health_changed(f32);
+    emit_signal("health_changed", 100.0);
+    print("[PASS] Signal emitted successfully");
+    print("[TEST_END]");
+}
+```
+
+**Running**:
+
+```bash
+ferris-test --all                # Run all integration tests
+ferris-test --script path.ferris # Run specific test
+ferris-test --all --verbose      # Verbose output
+```
+
+**Test Scripts**: Located in `godot_test/scripts/`:
+
+- `export_properties_test.ferris` - @export annotations with all hint types
+- `signal_test.ferris` - Signal declaration and emission
+- `process_test.ferris` - Lifecycle callbacks
+- `node_query_*.ferris` - Scene tree queries
+- `struct_literals_*.ferris` - Godot type construction
+
+### Layer 4: Manual Testing
+
+**Purpose**: Feature validation and exploratory testing
+
+**Process**:
 
 1. Build GDExtension: `cargo build --release`
 2. Copy `.dll`/`.so`/`.dylib` to Godot project
 3. Create scene with `FerrisScriptNode`
 4. Set `script_path` to `.ferris` file
-5. Run scene and observe behavior
+5. Run scene (F5) and observe behavior in Output panel
+
+**Test Project**: `godot_test/` - Complete Godot 4.x project with test scenes
+
+### Test Infrastructure
+
+**ferris-test CLI** (`crates/test_harness/`):
+
+- Headless Godot execution (no GUI)
+- Test metadata parsing (TEST, CATEGORY, EXPECT, ASSERT directives)
+- Output marker parsing ([TEST_START], [PASS], [FAIL], [TEST_END])
+- Multiple output formats (console, JSON, JUnit)
+- Timeout handling and parallel execution
+
+**Configuration** (`ferris-test.toml`):
+
+```toml
+godot_executable = "path/to/godot.exe"
+project_path = "./godot_test"
+timeout_seconds = 30
+output_format = "console"
+verbose = false
+```
+
+### Testing Documentation
+
+For comprehensive testing documentation, see:
+
+- **[docs/testing/README.md](../testing/README.md)** - Testing hub and overview
+- **[docs/testing/TESTING_GUIDE.md](../testing/TESTING_GUIDE.md)** - Complete patterns and procedures
+- **[docs/testing/TEST_MATRIX_NODE_QUERIES_SIGNALS.md](../testing/TEST_MATRIX_NODE_QUERIES_SIGNALS.md)** - Systematic coverage tracking
+- **[docs/testing/TEST_HARNESS_TESTING_STRATEGY.md](../testing/TEST_HARNESS_TESTING_STRATEGY.md)** - ferris-test architecture
 
 ---
 

@@ -78,15 +78,29 @@ FerrisScript (named after [Ferris 🦀](https://rustacean.net/), the Rust mascot
 
 ## ✨ Features
 
+### Core Language
+
 - 🦀 **Rust-Inspired Syntax** - Familiar to Rust developers, easy for beginners
-- 🎮 **Godot 4.x Integration** - Native GDExtension support via `gdext`
-- ⚡ **Static Type Checking** - Catch errors before runtime (843 tests)
+- ⚡ **Static Type Checking** - Catch errors at compile-time (843 tests, 82% coverage)
 - 🔒 **Immutability by Default** - Safe by default, explicit `mut` for mutations
 - 🎯 **Zero-Cost Abstractions** - Compiled to efficient runtime execution
 - 📦 **Minimal Dependencies** - Lightweight and fast compilation
-- 🎨 **@export Annotations** (v0.0.4+) - Inspector integration with property hints
-- 📊 **Godot Type Literals** (v0.0.4+) - Direct construction of `Vector2`, `Color`, `Rect2`, `Transform2D`
-- 🔔 **Signal System** - Declare and emit custom signals
+
+### Godot Integration (v0.0.4)
+
+- 🎮 **GDExtension Support** - Native Godot 4.x integration via `gdext`
+- 🎨 **@export Annotations** - Inspector integration with property hints (range, enum, file, multiline, color)
+- 🔔 **Signal System** - Declare and emit custom signals visible in Inspector
+- 📊 **Godot Type Literals** - Direct construction of `Vector2`, `Color`, `Rect2`, `Transform2D`
+- 🌳 **Node Query Functions** - `get_node()`, `get_parent()`, `has_node()`, `find_child()`
+- ⚡ **Lifecycle Callbacks** - `_ready()`, `_process()`, `_physics_process()`, `_input()`, `_unhandled_input()`
+
+### Developer Experience
+
+- 🎨 **VS Code Extension** - Syntax highlighting, IntelliSense, code snippets, hover tooltips
+- 🧪 **Testing Infrastructure** - 4-layer testing (unit, integration, GDExtension, benchmarks)
+- 📝 **Error Messages** - Clear, actionable error messages with error codes
+- 📖 **Documentation** - Comprehensive guides, examples, and API docs
 
 ## 🎨 Editor Support
 
@@ -363,7 +377,7 @@ ferrisscript/
 ├── Cargo.toml                 # Workspace root
 ├── README.md                  # This file
 ├── crates/
-│   ├── compiler/              # Lexer, Parser, Type Checker
+│   ├── compiler/              # Lexer, Parser, Type Checker (543 tests)
 │   │   ├── Cargo.toml
 │   │   └── src/
 │   │       ├── lib.rs         # Public compile() API
@@ -371,26 +385,56 @@ ferrisscript/
 │   │       ├── parser.rs      # AST generation
 │   │       ├── type_checker.rs# Static type checking
 │   │       └── ast.rs         # AST definitions
-│   ├── runtime/               # Execution engine
+│   ├── runtime/               # Execution engine (110 tests)
 │   │   ├── Cargo.toml
 │   │   └── src/
 │   │       └── lib.rs         # Runtime interpreter
-│   └── godot_bind/            # Godot 4.x integration
+│   ├── godot_bind/            # Godot 4.x integration (11 tests)
+│   │   ├── Cargo.toml
+│   │   └── src/
+│   │       └── lib.rs         # GDExtension bindings
+│   └── test_harness/          # Testing infrastructure (38 tests)
 │       ├── Cargo.toml
 │       └── src/
-│           └── lib.rs         # GDExtension bindings
-├── examples/                  # Example scripts
+│           ├── main.rs        # ferris-test CLI
+│           └── lib.rs         # Test runner, output parser
+├── examples/                  # 26 example scripts
 │   ├── hello.ferris           # Basic _ready callback
 │   ├── move.ferris            # Movement example
-│   └── bounce.ferris          # State & control flow
+│   ├── signals.ferris         # Signal system demo
+│   ├── struct_literals_*.ferris  # Godot type construction
+│   └── node_query_*.ferris    # Scene tree queries
 ├── godot_test/                # Godot test project
 │   ├── project.godot
 │   ├── ferrisscript.gdextension
-│   └── scripts/               # Test scripts
-└── docs/                      # Additional documentation
-    ├── PHASE*_TESTING.md      # Phase testing guides
-    └── copilot-checklist.md   # Development checklist
+│   └── scripts/               # 17 integration test scripts
+│       ├── export_properties_test.ferris
+│       ├── signal_test.ferris
+│       └── process_test.ferris
+├── extensions/                # Editor extensions
+│   └── vscode/               # VS Code extension (v0.0.4)
+│       ├── syntaxes/         # Syntax highlighting
+│       ├── snippets/         # Code snippets
+│       └── language-configuration.json
+└── docs/                      # Documentation
+    ├── testing/              # Testing guides and matrices
+    │   ├── README.md         # Testing hub
+    │   ├── TESTING_GUIDE.md  # Comprehensive guide
+    │   └── TEST_MATRIX_*.md  # Coverage tracking
+    ├── planning/             # Version roadmaps
+    ├── archive/              # Historical documentation
+    ├── ARCHITECTURE.md       # System design
+    ├── DEVELOPMENT.md        # Dev workflow
+    └── CONTRIBUTING.md       # Contribution guide
 ```
+
+**Quick Links**:
+
+- **Examples**: [examples/README.md](examples/README.md) - 26 annotated examples
+- **Testing**: [docs/testing/README.md](docs/testing/README.md) - 4-layer testing strategy
+- **Architecture**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - System design
+- **Development**: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) - Dev workflow
+- **Contributing**: [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
 
 ## 🔧 Building from Source
 
@@ -589,6 +633,68 @@ Access node properties via `self`:
 
 ## 🧪 Testing
 
+FerrisScript uses a **4-layer testing strategy** to ensure quality and reliability:
+
+### Testing Layers
+
+```
+┌─────────────────────────────────────────────┐
+│   Layer 4: Manual Testing (Godot Editor)    │  ← Feature validation
+├─────────────────────────────────────────────┤
+│   Layer 3: Integration Tests (.ferris)      │  ← End-to-end behavior
+├─────────────────────────────────────────────┤
+│   Layer 2: GDExtension Tests (GDScript)     │  ← Godot bindings
+├─────────────────────────────────────────────┤
+│   Layer 1: Unit Tests (Rust)                │  ← Pure logic
+└─────────────────────────────────────────────┘
+```
+
+### Quick Test Commands
+
+```bash
+# Run all unit tests (843 tests)
+cargo test --workspace
+
+# Run specific test types
+cargo test -p ferrisscript_compiler    # Compiler tests (543 tests)
+cargo test -p ferrisscript_runtime     # Runtime tests (110 tests)
+ferris-test --all                      # Integration tests (15+ scripts)
+
+# Run with coverage
+cargo llvm-cov --workspace --html      # Generates HTML report
+```
+
+### Test Results (v0.0.4)
+
+| Test Type | Count | Coverage | Description |
+|-----------|-------|----------|-------------|
+| **Compiler** | 543 | ~85% | Lexer, parser, type checker |
+| **Runtime** | 110 | ~80% | Interpreter, execution engine |
+| **GDExtension** | 11 | ~70% | Godot bindings (10 ignored*) |
+| **Test Harness** | 38 | ~90% | ferris-test CLI |
+| **Integration** | 15+ | N/A | End-to-end .ferris scripts |
+| **Total** | **843** | **~82%** | Across all layers |
+
+\* Some tests require Godot runtime and are covered by integration tests
+
+### Integration Testing (ferris-test)
+
+Run `.ferris` scripts headlessly against Godot:
+
+```bash
+# Run all integration tests
+ferris-test --all
+
+# Run specific test
+ferris-test --script godot_test/scripts/signal_test.ferris
+
+# Filter by name
+ferris-test --all --filter "export"
+
+# JSON output for CI
+ferris-test --all --format json > results.json
+```
+
 ### Manual Testing in Godot
 
 The `godot_test/` directory contains a complete test project:
@@ -604,23 +710,14 @@ cargo build --package ferrisscript_godot_bind
 # Check Output panel for results
 ```
 
-See `godot_test/README.md` for detailed testing instructions.
+### Documentation
 
-### Automated Testing
+- **[Testing Hub](docs/testing/README.md)** - Central testing documentation ⭐ **START HERE**
+- **[Testing Guide](docs/testing/TESTING_GUIDE.md)** - Complete patterns and procedures
+- **[Test Matrices](docs/testing/README.md#-test-matrices)** - Systematic coverage tracking
+- **[Test Harness Architecture](docs/testing/TEST_HARNESS_TESTING_STRATEGY.md)** - ferris-test design
 
-```bash
-# Run all unit tests
-cargo test --workspace
-
-# Test results (v0.0.4):
-# - Compiler: 543 tests passing
-# - Runtime: 110 tests passing
-# - Test Harness: 38 tests passing
-# - Integration: 15 tests passing
-# - Total: 843 tests passing
-```
-
-See [docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md) for comprehensive testing documentation, including headless testing setup, integration testing, and test architecture.
+See [docs/testing/README.md](docs/testing/README.md) for comprehensive testing documentation.
 
 ## 📊 Current Status (v0.0.4)
 
