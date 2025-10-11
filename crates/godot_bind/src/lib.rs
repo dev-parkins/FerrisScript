@@ -1035,11 +1035,13 @@ mod tests {
     // ====================
     // map_hint Tests (Bundle 4 - Checkpoint 3.7)
     // NOTE: These tests require Godot engine to be available (GString, PropertyInfo construction)
-    // They will be validated through manual Inspector testing in Bundle 5
-    // and automated integration tests in Godot
+    // They are disabled for unit testing but will be validated through:
+    // 1. Manual Inspector testing in Bundle 5
+    // 2. Automated integration tests with headless Godot (see TESTING_STRATEGY_PHASE5.md)
     // ====================
 
     #[test]
+    #[ignore = "Requires Godot engine runtime - enable with headless Godot testing"]
     fn test_map_hint_none() {
         let hint = ast::PropertyHint::None;
         let result = map_hint(&hint);
@@ -1048,6 +1050,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "Requires Godot engine runtime - enable with headless Godot testing"]
     fn test_map_hint_range() {
         let hint = ast::PropertyHint::Range {
             min: 0.0,
@@ -1069,6 +1072,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "Requires Godot engine runtime - enable with headless Godot testing"]
     fn test_map_hint_enum() {
         let hint = ast::PropertyHint::Enum {
             values: vec![
@@ -1083,6 +1087,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "Requires Godot engine runtime - enable with headless Godot testing"]
     fn test_map_hint_file_with_dots() {
         let hint = ast::PropertyHint::File {
             extensions: vec![".png".to_string(), ".jpg".to_string()],
@@ -1093,6 +1098,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "Requires Godot engine runtime - enable with headless Godot testing"]
     fn test_map_hint_file_with_wildcards() {
         let hint = ast::PropertyHint::File {
             extensions: vec!["*.txt".to_string(), "*.md".to_string()],
@@ -1103,6 +1109,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "Requires Godot engine runtime - enable with headless Godot testing"]
     fn test_map_hint_file_without_dots() {
         let hint = ast::PropertyHint::File {
             extensions: vec!["png".to_string(), "jpg".to_string()],
@@ -1115,10 +1122,12 @@ mod tests {
     // ====================
     // metadata_to_property_info Tests (Bundle 4 - Checkpoint 3.7)
     // NOTE: These tests require Godot engine to be available
-    // Will be validated through Bundle 5 Inspector testing
+    // They are disabled for unit testing but will be validated through Bundle 5 Inspector testing
+    // and automated integration tests with headless Godot (see TESTING_STRATEGY_PHASE5.md)
     // ====================
 
     #[test]
+    #[ignore = "Requires Godot engine runtime - enable with headless Godot testing"]
     fn test_metadata_basic_property() {
         let metadata = ast::PropertyMetadata {
             name: "test_prop".to_string(),
@@ -1135,6 +1144,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "Requires Godot engine runtime - enable with headless Godot testing"]
     fn test_metadata_with_range_hint() {
         let metadata = ast::PropertyMetadata {
             name: "health".to_string(),
@@ -1154,6 +1164,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "Requires Godot engine runtime - enable with headless Godot testing"]
     fn test_metadata_with_enum_hint() {
         let metadata = ast::PropertyMetadata {
             name: "state".to_string(),
@@ -1179,6 +1190,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "Requires Godot engine runtime - enable with headless Godot testing"]
     fn test_metadata_with_file_hint() {
         let metadata = ast::PropertyMetadata {
             name: "texture_path".to_string(),

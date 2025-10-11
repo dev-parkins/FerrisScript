@@ -2172,6 +2172,7 @@ fn is_similar(candidate: &str, target: &str) -> bool {
 **Solution**: Dual AI research approach (Claude 4.5 + GPT-5) with synthesis
 
 **Process**:
+
 1. Asked both AIs to research `get_property()` and `set_property()` APIs
 2. Compared results side-by-side
 3. Identified discrepancies (e.g., `#[class(tool)]` annotation)
@@ -2181,17 +2182,20 @@ fn is_similar(candidate: &str, target: &str) -> bool {
 **Key Discovery**: GPT-5 identified critical `#[class(tool)]` annotation that Claude 4.5 missed
 
 **Evidence**:
+
 - Bundle 7 implemented successfully on first try
 - No API usage errors
 - Research docs: 1400+ lines of comprehensive analysis
 
 **Lesson**: **When APIs are unclear, use dual AI research with synthesis**
+
 - Catches blind spots from single source
 - Discrepancies highlight critical details
 - Synthesized plan combines best of both
 - Invest 30 minutes in research to save hours of trial-and-error
 
 **Pattern for Future**:
+
 ```
 1. Ask AI #1 for research → save output
 2. Ask AI #2 for same research → save output
@@ -2207,18 +2211,21 @@ fn is_similar(candidate: &str, target: &str) -> bool {
 **Strategy**: Implement Bundle 7 in two phases (verification stub → full integration)
 
 **Phase 1** (10 min):
+
 - Added `#[class(tool)]` annotation
 - Implemented logging stubs for `get_property()` and `set_property()`
 - Verified hooks are called correctly
 - **Commit**: 8a65223
 
 **Phase 2** (35 min):
+
 - Replaced stubs with full runtime integration
 - 65+ lines of comprehensive documentation
 - Connected to runtime storage
 - **Commit**: 55ba87f
 
 **Benefits**:
+
 - Early validation of API usage (hooks actually called)
 - Clear checkpoint if issues arise
 - Reduced risk for complex integration
@@ -2227,11 +2234,13 @@ fn is_similar(candidate: &str, target: &str) -> bool {
 **Evidence**: No API errors, implementation smooth
 
 **Lesson**: **Use phased approach for risky integrations:**
+
 1. **Verification stub**: Minimal implementation to validate API
 2. **Full integration**: Complete logic with confidence
 3. **Each phase is a commit**: Clear progression, easy rollback
 
 **When to Use**:
+
 - New API with unclear behavior
 - Complex integration across modules
 - High-risk changes that might need rollback
@@ -2243,6 +2252,7 @@ fn is_similar(candidate: &str, target: &str) -> bool {
 **Pattern**: Property hooks use `Option<Variant>` and `bool` return types for fallback
 
 **Implementation**:
+
 ```rust
 fn get_property(&self, property: StringName) -> Option<Variant> {
     if let Some(env) = &self.env {
@@ -2265,6 +2275,7 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 ```
 
 **Benefits**:
+
 - Built-in Node2D properties (position, rotation) still work
 - No conflicts between FerrisScript and Godot systems
 - Clean separation of concerns
@@ -2273,6 +2284,7 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 **Evidence**: Can use `node.position` in Inspector alongside `@export` properties
 
 **Lesson**: **Use Option/bool return types for fallback behavior**
+
 - `Some(value)` / `true` = "I handled this"
 - `None` / `false` = "Let someone else handle this"
 - Enables coexistence with existing systems
@@ -2285,10 +2297,12 @@ fn set_property(&mut self, property: StringName, value: Variant) -> bool {
 **Discovery**: Runtime `set_exported_property()` has `from_inspector: bool` parameter
 
 **Behavior**:
+
 - `from_inspector = true` → Apply range clamping (user-friendly)
 - `from_inspector = false` → No clamping (full control for scripts)
 
 **Example**:
+
 ```ferris
 @export(range(0, 100))
 let mut health: i32 = 50;
@@ -2299,17 +2313,21 @@ fn damage(amount: i32) {
 ```
 
 In Inspector:
+
 - User sets health to 150 → Clamped to 100 (from_inspector=true)
 
 In Runtime:
+
 - `damage(60)` called → health = -10 (from_inspector=false, no clamp)
 
 **Benefits**:
+
 - Inspector UX friendly (prevents invalid values)
 - Runtime has full control (can exceed limits temporarily)
 - Single API serves both use cases
 
 **Lesson**: **Context-aware parameters enable elegant dual behavior**
+
 - Identify who's calling (Inspector vs Runtime)
 - Adjust behavior appropriately
 - One function, multiple UX patterns
@@ -2324,6 +2342,7 @@ In Runtime:
 **Bundle 7 Example**: 65+ lines of documentation for ~65 lines of code (1:1 ratio!)
 
 **Doc Structure**:
+
 ```rust
 // ========== Phase 5 Sub-Phase 3: Property Hooks (Bundle 7) ==========
 
@@ -2351,6 +2370,7 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 ```
 
 **Benefits**:
+
 - Implementation writes itself from docs
 - Edge cases documented while fresh
 - Return semantics crystal clear
@@ -2360,6 +2380,7 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 **Evidence**: Bundle 7 Phase 2 completed in 35 minutes with no logic errors
 
 **Lesson**: **Invest in documentation during implementation**
+
 - Write flow diagrams in comments
 - Document return semantics clearly
 - Explain edge cases inline
@@ -2373,11 +2394,13 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 **Bundle 8**: One line of code, huge workflow improvement
 
 **Change**:
+
 ```rust
 self.base_mut().notify_property_list_changed();  // ⬅️ This one line
 ```
 
 **Impact**:
+
 - Inspector auto-refreshes on script reload
 - Properties update automatically when script modified
 - No manual scene reload needed
@@ -2386,6 +2409,7 @@ self.base_mut().notify_property_list_changed();  // ⬅️ This one line
 **Result**: 20 minutes implementation time for major UX improvement
 
 **Lesson**: **Don't underestimate "small" changes**
+
 - Research where strategic calls go
 - One well-placed function call can transform UX
 - High-leverage changes exist - find them
@@ -2400,6 +2424,7 @@ self.base_mut().notify_property_list_changed();  // ⬅️ This one line
 **Issue During Session**: Forgot to run `cargo fmt` before committing Bundle 7 Phase 2
 
 **Hook Caught**:
+
 ```
 ✅ Formatting check...
 ❌ Formatting failed - fixing...
@@ -2410,6 +2435,7 @@ self.base_mut().notify_property_list_changed();  // ⬅️ This one line
 **Time Saved**: ~5 minutes of manual fix + re-commit
 
 **Lesson**: **Invest in pre-commit hooks early**
+
 - Format: `cargo fmt`
 - Lint: `cargo clippy`
 - Quick tests: `cargo test --lib`
@@ -2427,6 +2453,7 @@ self.base_mut().notify_property_list_changed();  // ⬅️ This one line
 **Issue**: Used `///` (doc comments) for inline explanations in Bundle 8
 
 **Error**:
+
 ```
 warning: unused doc comment
 note: use `//` for a plain comment
@@ -2437,11 +2464,13 @@ note: use `//` for a plain comment
 **Root Cause**: Unclear distinction between doc comment types
 
 **Clarification**:
+
 - `///` (doc comments): Only for function/struct/module documentation
 - `//` (regular comments): For inline code explanations
 - `//!` (module-level docs): For file/module overview
 
 **Lesson**: **Understand comment types in Rust**
+
 ```rust
 /// This documents the function below ✅
 fn my_function() {
@@ -2465,11 +2494,13 @@ fn another_function() {
 **Issue**: Pre-commit hook checks formatting but doesn't auto-fix
 
 **Workflow**:
+
 1. Attempt commit → Hook fails
 2. Manually run `cargo fmt`
 3. Re-attempt commit → Hook passes
 
 **Better Workflow**:
+
 ```bash
 # Pre-commit hook should:
 if ! cargo fmt --check; then
@@ -2481,6 +2512,7 @@ fi
 ```
 
 **Lesson**: **Pre-commit hooks should be helpful, not just gatekeepers**
+
 - Check → Fail → Fix → Require review → Pass
 - Don't just reject, help fix the issue
 - User reviews auto-fixes before committing
@@ -2494,12 +2526,14 @@ fi
 **Root Cause**: Tests call Godot FFI functions that need engine runtime
 
 **Current State**:
+
 - 11 tests pass (type mapping, API structure)
 - 10 tests fail (Godot FFI calls)
 
 **Workaround**: Skip godot_bind tests in CI with `--no-fail-fast`
 
 **Better Solution**: Headless Godot testing (see TESTING_STRATEGY_PHASE5.md)
+
 ```bash
 # Install godot-headless
 wget https://downloads.tuxfamily.org/godotengine/4.3/Godot_v4.3-stable_linux_headless.64.zip
@@ -2509,6 +2543,7 @@ godot --headless --script run_tests.gd
 ```
 
 **Lesson**: **Plan for integration testing environment early**
+
 - Identify tests that need external runtime
 - Set up headless/mock environments
 - Don't accept "tests that always fail" as normal
@@ -2524,16 +2559,19 @@ godot --headless --script run_tests.gd
 **Purpose**: Enables Inspector/editor integration in Godot
 
 **Without**:
+
 - Property hooks work at runtime only
 - Inspector can't read/write properties during editing
 - Properties show in list but can't be modified
 
 **With**:
+
 - Property hooks work in editor AND runtime
 - Inspector fully functional during editing
 - Seamless development experience
 
 **Lesson**: **Research annotation requirements for editor features**
+
 - Runtime behavior ≠ Editor behavior
 - Some features need special annotations
 - Test in editor, not just runtime
@@ -2546,11 +2584,13 @@ godot --headless --script run_tests.gd
 **Pattern**: Return types communicate "who handles this"
 
 **Examples**:
+
 - `Option<Variant>`: `Some` = handled, `None` = fallback
 - `bool`: `true` = handled, `false` = fallback
 - `Result<T, E>`: `Ok` = success, `Err` = error (caller handles)
 
 **Anti-Pattern**: Always return a value, even when you shouldn't
+
 ```rust
 // ❌ Bad: Always returns Some, breaks fallback
 fn get_property(&self, property: StringName) -> Option<Variant> {
@@ -2568,6 +2608,7 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 ```
 
 **Lesson**: **Design return types for integration, not just success/failure**
+
 - Think about "who handles what"
 - Use types to communicate responsibility
 - None/false can be just as important as Some/true
@@ -2579,10 +2620,12 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 **Insight**: `from_inspector` parameter enables dual behavior
 
 **Use Cases**:
+
 1. **Inspector writes**: User-facing, should clamp to prevent confusion
 2. **Runtime writes**: Developer-facing, should not clamp (might be intentional)
 
 **Example Scenario**:
+
 ```ferris
 @export(range(0, 100))
 let mut health: i32 = 100;
@@ -2596,6 +2639,7 @@ fn _process(delta: f32) {
 If clamped: Power-up wouldn't work!
 
 **Lesson**: **Context-aware behavior requires identifying the caller**
+
 - Who's calling: Inspector vs Runtime?
 - What's the intent: User correction vs Intentional override?
 - Design API to support both use cases
@@ -2608,6 +2652,7 @@ If clamped: Power-up wouldn't work!
 **Pattern**: Data structure changes must notify observers
 
 **Example**:
+
 ```rust
 // Script reloads with new properties
 self.env = Some(new_env);  // New property list
@@ -2623,6 +2668,7 @@ self.base_mut().notify_property_list_changed();
 ```
 
 **Lesson**: **Observer pattern requires explicit notifications**
+
 - Data change ≠ Automatic UI update
 - Call notification methods after state changes
 - Don't assume observers poll for changes
@@ -2635,6 +2681,7 @@ self.base_mut().notify_property_list_changed();
 #### 1. Research Complex APIs Before Implementation
 
 **Process**:
+
 1. Identify API uncertainty (e.g., property hooks unclear)
 2. Research using multiple AI sources (Claude + GPT)
 3. Compare results, note discrepancies
@@ -2648,6 +2695,7 @@ self.base_mut().notify_property_list_changed();
 #### 2. Implement Risky Features in Phases
 
 **Pattern**:
+
 1. **Phase 1**: Verification stub (10 min)
    - Minimal implementation
    - Validate API usage
@@ -2667,6 +2715,7 @@ self.base_mut().notify_property_list_changed();
 #### 3. Document While Implementing, Not After
 
 **Anti-Pattern**:
+
 ```rust
 // ❌ Write code first, document later
 fn get_property(&self, property: StringName) -> Option<Variant> {
@@ -2676,6 +2725,7 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 ```
 
 **Best Practice**:
+
 ```rust
 // ✅ Document flow before/during implementation
 /// Called by Godot Inspector when reading a property value.
@@ -2701,10 +2751,12 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 #### 4. Test Integration, Not Just Units
 
 **Current Coverage**:
+
 - ✅ 543 compiler tests (excellent unit coverage)
 - ⚠️ 0 integration tests (gap!)
 
 **Missing**:
+
 - Compile → Runtime → Inspector sync
 - Hot-reload behavior
 - Property hook edge cases
@@ -2736,11 +2788,13 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 **Decision**: `Option<Variant>` and `bool` return types for coexistence
 
 **Rationale**:
+
 - Allows built-in Node2D properties to work
 - Clean separation FerrisScript vs Godot
 - Graceful degradation on errors
 
 **Alternative Considered**: Always handle all properties
+
 - ❌ Would break position, rotation, etc.
 - ❌ Conflicts with Godot system
 - ❌ No fallback on errors
@@ -2752,11 +2806,13 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 **Decision**: `from_inspector` parameter controls clamping
 
 **Rationale**:
+
 - Inspector: User-facing, should prevent invalid values
 - Runtime: Developer-facing, needs full control
 - Single API serves both use cases
 
 **Alternative Considered**: Always clamp
+
 - ❌ Would break temporary overrides (power-ups, etc.)
 - ❌ Too restrictive for gameplay
 
@@ -2767,11 +2823,13 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 **Decision**: Call notification after script reload
 
 **Rationale**:
+
 - Inspector needs to know property list changed
 - Automatic refresh prevents manual scene reload
 - Consistent with Godot's GDScript behavior
 
 **Alternative Considered**: Let Inspector poll
+
 - ❌ Performance overhead
 - ❌ Delayed updates (bad UX)
 
@@ -2842,4 +2900,3 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 - [SESSION_SUMMARY_BUNDLES_7-8.md](phase5/SESSION_SUMMARY_BUNDLES_7-8.md) - Complete timeline
 - [TESTING_STRATEGY_PHASE5.md](phase5/TESTING_STRATEGY_PHASE5.md) - Testing roadmap
 - [PR #52](https://github.com/dev-parkins/FerrisScript/pull/52) - Inspector Integration Complete
-
