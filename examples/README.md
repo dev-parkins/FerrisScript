@@ -15,6 +15,7 @@ This directory contains example scripts demonstrating FerrisScript's features an
 ```
 
 **Benefits**:
+
 - Automated test discovery and validation
 - Consistent documentation structure
 - Headless testing support
@@ -27,11 +28,13 @@ This directory contains example scripts demonstrating FerrisScript's features an
 **NEW**: Test files for Inspector integration with `@export` properties!
 
 ### ✅ Recommended: Minimal Test (WORKS)
+
 - **Test File**: `inspector_minimal.ferris` - Simple working test with 7 properties
 - **Guide**: `INSPECTOR_MINIMAL_TEST_GUIDE.md` - Step-by-step testing instructions
 - **Status**: ✅ Compiles successfully, ready for testing
 
 ### ⚠️ Comprehensive Test (Has Issues)
+
 - **Test File**: `inspector_test.ferris` - Complete test suite with 20+ properties (in godot_test/scripts/)
 - **Status**: ⚠️ Parser issues - use minimal test instead
 - **Full Guide**: `INSPECTOR_TEST_GUIDE.md` - Detailed testing instructions

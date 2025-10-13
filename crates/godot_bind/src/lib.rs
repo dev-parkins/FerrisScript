@@ -359,6 +359,7 @@ pub struct FerrisScriptNode {
     base: Base<Node2D>,
 
     /// Path to the .ferris script file (e.g., "res://scripts/hello.ferris")
+    /// Handled by set_property() to trigger reload on change
     #[export(file = "*.ferris")]
     script_path: GString,
 
@@ -366,6 +367,9 @@ pub struct FerrisScriptNode {
     env: Option<Env>,
     program: Option<ast::Program>,
     script_loaded: bool,
+
+    // Hot-reload support: Track last modified time
+    last_modified: Option<std::time::SystemTime>,
 }
 
 #[godot_api]
@@ -377,6 +381,7 @@ impl INode2D for FerrisScriptNode {
             env: None,
             program: None,
             script_loaded: false,
+            last_modified: None,
         }
     }
 
@@ -411,6 +416,13 @@ impl INode2D for FerrisScriptNode {
     }
 
     fn process(&mut self, delta: f64) {
+        // ========== Hot-Reload: Check for file modifications ==========
+        // Check if script file has been modified and reload if necessary
+        // This enables seamless development workflow: edit → save → auto-reload
+        if self.script_loaded && !self.script_path.is_empty() {
+            self.check_and_reload_if_modified();
+        }
+
         // Execute _process function if script is loaded and function exists
         if self.script_loaded {
             if let Some(env) = &self.env {
@@ -619,6 +631,38 @@ impl INode2D for FerrisScriptNode {
     fn set_property(&mut self, property: StringName, value: Variant) -> bool {
         let prop_name = property.to_string();
 
+        // ========== Special Handling: script_path Property ==========
+        // When Inspector changes script_path, reload the script to update property list
+        if prop_name == "script_path" {
+            if let Ok(new_path) = value.try_to::<GString>() {
+                // Only reload if path actually changed
+                if new_path != self.script_path {
+                    godot_print!(
+                        "📝 Script path changed: {} → {}",
+                        self.script_path,
+                        new_path
+                    );
+
+                    self.script_path = new_path.clone();
+
+                    // Clear old script state
+                    self.script_loaded = false;
+                    self.env = None;
+                    self.program = None;
+                    self.last_modified = None;
+
+                    // Load new script (will trigger notify_property_list_changed)
+                    if !self.script_path.is_empty() {
+                        self.load_script();
+                    } else {
+                        // Path cleared - notify Inspector that properties are gone
+                        self.base_mut().notify_property_list_changed();
+                    }
+                }
+                return true; // We handled it
+            }
+        }
+
         // Check if we have a loaded environment with runtime storage
         if let Some(env) = &mut self.env {
             // Convert Godot Variant → FerrisScript Value
@@ -695,6 +739,23 @@ impl FerrisScriptNode {
         self.program = Some(program);
         self.env = Some(env);
         self.script_loaded = true;
+
+        // ========== Hot-Reload: Store initial file modification time ==========
+        // Cache the file's modification timestamp for hot-reload detection
+        let path_str = path.clone();
+        let absolute_path = if path_str.starts_with("res://") {
+            let relative = path_str.strip_prefix("res://").unwrap_or(&path_str);
+            let project_dir = std::env::current_dir().unwrap_or_default();
+            project_dir.join(relative)
+        } else {
+            std::path::PathBuf::from(path_str)
+        };
+
+        if let Ok(metadata) = std::fs::metadata(&absolute_path) {
+            if let Ok(modified) = metadata.modified() {
+                self.last_modified = Some(modified);
+            }
+        }
 
         godot_print!("Successfully loaded FerrisScript: {}", path);
 
@@ -829,12 +890,64 @@ impl FerrisScriptNode {
         result
     }
 
+    /// Check if script file has been modified and reload if necessary
+    ///
+    /// Called every frame in _process() to enable hot-reload during development.
+    /// Compares file modification time with cached last_modified timestamp.
+    /// If file is newer, triggers automatic reload via reload_script().
+    ///
+    /// **Hot-Reload Flow**:
+    /// 1. User edits .ferris file in external editor
+    /// 2. Saves file (updates modification timestamp)
+    /// 3. Next frame: _process() calls this function
+    /// 4. Detects file is newer than cached timestamp
+    /// 5. Calls reload_script() → recompiles and reloads
+    /// 6. notify_property_list_changed() triggers Inspector refresh
+    /// 7. New properties appear, removed properties disappear
+    ///
+    /// **Performance**: O(1) filesystem metadata check per frame (lightweight)
+    fn check_and_reload_if_modified(&mut self) {
+        // Convert res:// path to absolute filesystem path
+        let path_str = self.script_path.to_string();
+        let absolute_path = if path_str.starts_with("res://") {
+            // Convert res:// to absolute path using Godot's project directory
+            let relative = path_str.strip_prefix("res://").unwrap_or(&path_str);
+            let project_dir = std::env::current_dir().unwrap_or_default();
+            project_dir.join(relative)
+        } else {
+            std::path::PathBuf::from(path_str)
+        };
+
+        // Get current file modification time
+        if let Ok(metadata) = std::fs::metadata(&absolute_path) {
+            if let Ok(modified) = metadata.modified() {
+                // Check if this is first time or if file was modified since last check
+                let should_reload = match self.last_modified {
+                    Some(last) => modified > last, // File is newer than cached timestamp
+                    None => {
+                        // First time checking - just cache the timestamp, don't reload
+                        self.last_modified = Some(modified);
+                        false
+                    }
+                };
+
+                if should_reload {
+                    godot_print!("🔄 Hot-reload: Script file modified, reloading...");
+                    self.last_modified = Some(modified);
+                    self.reload_script();
+                    godot_print!("✅ Hot-reload complete! Properties updated.");
+                }
+            }
+        }
+    }
+
     /// Reload the script (useful for hot-reloading in development)
     #[func]
     pub fn reload_script(&mut self) {
         self.script_loaded = false;
         self.env = None;
         self.program = None;
+        self.last_modified = None; // Reset timestamp on manual reload
         self.load_script();
     }
 }

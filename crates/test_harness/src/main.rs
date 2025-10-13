@@ -63,6 +63,12 @@ fn main() -> anyhow::Result<()> {
                 .action(ArgAction::SetTrue)
                 .help("Enable verbose output"),
         )
+        .arg(
+            Arg::new("scripts-dir")
+                .long("scripts-dir")
+                .value_name("DIR")
+                .help("Directory containing .ferris scripts (default: godot_test/scripts)"),
+        )
         .get_matches();
 
     // Load configuration
@@ -104,7 +110,10 @@ fn main() -> anyhow::Result<()> {
         vec![harness.run_script(&PathBuf::from(script_path))?]
     } else if matches.get_flag("all") {
         // All scripts mode
-        let scripts_dir = PathBuf::from("godot_test/scripts");
+        let scripts_dir = matches
+            .get_one::<String>("scripts-dir")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from("godot_test/scripts"));
         harness.run_all_scripts(&scripts_dir)?
     } else {
         eprintln!("Error: Must specify --script or --all");
