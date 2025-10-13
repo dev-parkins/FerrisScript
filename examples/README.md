@@ -2,15 +2,42 @@
 
 This directory contains example scripts demonstrating FerrisScript's features and capabilities.
 
+## 🧪 TEST Metadata (v0.0.4+)
+
+**All `.ferris` files now include standardized TEST headers** for headless test runner integration:
+
+```ferris
+// TEST: test_name
+// CATEGORY: unit|integration
+// DESCRIPTION: Brief description
+// EXPECT: success|error
+// ASSERT: Expected output lines
+```
+
+**Benefits**:
+- Automated test discovery and validation
+- Consistent documentation structure
+- Headless testing support
+- CI/CD integration ready
+
+**See**: [`docs/testing/TESTING_GUIDE.md`](../docs/testing/TESTING_GUIDE.md) for full testing patterns
+
 ## ⭐ Inspector Testing (v0.0.4)
 
-**NEW**: Comprehensive Inspector integration test file for testing `@export` properties!
+**NEW**: Test files for Inspector integration with `@export` properties!
 
-- **Test File**: `inspector_test.ferris` - Complete test suite with 20+ exported properties
-- **Full Guide**: `INSPECTOR_TEST_GUIDE.md` - Detailed testing instructions and troubleshooting
-- **Quick Ref**: `INSPECTOR_QUICK_REF.md` - 30-second smoke test and quick reference
+### ✅ Recommended: Minimal Test (WORKS)
+- **Test File**: `inspector_minimal.ferris` - Simple working test with 7 properties
+- **Guide**: `INSPECTOR_MINIMAL_TEST_GUIDE.md` - Step-by-step testing instructions
+- **Status**: ✅ Compiles successfully, ready for testing
 
-See the [Inspector Test Guide](INSPECTOR_TEST_GUIDE.md) for complete testing instructions.
+### ⚠️ Comprehensive Test (Has Issues)
+- **Test File**: `inspector_test.ferris` - Complete test suite with 20+ properties (in godot_test/scripts/)
+- **Status**: ⚠️ Parser issues - use minimal test instead
+- **Full Guide**: `INSPECTOR_TEST_GUIDE.md` - Detailed testing instructions
+- **Quick Ref**: `INSPECTOR_QUICK_REF.md` - Quick reference
+
+**Get Started**: See [Inspector Minimal Test Guide](INSPECTOR_MINIMAL_TEST_GUIDE.md) for testing instructions.
 
 ---
 
