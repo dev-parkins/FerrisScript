@@ -3,11 +3,10 @@ on:
   push:
     branches:
       - main
-      - develop
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
-  # Generate coverage for all branches (PRs + main/develop)
+  # Generate coverage for all branches (PRs + main)
   # Codecov tracks coverage trends across all branches
   coverage:
     name: Generate Coverage Report
