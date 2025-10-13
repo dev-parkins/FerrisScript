@@ -1,8 +1,8 @@
 # FerrisScript Master Roadmap
 
 **Single Source of Truth for Version Planning**  
-**Last Updated**: October 10, 2025  
-**Current Version**: v0.0.4 (Phases 1-4.5 complete, Phase 5 deferred)
+**Last Updated**: October 11, 2025  
+**Current Version**: v0.0.4 (Phases 1-5 complete, documentation polish remaining)
 
 ---
 
@@ -89,21 +89,23 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 | Version | Status | Focus | Timeline | Premium Requests |
 |---------|--------|-------|----------|------------------|
 | **v0.0.4** | ✅ Complete | Godot API + Inspector integration | Completed Oct 10, 2025 | 6-8 used |
-| **v0.0.5** | 📋 Next | LSP Alpha + safety fix 🛡️ | 3-4 weeks | 12-17 ⬆️ |
+| **v0.0.5** | 📋 Next | LSP + Compiler Prerequisites + Test Framework 🛡️ | 6-7 weeks | 20-25 ⬆️ |
 | **v0.0.6** | 📋 Planned | Language features (arrays/for) | 2-3 weeks | 8-12 |
 | **v0.0.7** | 📋 Planned | Godot API + node safety 🛡️ | 2-3 weeks | 9-12 ⬆️ |
-| **v0.1.0** | 🎯 Milestone | Metadata + polish | 2-3 weeks | 6-9 |
-| **v0.2.0** | 🚀 Planned | Extended types (i64/f64/u8) + casting | 2-3 weeks | 6-9 |
-| **v0.3.0** | 🚀 Planned | Arithmetic safety (checked/saturating) | 2-3 weeks | 6-10 |
+| **v0.1.0** | 🎯 Milestone | LSP UX + Type Safety + Metadata | 3-4 weeks | 10-15 ⬆️ |
+| **v0.2.0** | 🚀 Planned | Extended types + LSP Navigation + Validation | 4-5 weeks | 12-16 ⬆️ |
+| **v0.3.0** | 🚀 Planned | Arithmetic safety + LSP Advanced + Type Safety Advanced | 5-7 weeks | 14-20 ⬆️ |
 | **v0.4.0** | 🚀 Planned | Documentation site + tooling | 3-4 weeks | 10-15 |
 | **v0.5.0** | 🚀 Planned | Godot editor integration + hot reload | 5-7 weeks | 16-21 |
 | **v0.6.0+** | 🌱 Community | Ecosystem & advanced features | 12+ weeks | 50+ |
 
-**Total to v0.1.0**: ~10-15 weeks, ~39-56 premium requests ⬆️ (increased due to manifest complexity + node safety)
+**Total to v0.1.0**: ~11-15 weeks, ~40-57 premium requests ⬆️ (increased due to LSP + type safety + manifest)
 
-**Total to v0.4.0**: ~20-28 weeks, ~67-91 premium requests (includes type system expansion + docs)
+**Total to v0.4.0**: ~26-34 weeks, ~76-108 premium requests ⬆️ (includes LSP full stack + type system expansion)
 
-**Total to v0.5.0**: ~25-35 weeks, ~83-112 premium requests (includes Godot editor integration)
+**Total to v0.5.0**: ~31-41 weeks, ~92-129 premium requests ⬆️ (includes Godot editor integration)
+
+**⚠️ Note**: Timelines increased to reflect realistic LSP development effort (doubled estimates based on Phase 5 velocity)
 
 **⚠️ Note**: v0.3.0+ features require community validation before committing. Timeline assumes user demand exists.
 
@@ -182,73 +184,186 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 - ✅ 39 robustness tests + 5 integration examples
 - ✅ Comprehensive documentation and checkpoint methodology
 
-**Timeline**: Phase 4-4.5 complete (October 10, 2025)  
-**Actual Premium Requests Used**: 3-4 (as estimated)  
-**Phase 5 Estimate**: 23-31 hours (6-8 premium requests) - requires dedicated session
+**Timeline**: Phase 4-4.5 complete (October 10, 2025), Phase 5 complete (October 10, 2025)  
+**Actual Premium Requests Used**: Phase 4: 3-4, Phase 5: ~3-4 (12 hours actual vs 21-29 estimate)  
+**Documentation Polish Remaining**: 30 minutes (README + property patterns doc)
 
 ---
 
-### v0.0.5: LSP Alpha + Safety Fix (HIGHEST PRIORITY)
+### v0.0.5: LSP Foundation + Safety Fix (HIGHEST PRIORITY)
 
-**Goal**: First-class editor support with real-time diagnostics + node safety
+**Goal**: Real-time diagnostics and node safety foundation
 
 **Why This Matters**:
 
-- 🔥 Editor support is adoption-critical
-- 🔥 Differentiates FerrisScript from GDScript
-- 🔥 Attracts Rust developers to Godot
-- 🔥 Enables productivity with basic language features
-- 🛡️ Safety fix prevents crashes from freed nodes
+- 🔥 **Editor Support**: Makes type safety visible while coding (red squiggles)
+- 🔥 **Differentiation**: Positions FerrisScript vs GDScript on developer experience
+- 🔥 **Adoption**: Attracts Rust developers who expect great tooling
+- 🛡️ **Safety**: Prevents crashes from freed nodes
 
-**Phases**:
+**Philosophy**: LSP transforms type safety from "annoying batch errors" to "helpful real-time guidance"
 
-0. **Node Invalidation Phase 1** (1 PR) 🛡️ NEW
-   - Basic validity checking for NodeHandle
-   - Prevents crashes from freed nodes
-   - Better error messages
-   - **Effort**: 1-2 hours
-   - **Priority**: HIGH (safety issue)
-   - **Timing**: Week 1 (before LSP work starts)
+**Phases** (Updated with Option A decisions):
 
-1. **LSP Server Foundation** (2-3 PRs)
-   - Create `ferrisscript_lsp` crate
-   - Basic LSP protocol handler (tower-lsp)
-   - Text document synchronization
+0. **Compiler Prerequisites** (3 PRs, 2-3 weeks) 🆕 BLOCKING
+   - **Phase 0.1**: Source spans in AST (1 week)
+     - Add `Span` and `Position` structs to all AST nodes
+     - Update parser to track spans from tokens
+     - Required for LSP error reporting
+   - **Phase 0.2**: Symbol table extraction (1 week)
+     - Extract symbol table from type checker
+     - Public API for LSP (go-to-definition, autocomplete)
+     - Scope chain tracking
+   - **Phase 0.3**: Incremental compilation (1 week)
+     - AST caching with source hash invalidation
+     - Dependency graph for transitive invalidation
+     - Target: 5-10x speedup for LSP responsiveness
 
-2. **Syntax Checking** (2-3 PRs)
-   - Integrate compiler (lexer + parser + type checker)
-   - Real-time diagnostics
-   - Publish errors to client
+1. **Test Framework Foundation** (3-4 PRs, 1 week)
+   - Create `crates/test_harness` with metadata parsing
+   - Test discovery from `/examples` directory
+   - Rust test integration with filtering
+   - Cross-platform compatibility (Windows/Linux/macOS)
 
-3. **Autocompletion** (3-4 PRs)
-   - Keyword completion
-   - Type completion
-   - Built-in function completion
-   - User symbol completion
+2. **LSP Server Foundation** (2-3 PRs, 1 week)
+   - Create `ferrisscript_lsp` crate with tower-lsp
+   - Basic LSP protocol (initialize, shutdown, capabilities)
+   - Document manager with incremental compiler integration
+   - Text document synchronization (incremental updates)
 
-4. **Navigation** (2-3 PRs)
-   - Go to definition
-   - Hover documentation
-   - Symbol outline
+3. **LSP Test Integration** (2-3 PRs, 1 week)
+   - Custom LSP protocol (`ferrisscript/documentTests`, `ferrisscript/runTest`)
+   - Test discovery API in LSP
+   - Test result cache for status tracking
+   - VS Code CodeLens provider ("Run Test" buttons)
 
-5. **VS Code Extension** (2-3 PRs)
-   - Extension scaffolding
-   - LSP client integration
-   - Syntax highlighting (TextMate)
-   - Marketplace publishing
+4. **Real-Time Diagnostics** (2-3 PRs, 1 week)
+   - Integrate compiler with LSP (lexer → parser → type checker)
+   - Incremental compilation on each keystroke (using Phase 0.3 cache)
+   - Publish diagnostics (errors, warnings) to client
+   - Error recovery for partial syntax
+   - Performance target: <100ms for typical edits (cache hit)
+
+5. **Godot Test Runner** (2-3 PRs, 1 week)
+   - Implement `test_runner.gd` with assertion validation
+   - Timeout mechanism and signal monitoring
+   - JSON output for CI integration
+   - Cross-platform filesystem access
+
+6. **VS Code Extension** (2-3 PRs, 1 week)
+   - Extension scaffolding (package.json, activation)
+   - LSP client integration (vscode-languageclient)
+   - Enhanced syntax highlighting (TextMate grammar reuse)
+   - Marketplace publishing (extension ID, icon, README)
 
 **Deliverables**:
 
-- Working LSP server
-- VS Code extension published
-- Real-time error checking
-- Autocomplete and navigation
-- Documentation and examples
+- ✅ Compiler with source spans, symbol table, and incremental compilation
+- ✅ Consolidated test framework (single source of truth in `/examples`)
+- ✅ Working LSP server with real-time error checking
+- ✅ LSP test integration (CodeLens "Run Test" buttons)
+- ✅ VS Code extension published to marketplace
+- ✅ Red squiggles for type errors (instant feedback)
+- ✅ Godot headless test runner with assertion validation
+- ✅ CI integration with JSON test results
+- ✅ Documentation and installation guide
 
-**Timeline**: 3-4 weeks  
-**Estimated Premium Requests**: 11-16
+**What's NOT Included** (deferred to v0.1.0):
 
-**Dependencies**: v0.0.4 Phase 2 complete
+- ❌ Hover tooltips (needs Phase 0.2 symbol table, but UI deferred)
+- ❌ Autocomplete (needs Phase 0.2 symbol table, but UI deferred)
+- ❌ Go-to-definition (needs Phase 0.1 spans, but UI deferred)
+- ❌ Find references (needs Phase 0.2 symbol table, but UI deferred)
+- ❌ Node invalidation Phase 1 (moved to v0.0.7)
+
+**Timeline**: 6-7 weeks (was 3-4 weeks, then 4-5 weeks)  
+**Estimated Premium Requests**: 20-25 (was 11-16, then 13-18)
+
+**Timeline Breakdown**:
+
+- Weeks 1-3: Compiler prerequisites (spans, symbol table, incremental compilation)
+- Week 4: Test framework foundation
+- Week 5: LSP test integration
+- Week 6: Godot test runner
+- Week 7: CI integration and migration
+
+**Dependencies**: v0.0.4 complete
+
+**Note**: Focus on **diagnostics only** (Minimum Viable LSP). Additional features come in v0.1.0.
+
+**See**: `docs/planning/v0.0.5/LSP_ARCHITECTURE_SUPPORT.md` for detailed architecture
+
+#### v0.0.5 Consistency Checklist 🆕
+
+**Purpose**: Ensure all v0.0.5 planning documents align with master roadmap decisions.
+
+**Critical Decisions Made** (Option A for all):
+
+1. ✅ Ship v0.0.5 with compiler prerequisites (spans + symbol table) - adds 1 week
+2. ✅ Full LSP test integration in v0.0.5 - no deferral
+3. ✅ Add incremental compilation to v0.0.5 - adds 2-3 weeks
+
+**Updated Timeline**: 6-7 weeks (was 3-4 weeks, then 4-5 weeks)
+
+**Scope Consistency Checklist**:
+
+- [x] **CONSOLIDATED_TEST_FRAMEWORK_IMPLEMENTATION.md**:
+  - [x] Timeline updated to 6-7 weeks
+  - [x] Phase 0 added (Compiler Prerequisites: Spans, Symbol Table, Incremental Compilation)
+  - [x] Phase 2.5 includes test discovery API and result cache
+  - [x] Success criteria includes incremental compilation metrics
+  - [x] Dependencies section lists Phase 0 as blocking
+  - [x] Risk mitigation covers compiler refactoring and cache bugs
+
+- [x] **LSP_ARCHITECTURE_SUPPORT.md**: ✅ UPDATED
+  - [x] Verify incremental compilation architecture matches Phase 0.3
+  - [x] Confirm symbol table API matches Phase 0.2
+  - [x] Ensure span tracking matches Phase 0.1
+  - [x] Timeline reflects 6-7 weeks total (not just LSP-specific time)
+  - [x] Decision log documents Option A choices
+  - [x] Roadmap section updated with v0.0.5/v0.1.0 split
+
+- [ ] **ROADMAP_MASTER.md**: (This document)
+  - [x] v0.0.5 timeline updated to 6-7 weeks
+  - [x] Premium request estimate updated (13-18 → likely 20-25 with added scope)
+  - [ ] Phases 0-3 clearly documented
+  - [ ] Dependencies call out compiler prerequisites
+
+**Verification Steps**:
+
+1. **Before starting Phase 0**:
+   - [ ] All three documents agree on 6-7 week timeline
+   - [ ] Phase 0 tasks match across documents
+   - [ ] Compiler refactoring risks acknowledged
+
+2. **End of Week 3** (Decision Point):
+   - [ ] Phase 0 complete or on track
+   - [ ] Re-assess timeline if falling behind
+   - [ ] Consider de-scoping incremental compilation if critical
+
+3. **Before starting Phase 2.5** (Week 5):
+   - [ ] Compiler prerequisites (Phase 0) verified complete
+   - [ ] Symbol table API stable and tested
+   - [ ] Incremental compilation benchmarked
+
+**De-Scoping Plan** (if timeline slips):
+
+Priority 1 (Keep):
+
+- Source spans in AST
+- Symbol table extraction
+- Basic LSP diagnostics
+- Test framework foundation
+
+Priority 2 (Defer to v0.0.6 if needed):
+
+- Incremental compilation (fallback: always recompile)
+- LSP test integration (ship test framework standalone)
+
+Priority 3 (Defer to v0.1.0):
+
+- Advanced caching strategies
+- Dependency graph optimizations
 
 ---
 
@@ -345,15 +460,37 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ---
 
-### v0.1.0: Metadata & Polish (MILESTONE)
+### v0.1.0: LSP UX + Type Safety + Metadata (MILESTONE)
 
-**Goal**: Cohesive v0.1.0 release with metadata system and production readiness
+**Goal**: Production-ready v0.1.0 with great developer experience
 
-**⚠️ CRITICAL**: This version includes manifest generation that **enables all Godot editor integration in v0.5.0**. Design must be solid. See `planning/v0.1.0-release-plan.md` for detailed execution plan.
+**⚠️ CRITICAL**: This version includes:
+
+1. LSP UX features that make type safety **feel good**
+2. Type safety enhancements that catch more errors at compile-time
+3. Metadata system that enables Godot editor integration (v0.5.0)
 
 **Features**:
 
-1. **Metadata System** (4-6 PRs) ⬆️ Increased scope
+1. **Type Safety Enhancements** (1 PR, 2-3 hours) 🆕
+   - **Property Hint Type Validation** (E820-E823 error codes):
+     - Range hints (`@range`) only valid for `i32`/`f32` types
+     - Enum hints (`@enum`) only valid for `String` type
+     - File hints (`@file`) only valid for `String` type
+     - Multiline hints (`@multiline`) only valid for `String` type
+   - Compile-time error messages with clear explanations
+   - 10-15 new validation tests
+   - Error code documentation updated
+   - **Impact**: Catches property hint mismatches before Inspector shows them
+
+2. **LSP UX Features** (2-3 PRs, 2-3 weeks) 🆕
+   - **Hover Tooltips**: Show type information, documentation, and examples
+   - **Basic Keyword Completion**: Complete `fn`, `let`, `if`, `while`, `return`, etc.
+   - **Document Symbols**: Outline view (Ctrl+Shift+O) shows functions and globals
+   - **Platform Testing**: Verify on Windows, Linux, macOS
+   - **Impact**: Makes type safety visible and interactive while coding
+
+3. **Metadata System** (4-6 PRs)
    - Design manifest schema (`ferris_manifest.json`)
    - Generate JSON manifest (signals, properties, methods)
    - Implement `FerrisMetadataRegistry` in godot_bind
@@ -361,7 +498,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
    - Export for Godot editor
    - Documentation generation
 
-2. **Demo Game Development** (1 PR)
+4. **Demo Game Development** (1 PR)
    - Choose demo type (Pong recommended, Breakout optional)
    - Implement complete game in FerrisScript
    - Use all major features (arrays, for loops, match, signals, exports, node queries)
@@ -369,20 +506,20 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
    - Development process documentation
    - Video walkthrough
 
-3. **Complete Documentation** (2-3 PRs)
+5. **Complete Documentation** (2-3 PRs)
    - Language reference (comprehensive syntax/semantics)
    - Godot integration guide (complete API reference)
    - Tutorial series (getting started → building complete game)
    - API documentation (generated from code)
    - Migration guide (GDScript → FerrisScript)
 
-4. **Example Projects** (1-2 PRs)
+6. **Example Projects** (1-2 PRs)
    - Expand existing examples (hello, move, bounce with arrays)
    - New examples: state_machine (match), bullet_hell (arrays), game_loop (complete structure)
    - Complete games: pong, breakout (if time)
    - Each includes: code, README, tutorial, screenshots/GIFs
 
-5. **Performance Validation** (1 PR)
+7. **Performance Validation** (1 PR)
    - Run comprehensive benchmarks
    - Compare with GDScript baseline
    - Optimize hot paths if needed
@@ -391,7 +528,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
    - Profile real-world game scenarios
    - Memory usage analysis
 
-6. **Quality Assurance** (1 PR)
+8. **Quality Assurance** (1 PR)
    - All tests passing (target: 200+ tests)
    - Test coverage ≥ 80%
    - Zero clippy warnings
@@ -405,6 +542,8 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 **Deliverables**:
 
+- Property hint type validation working
+- LSP with hover, completion, and symbols
 - JSON metadata working
 - Manifest schema documented
 - Metadata registry in GDExtension
@@ -417,14 +556,18 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 - Quality assured
 - v0.1.0 release 🎉
 
-**Timeline**: 2-3 weeks ⬆️ (was 1-2)  
-**Estimated Premium Requests**: 6-9 ⬆️ (was 5-7)
+**Timeline**: 3-4 weeks (was 2-3 weeks)  
+**Estimated Premium Requests**: 10-15 (was 6-9)
 
 **Dependencies**: All v0.0.5-7 complete
 
 **Blocks**: 🚨 All Godot editor integration (v0.5.0)
 
-**See**: `planning/v0.1.0-release-plan.md` for detailed execution plan and deliverables
+**See**:
+
+- `docs/planning/v0.1.0-release-plan.md` for execution plan
+- `docs/TYPE_SAFETY_ROADMAP_ANALYSIS.md` for type safety details
+- `docs/planning/v0.0.5/LSP_ARCHITECTURE_SUPPORT.md` for LSP architecture
 
 ---
 
@@ -495,16 +638,15 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ## � Future Versions (v0.2.0+)
 
-### v0.2.0: Extended Type System & Casting
+### v0.2.0: Extended Types + LSP Navigation + Script Validation
 
-**Goal**: 64-bit types, smaller integer types, and explicit type casting
+**Goal**: Complete type system, navigation features, and runtime validation
 
 **Why This Matters**:
 
-- Enable large values (timestamps, entity IDs, coordinates)
-- High-precision calculations (f64 for scientific accuracy)
-- Memory optimization (u8 for colors, i16 for tile grids)
-- Safe conversions between numeric types
+- **Extended Types**: Enable large values, high-precision math, memory optimization
+- **LSP Navigation**: Jump to definitions, find references, workspace-wide search
+- **Script Validation**: Catch interface mismatches at load-time
 
 **Features**:
 
@@ -528,33 +670,53 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
    - Cross-family casts: `i32` → `f32` (may lose precision)
    - Runtime checks for debug builds
 
+4. **LSP Navigation Features** (2-3 PRs, 2-3 weeks) 🆕
+   - **Go-to-Definition**: Ctrl+Click or F12 to jump to function/variable definition
+   - **Find References**: Shift+F12 to show all usages of a symbol
+   - **Symbol Index**: Workspace-wide symbol search (Ctrl+T)
+   - **Cross-File Navigation**: Navigate between script files
+   - **Impact**: Makes large codebases navigable and refactorable
+
+5. **Script Signature Validation** (1 PR, 5-7 hours) 🆕
+   - Define `ScriptSignature` interface (properties, functions, signals)
+   - Validate scripts have required properties at load-time
+   - Validate scripts have required functions at load-time
+   - Better error messages for interface mismatches
+   - **Use Cases**: Plugin systems, child node contracts, team API validation
+   - **Impact**: Catches interface breaks before runtime
+
 **Deliverables**:
 
 - All new types implemented in lexer, parser, type checker, runtime
 - Explicit casting with overflow/truncation handling
-- Comprehensive tests (~40-50 new tests)
+- LSP navigation working (go-to-def, find refs, workspace symbols)
+- Script signature validation at load-time
+- Comprehensive tests (~50-60 new tests)
 - Documentation and examples
 - Godot bindings updated
 
-**Timeline**: 2-3 weeks  
-**Estimated Premium Requests**: 6-9
+**Timeline**: 4-5 weeks (was 2-3 weeks)  
+**Estimated Premium Requests**: 12-16 (was 6-9)
 
-**Dependencies**: None (extends v0.1.0 type system)
+**Dependencies**: v0.1.0 complete (LSP foundation, type system)
 
-**See**: `planning/v0.2.0-roadmap.md` for detailed specifications
+**See**:
+
+- `docs/planning/v0.2.0-roadmap.md` for type system details
+- `docs/TYPE_SAFETY_ROADMAP_ANALYSIS.md` for validation details
+- `docs/planning/v0.0.5/LSP_ARCHITECTURE_SUPPORT.md` for LSP navigation
 
 ---
 
-### v0.3.0: Arithmetic Safety Features
+### v0.3.0: Arithmetic Safety + LSP Advanced + Type Safety Advanced
 
-**Goal**: Optional overflow protection for safer game logic
+**Goal**: Complete safety features and advanced LSP capabilities
 
 **Why This Matters**:
 
-- Detect overflow at runtime (prevent silent bugs)
-- Clamp values to type limits (health, score systems)
-- Explicit wrapping behavior (document intent)
-- Match Rust's proven safety approach
+- **Arithmetic Safety**: Prevent overflow bugs in game logic (health, scores, timers)
+- **LSP Advanced**: Enable safe refactoring and better code intelligence
+- **Type Safety Advanced**: Optional features for maximum safety (community-driven)
 
 **Features**:
 
@@ -578,20 +740,47 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
    - Methods: `overflowing_add()`, etc.
    - Allows custom overflow handling
 
+5. **LSP Advanced Features** (3-4 PRs, 3-4 weeks) 🆕
+   - **Rename Symbol**: Safe refactoring (F2 to rename across all files)
+   - **Parameter Hints**: Signature help (Ctrl+Shift+Space shows parameter names/types)
+   - **Context-Aware Completions**: Type-filtered autocomplete (only show valid properties)
+   - **Semantic Highlighting**: Color code based on symbol types
+   - **Impact**: Transforms LSP from "helpful" to "essential"
+
+6. **Type Safety Advanced** (2-3 PRs, TBD - community-driven) 🆕⚠️
+   - **Type-Safe Node Queries** *(if Godot types available)*:
+     - `get_node::<Player>("Player")` returns typed node
+     - Compile-time validation of node types
+     - **Requires**: Godot type registry (significant effort)
+   - **Strict Mode** *(if community wants it)*:
+     - `@strict` attribute for maximum type safety
+     - Require explicit types everywhere (no inference)
+     - Require explicit casts (no implicit conversions)
+   - **Pre-Compilation** *(if performance needed)*:
+     - Compile `.ferris` → `.fsc` at build time
+     - Faster load times, no runtime compilation
+   - **⚠️ Note**: These features require **community validation** before implementation
+
 **Deliverables**:
 
 - All arithmetic safety methods implemented
 - `Option<T>` type added to type system
-- Comprehensive tests (~60-80 new tests)
+- LSP rename and advanced completions working
+- Type safety advanced features (if validated)
+- Comprehensive tests (~70-90 new tests)
 - Documentation with game-specific examples
 - Performance benchmarks
 
-**Timeline**: 2-3 weeks  
-**Estimated Premium Requests**: 6-10
+**Timeline**: 5-7 weeks (was 2-3 weeks)  
+**Estimated Premium Requests**: 14-20 (was 6-10)
 
-**Dependencies**: v0.2.0 (extended type system)
+**Dependencies**: v0.2.0 (extended type system, LSP navigation)
 
-**See**: `planning/v0.3.0-roadmap.md` for detailed specifications
+**See**:
+
+- `docs/planning/v0.3.0-roadmap.md` for arithmetic safety details
+- `docs/planning/v0.0.5/LSP_ARCHITECTURE_SUPPORT.md` for LSP advanced features
+- `docs/TYPE_SAFETY_ROADMAP_ANALYSIS.md` for type safety advanced (community validation required)
 
 ---
 

@@ -660,6 +660,63 @@ cargo test  # Some tests fail
 
 ---
 
+### Issue: Inspector properties don't update when switching from script with type errors
+
+**Symptoms:**
+
+- Attach a `.ferris` script with a type error (e.g., `@export let mut health: i32 = "Banana";`)
+- Godot console shows compilation error (E200: Type mismatch)
+- Switch to a different valid `.ferris` script
+- Inspector shows "Script path changed" message
+- **But Inspector properties don't update** - still shows old/empty properties
+
+**Example Error:**
+
+```
+ERROR: crates\godot_bind\src\lib.rs:719 - Failed to compile script 'res://scripts/inspector_minimal.ferris': Error[E200]: Type mismatch
+ERROR: Type mismatch in global variable 'health': expected i32, found String at line 1, column 1
+ERROR: 
+ERROR:  1 | @export let mut health: i32 = "Banana";
+ERROR:    | ^ Value type String cannot be coerced to i32
+```
+
+**Then switching scripts:**
+
+```
+Set script_path
+📝 Script path changed: res://scripts/inspector_minimal.ferris → res://scripts/other_script.ferris
+```
+
+**Cause:** When a script fails to compile, the property list isn't cleared. Switching to a new script doesn't trigger property list refresh if the old script left the node in an error state.
+
+**Solution (Workaround):**
+
+1. **Fix type errors before switching scripts**
+
+   ```ferris
+   // ✅ Correct
+   @export let mut health: i32 = 100;
+   ```
+
+2. **Or manually refresh Inspector:**
+   - Click on a different node
+   - Click back on the FerrisScriptNode
+   - Inspector should now show correct properties
+
+3. **Or reload the scene:**
+   - Close and reopen the scene
+   - Properties will refresh correctly
+
+**Status:** Known issue in v0.0.4. Will be fixed in v0.0.5 by:
+
+- Clearing property list on compilation failure
+- Calling `notify_property_list_changed()` even on error paths
+- Improving error state handling in `load_script()`
+
+**Workaround Impact:** Low - only affects development workflow when fixing type errors.
+
+---
+
 ## Runtime Errors
 
 ### Error: "type mismatch" when running `.ferris` script

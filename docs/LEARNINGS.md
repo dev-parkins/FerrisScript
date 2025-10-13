@@ -1,6 +1,6 @@
 # FerrisScript Development Learnings
 
-**Last Updated**: October 10, 2025  
+**Last Updated**: October 11, 2025  
 **Purpose**: Capture insights, patterns, and lessons learned during FerrisScript development
 
 ---
@@ -2848,6 +2848,180 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 
 ---
 
+---
+
+## Testing Metadata Standardization - October 11, 2025
+
+**Context**: Standardized TEST headers across all `.ferris` files for headless test runner integration
+
+### 🎯 What Worked Well
+
+#### 1. Consistent TEST Header Format ✅
+
+**Achievement**: All `.ferris` files now have standardized metadata headers
+
+```ferris
+// TEST: test_name
+// CATEGORY: unit|integration|error_demo
+// DESCRIPTION: Brief description
+// EXPECT: success|error
+// ASSERT: Expected output line
+// EXPECT_ERROR: E200 (optional for negative tests)
+```
+
+**Benefits**:
+
+- Automated test discovery
+- Assertion validation
+- Clear test categorization
+- Documentation self-generation
+- CI/CD integration ready
+
+**Evidence**: Updated 30+ `.ferris` files across `examples/` and `godot_test/scripts/`
+
+**Lesson**: Standardizing metadata upfront enables powerful automation later
+
+---
+
+#### 2. Documentation Consolidation ✅
+
+**Strategy**: Fold redundant documentation into test file headers
+
+**Actions**:
+
+- ✅ Removed `INSPECTOR_MINIMAL_TEST_GUIDE.md` (content now in `.ferris` headers)
+- ✅ Updated `bounce/`, `hello/`, `move/` READMEs to reference parent `.ferris` files
+- ✅ Added TEST metadata notes to `INSPECTOR_TEST_GUIDE.md`, `INSPECTOR_QUICK_REF.md`
+- ✅ Updated `examples/README.md` and `docs/testing/TESTING_GUIDE.md`
+
+**Benefit**: Single source of truth - test files ARE the documentation
+
+**Lesson**: Documentation should live closest to the code it describes
+
+---
+
+### 🐛 Bugs Discovered
+
+#### 1. Inspector Property Update Bug - Type Error Recovery ⚠️
+
+**Bug**: Inspector doesn't update properties when switching from script with type errors to valid script
+
+**Example**:
+
+```ferris
+@export let mut health: i32 = "Banana";  // ❌ E200: Type mismatch
+```
+
+**Behavior**:
+
+1. Script fails to compile (E200: expected i32, found String)
+2. Switch to different valid `.ferris` script
+3. Console shows "Script path changed" ✅
+4. **But Inspector properties don't update** ❌
+
+**Root Cause**: When compilation fails, property list isn't cleared. Switching scripts doesn't trigger property refresh if old script left node in error state.
+
+**Workaround**:
+
+- Fix type errors before switching scripts
+- Or manually refresh Inspector (click another node, click back)
+- Or reload scene
+
+**Status**: Documented in `docs/TROUBLESHOOTING.md`. Planned fix in v0.0.5:
+
+- Clear property list on compilation failure
+- Call `notify_property_list_changed()` on error paths
+- Improve error state handling in `load_script()`
+
+**Impact**: Low - only affects development workflow when fixing type errors
+
+**Lesson**: Error recovery paths need same attention as success paths
+
+---
+
+### 🚀 Best Practices Identified
+
+#### 1. TEST Metadata Guidelines
+
+**Format Rules**:
+
+- TEST name: `snake_case`, descriptive (e.g., `inspector_comprehensive`)
+- CATEGORY: `unit` (pure logic), `integration` (Godot runtime), `error_demo` (negative tests)
+- DESCRIPTION: One-line summary of what's tested
+- EXPECT: `success` (should compile/run) or `error` (should fail)
+- ASSERT: Exact console output expected (one per line)
+- EXPECT_ERROR: Error code for negative tests (e.g., `E200`, `E701`)
+
+**Example Patterns**:
+
+```ferris
+// Positive test
+// TEST: hello_world
+// CATEGORY: integration
+// EXPECT: success
+// ASSERT: Hello from FerrisScript!
+
+// Negative test
+// TEST: type_mismatch_error
+// CATEGORY: unit
+// EXPECT: error
+// EXPECT_ERROR: E200
+// EXPECT_ERROR: Type mismatch
+// EXPECT_ERROR: expected i32, found bool
+```
+
+**Lesson**: Clear conventions enable powerful tooling
+
+---
+
+#### 2. Documentation Consolidation Strategy
+
+**When to Keep Separate Documentation**:
+
+- ✅ Comprehensive learning materials (e.g., `hello/README.md` - 397 lines explaining line-by-line)
+- ✅ Testing guides with checklists (e.g., `INSPECTOR_TEST_GUIDE.md`)
+- ✅ Quick reference cards (e.g., `INSPECTOR_QUICK_REF.md`)
+
+**When to Consolidate**:
+
+- ❌ Redundant setup instructions already in test headers
+- ❌ Documentation duplicating test metadata
+- ❌ Multiple guides for same simple example
+
+**Solution**: Add cross-references:
+
+```markdown
+> **📁 Code Location**: [`../hello.ferris`](../hello.ferris)  
+> **🧪 Test Metadata**: See TEST header in .ferris file
+```
+
+**Lesson**: Keep educational content, eliminate redundancy, add clear navigation
+
+---
+
+### 🔗 Files Updated
+
+**`.ferris` Files (30+ files)**:
+
+- `examples/`: `hello.ferris`, `bounce.ferris`, `move.ferris`, `loop.ferris`, `functions.ferris`, `collections.ferris`, `match.ferris`, `branch.ferris`, `type_error.ferris`, `reload.ferris`, `scene.ferris`, `signals.ferris`, `struct_literals_*.ferris`, `inspector_*.ferris`, `error_showcase.ferris`, `node_query_*.ferris`, `test_minimal.ferris`
+- `godot_test/scripts/`: `hello.ferris`, `bounce_test.ferris`, `move_test.ferris`, `process_test.ferris`, `export_properties_test.ferris`, `clamp_on_set_test.ferris`, `signal_test.ferris`, `v004_phase2_test.ferris`, `inspector_*.ferris`
+
+**Documentation Files**:
+
+- `docs/TROUBLESHOOTING.md`: Added Inspector property update bug
+- `docs/testing/TESTING_GUIDE.md`: Added TEST metadata format section
+- `examples/README.md`: Added TEST metadata overview
+- `examples/INSPECTOR_TEST_GUIDE.md`: Added TEST metadata reference
+- `examples/INSPECTOR_QUICK_REF.md`: Added TEST metadata note
+- `examples/INSPECTOR_TESTING_SUMMARY.md`: Updated with TEST metadata
+- `examples/{hello,move,bounce}/README.md`: Added cross-references to `.ferris` files
+
+**Deleted Files**:
+
+- `examples/INSPECTOR_MINIMAL_TEST_GUIDE.md`: Content now in `inspector_minimal.ferris` header
+
+---
+
 ### 🚀 Recommendations
 
 #### For Immediate Action
@@ -2900,3 +3074,245 @@ fn get_property(&self, property: StringName) -> Option<Variant> {
 - [SESSION_SUMMARY_BUNDLES_7-8.md](phase5/SESSION_SUMMARY_BUNDLES_7-8.md) - Complete timeline
 - [TESTING_STRATEGY_PHASE5.md](phase5/TESTING_STRATEGY_PHASE5.md) - Testing roadmap
 - [PR #52](https://github.com/dev-parkins/FerrisScript/pull/52) - Inspector Integration Complete
+
+---
+
+## Test Harness Debugging & Integration - October 11, 2025
+
+**Date**: October 11, 2025  
+**Context**: After standardizing TEST headers, debugged and successfully integrated the headless test runner
+
+### 🎯 What Worked Well
+
+#### 1. Test Harness Architecture ✅
+
+**Components**: Clean separation of concerns
+
+- **SceneBuilder**: Dynamic .tscn generation from script metadata
+- **GodotRunner**: Headless Godot execution with timeout
+- **MetadataParser**: TEST header parsing with validation
+- **OutputParser**: Test result extraction and validation
+
+**Result**: 15/26 tests passing (58%) on first successful run
+
+**Lesson**: Well-designed test infrastructure pays off when debugging
+
+---
+
+#### 2. Root Cause Investigation Process ✅
+
+**Problem**: Test harness failed with "file not found" errors
+
+**Investigation Steps**:
+
+1. ✅ Verified Godot executable exists and runs
+2. ✅ Verified ferris-test.toml configuration correct
+3. ✅ Verified test scenes generated
+4. ✅ Ran Godot manually with test scene
+5. ✅ Examined generated scene content
+6. 🐛 **Discovered root cause**: Scripts in `examples/`, not `godot_test/scripts/`
+
+**Solution**: Added `--scripts-dir` CLI flag to test harness
+
+**Lesson**: Systematic debugging reveals issues faster than guessing
+
+---
+
+#### 3. Negative Test Support ✅
+
+**Problem**: type_error.ferris marked as failed despite correct E200 error
+
+**Root Cause**: test_runner didn't parse TEST metadata, always checked for compilation success
+
+**Fix**:
+
+```rust
+// Parse test metadata
+let metadata = crate::MetadataParser::parse_metadata(&script_content)?;
+
+// Validate test expectations (pass/fail based on metadata)
+let validation = self.parser.validate_test(&metadata, &output.stdout, &output.stderr);
+let passed = validation.passed;
+```
+
+**Result**: Negative tests (EXPECT: error) now pass correctly
+
+**Lesson**: Test harness must respect test expectations, not assume all tests expect success
+
+---
+
+### 🐛 Bugs Discovered
+
+#### 1. Test Harness: Missing Metadata Check
+
+**Issue**: test_runner.rs didn't parse TEST metadata, always assumed EXPECT: success
+
+**Symptoms**:
+
+- type_error.ferris failed despite correct E200 error
+- Negative tests incorrectly marked as failures
+
+**Fix**: Added metadata parsing and validation in `run_script()`
+
+**Status**: ✅ Fixed (v0.0.4)
+
+---
+
+#### 2. Test Harness: Hardcoded Scripts Directory
+
+**Issue**: `--all` flag hardcoded to `godot_test/scripts`, but examples in `examples/`
+
+**Symptoms**:
+
+- `ferris-test --all` failed with "file not found"
+- Single script mode worked with correct paths
+
+**Fix**: Added `--scripts-dir` CLI flag with default fallback
+
+**Status**: ✅ Fixed (v0.0.4)
+
+---
+
+#### 3. Multiple EXPECT_ERROR Lines Not Supported
+
+**Issue**: MetadataParser overwrites `expect_error` field on each EXPECT_ERROR line
+
+**Example**:
+
+```ferrisscript
+// EXPECT_ERROR: E200
+// EXPECT_ERROR: Type mismatch  // ← This overwrites previous line
+```
+
+**Workaround**: Use only one EXPECT_ERROR line per test
+
+**Future**: Support multiple expected error patterns (OR logic)
+
+**Status**: 🚧 Documented (fix planned for v0.0.5)
+
+---
+
+### 🚀 Best Practices Established
+
+#### 1. Test Metadata Format (Finalized)
+
+**Standard Header**:
+
+```ferrisscript
+// TEST: test_name
+// CATEGORY: unit|integration|error_demo
+// DESCRIPTION: Brief description
+// EXPECT: success|error
+// ASSERT: Expected output line  (required for EXPECT: success)
+// EXPECT_ERROR: E200  (required for EXPECT: error)
+```
+
+**Key Requirements**:
+
+- `EXPECT: error` tests must have `EXPECT_ERROR` with error pattern
+- `EXPECT: success` tests must have at least one `ASSERT` line
+- Integration tests requiring _process() should have runtime assertions
+
+---
+
+#### 2. Test Categories
+
+**unit**: Simple, self-contained tests that run in _ready()
+
+- Example: hello.ferris, functions.ferris, type_error.ferris
+
+**integration**: Tests requiring scene tree or _process() loop
+
+- Example: bounce.ferris, move.ferris, node_query_*.ferris
+
+**error_demo**: Negative tests demonstrating error handling
+
+- Example: type_error.ferris, node_query_error_demo.ferris
+
+---
+
+#### 3. Test Harness Usage
+
+**Run Single Test**:
+
+```powershell
+ferris-test --script "examples/hello.ferris" --verbose
+```
+
+**Run All Tests**:
+
+```powershell
+ferris-test --all --scripts-dir "examples"
+```
+
+**Filter Tests**:
+
+```powershell
+ferris-test --all --scripts-dir "examples" --filter "node_query"
+```
+
+---
+
+### 📊 Test Results (v0.0.4)
+
+**Total**: 26 tests  
+**Passing**: 15 tests (58%)  
+**Failing**: 11 tests (42%)
+
+**Passing Tests**:
+
+- ✅ branch.ferris
+- ✅ functions.ferris
+- ✅ hello.ferris
+- ✅ inspector_minimal.ferris
+- ✅ node_query_basic.ferris
+- ✅ node_query_error_demo.ferris
+- ✅ node_query_search.ferris
+- ✅ node_query_validation.ferris
+- ✅ signals.ferris
+- ✅ struct_literals_*.ferris (5 tests)
+- ✅ type_error.ferris (negative test)
+
+**Failing Tests (To Investigate)**:
+
+- ❌ bounce.ferris - Runtime test, no _ready() assertions
+- ❌ collections.ferris - Need to check assertions
+- ❌ error_showcase.ferris - May need specific output
+- ❌ inspector_test.ferris - Compilation error (syntax issue)
+- ❌ loop.ferris - Runtime test
+- ❌ match.ferris - Need to check assertions
+- ❌ move.ferris - Runtime test
+- ❌ node_query_error_handling.ferris - Missing scene nodes
+- ❌ reload.ferris - Runtime test
+- ❌ scene.ferris - Runtime test
+- ❌ test_minimal.ferris - Need to check
+
+---
+
+### 🔗 Files Modified
+
+**Test Harness**:
+
+- `crates/test_harness/src/main.rs` - Added `--scripts-dir` flag
+- `crates/test_harness/src/test_runner.rs` - Added metadata parsing & validation
+- 30+ .ferris files - Standardized TEST headers
+
+**Test Files Fixed**:
+
+- `examples/type_error.ferris` - Reduced to single EXPECT_ERROR line
+
+---
+
+### 💡 Key Takeaways
+
+1. **Test Infrastructure Investment Pays Off**: Well-structured test harness made debugging systematic
+
+2. **Metadata-Driven Testing**: TEST headers enable automated validation without manual test markers
+
+3. **Negative Tests are First-Class**: Test harness must support EXPECT: error as equal to EXPECT: success
+
+4. **Integration Tests Need Runtime**: Tests requiring _process() need different validation approach
+
+5. **CLI Flexibility Matters**: Hardcoded paths create friction; flags enable different use cases
+
+---

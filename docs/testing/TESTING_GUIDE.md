@@ -44,8 +44,47 @@ FerrisScript uses a **layered testing strategy** where each layer validates diff
 1. **Test at the Right Layer**: Don't use integration tests for unit-testable logic
 2. **Use Existing Infrastructure**: Leverage `test_harness` and `ferris-test.toml`
 3. **Document Test Intent**: Every test should clearly state what it validates
-4. **CI-Friendly**: All tests must run headlessly without GUI
-5. **Fast Feedback**: Unit tests run in <1s, integration tests in <30s
+4. **Use Standardized TEST Headers**: All `.ferris` files include TEST metadata (see below)
+5. **CI-Friendly**: All tests must run headlessly without GUI
+6. **Fast Feedback**: Unit tests run in <1s, integration tests in <30s
+
+### TEST Metadata Format (v0.0.4+)
+
+All `.ferris` example and test files now include standardized headers for test runner integration:
+
+```ferris
+// TEST: test_name_here
+// CATEGORY: unit|integration|error_demo
+// DESCRIPTION: Brief description of what this tests
+// EXPECT: success|error
+// ASSERT: Expected output line 1
+// ASSERT: Expected output line 2
+// EXPECT_ERROR: E200  (optional, for negative tests)
+//
+// Additional documentation follows...
+```
+
+**Example**:
+
+```ferris
+// TEST: hello_world
+// CATEGORY: integration
+// DESCRIPTION: Basic "Hello World" example demonstrating _ready() lifecycle hook
+// EXPECT: success
+// ASSERT: Hello from FerrisScript!
+//
+// This is the simplest FerrisScript example...
+```
+
+**Benefits**:
+
+- Automated test discovery
+- Assertion validation
+- Categorization (unit vs integration)
+- Documentation generation
+- Consistent test structure
+
+**See**: [`docs/testing/TEST_HARNESS_TESTING_STRATEGY.md`](TEST_HARNESS_TESTING_STRATEGY.md) for metadata parser details
 
 ---
 
