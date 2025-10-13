@@ -1,0 +1,42 @@
+// TEST: struct_literals_functions
+// CATEGORY: unit
+// DESCRIPTION: Struct literals as function parameters and return values
+// EXPECT: success
+// ASSERT: Function tests passed
+//
+// Demonstrates:
+// - Functions returning struct literals
+// - Functions accepting struct parameters
+// - Struct construction in return statements
+// - Struct field manipulation in functions
+// - Color interpolation (lerp) algorithm
+
+fn create_centered_rect(width: f32, height: f32) -> Rect2 {
+    let half_w = width / 2.0;
+    let half_h = height / 2.0;
+    let pos = Vector2 { x: 0.0 - half_w, y: 0.0 - half_h };
+    let size = Vector2 { x: width, y: height };
+    return Rect2 { position: pos, size: size };
+}
+
+fn lerp_color(a: Color, b: Color, t: f32) -> Color {
+    let r = a.r + (b.r - a.r) * t;
+    let g = a.g + (b.g - a.g) * t;
+    let b_val = a.b + (b.b - a.b) * t;
+    let a_val = a.a + (b.a - a.a) * t;
+    return Color { r: r, g: g, b: b_val, a: a_val };
+}
+
+fn _ready() {
+    // Test function with struct literal returns
+    let centered = create_centered_rect(100.0, 50.0);
+    let width = centered.size.x;
+    
+    // Test function with struct literal parameters
+    let red = Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
+    let blue = Color { r: 0.0, g: 0.0, b: 1.0, a: 1.0 };
+    let purple = lerp_color(red, blue, 0.5);
+    
+    print("Function tests passed");
+    // ASSERT_OUTPUT: Function tests passed
+}

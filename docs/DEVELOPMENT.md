@@ -163,12 +163,16 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md#branch-naming-convention) for full deta
 
 ### 4. Test Your Changes
 
+**📚 See [testing/README.md](testing/README.md) for comprehensive testing documentation**
+
 ```bash
-# Run all tests
+# Run all tests (843+ tests across all layers)
 cargo test --workspace
 
-# Run specific crate tests
-cargo test -p ferrisscript_compiler
+# Run specific test types
+cargo test -p ferrisscript_compiler    # Unit tests (compiler)
+cargo test -p ferrisscript_runtime     # Unit tests (runtime)
+ferris-test --all                      # Integration tests (.ferris scripts)
 
 # Run specific test
 cargo test test_compile_hello
@@ -177,6 +181,19 @@ cargo test test_compile_hello
 cargo fmt --all
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 ```
+
+**Testing Layers**:
+
+1. **Unit Tests (Rust)** - Pure logic testing (compiler/runtime)
+2. **Integration Tests (.ferris)** - End-to-end testing with Godot
+3. **GDExtension Tests** - Godot bindings requiring runtime
+4. **Benchmark Tests** - Performance measurement
+
+**Quick Links**:
+
+- [Testing Guide](testing/TESTING_GUIDE.md) - Complete testing patterns ⭐ **START HERE**
+- [Test Matrices](testing/README.md#test-matrices) - Systematic coverage tracking
+- [Test Harness](testing/TEST_HARNESS_TESTING_STRATEGY.md) - ferris-test CLI architecture
 
 ### 4.5. Validate Documentation Changes
 

@@ -79,8 +79,12 @@ impl fmt::Display for Span {
 pub struct Program {
     /// Global variable declarations (let and let mut)
     pub global_vars: Vec<GlobalVar>,
+    /// Signal declarations
+    pub signals: Vec<Signal>,
     /// Function definitions
     pub functions: Vec<Function>,
+    /// Property metadata for exported variables (generated during type checking)
+    pub property_metadata: Vec<PropertyMetadata>,
 }
 
 impl Default for Program {
@@ -93,7 +97,9 @@ impl Program {
     pub fn new() -> Self {
         Program {
             global_vars: Vec::new(),
+            signals: Vec::new(),
             functions: Vec::new(),
+            property_metadata: Vec::new(),
         }
     }
 }
@@ -103,10 +109,96 @@ impl fmt::Display for Program {
         for var in &self.global_vars {
             writeln!(f, "{}", var)?;
         }
+        for signal in &self.signals {
+            writeln!(f, "{}", signal)?;
+        }
         for func in &self.functions {
             writeln!(f, "{}", func)?;
         }
         Ok(())
+    }
+}
+
+/// Property hint for exported variables.
+///
+/// Hints provide additional metadata for how properties should be displayed
+/// and edited in the Godot Inspector.
+#[derive(Debug, Clone, PartialEq)]
+pub enum PropertyHint {
+    /// No hint (default Inspector widget)
+    None,
+    /// Range hint with min, max, step
+    /// Example: `@export(range(0, 100, 1))`
+    Range { min: f32, max: f32, step: f32 },
+    /// File hint with allowed extensions
+    /// Example: `@export(file("*.png", "*.jpg"))`
+    File { extensions: Vec<String> },
+    /// Enum hint with allowed values
+    /// Example: `@export(enum("Easy", "Medium", "Hard"))`
+    Enum { values: Vec<String> },
+}
+
+/// Export annotation for Inspector-editable properties.
+///
+/// The `@export` annotation exposes a variable to the Godot Inspector,
+/// allowing it to be edited in the editor.
+///
+/// # Examples
+///
+/// ```text
+/// @export let speed: f32 = 10.0;
+/// @export(range(0, 100)) let health: i32 = 100;
+/// ```
+#[derive(Debug, Clone, PartialEq)]
+pub struct ExportAnnotation {
+    /// Optional property hint
+    pub hint: PropertyHint,
+    /// Source location
+    pub span: Span,
+}
+
+/// Property metadata for exported variables.
+///
+/// Generated during type checking and stored in the Program for runtime access.
+/// Contains all information needed to expose properties to Godot Inspector.
+///
+/// # Examples
+///
+/// ```text
+/// // For: @export(range(0, 100, 1)) let mut health: i32 = 100;
+/// PropertyMetadata {
+///     name: "health".to_string(),
+///     type_name: "i32".to_string(),
+///     hint: PropertyHint::Range { min: 0.0, max: 100.0, step: 1.0 },
+///     hint_string: "0,100,1".to_string(),
+///     default_value: Some("100".to_string()),
+/// }
+/// ```
+#[derive(Debug, Clone, PartialEq)]
+pub struct PropertyMetadata {
+    /// Property name (variable name)
+    pub name: String,
+    /// Type name (i32, f32, bool, String, Vector2, Color, Rect2, Transform2D)
+    pub type_name: String,
+    /// Property hint (range, file, enum, or none)
+    pub hint: PropertyHint,
+    /// Godot-compatible hint string ("0,100,1" or "Easy,Normal,Hard" or "*.png,*.jpg")
+    pub hint_string: String,
+    /// Default value as string representation (for Inspector reset)
+    pub default_value: Option<String>,
+}
+
+impl PropertyMetadata {
+    /// Generate Godot-compatible hint_string from PropertyHint
+    pub fn generate_hint_string(hint: &PropertyHint) -> String {
+        match hint {
+            PropertyHint::None => String::new(),
+            PropertyHint::Range { min, max, step } => {
+                format!("{},{},{}", min, max, step)
+            }
+            PropertyHint::File { extensions } => extensions.join(","),
+            PropertyHint::Enum { values } => values.join(","),
+        }
     }
 }
 
@@ -131,6 +223,8 @@ pub struct GlobalVar {
     pub ty: Option<String>,
     /// Initializer expression
     pub value: Expr,
+    /// Optional export annotation
+    pub export: Option<ExportAnnotation>,
     /// Source location
     pub span: Span,
 }
@@ -251,6 +345,7 @@ pub enum Stmt {
         mutable: bool,
         ty: Option<String>,
         value: Expr,
+        export: Option<ExportAnnotation>,
         span: Span,
     },
     Assign {
@@ -273,6 +368,40 @@ pub enum Stmt {
         value: Option<Expr>,
         span: Span,
     },
+}
+
+/// Signal declaration (top-level only).
+///
+/// Signals are event declarations that can be emitted and connected to methods.
+/// They must be declared at the module level (not inside functions).
+///
+/// # Examples
+///
+/// ```text
+/// signal health_changed(old: i32, new: i32);
+/// signal player_died;
+/// ```
+#[derive(Debug, Clone, PartialEq)]
+pub struct Signal {
+    /// Signal name
+    pub name: String,
+    /// Signal parameters (name, type)
+    pub parameters: Vec<(String, String)>,
+    /// Source location
+    pub span: Span,
+}
+
+impl fmt::Display for Signal {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "signal {}(", self.name)?;
+        for (i, (param_name, param_type)) in self.parameters.iter().enumerate() {
+            if i > 0 {
+                write!(f, ", ")?;
+            }
+            write!(f, "{}: {}", param_name, param_type)?;
+        }
+        write!(f, ");")
+    }
 }
 
 impl fmt::Display for Stmt {
@@ -362,6 +491,7 @@ impl fmt::Display for Stmt {
 /// -velocity.y           // Unary + FieldAccess
 /// sqrt(x * x + y * y)   // Call
 /// position.x            // FieldAccess
+/// Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }  // StructLiteral
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
@@ -373,6 +503,14 @@ pub enum Expr {
     FieldAccess(Box<Expr>, String, Span),
     Assign(Box<Expr>, Box<Expr>, Span),
     CompoundAssign(Box<Expr>, CompoundOp, Box<Expr>, Span),
+    /// Struct literal: `TypeName { field1: value1, field2: value2 }`
+    /// Used for constructing Color, Rect2, Transform2D, etc.
+    /// MVP: No nested literals (e.g., Rect2 with inline Vector2)
+    StructLiteral {
+        type_name: String,
+        fields: Vec<(String, Expr)>,
+        span: Span,
+    },
 }
 
 impl Expr {
@@ -386,6 +524,7 @@ impl Expr {
             Expr::FieldAccess(_, _, s) => *s,
             Expr::Assign(_, _, s) => *s,
             Expr::CompoundAssign(_, _, _, s) => *s,
+            Expr::StructLiteral { span, .. } => *span,
         }
     }
 }
@@ -410,6 +549,18 @@ impl fmt::Display for Expr {
             Expr::FieldAccess(obj, field, _) => write!(f, "{}.{}", obj, field),
             Expr::Assign(target, value, _) => write!(f, "{} = {}", target, value),
             Expr::CompoundAssign(target, op, value, _) => write!(f, "{} {} {}", target, op, value),
+            Expr::StructLiteral {
+                type_name, fields, ..
+            } => {
+                write!(f, "{} {{ ", type_name)?;
+                for (i, (field_name, field_expr)) in fields.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "{}: {}", field_name, field_expr)?;
+                }
+                write!(f, " }}")
+            }
         }
     }
 }

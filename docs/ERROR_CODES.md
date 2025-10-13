@@ -10,6 +10,7 @@ This document provides a comprehensive reference for all error codes in FerrisSc
   - [Lexical Errors (E001-E099)](#lexical-errors-e001-e099)
   - [Syntax Errors (E100-E199)](#syntax-errors-e100-e199)
   - [Type Errors (E200-E299)](#type-errors-e200-e299)
+  - [Semantic Errors (E300-E399)](#semantic-errors-e300-e399)
   - [Runtime Errors (E400-E499)](#runtime-errors-e400-e499)
 
 ## Overview
@@ -18,6 +19,8 @@ FerrisScript uses structured error codes to help you quickly identify and fix is
 
 - **E001-E099**: Lexical/tokenization errors
 - **E100-E199**: Syntax/parsing errors
+- **E200-E299**: Type checking errors
+- **E300-E399**: Semantic/signal errors
 - **E200-E299**: Type checking errors
 - **E400-E499**: Runtime errors
 
@@ -1131,6 +1134,168 @@ Error[E219]: Incompatible types in assignment
 
 ---
 
+### Semantic Errors (E300-E399)
+
+Errors related to signal declarations and usage.
+
+#### E301: Signal Already Defined
+
+**Description**: A signal with the same name has already been declared in the current scope.
+
+**Common Causes**:
+
+- Declaring the same signal twice
+- Copy-pasting signal declarations
+- Name collision with existing signal
+
+**Example**:
+
+```ferris
+signal health_changed(old: i32, new: i32);
+signal health_changed(value: i32);  // Error: signal already defined
+```
+
+**Error Message**:
+
+```
+Error[E301]: Signal already defined
+  Signal 'health_changed' is already defined
+  |
+2 | signal health_changed(value: i32);
+  |        ^^^^^^^^^^^^^^ Signal already declared at line 1
+```
+
+**How to Fix**:
+
+- Remove duplicate signal declaration
+- Rename one of the signals
+- Check for existing signals with the same name
+
+**Related Codes**: E302, E303, E304
+
+---
+
+#### E302: Signal Not Defined
+
+**Description**: Attempting to emit a signal that has not been declared.
+
+**Common Causes**:
+
+- Typo in signal name
+- Signal not declared before use
+- Signal declared in different scope
+
+**Example**:
+
+```ferris
+fn take_damage() {
+    emit_signal("health_change", 100, 75);  // Typo: should be "health_changed"
+}
+```
+
+**Error Message**:
+
+```
+Error[E302]: Signal not defined
+  Signal 'health_change' is not defined
+  |
+2 |     emit_signal("health_change", 100, 75);
+  |                 ^^^^^^^^^^^^^^^ Signal not declared
+  |
+  = help: Did you mean 'health_changed'?
+```
+
+**How to Fix**:
+
+- Declare the signal before using it
+- Check signal name spelling
+- Verify signal is in scope
+
+**Related Codes**: E301, E303, E304
+
+---
+
+#### E303: Signal Parameter Count Mismatch
+
+**Description**: The number of arguments provided to `emit_signal` doesn't match the signal's declared parameter count.
+
+**Common Causes**:
+
+- Missing arguments in emit_signal call
+- Too many arguments provided
+- Incorrect signal signature
+
+**Example**:
+
+```ferris
+signal health_changed(old: i32, new: i32);
+
+fn take_damage() {
+    emit_signal("health_changed", 75);  // Missing 'old' parameter
+}
+```
+
+**Error Message**:
+
+```
+Error[E303]: Signal parameter count mismatch
+  Signal 'health_changed' expects 2 parameters, but 1 provided
+  |
+4 |     emit_signal("health_changed", 75);
+  |                 ^^^^^^^^^^^^^^^^^^^^^^ Expected 2 arguments
+```
+
+**How to Fix**:
+
+- Provide all required parameters
+- Check signal declaration
+- Verify argument count matches declaration
+
+**Related Codes**: E301, E302, E304
+
+---
+
+#### E304: Signal Parameter Type Mismatch
+
+**Description**: An argument provided to `emit_signal` doesn't match the expected parameter type.
+
+**Common Causes**:
+
+- Wrong type passed as signal parameter
+- Type confusion
+- Missing type coercion
+
+**Example**:
+
+```ferris
+signal score_updated(score: i32);
+
+fn add_score() {
+    emit_signal("score_updated", "100");  // String instead of i32
+}
+```
+
+**Error Message**:
+
+```
+Error[E304]: Signal parameter type mismatch
+  Signal 'score_updated' parameter 1 expects i32, but String provided
+  |
+4 |     emit_signal("score_updated", "100");
+  |                                  ^^^^^ Expected i32, found String
+```
+
+**How to Fix**:
+
+- Use correct parameter type
+- Check signal declaration
+- Convert value to expected type
+- Note: i32 can be implicitly converted to f32
+
+**Related Codes**: E301, E302, E303, E200
+
+---
+
 ### Runtime Errors (E400-E499)
 
 Errors that occur during program execution.
@@ -1772,6 +1937,88 @@ Error[E418]: Assignment expressions should be statements
 - Use proper statement syntax
 
 **Related Codes**: None
+
+---
+
+#### E501: emit_signal Requires Signal Name
+
+**Description**: `emit_signal` was called without providing a signal name as the first argument.
+
+**Common Causes**:
+
+- Calling emit_signal with no arguments
+- Missing signal name parameter
+- Incorrect function call syntax
+
+**Example**:
+
+```ferris
+fn trigger_event() {
+    emit_signal();  // Missing signal name
+}
+```
+
+**Error Message**:
+
+```
+Error[E501]: emit_signal requires at least a signal name
+```
+
+**How to Fix**:
+
+- Provide signal name as first argument
+- Ensure signal name is a string literal
+- Check emit_signal call syntax
+
+**Correct Usage**:
+
+```ferris
+emit_signal("player_died");
+emit_signal("health_changed", 100, 75);
+```
+
+**Related Codes**: E502, E302, E303
+
+---
+
+#### E502: emit_signal Signal Name Must Be String
+
+**Description**: The first argument to `emit_signal` must be a string literal containing the signal name.
+
+**Common Causes**:
+
+- Passing non-string value as signal name
+- Using variable instead of string literal
+- Type error in first argument
+
+**Example**:
+
+```ferris
+fn trigger_event() {
+    emit_signal(123, 456);  // First argument must be string
+}
+```
+
+**Error Message**:
+
+```
+Error[E502]: emit_signal first argument must be a string
+```
+
+**How to Fix**:
+
+- Use string literal for signal name
+- Check first argument type
+- Signal name must be known at compile time
+
+**Correct Usage**:
+
+```ferris
+emit_signal("score_updated", 100);
+emit_signal("player_died");
+```
+
+**Related Codes**: E501, E302
 
 ---
 

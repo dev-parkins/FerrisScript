@@ -35,8 +35,11 @@ FerrisScript is a Rust-inspired scripting language designed specifically for the
 
 ### Version Status
 
-- **v0.0.1**: Released October 2, 2025 - Initial compiler and runtime implementation
-- **v0.0.2**: In progress - Documentation improvements and community standards
+- **v0.0.1**: Released October 2, 2025 - Initial compiler and runtime
+- **v0.0.2**: Released - Documentation improvements and community standards
+- **v0.0.3**: Released - VS Code extension and error handling improvements
+- **v0.0.4**: Current (October 10, 2025) - @export annotations, signals, struct literals, node queries, testing infrastructure (843 tests)
+- **v0.0.5**: Planned - LSP alpha, arrays, for loops
 
 ### File Extensions
 
@@ -590,28 +593,210 @@ docs: update installation instructions for Windows
 
 ## Testing Guidelines
 
+**📚 See [docs/testing/README.md](docs/testing/README.md) for comprehensive testing documentation**
+
+### Testing Overview
+
+FerrisScript uses a **4-layer testing strategy** to ensure quality:
+
+1. **Unit Tests (Rust)** - Pure logic testing (compiler/runtime)
+2. **Integration Tests (.ferris)** - End-to-end testing with Godot
+3. **GDExtension Tests** - Godot bindings requiring runtime
+4. **Benchmark Tests** - Performance measurement
+
+**Current Status**: 843+ tests across all layers | ~82% code coverage
+
 ### Writing Tests
 
-- Every new feature should include tests
-- Bug fixes should include regression tests
-- Place tests in the same file using `#[cfg(test)]` modules
-- Use descriptive test names: `test_parser_handles_nested_functions`
+**Required for all contributions**:
+
+- ✅ Every new feature must include tests
+- ✅ Bug fixes must include regression tests
+- ✅ Tests must pass before PR is merged
+- ✅ Use descriptive test names: `test_parser_handles_nested_functions`
+
+**Test placement**:
+
+- Unit tests: `#[cfg(test)] mod tests` in same file
+- Integration tests: `.ferris` scripts in `godot_test/scripts/`
+- Benchmarks: `benches/` directory in relevant crate
+
+**Quick Links**:
+
+- [Testing Guide](docs/testing/TESTING_GUIDE.md) - Complete testing patterns ⭐ **START HERE**
+- [Test Checklist](docs/testing/README.md#testing-checklist-for-new-features) - Step-by-step checklist
+- [Test Matrices](docs/testing/README.md#test-matrices) - Systematic coverage tracking
 
 ### Running Tests
 
 ```bash
-# Run all tests
-cargo test
+# Run all tests (843+ tests)
+cargo test --workspace
 
-# Run tests for a specific crate
-cargo test -p rustyscript_compiler
+# Run specific test types
+cargo test -p ferrisscript_compiler    # Unit tests (compiler)
+cargo test -p ferrisscript_runtime     # Unit tests (runtime)
+ferris-test --all                      # Integration tests (.ferris scripts)
 
-# Run a specific test
-cargo test test_lexer_tokenizes_keywords
+# Run specific test
+cargo test test_parse_assignment
 
-# Run tests with output
+# Run with output
 cargo test -- --nocapture
 ```
+
+### Running Integration Tests (ferris-test)
+
+FerrisScript includes a **headless test harness** (`ferris-test`) for running `.ferris` scripts against Godot without manual intervention.
+
+**Quick Commands**:
+
+```bash
+# Run all integration tests
+ferris-test --all
+
+# Run specific test
+ferris-test --script godot_test/scripts/signal_test.ferris
+
+# Filter by name
+ferris-test --all --filter "node_query"
+
+# Verbose output
+ferris-test --all --verbose
+
+# JSON format (for CI)
+ferris-test --all --format json > results.json
+```
+
+**Configuration**: `ferris-test.toml` in workspace root
+
+**Test Harness Features**:
+
+- ✅ Headless Godot execution (no GUI needed)
+- ✅ Test metadata parsing (TEST, CATEGORY, EXPECT, ASSERT)
+- ✅ Output marker parsing ([TEST_START], [PASS], [FAIL], [TEST_END])
+- ✅ Multiple output formats (console, JSON, JUnit)
+- ✅ Parallel test execution with timeout handling
+
+**Documentation**:
+
+- [Testing Guide - Integration Tests](docs/testing/TESTING_GUIDE.md#pattern-2-integration-tests-ferris-scripts)
+- [Test Harness Architecture](docs/testing/TEST_HARNESS_TESTING_STRATEGY.md)
+
+### Automated Testing (Pre-commit Hooks)
+
+FerrisScript uses **pre-commit hooks** to automatically validate code before commits. These hooks ensure:
+
+- ✅ Code is properly formatted (`cargo fmt`)
+- ✅ No linting warnings (`cargo clippy`)
+- ✅ All unit tests pass (`cargo test`)
+
+**Installing Pre-commit Hooks**:
+
+The hooks are automatically installed when you first run `cargo build`. If they're not active, install them manually:
+
+**PowerShell (Windows)**:
+
+```powershell
+.\scripts\install-git-hooks.ps1
+```
+
+**Bash (Linux/macOS)**:
+
+```bash
+./scripts/install-git-hooks.sh
+```
+
+**What Happens on Commit**:
+
+When you run `git commit`, the pre-commit hook will automatically:
+
+1. **Check formatting**: Verifies `cargo fmt` has been run
+2. **Run linter**: Executes `cargo clippy` with strict warnings
+3. **Run tests**: Executes quick unit tests (not integration tests)
+
+If any check fails, the commit is **blocked** and you'll see:
+
+```
+❌ Formatting issues detected
+❌ Linting warnings found
+❌ Tests failed
+```
+
+**Running Checks Manually**:
+
+You can run the same checks locally before committing:
+
+```bash
+# Format code
+cargo fmt --all
+
+# Check linting
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+# Run tests
+cargo test --workspace
+
+# Or use the pre-commit script directly (PowerShell)
+.\.git\hooks\pre-commit
+
+# Or use the pre-commit script directly (Bash)
+./.git/hooks/pre-commit
+```
+
+**Skipping Pre-commit Hooks** (Not Recommended):
+
+In rare cases where you need to commit work-in-progress code:
+
+```bash
+git commit --no-verify -m "WIP: incomplete feature"
+```
+
+⚠️ **Warning**: Skipping hooks means your code may not pass CI checks. Use sparingly and fix issues before creating a PR.
+
+**Troubleshooting Pre-commit Hooks**:
+
+**Hook not running**:
+
+```bash
+# Re-install hooks
+.\scripts\install-git-hooks.ps1  # Windows
+./scripts/install-git-hooks.sh   # Linux/macOS
+```
+
+**Formatting check fails**:
+
+```bash
+# Auto-format all code
+cargo fmt --all
+```
+
+**Clippy warnings**:
+
+```bash
+# See detailed warnings
+cargo clippy --workspace --all-targets --all-features
+
+# Fix automatically (some warnings)
+cargo clippy --fix --workspace --all-targets --all-features
+```
+
+**Tests failing**:
+
+```bash
+# Run tests with output to see failures
+cargo test --workspace -- --nocapture
+
+# Run specific failing test
+cargo test test_name -- --nocapture
+```
+
+**Why Pre-commit Hooks?**
+
+- **Catches issues early**: Before they reach CI or code review
+- **Saves time**: No waiting for CI to find formatting issues
+- **Maintains quality**: Ensures consistent code standards
+- **Reduces review burden**: Reviewers can focus on logic, not style
 
 ### Test Coverage
 

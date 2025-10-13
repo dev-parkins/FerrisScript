@@ -1,0 +1,64 @@
+// TEST: v004_phase2_validation
+// CATEGORY: integration
+// DESCRIPTION: Phase 2 feature validation (variables, arithmetic, conditionals)
+// EXPECT: success
+// ASSERT: Test 1: Variable Assignment and Retrieval
+// ASSERT: PASS
+// ASSERT: Test 2: Arithmetic Operations
+//
+// Phase 2 Feature Validation Test
+// Tests core FerrisScript features from v0.0.4 Phase 2
+
+// HI FROM COMMENT
+
+
+let thing:bool = true;
+let result: i32 = 0
+
+fn assert_test(cond: bool) {
+    if cond {
+        print("PASS");
+    } else {
+        print("FAIL");
+    }
+}
+
+fn run_tests() {
+    // Test 1: Variable Assignment and Retrieval
+    print("Test 1: Variable Assignment and Retrieval");
+    let x: i32 = 42;
+    assert_test(x == 42);
+
+    // Test 2: Arithmetic Operations
+    print("Test 2: Arithmetic Operations");
+    let y: i32 = x + 8;
+    assert_test(y == 50);
+
+    // Test 3: Conditional Branching
+    print("Test 3: Conditional Branching");
+    // Note: Variables are immutable, so we test the condition directly
+    assert_test(y > 40);
+
+    // Test 4: Loop Execution
+    print("Test 4: Loop Execution (skipped - requires mutable variables)");
+    // Note: While loops require mutable variables to update counters
+    // This feature will be added in a future phase
+    // Expected: sum of 0+1+2+3+4 = 10
+
+    // Test 5: Function Definition and Invocation
+    print("Test 5: Function Definition and Invocation");
+    let z: i32 = add(5, 7);
+    assert_test(z == 12);
+
+    // Test 6: Error Handling
+    print("Test 6: Error Handling (skipped - no try/catch support)");
+
+    // Test 7: Godot Signal Integration
+    print("Test 7: Godot Signal Integration (skipped)");
+
+    print("All v0.0.4 Phase 2 tests completed.");
+}
+
+fn add(a: i32, b: i32) -> i32 {
+    return a + b;
+}

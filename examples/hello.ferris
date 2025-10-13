@@ -1,3 +1,17 @@
+// TEST: hello_world
+// CATEGORY: integration
+// DESCRIPTION: Basic "Hello World" example demonstrating _ready() lifecycle hook
+// EXPECT: success
+// ASSERT: Hello from FerrisScript!
+//
+// This is the simplest FerrisScript example showing:
+// - Function definition (fn)
+// - Godot lifecycle hook (_ready)
+// - Print statement
+// - Basic FerrisScript syntax
+//
+// SCENE SETUP: Attach to any Node2D in Godot
+
 fn _ready() {
     print("Hello from FerrisScript!");
 }

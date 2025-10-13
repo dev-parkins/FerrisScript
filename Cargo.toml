@@ -4,13 +4,15 @@ members = [
     "crates/compiler",
     "crates/runtime",
     "crates/godot_bind",
+    "crates/test_harness",
 ]
 
 [workspace.package]
-version = "0.0.3"
+version = "0.0.4"
 edition = "2021"
 authors = ["FerrisScript Contributors"]
 license = "MIT"
 
 [workspace.dependencies]
 criterion = "0.7"
+ 

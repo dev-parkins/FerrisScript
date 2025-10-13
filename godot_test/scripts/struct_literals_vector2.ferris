@@ -1,0 +1,31 @@
+// TEST: struct_literals_vector2
+// CATEGORY: unit
+// DESCRIPTION: Vector2 struct literals with arithmetic operations and field access
+// EXPECT: success
+// ASSERT: Position updated
+//
+// Demonstrates:
+// - Vector2 struct literal syntax
+// - Field initialization (x, y)
+// - Field access (pos.x, pos.y)
+// - Integer to f32 coercion in struct literals
+// - Manual vector arithmetic
+
+fn _ready() {
+    // Create vectors using struct literals
+    let pos = Vector2 { x: 100.0, y: 200.0 };
+    let velocity = Vector2 { x: 5.0, y: -3.0 };
+    
+    // Calculate new position (manual vector addition)
+    let new_x = pos.x + velocity.x;
+    let new_y = pos.y + velocity.y;
+    let new_pos = Vector2 { x: new_x, y: new_y };
+    
+    // Test integer coercion
+    let origin = Vector2 { x: 0, y: 0 };
+    let unit_x = Vector2 { x: 1, y: 0 };
+    let unit_y = Vector2 { x: 0, y: 1 };
+    
+    print("Position updated");
+    // ASSERT_OUTPUT: Position updated
+}

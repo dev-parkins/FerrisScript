@@ -1,0 +1,151 @@
+// TEST: signals_comprehensive
+// CATEGORY: integration
+// DESCRIPTION: Comprehensive signal declaration, emission, and parameter passing
+// EXPECT: success
+// ASSERT: Signal Example Ready!
+// ASSERT: Available signals:
+//
+// Comprehensive Signal Example for FerrisScript v0.0.4
+// Demonstrates signal declaration, emission, and best practices
+
+// ===== Signal Declarations =====
+// Signals should be declared at the top of the file
+// Format: signal name(param1: Type1, param2: Type2);
+
+// Signal with no parameters
+signal player_died();
+
+// Signal with typed parameters
+signal health_changed(old_health: i32, new_health: i32);
+
+// Signal for score system
+signal score_updated(new_score: i32);
+
+// Signal for position events
+signal position_changed(pos: Vector2);
+
+// Signal with multiple types
+signal item_collected(item_name: String, quantity: i32, value: f32);
+
+// ===== Global State =====
+let mut health: i32 = 100;
+let mut score: i32 = 0;
+
+// ===== Signal Emission Examples =====
+
+fn take_damage(damage: i32) {
+    let old: i32 = health;
+    health = health - damage;
+    
+    // Emit signal with parameters
+    emit_signal("health_changed", old, health);
+    
+    // Check for death condition
+    if health <= 0 {
+        // Emit simple signal with no parameters
+        emit_signal("player_died");
+    }
+}
+
+fn heal(amount: i32) {
+    let old: i32 = health;
+    health = health + amount;
+    
+    // Cap health at 100
+    if health > 100 {
+        health = 100;
+    }
+    
+    emit_signal("health_changed", old, health);
+}
+
+fn add_score(points: i32) {
+    score = score + points;
+    emit_signal("score_updated", score);
+}
+
+fn collect_item(name: String, qty: i32) {
+    // Calculate item value (10 per quantity)
+    let value: f32 = 10.0;
+    let total: i32 = qty * 10;
+    
+    add_score(total);
+    
+    // Emit signal with mixed types
+    emit_signal("item_collected", name, qty, value);
+}
+
+fn update_position() {
+    // Get current position from self.position
+    let pos: Vector2 = self.position;
+    
+    // Emit signal with Vector2 parameter
+    emit_signal("position_changed", pos);
+}
+
+// ===== Lifecycle Functions =====
+
+fn _ready() {
+    print("Signal Example Ready!");
+    print("Available signals:");
+    print("  - player_died()");
+    print("  - health_changed(old, new)");
+    print("  - score_updated(score)");
+    print("  - position_changed(pos)");
+    print("  - item_collected(name, qty, value)");
+    print("");
+    print("Signals are emitted when events occur.");
+    print("Connect to these signals in the Godot editor!");
+}
+
+fn _process(delta: f32) {
+    // Example: Damage player over time (uncomment to test)
+    // take_damage(1);
+    
+    // Example: Update position signal
+    // update_position();
+}
+
+// ===== Best Practices =====
+// 
+// 1. Declare all signals at the top of the file
+// 2. Use descriptive signal names (past tense verbs)
+// 3. Include relevant data as parameters
+// 4. Type signal parameters appropriately
+// 5. Emit signals after state changes
+// 6. Connect signals in Godot editor for maximum flexibility
+// 
+// ===== Connecting Signals in Godot =====
+// 
+// In the Godot editor:
+// 1. Select the FerrisScriptNode in the scene tree
+// 2. Go to the "Node" tab (next to Inspector)
+// 3. Click "Signals" section
+// 4. You'll see all declared signals
+// 5. Double-click a signal to connect it to a method
+// 6. Select target node and method
+// 7. Signal will fire when emit_signal() is called
+// 
+// ===== Error Handling =====
+// 
+// Common errors and fixes:
+// 
+// E301: Signal Already Defined
+//   - Don't declare the same signal twice
+// 
+// E302: Signal Not Defined  
+//   - Declare signal before emitting it
+//   - Check spelling of signal name
+// 
+// E303: Parameter Count Mismatch
+//   - Provide all required parameters to emit_signal()
+// 
+// E304: Parameter Type Mismatch
+//   - Use correct types for signal parameters
+//   - Note: i32 can be automatically converted to f32
+// 
+// E501: emit_signal Requires Signal Name
+//   - Always provide signal name as first argument
+// 
+// E502: Signal Name Must Be String
+//   - Signal name must be a string literal

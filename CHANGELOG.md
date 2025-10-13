@@ -23,6 +23,152 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.0.4] - 2025-10-08
+
+**Codename**: "Godot API Expansion" 🔔🌳
+
+This release significantly expands FerrisScript's Godot integration, adding signal support, lifecycle callbacks, and node query functions. Enables real 2D game development with event-driven programming and scene tree interaction.
+
+### Added
+
+#### Signal System (Phase 1) ✅
+
+- **Signal Declaration Syntax** (PR #46)
+  - `signal name(param1: Type1, param2: Type2);` syntax
+  - Type checking for signal declarations (E301-E304 error codes)
+  - Signal validation: duplicate detection, type checking, parameter validation
+  - 17 new tests (2 lexer, 6 parser, 9 type checker)
+
+- **Signal Emission** (PR #46)
+  - `emit_signal("signal_name", arg1, arg2)` built-in function
+  - Runtime signal registration and emission
+  - Godot binding integration with instance ID pattern
+  - Value→Variant conversion for all FerrisScript types
+  - 7 new runtime tests for signal emission
+  - E501-E502 error codes for emit_signal validation
+
+- **Signal Documentation** (PR #46)
+  - Updated ERROR_CODES.md with signal errors (E301-E304, E501-E502)
+  - Signal usage examples in godot_test/scripts/signal_test.ferris
+  - STEP_6_COMPLETION_REPORT.md with technical details
+
+**Signal Technical Details**:
+
+- **Signal Flow**: FerrisScript → Runtime callback → Godot emit_signal()
+- **Type Safety**: Compile-time type checking, runtime validation
+- **Thread Safety**: Instance ID pattern avoids borrowing conflicts
+- **Test Coverage**: 382 tests passing after Phase 1
+
+#### Additional Callbacks (Phase 2) ✅
+
+- **Lifecycle Callbacks** (PR #TBD)
+  - `_input(event: InputEvent)` - User input handling
+  - `_physics_process(delta: f32)` - Fixed timestep physics updates
+  - `_enter_tree()` - Node enters scene tree
+  - `_exit_tree()` - Node exits scene tree
+  - E305 error code for lifecycle callback validation
+  - 11 new tests (7 type checker + 4 runtime)
+
+- **InputEvent Type** (PR #TBD)
+  - `InputEvent` type support in type checker
+  - `is_action_pressed(action: String) -> bool` method
+  - `is_action_released(action: String) -> bool` method
+
+**Callbacks Technical Details**:
+
+- **Test Coverage**: 396 tests passing after Phase 2
+- **Pattern**: Consistent with existing `_ready()` and `_process()` callbacks
+
+#### Node Query Functions (Phase 3) ✅
+
+- **Node Query Built-ins** (PR #TBD)
+  - `get_node(path: String) -> Node` - Retrieve node by scene path
+  - `get_parent() -> Node` - Get parent node
+  - `has_node(path: String) -> bool` - Check if node exists
+  - `find_child(name: String) -> Node` - Find child by name (recursive)
+  - 12 new error codes (E601-E613) for comprehensive validation
+  - 17 new tests (11 type checker + 6 runtime)
+
+- **Node Infrastructure** (PR #TBD)
+  - `Value::Node` variant for representing Godot nodes
+  - `NodeHandle` struct for opaque node references
+  - `NodeQueryType` enum for query operations
+  - Thread-local storage pattern for clean Godot integration
+  - Callback mechanism consistent with signal pattern
+
+**Node Queries Technical Details**:
+
+- **Architecture**: Runtime callbacks → Thread-local storage → Godot Node API
+- **Type Safety**: Compile-time path validation, runtime existence checks
+- **Test Coverage**: 416 tests passing after Phase 3
+- **Implementation Efficiency**: Batched implementation saved 4-7 hours
+
+#### Godot Types & Struct Literals (Phase 4 & 4.5) ✅
+
+- **Additional Godot Types** (Phase 4)
+  - Color type with r/g/b/a field access
+  - Rect2 type with position/size field access (nested Vector2 support)
+  - Transform2D type with position/rotation/scale fields
+  - Runtime field get/set operations
+  - Godot binding conversions for all types
+  - 31 type-specific tests + 10 error codes (E701-E710)
+
+- **Struct Literal Syntax** (Phase 4.5)
+  - Literal syntax: `Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }`
+  - Parser support for struct field initialization
+  - Type checker validation (missing fields, duplicate fields, wrong types)
+  - Runtime evaluation with integer→float coercion
+  - 39 robustness tests (27 compiler + 12 runtime)
+  - 5 integration examples demonstrating real-world usage
+  - Checkpoint methodology (50% faster than Phase 4)
+  - Support for all struct types (Vector2, Color, Rect2, Transform2D)
+
+#### Property Exports & Inspector Integration (Phase 5) ✅
+
+**Status**: COMPLETE (Sub-Phases 1-3, October 10, 2025)
+
+- **@export Annotation System** (Sub-Phase 1, ~4 hours)
+  - Parser support for `@export` annotation before variable declarations
+  - Property hint syntax: `@export(range(0, 100))`, `@export(file("*.png"))`, `@export(enum("A", "B"))`
+  - 34 parser tests covering all hint types and error recovery
+  - 8 structured checkpoints with test-first validation
+
+- **Compile-Time Validation** (Sub-Phase 2, ~2 hours)
+  - Export eligibility validation (8 types: i32, f32, bool, String, Vector2, Color, Rect2, Transform2D)
+  - Hint compatibility matrix (range for numerics, file/enum for strings)
+  - PropertyMetadata generation with Godot-compliant formatting
+  - 15 error codes (E801-E816) with comprehensive validation
+  - 61 type checker tests
+  - Hybrid metadata architecture (static compile-time + per-instance runtime values)
+
+- **Runtime & Inspector Integration** (Sub-Phase 3, ~6 hours)
+  - Per-instance property value storage (HashMap-based)
+  - Property get/set methods with range clamping
+  - Godot PropertyInfo generation from static metadata
+  - Inspector get_property_list() implementation
+  - Bidirectional Inspector ↔ Runtime synchronization
+  - Hot-reload support with property persistence
+  - 15 integration tests covering roundtrip sync
+  - 10 runtime tests + 10 godot_bind tests (ignored in headless CI)
+
+**Property Exports Technical Details**:
+
+- **Hint Formatting**: Exact Godot formats ("0,100,1" for range, "Easy,Medium,Hard" for enum, "*.png,*.jpg" for file)
+- **Clamp-on-Set Policy**: Inspector sets automatically clamp, script sets warn (E816)
+- **Immutability Support**: `let` → read-only in Inspector, `let mut` → read/write
+- **Test Coverage**: 843 tests passing (543 compiler + 110 runtime + 38 harness + 15 integration + 137 other)
+- **Efficiency**: 58% faster than estimated (12 hours actual vs 21-29 hour estimate)
+- **Documentation**: 8 bundle summaries, 3 sub-phase completion reports, comprehensive execution plan
+
+### Notes
+
+- Signal connections handled via Godot editor (connect/disconnect methods deferred to future release)
+- All FerrisScript types supported as signal parameters (i32, f32, bool, String, Vector2, Color, Rect2, Transform2D)
+- Signals registered dynamically with Godot's add_user_signal()
+- Property exports enable full Inspector integration with type-safe Godot editor workflows
+
+---
+
 ## [0.0.3] - 2025-10-08
 
 **Codename**: "Editor Experience Alpha" 💡🔍

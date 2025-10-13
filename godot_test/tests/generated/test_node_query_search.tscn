@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[node name="TestRunner" type="Node2D"]
+
+[node name="Main" type="FerrisScriptNode" parent="."]
+script_path = "res://scripts/node_query_search.ferris"
+
+[node name="UI" type="Node2D" parent="Main"]
+
+[node name="HealthBar" type="Node2D" parent="Main/UI"]
+
+[node name="ScoreLabel" type="Node2D" parent="Main/UI"]
+
+[node name="Player" type="Node2D" parent="Main"]
+
+[node name="CurrentWeapon" type="Node2D" parent="Main/UI"]
+

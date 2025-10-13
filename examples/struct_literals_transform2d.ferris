@@ -1,0 +1,38 @@
+// TEST: struct_literals_transform2d
+// CATEGORY: unit
+// DESCRIPTION: Transform2D struct literals with position, rotation, and scale
+// EXPECT: success
+// ASSERT: Transforms initialized
+//
+// Demonstrates:
+// - Transform2D struct literal syntax
+// - Position (Vector2), rotation (f32), scale (Vector2) fields
+// - Nested field access (transform.position.x)
+// - Rotation in radians
+// - Multi-line struct literal formatting
+
+fn _ready() {
+    // Create transform using struct literals
+    let spawn_pos = Vector2 { x: 400.0, y: 300.0 };
+    let spawn_scale = Vector2 { x: 1.5, y: 1.5 };
+    let spawn_transform = Transform2D { 
+        position: spawn_pos, 
+        rotation: 0.0, 
+        scale: spawn_scale 
+    };
+    
+    // Create rotated version
+    let rotated_transform = Transform2D {
+        position: spawn_pos,
+        rotation: 1.57,  // ~90 degrees in radians
+        scale: spawn_scale
+    };
+    
+    // Access nested fields
+    let x_pos = spawn_transform.position.x;
+    let scale_x = spawn_transform.scale.x;
+    let rotation = rotated_transform.rotation;
+    
+    print("Transforms initialized");
+    // ASSERT_OUTPUT: Transforms initialized
+}

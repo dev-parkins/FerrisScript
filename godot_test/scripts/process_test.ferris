@@ -1,3 +1,10 @@
+// TEST: process_callback_test
+// CATEGORY: integration
+// DESCRIPTION: _process callback with delta time logging (expect console spam)
+// EXPECT: success
+// ASSERT: Process test started! Watch the delta values...
+// ASSERT: Delta
+//
 // Test script for _process callback
 // Simplified version - just prints delta each frame (will spam console!)
 

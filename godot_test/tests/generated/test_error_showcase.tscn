@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[node name="TestRunner" type="Node2D"]
+
+[node name="Main" type="FerrisScriptNode" parent="."]
+script_path = "res://scripts/error_showcase.ferris"
+

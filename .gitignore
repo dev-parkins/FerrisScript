@@ -25,6 +25,7 @@ node_modules/
 
 # Temporary files (PR bodies, scripts)
 /temp/
+.github/PR_DESCRIPTION.md
 
 # OS
 Thumbs.db
@@ -53,3 +54,4 @@ tarpaulin-report.html
 
 # Godot UID files (auto-generated)
 *.gdextension.uid
+*.gd.uid

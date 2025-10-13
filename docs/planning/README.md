@@ -10,7 +10,8 @@ This folder contains detailed roadmaps for each development version on the path 
 
 - ✅ v0.0.1: Released (October 2, 2025)
 - ✅ v0.0.2: Released (October 5, 2025)
-- 🔜 v0.0.3: Ready to Start (Editor Experience Alpha)
+- ✅ v0.0.3: Released (October 8, 2025) - Editor Experience Alpha
+- 🔜 v0.0.4: **IN PROGRESS** (Godot API Expansion) - Phase 1 Ready
 
 ---
 
@@ -44,39 +45,52 @@ This folder contains detailed roadmaps for each development version on the path 
 
 ---
 
-### [v0.0.3 - Editor Experience Alpha](v0.0.3-roadmap.md) 🔜 **NEXT**
+### [v0.0.3 - Editor Experience Alpha](../archive/v0.0.3/README.md) ✅ **COMPLETE**
 
-**Timeline**: 2-3 weeks  
+**Released**: October 8, 2025  
+**Status**: ✅ **COMPLETE (100%)**  
 **Focus**: Enhanced editor support and diagnostics
 
 **Key Deliverables**:
 
-- 🔥 Enhanced error diagnostics (error codes, "did you mean?" suggestions)
-- VS Code extension polish (completion, hover, problem panel)
-- Development scripts (test.sh, bench.sh, format.sh, etc.)
-- **NEW**: Staged branching workflow (feature → develop → main)
-- **NEW**: CI optimization (60-95% time savings)
+- ✅ Enhanced error diagnostics (error codes, "did you mean?" suggestions)
+- ✅ VS Code extension polish (completion, hover, problem panel)
+- ✅ Development scripts (test.sh, bench.sh, format.sh, etc.)
+- ✅ Staged branching workflow (feature → develop → main)
+- ✅ CI optimization (60-95% time savings)
+- ✅ Parser error recovery (multi-error reporting foundation)
+- ✅ Documentation website (Jekyll + GitHub Pages)
 
-**Status**: 🟢 **READY TO START**  
+**Final Metrics**:
+
+- 9 phases completed (1-7 merged, 8 deferred to v0.0.4, 9 deferred to v0.1.0)
+- 270+ tests passing
+- 64.54% test coverage (+5% from v0.0.2)
+- 0 clippy warnings (strict mode)
+- 6 PRs merged (#27, #32, TBD for phases 4-7)
+
+**Archive**: `docs/archive/v0.0.3/`  
 **Prerequisites**: ✅ v0.0.2 (completed)
 
 ---
 
-### [v0.0.4 - Godot API Expansion](v0.0.4-roadmap.md)
+### [v0.0.4 - Godot API Expansion](v0.0.4/README.md) 🔜 **IN PROGRESS**
 
 **Timeline**: 3-4 weeks  
 **Focus**: Expand Godot integration without new language features
 
 **Key Deliverables**:
 
-- 🔥 Signal support (define, emit, connect)
-- Additional callbacks (_input,_physics_process,_enter_tree,_exit_tree)
+- 🔥 Signal support (define, emit, connect) - **Phase 1 Ready**
+- Additional callbacks (_input, _physics_process, _enter_tree, _exit_tree)
 - Node query functions (get_node, get_parent, has_node, find_child)
 - Additional Godot types (Color, Rect2, Transform2D)
 - Custom property exports (@export)
 
-**Status**: 🟡 Planning  
-**Prerequisites**: v0.0.3 (solid editor + error reporting)
+**Status**: � **ACTIVE DEVELOPMENT** (Phase 1 ready to start)  
+**Prerequisites**: ✅ v0.0.3 (solid editor + error reporting)
+
+**Phase Tracking**: See [v0.0.4/README.md](v0.0.4/README.md) for detailed phase status
 
 ---
 
@@ -247,7 +261,7 @@ v0.1.0 (Production Ready) 🚀
 
 ## 🔗 Related Documentation
 
-- [v0.1.0 Roadmap (Main)](../v0.1.0-ROADMAP.md) - Comprehensive feature roadmap
+- [v0.1.0 Roadmap (Main)](./v0.1.0-ROADMAP.md) - Comprehensive feature roadmap
 - [v0.0.2 Checklist](../archive/v0.0.2/v0.0.2-CHECKLIST.md) - Detailed task checklist (archived)
 - [Version Planning](../VERSION_PLANNING.md) - High-level version strategy
 - [Architecture](../ARCHITECTURE.md) - Technical architecture
