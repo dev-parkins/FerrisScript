@@ -1,0 +1,27 @@
+// TEST: function_definitions
+// CATEGORY: unit
+// DESCRIPTION: Function definitions with parameters, return types, and function calls
+// EXPECT: success
+// ASSERT: FerrisScript
+//
+// Demonstrates:
+// - Function definition with return type (fn add)
+// - Function with parameters, no return (fn greet)
+// - Function call with arguments
+// - Return statement
+// - Type annotations on parameters and return values
+//
+// SCENE SETUP: Attach to any Node2D
+
+fn add(a: i32, b: i32) -> i32 {
+    return a + b;
+}
+
+fn greet(name: String) {
+    print(name);
+}
+
+fn _ready() {
+    let sum: i32 = add(2, 3);
+    greet("FerrisScript");
+}

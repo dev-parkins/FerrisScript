@@ -1,0 +1,27 @@
+// TEST: hot_reload_state
+// CATEGORY: integration
+// DESCRIPTION: State persistence across hot-reloads (counter increments)
+// EXPECT: success
+// ASSERT: (counter increments across reloads - manual verification needed)
+//
+// Demonstrates:
+// - Mutable global state
+// - _process() lifecycle hook
+// - Variable increment
+// - State persistence during hot-reload
+//
+// TESTING HOT-RELOAD:
+// 1. Attach to Node2D and run scene
+// 2. Counter increments every frame
+// 3. Modify this file (e.g., change increment to +2)
+// 4. Save file
+// 5. Counter continues from last value (not reset to 0)
+//
+// NOTE: Hot-reload testing requires manual verification in Godot editor
+
+let mut count: i32 = 0;
+
+fn _process(delta: f32) {
+    count = count + 1;
+}
+

@@ -1,3 +1,10 @@
+// TEST: signal_declaration_emission
+// CATEGORY: integration
+// DESCRIPTION: Signal declaration and emission with typed parameters
+// EXPECT: success
+// ASSERT: Signal Test Ready!
+// ASSERT: Available signals: health_changed, player_died, score_updated
+//
 // Signal Test for FerrisScript v0.0.4
 // Tests signal declaration and emission
 

@@ -1,3 +1,10 @@
+// TEST: bounce_test_godot
+// CATEGORY: integration
+// DESCRIPTION: Mutable state persistence and control flow with boundary checking
+// EXPECT: success
+// ASSERT: Bounce test started
+// ASSERT: Node will bounce between x = -200 and x = 200
+//
 // Bounce Test - Tests mutable state persistence and control flow
 // This script demonstrates:
 // - Mutable global variables that persist between frames

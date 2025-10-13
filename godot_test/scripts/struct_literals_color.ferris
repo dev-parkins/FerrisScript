@@ -1,8 +1,15 @@
-// Example: Struct Literal Color Manipulation
-// TEST struct_literals_color
-// CATEGORY: semantics
-// EXPECT: compile_success
-// DESCRIPTION: Demonstrates Color struct literals with field access
+// TEST: struct_literals_color
+// CATEGORY: unit
+// DESCRIPTION: Color struct literals with RGBA fields and color mixing
+// EXPECT: success
+// ASSERT: Red component:
+//
+// Demonstrates:
+// - Color struct literal syntax
+// - RGBA field initialization (r, g, b, a)
+// - Field access for color manipulation
+// - Integer to f32 coercion in Color literals
+// - Color mixing with manual calculations
 
 fn _ready() {
     // Create colors using struct literals

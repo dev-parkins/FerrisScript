@@ -1,0 +1,20 @@
+// TEST: type_mismatch_error
+// CATEGORY: unit
+// DESCRIPTION: Negative test verifying type checker rejects type mismatches
+// EXPECT: error
+// EXPECT_ERROR: E200
+//
+// This is a NEGATIVE TEST demonstrating FerrisScript's type safety.
+// The compiler should REJECT this code with Error E200 (Type mismatch).
+//
+// Demonstrates:
+// - Strong static typing
+// - Compile-time type checking
+// - Type safety prevents runtime crashes
+//
+// If this compiles successfully, the type checker has a bug!
+
+fn _ready() {
+    let x: i32 = true;  // ❌ Type error: bool cannot be coerced to i32
+}
+

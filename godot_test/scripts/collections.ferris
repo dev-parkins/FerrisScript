@@ -1,0 +1,21 @@
+// TEST: collections_placeholder
+// CATEGORY: unit
+// DESCRIPTION: Placeholder for future array and iteration support
+// EXPECT: success
+// ASSERT: (no output - future feature)
+//
+// NOTE: This file shows desired future functionality:
+// - Array literals: [1, 2, 3]
+// - Generic types: Array<i32>
+// - For loops: for n in nums
+//
+// STATUS: Arrays and for loops not yet implemented (planned for v0.2.0)
+//
+// This file exists as documentation of planned features.
+
+// This is for future implementation:
+// let nums: Array<i32> = [1, 2, 3];
+// for n in nums {
+//     print("num");
+// }
+

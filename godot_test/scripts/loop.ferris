@@ -1,0 +1,24 @@
+// TEST: while_loop
+// CATEGORY: unit
+// DESCRIPTION: While loop incrementing counter variable
+// EXPECT: success
+// ASSERT: (counter reaches 3)
+//
+// Demonstrates:
+// - While loop syntax
+// - Mutable global variable
+// - Loop condition checking
+// - Variable increment pattern
+//
+// NOTE: for loops not yet implemented (planned for v0.2.0)
+//
+// SCENE SETUP: Attach to any Node2D
+
+let mut i: i32 = 0;
+
+fn _ready() {
+    while i < 3 {
+        i = i + 1;
+    }
+}
+

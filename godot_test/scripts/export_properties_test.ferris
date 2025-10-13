@@ -1,3 +1,9 @@
+// TEST: export_properties_comprehensive
+// CATEGORY: integration
+// DESCRIPTION: All 8 exportable types and 4 hint types (@export properties)
+// EXPECT: success
+// ASSERT: (properties visible in Inspector - manual verification)
+//
 // Integration Test: Exported Properties with All Types and Hints
 // Tests all 8 exportable types and 4 hint types
 

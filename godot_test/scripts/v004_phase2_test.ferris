@@ -1,3 +1,13 @@
+// TEST: v004_phase2_validation
+// CATEGORY: integration
+// DESCRIPTION: Phase 2 feature validation (variables, arithmetic, conditionals)
+// EXPECT: success
+// ASSERT: Test 1: Variable Assignment and Retrieval
+// ASSERT: PASS
+// ASSERT: Test 2: Arithmetic Operations
+//
+// Phase 2 Feature Validation Test
+// Tests core FerrisScript features from v0.0.4 Phase 2
 
 // HI FROM COMMENT
 

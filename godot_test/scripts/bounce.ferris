@@ -1,0 +1,28 @@
+// TEST: bounce_horizontal
+// CATEGORY: integration
+// DESCRIPTION: Horizontal bouncing motion using self.position and conditional logic
+// EXPECT: success
+// ASSERT: (checks for smooth position updates in runtime)
+//
+// Demonstrates:
+// - Global mutable variable (let mut)
+// - _process() lifecycle hook with delta time
+// - self.position property access
+// - Conditional logic (if statements)
+// - Directional movement state
+//
+// SCENE SETUP: Attach to Node2D, run scene to see horizontal bouncing motion
+// EXPECTED BEHAVIOR: Node bounces between x=-10.0 and x=10.0
+
+let mut dir: f32 = 1.0;
+
+fn _process(delta: f32) {
+    self.position.x += dir * 100.0 * delta;
+
+    if self.position.x > 10.0 {
+        dir = -1.0;
+    }
+    if self.position.x < -10.0 {
+        dir = 1.0;
+    }
+}

@@ -1,3 +1,10 @@
+// TEST: inspector_clamp_on_set
+// CATEGORY: integration
+// DESCRIPTION: Inspector clamp-on-set policy (Inspector clamps, script warns)
+// EXPECT: success
+// ASSERT: === Inspector Clamp-on-Set Test ===
+// ASSERT: Initial values:
+//
 // Integration Test: Inspector Clamp-on-Set Policy
 // Tests that Inspector sets clamp values, while script sets warn
 
