@@ -1,8 +1,15 @@
-// Example: Struct Literal Rect2 Boundaries
-// TEST struct_literals_rect2
-// CATEGORY: semantics
-// EXPECT: compile_success
-// DESCRIPTION: Demonstrates Rect2 struct literals with nested Vector2 access
+// TEST: struct_literals_rect2
+// CATEGORY: unit
+// DESCRIPTION: Rect2 struct literals with nested Vector2 and boundary calculations
+// EXPECT: success
+// ASSERT: Rect bounds calculated
+//
+// Demonstrates:
+// - Rect2 struct literal syntax
+// - Nested Vector2 fields (position, size)
+// - Nested field access (rect.position.x)
+// - Boundary calculation logic
+// - Point-in-rectangle testing
 
 fn _ready() {
     // Create rectangle using struct literals

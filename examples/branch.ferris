@@ -1,4 +1,16 @@
-// branch.ferris – test if/else branching
+// TEST: if_else_branching
+// CATEGORY: unit
+// DESCRIPTION: If/else conditional branching with comparison operators
+// EXPECT: success
+// ASSERT: big
+//
+// Demonstrates:
+// - If/else statement syntax
+// - Comparison operators (>)
+// - Global variable access
+// - Conditional execution paths
+//
+// SCENE SETUP: Attach to any Node2D
 
 let x: i32 = 5;
 

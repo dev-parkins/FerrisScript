@@ -1,3 +1,9 @@
+// TEST: error_showcase
+// CATEGORY: integration
+// DESCRIPTION: Demonstrates FerrisScript's helpful error messages (uncomment to test)
+// EXPECT: success
+// ASSERT: (no output - errors are commented out)
+//
 // Error Showcase Example
 // 
 // This example demonstrates FerrisScript's helpful error messages.

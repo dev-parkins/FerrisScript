@@ -1,0 +1,47 @@
+// TEST: inspector_minimal
+// CATEGORY: integration
+// DESCRIPTION: Minimal Inspector test with @export properties (basic types, Godot types, hints)
+// EXPECT: success
+// ASSERT: Inspector minimal test ready
+//
+// This file tests Inspector integration with minimal examples of:
+// - Basic types (i32, f32, bool, String)
+// - Godot types (Vector2, Color)
+// - Property hints (range)
+// - Property mutation in _process()
+//
+// SCENE SETUP:
+// 1. Create Node2D in Godot Editor
+// 2. Attach FerrisScriptNode
+// 3. Set Script Path: res://examples/inspector_minimal.ferris
+// 4. Verify all 7 properties visible in Inspector
+//
+// EXPECTED BEHAVIOR:
+// - Inspector shows all 7 properties with correct default values
+// - health increments every frame (not visible in Inspector during runtime)
+// - stamina regenerates to 100 when below 100
+
+// Basic types
+@export let mut health: i32 = 100;
+@export let mut speed: f32 = 5.0;
+@export let mut is_active: bool = true;
+@export let mut player_name: String = "Hero";
+
+// Godot types
+@export let mut spawn_pos: Vector2 = Vector2 { x: 0.0, y: 0.0 };
+@export let mut tint: Color = Color { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
+
+// Property with hint (NOTE: correct syntax)
+@export(range(0, 100, 1))
+let mut stamina: i32 = 50;
+
+fn _ready() {
+    print("Inspector minimal test ready");
+}
+
+fn _process(delta: f32) {
+    health = health + 1;
+    if stamina < 100 {
+        stamina = stamina + 1;
+    }
+}

@@ -1,3 +1,18 @@
+// TEST: move_right
+// CATEGORY: integration
+// DESCRIPTION: Continuous rightward movement using _process() and delta time
+// EXPECT: success
+// ASSERT: (checks for position updates in runtime)
+//
+// Demonstrates:
+// - _process() lifecycle hook
+// - Delta time for frame-independent movement
+// - self.position property modification
+// - Basic arithmetic operations
+//
+// SCENE SETUP: Attach to Node2D, run scene to see continuous rightward motion
+// EXPECTED BEHAVIOR: Node moves right at 50 pixels/second
+
 fn _process(delta: f32) {
     self.position.x += 50.0 * delta;
 }

@@ -1,6 +1,18 @@
-// match.ferris – test enums and pattern matching
-// Note: Enums and match expressions not yet implemented
-// This shows desired future functionality
+// TEST: match_placeholder
+// CATEGORY: unit
+// DESCRIPTION: Placeholder for future enum and pattern matching support
+// EXPECT: success
+// ASSERT: (no output - future feature)
+//
+// NOTE: This file shows desired future functionality:
+// - Enum definitions: enum Dir { Left, Right, Up, Down }
+// - Enum variants: Dir.Left
+// - Match expressions: match d { ... }
+// - Pattern matching with arms
+//
+// STATUS: Enums and match not yet implemented (planned for v0.2.0)
+//
+// This file exists as documentation of planned features.
 
 // This is for future implementation:
 // enum Dir { Left, Right, Up, Down }

@@ -49,8 +49,14 @@ impl TestHarness {
 
         println!("Running test: {}", script_name);
 
-        // Read script content to parse scene requirements
+        // Read script content to parse scene requirements and test metadata
         let script_content = std::fs::read_to_string(script_path)?;
+
+        // Parse test metadata
+        let all_metadata = crate::MetadataParser::parse_metadata(&script_content)?;
+        let metadata = all_metadata
+            .first()
+            .ok_or_else(|| anyhow::anyhow!("Error: No TEST metadata found in script"))?;
 
         // Build scene dynamically
         let scene_path = self.generate_test_scene(&script_name, &script_content, script_path)?;
@@ -65,12 +71,11 @@ impl TestHarness {
             .parser
             .parse(&script_name, &output.stdout, &output.stderr);
 
-        // Determine pass/fail
-        let passed = results.failed == 0
-            && self.parser.script_loaded_successfully(&output.stdout)
-            && !self
-                .parser
-                .has_compilation_errors(&output.stdout, &output.stderr);
+        // Validate test expectations (pass/fail based on metadata)
+        let validation = self
+            .parser
+            .validate_test(metadata, &output.stdout, &output.stderr);
+        let passed = validation.passed;
 
         Ok(TestResult {
             script_name,

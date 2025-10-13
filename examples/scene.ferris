@@ -1,6 +1,18 @@
-// scene.ferris – test Godot node access
-// Note: node() function and Sprite type not yet implemented
-// This shows desired future functionality
+// TEST: scene_position_update
+// CATEGORY: integration
+// DESCRIPTION: Basic scene interaction with self.position property
+// EXPECT: success
+// ASSERT: (position updates - visible in runtime)
+//
+// Demonstrates:
+// - self.position property access
+// - Position mutation in _process()
+// - Frame-based movement
+//
+// NOTE: More advanced node access (get_node, get_parent) coming in v0.0.4
+// See node_query_*.ferris examples for full node query functionality.
+//
+// SCENE SETUP: Attach to Node2D, run scene to see continuous rightward motion
 
 fn _process(delta: f32) {
     self.position.x = self.position.x + 10.0;

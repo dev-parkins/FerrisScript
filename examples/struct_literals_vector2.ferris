@@ -1,8 +1,15 @@
-// Example: Struct Literal Vector2 Math
-// TEST struct_literals_vector2
-// CATEGORY: semantics
-// EXPECT: compile_success
-// DESCRIPTION: Demonstrates Vector2 struct literals with arithmetic operations
+// TEST: struct_literals_vector2
+// CATEGORY: unit
+// DESCRIPTION: Vector2 struct literals with arithmetic operations and field access
+// EXPECT: success
+// ASSERT: Position updated
+//
+// Demonstrates:
+// - Vector2 struct literal syntax
+// - Field initialization (x, y)
+// - Field access (pos.x, pos.y)
+// - Integer to f32 coercion in struct literals
+// - Manual vector arithmetic
 
 fn _ready() {
     // Create vectors using struct literals

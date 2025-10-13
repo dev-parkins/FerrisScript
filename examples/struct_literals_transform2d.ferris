@@ -1,8 +1,15 @@
-// Example: Struct Literal Transform2D Scene Setup
-// TEST struct_literals_transform2d
-// CATEGORY: semantics
-// EXPECT: compile_success
-// DESCRIPTION: Demonstrates Transform2D struct literals for scene transformations
+// TEST: struct_literals_transform2d
+// CATEGORY: unit
+// DESCRIPTION: Transform2D struct literals with position, rotation, and scale
+// EXPECT: success
+// ASSERT: Transforms initialized
+//
+// Demonstrates:
+// - Transform2D struct literal syntax
+// - Position (Vector2), rotation (f32), scale (Vector2) fields
+// - Nested field access (transform.position.x)
+// - Rotation in radians
+// - Multi-line struct literal formatting
 
 fn _ready() {
     // Create transform using struct literals

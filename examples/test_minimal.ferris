@@ -1,0 +1,32 @@
+// TEST: parser_minimal
+// CATEGORY: unit
+// DESCRIPTION: Minimal parser test with @export properties and multiple functions
+// EXPECT: error
+// EXPECT_ERROR: print expects 1 argument
+//
+// NOTE: This file currently has a print() limitation - print only accepts 1 argument.
+// The multi-argument print calls will fail until print is upgraded.
+//
+// Minimal test to isolate the parser issue
+
+@export
+let mut health: i32 = 100;
+
+@export
+let mut position: Vector2 = Vector2 { x: 0.0, y: 0.0 };
+
+fn _ready() {
+    print("Ready");
+    print("Health: ", health);
+    print("Position: ", position.x, ", ", position.y);
+}
+
+fn test_function() {
+    print("Test 1");
+}
+
+fn another_function() {
+    print("Test 2");
+    health = 50;
+    print("Test 3");
+}

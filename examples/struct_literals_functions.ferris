@@ -1,8 +1,15 @@
-// Example: Struct Literal Functions
-// TEST struct_literals_functions
-// CATEGORY: semantics
-// EXPECT: compile_success
-// DESCRIPTION: Demonstrates struct literals as function parameters and return values
+// TEST: struct_literals_functions
+// CATEGORY: unit
+// DESCRIPTION: Struct literals as function parameters and return values
+// EXPECT: success
+// ASSERT: Function tests passed
+//
+// Demonstrates:
+// - Functions returning struct literals
+// - Functions accepting struct parameters
+// - Struct construction in return statements
+// - Struct field manipulation in functions
+// - Color interpolation (lerp) algorithm
 
 fn create_centered_rect(width: f32, height: f32) -> Rect2 {
     let half_w = width / 2.0;

@@ -1,3 +1,10 @@
+// TEST: signals_comprehensive
+// CATEGORY: integration
+// DESCRIPTION: Comprehensive signal declaration, emission, and parameter passing
+// EXPECT: success
+// ASSERT: Signal Example Ready!
+// ASSERT: Available signals:
+//
 // Comprehensive Signal Example for FerrisScript v0.0.4
 // Demonstrates signal declaration, emission, and best practices
 
