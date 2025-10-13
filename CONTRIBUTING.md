@@ -232,7 +232,7 @@ Code contributions are welcome for:
 
 1. **Open an issue** (or comment on an existing one) to discuss your approach
 2. **Wait for feedback** from maintainers to ensure alignment
-3. **Create a feature branch** from `develop` for your work (e.g., `feature/my-feature`)
+3. **Create a feature branch** from `main` for your work (e.g., `feature/my-feature`)
 
 #### Maintaining Syntax Highlighting
 
@@ -305,31 +305,27 @@ You should see "Hello from FerrisScript!" printed to the console.
 
 ## Development Workflow
 
-**Starting with v0.0.3**, FerrisScript uses a **staged development workflow** with three branch types:
+**As of October 2025**, FerrisScript uses a **direct-to-main workflow** (GitHub Flow) with two branch types:
 
 ### Branch Structure
 
 - **`main`**: Production-ready code, protected
-  - Only receives PRs from `develop`
-  - Requires code review and passing CI
-  - Triggers release workflows
-
-- **`develop`**: Integration/staging branch
   - Accepts PRs from `feature/*` branches
-  - Full CI suite runs on every push
-  - Tests multiple features together before release
+  - Requires code review and passing CI
+  - Triggers release workflows on tags
 
 - **`feature/*`**: Individual feature branches
-  - Created from `develop` (not `main`)
-  - Quick CI checks only (2-3 min feedback)
+  - Created from `main`
+  - Quick CI checks for fast feedback (2-3 min)
+  - Full test suite runs before merge to main
   - One feature per branch
 
 ### Creating a Feature Branch
 
 ```bash
-# Start from develop
-git checkout develop
-git pull origin develop
+# Start from main
+git checkout main
+git pull origin main
 
 # Create your feature branch
 git checkout -b feature/your-feature-name
@@ -341,14 +337,14 @@ git checkout -b feature/your-feature-name
 cargo test --workspace
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 
-# Push and create PR to develop
+# Push and create PR to main
 git push -u origin feature/your-feature-name
-gh pr create --base develop --title "feat: Your feature description"
+gh pr create --base main --title "feat: Your feature description"
 ```
 
 ### CI Behavior by Branch
 
-**Feature Branches** (`feature/*`):
+**Feature Branch PRs** (`feature/*` → `main`):
 
 - ⚡ **Quick Check** (2-3 minutes):
   - Code formatting (`cargo fmt`)
@@ -357,21 +353,22 @@ gh pr create --base develop --title "feat: Your feature description"
 - 🎯 **Goal**: Fast feedback during development
 - 💰 **Savings**: ~60-70% CI time vs full suite
 
-**Develop Branch**:
+**Main Branch** (after PR merge):
 
 - 🔄 **Full Test Suite** (~10-15 minutes):
   - Cross-platform tests (Linux, Windows, macOS)
   - All tests (unit + integration)
   - Code coverage reporting
   - Release builds
-- 🎯 **Goal**: Integration testing before release
-
-**Main Branch**:
-
-- ✅ **Full Test Suite + Release**:
-  - Everything from develop
-  - Creates GitHub release on tags
 - 🎯 **Goal**: Production validation
+
+**Tagged Releases** (`v*` tags on main):
+
+- ✅ **Full Test Suite + Release Build**:
+  - All validation checks
+  - Creates GitHub release
+  - Attaches platform-specific binaries
+- 🎯 **Goal**: Automated releases
 
 ### Path Filters (Docs-Only Changes)
 
@@ -389,15 +386,16 @@ This saves ~95% CI time for documentation PRs!
 ### Release Flow
 
 ```bash
-# Feature development
-feature/my-feature → develop (via PR)
-feature/another-feature → develop (via PR)
+# Feature development (direct to main)
+feature/my-feature → main (via PR)
+feature/another-feature → main (via PR)
 
-# After multiple features tested on develop
-develop → main (via PR)
+# Tag for release when ready
+git tag -a v0.0.5 -m "Release v0.0.5"
+git push origin v0.0.5
 
-# Creates release
-main → tagged release (v0.0.3)
+# Creates release automatically
+main (tagged) → GitHub Release
 ```
 
 ## Pull Request Process
@@ -426,12 +424,12 @@ git checkout -b docs/add-api-examples
 
 ### Creating a Pull Request
 
-1. **Create a feature branch** from `develop` with the appropriate prefix:
+1. **Create a feature branch** from `main` with the appropriate prefix:
 
    ```bash
-   # Start from develop
-   git checkout develop
-   git pull origin develop
+   # Start from main
+   git checkout main
+   git pull origin main
    
    # For bug fixes
    git checkout -b bugfix/your-bug-description
@@ -452,11 +450,11 @@ git checkout -b docs/add-api-examples
    git commit -m "fix: resolve issue with parser"
    ```
 
-3. **Keep your branch up to date** with `develop`:
+3. **Keep your branch up to date** with `main`:
 
    ```bash
    git fetch origin
-   git rebase origin/develop
+   git rebase origin/main
    ```
 
 4. **Push your branch**:
@@ -465,8 +463,8 @@ git checkout -b docs/add-api-examples
    git push origin feature/your-feature-name
    ```
 
-5. **Open a Pull Request** to `develop` (not `main`) via GitHub:
-   - **Base branch**: `develop` (important!)
+5. **Open a Pull Request** to `main` via GitHub:
+   - **Base branch**: `main`
    - Use a clear, descriptive title following [Conventional Commits](https://www.conventionalcommits.org/)
    - The appropriate PR template will be **automatically applied** based on your branch name
    - Fill out all sections marked with `<!-- ... -->` comments
@@ -505,9 +503,8 @@ Before your PR can be merged:
 
 ### Merge Strategy
 
-- **Feature branches → develop**: We use **squash and merge** to keep develop branch history clean
-- **develop → main**: Merge commits for releases to preserve version history
-- **Hotfix branches**: We use **merge commit** to preserve context
+- **Feature branches → main**: We use **squash and merge** to keep main branch history clean and linear
+- **Hotfix branches**: We use **squash and merge** for consistency
 - **Branch deletion**: Branches are automatically deleted after merge (enable in your fork's settings)
 
 ### Draft Pull Requests
