@@ -54,3 +54,4 @@ tarpaulin-report.html
 
 # Godot UID files (auto-generated)
 *.gdextension.uid
+*.gd.uid
