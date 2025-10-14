@@ -237,6 +237,7 @@
 **✅ Completed (PR #TBD)**: Tasks 1-4 complete. Created `span.rs` module with Position/Span structs, updated AST/parser/type_checker, all tests passing.
 
 **⚠️ Implementation Notes**:
+
 - **Byte offset tracking**: Currently using placeholder `0` values. Lexer doesn't track byte positions yet. Deferred to future enhancement (can calculate from line/column if needed, but adds overhead).
 - **Point spans**: Most spans are zero-length (start == end) because `span_from()` helper exists but isn't called yet. Multi-token span tracking deferred to Week 2 parser enhancements.
 - **Backward compatibility**: Re-exported `Span` from `ast` module to avoid breaking runtime crate. All existing `ast::Span` references still work.
