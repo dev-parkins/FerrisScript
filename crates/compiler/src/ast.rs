@@ -25,41 +25,8 @@
 
 use std::fmt;
 
-/// Source code location (line and column numbers).
-///
-/// Used throughout the AST to track where each construct appears in the
-/// source code. This enables precise error messages with line/column info.
-///
-/// # Examples
-///
-/// ```
-/// use ferrisscript_compiler::ast::Span;
-///
-/// let span = Span::new(10, 15); // line 10, column 15
-/// assert_eq!(span.line, 10);
-/// assert_eq!(span.column, 15);
-/// ```
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Span {
-    pub line: usize,
-    pub column: usize,
-}
-
-impl Span {
-    pub fn new(line: usize, column: usize) -> Self {
-        Span { line, column }
-    }
-
-    pub fn unknown() -> Self {
-        Span { line: 0, column: 0 }
-    }
-}
-
-impl fmt::Display for Span {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "line {}, column {}", self.line, self.column)
-    }
-}
+// Re-export Span for backward compatibility
+pub use crate::span::Span;
 
 /// Root node of a FerrisScript program.
 ///
@@ -368,6 +335,31 @@ pub enum Stmt {
         value: Option<Expr>,
         span: Span,
     },
+}
+
+impl Stmt {
+    /// Get the span of this statement.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ferrisscript_compiler::ast::{Stmt, Expr, Literal};
+    /// use ferrisscript_compiler::span::{Span, Position};
+    ///
+    /// let span = Span::new(Position::new(1, 1, 0), Position::new(1, 10, 9));
+    /// let stmt = Stmt::Expr(Expr::Literal(Literal::Int(42), span));
+    /// assert_eq!(stmt.span(), span);
+    /// ```
+    pub fn span(&self) -> Span {
+        match self {
+            Stmt::Expr(expr) => expr.span(),
+            Stmt::Let { span, .. } => *span,
+            Stmt::Assign { span, .. } => *span,
+            Stmt::If { span, .. } => *span,
+            Stmt::While { span, .. } => *span,
+            Stmt::Return { span, .. } => *span,
+        }
+    }
 }
 
 /// Signal declaration (top-level only).

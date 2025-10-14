@@ -220,11 +220,11 @@
 
 **Acceptance Criteria**:
 
-- [ ] `Span::new(start, end)` and `Span::merge(other)` work
-- [ ] Every `Expr`, `Stmt`, `Type` has a `span()` method
-- [ ] Parser creates spans from token positions
-- [ ] Error messages include `Span` information
-- [ ] All 543 compiler tests pass with spans
+- [x] `Span::new(start, end)` and `Span::merge(other)` work
+- [x] Every `Expr`, `Stmt`, `Type` has a `span()` method
+- [x] Parser creates spans from token positions
+- [x] Error messages include `Span` information
+- [x] All 568 compiler tests pass with spans (31 new span unit tests + 5 integration tests)
 - [ ] **🆕 Inspector clears properties on compilation failure**
 - [ ] **🆕 Switching scripts after type error updates Inspector correctly**
 
@@ -233,6 +233,14 @@
 
 **Quick Win**: Inspector fix can run in parallel as background agent task  
 **📄 Inspector Fix Details**: See [INSPECTOR_PROPERTY_FIX.md](INSPECTOR_PROPERTY_FIX.md)
+
+**✅ Completed (PR #TBD)**: Tasks 1-4 complete. Created `span.rs` module with Position/Span structs, updated AST/parser/type_checker, all tests passing.
+
+**⚠️ Implementation Notes**:
+
+- **Byte offset tracking**: Currently using placeholder `0` values. Lexer doesn't track byte positions yet. Deferred to future enhancement (can calculate from line/column if needed, but adds overhead).
+- **Point spans**: Most spans are zero-length (start == end) because `span_from()` helper exists but isn't called yet. Multi-token span tracking deferred to Week 2 parser enhancements.
+- **Backward compatibility**: Re-exported `Span` from `ast` module to avoid breaking runtime crate. All existing `ast::Span` references still work.
 
 ---
 

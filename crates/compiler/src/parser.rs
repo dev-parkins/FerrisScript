@@ -34,6 +34,7 @@ use crate::ast::*;
 use crate::error_code::ErrorCode;
 use crate::error_context::format_error_with_code;
 use crate::lexer::{PositionedToken, Token};
+use crate::span::{Position, Span};
 
 pub struct Parser<'a> {
     tokens: Vec<PositionedToken>,
@@ -119,7 +120,32 @@ impl<'a> Parser<'a> {
     }
 
     fn span(&self) -> Span {
-        Span::new(self.current_line, self.current_column)
+        // TODO(v0.0.5): Track actual byte offsets during parsing
+        // For now, use offset 0 (unknown) and create zero-length spans
+        let pos = Position::new(self.current_line, self.current_column, 0);
+        Span::point(pos)
+    }
+
+    /// Create a span from a start position to the current position.
+    ///
+    /// This is used when parsing multi-token constructs to create a span
+    /// that covers the entire construct.
+    ///
+    /// # Arguments
+    ///
+    /// * `start_line` - The line where the construct started
+    /// * `start_column` - The column where the construct started
+    ///
+    /// # Returns
+    ///
+    /// A span from the start position to the current position
+    #[allow(dead_code)]
+    fn span_from(&self, start_line: usize, start_column: usize) -> Span {
+        // TODO(v0.0.5): Track actual byte offsets during parsing
+        // For now, use offset 0 (unknown)
+        let start_pos = Position::new(start_line, start_column, 0);
+        let end_pos = Position::new(self.current_line, self.current_column, 0);
+        Span::new(start_pos, end_pos)
     }
 
     /// Synchronize parser to next safe recovery point after error.
