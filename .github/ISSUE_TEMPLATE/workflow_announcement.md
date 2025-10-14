@@ -7,7 +7,7 @@ assignees: ''
 pinned: true
 ---
 
-# 🎉 Workflow Simplification - We've Removed the `develop` Branch!
+# 🎉 Workflow Simplification - We've Removed the `develop` Branch
 
 **Effective Date:** October 13, 2025  
 **Impact:** All contributors
@@ -19,12 +19,14 @@ pinned: true
 FerrisScript has **simplified its development workflow** from a three-branch model to a direct-to-main model (GitHub Flow).
 
 ### Before (Three-Branch Workflow)
+
 ```
 feature/my-feature → develop (PR #1)
 develop → main (PR #2)
 ```
 
 ### After (Direct-to-Main Workflow)
+
 ```
 feature/my-feature → main (PR)
 ```
@@ -48,6 +50,7 @@ See [docs/planning/REMOVE_DEVELOP_BRANCH_PLAN.md](https://github.com/dev-parkins
 ## 🚀 What You Need to Do
 
 ### For New Contributors
+
 **Nothing!** Just follow the updated [CONTRIBUTING.md](https://github.com/dev-parkins/FerrisScript/blob/main/CONTRIBUTING.md) guide.
 
 ### For Existing Contributors with Feature Branches
@@ -88,6 +91,7 @@ git push origin main
 ## 📖 Updated Workflow
 
 1. **Create feature branch from `main`**:
+
    ```bash
    git checkout main
    git pull origin main
@@ -95,12 +99,14 @@ git push origin main
    ```
 
 2. **Make changes and test locally**:
+
    ```bash
    cargo test --workspace
    cargo clippy --workspace --all-targets --all-features -- -D warnings
    ```
 
 3. **Create PR to `main`**:
+
    ```bash
    git push -u origin feature/your-feature
    gh pr create --base main --title "feat: your feature"
@@ -122,6 +128,7 @@ The **Quick Check optimization** remains in place:
 ## 📚 Updated Documentation
 
 All documentation has been updated:
+
 - ✅ [CONTRIBUTING.md](https://github.com/dev-parkins/FerrisScript/blob/main/CONTRIBUTING.md) - Updated workflow instructions
 - ✅ GitHub workflows - Removed `develop` triggers
 - ✅ Branch protection - Only `main` is protected now
@@ -142,6 +149,7 @@ All documentation has been updated:
 ## 📊 Success Metrics (First Week)
 
 We're tracking:
+
 - Average PR time (expect 20-30% reduction)
 - CI resource usage (expect 15-20% reduction)
 - Contributor feedback
@@ -153,5 +161,6 @@ We're tracking:
 ---
 
 **Related:**
+
 - Full Plan: [docs/planning/REMOVE_DEVELOP_BRANCH_PLAN.md](https://github.com/dev-parkins/FerrisScript/blob/main/docs/planning/REMOVE_DEVELOP_BRANCH_PLAN.md)
 - Contributing Guide: [CONTRIBUTING.md](https://github.com/dev-parkins/FerrisScript/blob/main/CONTRIBUTING.md)
