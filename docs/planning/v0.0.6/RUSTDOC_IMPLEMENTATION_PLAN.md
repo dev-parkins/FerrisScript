@@ -1,6 +1,6 @@
 # Rustdoc Implementation Plan for FerrisScript
 
-**Version**: v0.0.5 (or later)  
+**Version**: v0.0.6 (or later)  
 **Created**: October 13, 2025  
 **Status**: Planning  
 **Effort Estimate**: 2-3 weeks (Medium complexity)
@@ -676,7 +676,7 @@ pub fn my_method(&self, param1: Type1, param2: Type2) -> Result<Output, Error> {
 
 ## 🚀 Future Enhancements
 
-### Phase 5: Rustdoc JSON Export (Post-v0.0.5)
+### Phase 5: Rustdoc JSON Export (Post-v0.0.6)
 
 **Goal**: Enable AI-assisted development via Rustdoc JSON
 
@@ -870,4 +870,4 @@ fn extract_docs(json_path: &str) -> Result<Vec<DocItem>, Error> {
 ---
 
 **Status**: Ready for implementation  
-**Next Steps**: Assign to v0.0.5 milestone and begin Phase 1
+**Next Steps**: Assign to v0.0.6 milestone and begin Phase 1

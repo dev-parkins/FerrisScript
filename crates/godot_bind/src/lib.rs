@@ -1,14 +1,13 @@
 use ferrisscript_compiler::{ast, compile};
-use ferrisscript_runtime::{call_function, execute, Env, InputEventHandle, Value};
-use godot::classes::{file_access::ModeFlags, FileAccess, InputEvent};
+use ferrisscript_runtime::{Env, InputEventHandle, Value, call_function, execute};
+use godot::classes::{FileAccess, InputEvent, file_access::ModeFlags};
 use godot::prelude::*;
 use std::cell::RefCell;
 
 // PropertyInfo imports for Inspector integration (Bundle 4 - Checkpoint 3.7)
 use godot::builtin::VariantType;
-use godot::global::{PropertyHint, PropertyUsageFlags};
-use godot::meta::{ClassId, PropertyHintInfo, PropertyInfo};
-use godot::register::property::export_info_functions;
+use godot::register::info::{PropertyHint, PropertyHintInfo, PropertyInfo, PropertyUsageFlags};
+use godot::register::property::export_fns;
 
 // Signal prototype module for v0.0.4 research
 mod signal_prototype;
@@ -73,8 +72,8 @@ fn map_hint(hint: &ast::PropertyHint) -> PropertyHintInfo {
         },
 
         ast::PropertyHint::Range { min, max, step } => {
-            // Use export_info_functions for robust formatting
-            export_info_functions::export_range(
+            // Use export_fns for robust formatting
+            export_fns::export_range(
                 *min as f64,
                 *max as f64,
                 Some(*step as f64),
@@ -124,14 +123,14 @@ fn map_hint(hint: &ast::PropertyHint) -> PropertyHintInfo {
 ///
 /// This is the main conversion function that combines type and hint mapping.
 /// Uses verified API patterns:
-/// - ClassId::none() for non-object types
+/// - empty class_name for non-object types
 /// - property_usage_common() for standard usage flags
 /// - Generates fresh PropertyInfo on each call (Godot best practice)
 #[allow(dead_code)]
 fn metadata_to_property_info(metadata: &ast::PropertyMetadata) -> PropertyInfo {
     PropertyInfo {
         variant_type: map_type_to_variant(&metadata.type_name),
-        class_id: ClassId::none(), // FerrisScript types are not Godot objects
+        class_name: StringName::default(), // FerrisScript types are not Godot objects
         property_name: StringName::from(&metadata.name),
         hint_info: map_hint(&metadata.hint),
         usage: property_usage_common(),
@@ -392,26 +391,25 @@ impl INode2D for FerrisScriptNode {
         }
 
         // Register signals with Godot if script is loaded
-        if self.script_loaded {
-            if let Some(program) = &self.program {
-                // Clone signal names to avoid borrowing issues
-                let signal_names: Vec<String> =
-                    program.signals.iter().map(|s| s.name.clone()).collect();
+        if self.script_loaded
+            && let Some(program) = &self.program
+        {
+            // Clone signal names to avoid borrowing issues
+            let signal_names: Vec<String> =
+                program.signals.iter().map(|s| s.name.clone()).collect();
 
-                for signal_name in signal_names {
-                    self.base_mut().add_user_signal(&signal_name);
-                    godot_print!("Registered signal: {}", signal_name);
-                }
+            for signal_name in signal_names {
+                self.base_mut().add_user_signal(&signal_name);
+                godot_print!("Registered signal: {}", signal_name);
             }
         }
 
         // Execute _ready function if it exists
-        if self.script_loaded {
-            if let Some(env) = &self.env {
-                if env.get_function("_ready").is_some() {
-                    self.call_script_function("_ready", &[]);
-                }
-            }
+        if self.script_loaded
+            && let Some(env) = &self.env
+            && env.get_function("_ready").is_some()
+        {
+            self.call_script_function("_ready", &[]);
         }
     }
 
@@ -424,101 +422,96 @@ impl INode2D for FerrisScriptNode {
         }
 
         // Execute _process function if script is loaded and function exists
-        if self.script_loaded {
-            if let Some(env) = &self.env {
-                if env.get_function("_process").is_some() {
-                    // Convert delta to Float (f32 for FerrisScript)
-                    let delta_value = Value::Float(delta as f32);
-                    self.call_script_function_with_self("_process", &[delta_value]);
-                }
-            }
+        if self.script_loaded
+            && let Some(env) = &self.env
+            && env.get_function("_process").is_some()
+        {
+            // Convert delta to Float (f32 for FerrisScript)
+            let delta_value = Value::Float(delta as f32);
+            self.call_script_function_with_self("_process", &[delta_value]);
         }
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
         // Execute _input function if script is loaded and function exists
-        if self.script_loaded {
-            if let Some(env) = &self.env {
-                if env.get_function("_input").is_some() {
-                    // Convert Godot InputEvent to FerrisScript InputEventHandle
-                    // NOTE: Simplified implementation for Phase 2.1
-                    // - Currently checks hardcoded common actions (ui_* actions)
-                    // - Stores action name strings, not full Godot event reference
-                    // - Full InputEvent API (position, button_index, etc.) deferred to Phase 5/6
-                    // See: docs/planning/v0.0.4/KNOWN_LIMITATIONS.md - "InputEvent Simplified API"
-                    let action_pressed = if event.is_action_pressed("ui_accept") {
-                        Some("ui_accept".to_string())
-                    } else if event.is_action_pressed("ui_cancel") {
-                        Some("ui_cancel".to_string())
-                    } else if event.is_action_pressed("ui_left") {
-                        Some("ui_left".to_string())
-                    } else if event.is_action_pressed("ui_right") {
-                        Some("ui_right".to_string())
-                    } else if event.is_action_pressed("ui_up") {
-                        Some("ui_up".to_string())
-                    } else if event.is_action_pressed("ui_down") {
-                        Some("ui_down".to_string())
-                    } else {
-                        None
-                    };
+        if self.script_loaded
+            && let Some(env) = &self.env
+            && env.get_function("_input").is_some()
+        {
+            // Convert Godot InputEvent to FerrisScript InputEventHandle
+            // NOTE: Simplified implementation for Phase 2.1
+            // - Currently checks hardcoded common actions (ui_* actions)
+            // - Stores action name strings, not full Godot event reference
+            // - Full InputEvent API (position, button_index, etc.) deferred to Phase 5/6
+            // See: docs/planning/v0.0.4/KNOWN_LIMITATIONS.md - "InputEvent Simplified API"
+            let action_pressed = if event.is_action_pressed("ui_accept") {
+                Some("ui_accept".to_string())
+            } else if event.is_action_pressed("ui_cancel") {
+                Some("ui_cancel".to_string())
+            } else if event.is_action_pressed("ui_left") {
+                Some("ui_left".to_string())
+            } else if event.is_action_pressed("ui_right") {
+                Some("ui_right".to_string())
+            } else if event.is_action_pressed("ui_up") {
+                Some("ui_up".to_string())
+            } else if event.is_action_pressed("ui_down") {
+                Some("ui_down".to_string())
+            } else {
+                None
+            };
 
-                    let action_released = if event.is_action_released("ui_accept") {
-                        Some("ui_accept".to_string())
-                    } else if event.is_action_released("ui_cancel") {
-                        Some("ui_cancel".to_string())
-                    } else if event.is_action_released("ui_left") {
-                        Some("ui_left".to_string())
-                    } else if event.is_action_released("ui_right") {
-                        Some("ui_right".to_string())
-                    } else if event.is_action_released("ui_up") {
-                        Some("ui_up".to_string())
-                    } else if event.is_action_released("ui_down") {
-                        Some("ui_down".to_string())
-                    } else {
-                        None
-                    };
+            let action_released = if event.is_action_released("ui_accept") {
+                Some("ui_accept".to_string())
+            } else if event.is_action_released("ui_cancel") {
+                Some("ui_cancel".to_string())
+            } else if event.is_action_released("ui_left") {
+                Some("ui_left".to_string())
+            } else if event.is_action_released("ui_right") {
+                Some("ui_right".to_string())
+            } else if event.is_action_released("ui_up") {
+                Some("ui_up".to_string())
+            } else if event.is_action_released("ui_down") {
+                Some("ui_down".to_string())
+            } else {
+                None
+            };
 
-                    let input_event_handle = InputEventHandle::new(action_pressed, action_released);
-                    let input_event_value = Value::InputEvent(input_event_handle);
+            let input_event_handle = InputEventHandle::new(action_pressed, action_released);
+            let input_event_value = Value::InputEvent(input_event_handle);
 
-                    self.call_script_function_with_self("_input", &[input_event_value]);
-                }
-            }
+            self.call_script_function_with_self("_input", &[input_event_value]);
         }
     }
 
     fn physics_process(&mut self, delta: f64) {
         // Execute _physics_process function if script is loaded and function exists
-        if self.script_loaded {
-            if let Some(env) = &self.env {
-                if env.get_function("_physics_process").is_some() {
-                    // Convert delta to Float (f32 for FerrisScript)
-                    let delta_value = Value::Float(delta as f32);
-                    self.call_script_function_with_self("_physics_process", &[delta_value]);
-                }
-            }
+        if self.script_loaded
+            && let Some(env) = &self.env
+            && env.get_function("_physics_process").is_some()
+        {
+            // Convert delta to Float (f32 for FerrisScript)
+            let delta_value = Value::Float(delta as f32);
+            self.call_script_function_with_self("_physics_process", &[delta_value]);
         }
     }
 
     fn enter_tree(&mut self) {
         // Execute _enter_tree function if script is loaded and function exists
-        if self.script_loaded {
-            if let Some(env) = &self.env {
-                if env.get_function("_enter_tree").is_some() {
-                    self.call_script_function("_enter_tree", &[]);
-                }
-            }
+        if self.script_loaded
+            && let Some(env) = &self.env
+            && env.get_function("_enter_tree").is_some()
+        {
+            self.call_script_function("_enter_tree", &[]);
         }
     }
 
     fn exit_tree(&mut self) {
         // Execute _exit_tree function if script is loaded and function exists
-        if self.script_loaded {
-            if let Some(env) = &self.env {
-                if env.get_function("_exit_tree").is_some() {
-                    self.call_script_function("_exit_tree", &[]);
-                }
-            }
+        if self.script_loaded
+            && let Some(env) = &self.env
+            && env.get_function("_exit_tree").is_some()
+        {
+            self.call_script_function("_exit_tree", &[]);
         }
     }
 
@@ -544,7 +537,7 @@ impl INode2D for FerrisScriptNode {
     /// - Range(min, max, step): Slider control for numeric types
     /// - Enum(values): Dropdown selection for String types
     /// - File(extensions): File picker dialog for String types
-    fn get_property_list(&mut self) -> Vec<PropertyInfo> {
+    fn on_get_property_list(&mut self) -> Vec<PropertyInfo> {
         // Only expose properties if script is successfully loaded and compiled
         if let Some(program) = &self.program {
             // Convert each PropertyMetadata to PropertyInfo using helper function
@@ -584,7 +577,7 @@ impl INode2D for FerrisScriptNode {
     /// - If env is None (script not loaded): Returns None gracefully
     /// - If property doesn't exist: Returns None gracefully (not an error)
     /// - Never panics (would crash Inspector)
-    fn get_property(&self, property: StringName) -> Option<Variant> {
+    fn on_get(&self, property: StringName) -> Option<Variant> {
         let prop_name = property.to_string();
 
         // Check if we have a loaded environment with runtime storage
@@ -628,39 +621,39 @@ impl INode2D for FerrisScriptNode {
     /// - If property doesn't exist: Returns false gracefully
     /// - If set operation fails: Logs error with godot_error! but doesn't panic
     /// - Never panics (would crash Inspector)
-    fn set_property(&mut self, property: StringName, value: Variant) -> bool {
+    fn on_set(&mut self, property: StringName, value: Variant) -> bool {
         let prop_name = property.to_string();
 
         // ========== Special Handling: script_path Property ==========
         // When Inspector changes script_path, reload the script to update property list
-        if prop_name == "script_path" {
-            if let Ok(new_path) = value.try_to::<GString>() {
-                // Only reload if path actually changed
-                if new_path != self.script_path {
-                    godot_print!(
-                        "📝 Script path changed: {} → {}",
-                        self.script_path,
-                        new_path
-                    );
+        if prop_name == "script_path"
+            && let Ok(new_path) = value.try_to::<GString>()
+        {
+            // Only reload if path actually changed
+            if new_path != self.script_path {
+                godot_print!(
+                    "📝 Script path changed: {} → {}",
+                    self.script_path,
+                    new_path
+                );
 
-                    self.script_path = new_path.clone();
+                self.script_path = new_path.clone();
 
-                    // Clear old script state
-                    self.script_loaded = false;
-                    self.env = None;
-                    self.program = None;
-                    self.last_modified = None;
+                // Clear old script state
+                self.script_loaded = false;
+                self.env = None;
+                self.program = None;
+                self.last_modified = None;
 
-                    // Load new script (will trigger notify_property_list_changed)
-                    if !self.script_path.is_empty() {
-                        self.load_script();
-                    } else {
-                        // Path cleared - notify Inspector that properties are gone
-                        self.base_mut().notify_property_list_changed();
-                    }
+                // Load new script (will trigger notify_property_list_changed)
+                if !self.script_path.is_empty() {
+                    self.load_script();
+                } else {
+                    // Path cleared - notify Inspector that properties are gone
+                    self.base_mut().notify_property_list_changed();
                 }
-                return true; // We handled it
             }
+            return true; // We handled it
         }
 
         // Check if we have a loaded environment with runtime storage
@@ -783,10 +776,10 @@ impl FerrisScriptNode {
             std::path::PathBuf::from(path_str)
         };
 
-        if let Ok(metadata) = std::fs::metadata(&absolute_path) {
-            if let Ok(modified) = metadata.modified() {
-                self.last_modified = Some(modified);
-            }
+        if let Ok(metadata) = std::fs::metadata(&absolute_path)
+            && let Ok(modified) = metadata.modified()
+        {
+            self.last_modified = Some(modified);
         }
 
         godot_print!("Successfully loaded FerrisScript: {}", path);
@@ -951,24 +944,24 @@ impl FerrisScriptNode {
         };
 
         // Get current file modification time
-        if let Ok(metadata) = std::fs::metadata(&absolute_path) {
-            if let Ok(modified) = metadata.modified() {
-                // Check if this is first time or if file was modified since last check
-                let should_reload = match self.last_modified {
-                    Some(last) => modified > last, // File is newer than cached timestamp
-                    None => {
-                        // First time checking - just cache the timestamp, don't reload
-                        self.last_modified = Some(modified);
-                        false
-                    }
-                };
-
-                if should_reload {
-                    godot_print!("🔄 Hot-reload: Script file modified, reloading...");
+        if let Ok(metadata) = std::fs::metadata(&absolute_path)
+            && let Ok(modified) = metadata.modified()
+        {
+            // Check if this is first time or if file was modified since last check
+            let should_reload = match self.last_modified {
+                Some(last) => modified > last, // File is newer than cached timestamp
+                None => {
+                    // First time checking - just cache the timestamp, don't reload
                     self.last_modified = Some(modified);
-                    self.reload_script();
-                    godot_print!("✅ Hot-reload complete! Properties updated.");
+                    false
                 }
+            };
+
+            if should_reload {
+                godot_print!("🔄 Hot-reload: Script file modified, reloading...");
+                self.last_modified = Some(modified);
+                self.reload_script();
+                godot_print!("✅ Hot-reload complete! Properties updated.");
             }
         }
     }
@@ -1105,7 +1098,7 @@ mod tests {
     use super::*;
 
     /// API Verification Test (Bundle 4 - Checkpoint 3.7)
-    /// Confirms which PropertyUsageFlags and ClassId API variants work in godot-rust 0.4.0
+    /// Confirms which PropertyUsageFlags API variants work in godot-rust 0.5
     #[test]
     fn test_property_usage_flags_api() {
         // Test 1: Verify bitwise OR operator works on PropertyUsageFlags
@@ -1116,15 +1109,6 @@ mod tests {
         // API verification: if this compiles, the API patterns are correct
         assert_eq!(flags, flags); // Non-constant assertion to avoid clippy warning
         assert_eq!(common, common);
-    }
-
-    #[test]
-    fn test_classid_api() {
-        // Test which ClassId variant exists
-        // Try ClassId::none() first (most common in 0.4.0)
-        let class_id = ClassId::none();
-        // API verification: if above compiles, none() is correct
-        assert_eq!(class_id, ClassId::none());
     }
 
     // ====================
@@ -1285,7 +1269,7 @@ mod tests {
         assert_eq!(result.variant_type, VariantType::INT);
         assert_eq!(result.property_name.to_string(), "test_prop");
         assert_eq!(result.hint_info.hint, PropertyHint::NONE);
-        assert_eq!(result.class_id, ClassId::none());
+        assert_eq!(result.class_name, StringName::default());
     }
 
     #[test]

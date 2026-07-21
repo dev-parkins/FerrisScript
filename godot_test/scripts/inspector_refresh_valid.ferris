@@ -1,0 +1,9 @@
+// Minimal valid script with exported properties, used by inspector_refresh_test.gd
+// to verify PR #60's Inspector clear-on-error behavior headlessly.
+
+@export let mut basic_int: i32 = 42;
+@export let mut basic_float: f32 = 3.14;
+
+fn _ready() {
+    print("inspector_refresh_valid ready");
+}

@@ -311,7 +311,10 @@ impl<'a> Lexer<'a> {
                                 self.source,
                                 self.line,
                                 self.column,
-                                &format!("Unknown escape '\\{}', valid escapes are \\n \\t \\r \\\\ \\\"", ch),
+                                &format!(
+                                    "Unknown escape '\\{}', valid escapes are \\n \\t \\r \\\\ \\\"",
+                                    ch
+                                ),
                             ));
                         }
                         None => {

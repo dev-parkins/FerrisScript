@@ -171,11 +171,7 @@ pub fn parse_scene_requirements(ferris_content: &str) -> Option<SceneBuilder> {
         }
     }
 
-    if main_node_found {
-        Some(builder)
-    } else {
-        None
-    }
+    if main_node_found { Some(builder) } else { None }
 }
 
 fn extract_node_name(line: &str) -> Option<String> {

@@ -743,7 +743,9 @@ mod tests {
     #[test]
     fn test_get_docs_url_default() {
         // Without FERRIS_DOCS_BASE env var, should return GitHub Pages URL with proper anchors
-        std::env::remove_var("FERRIS_DOCS_BASE");
+        unsafe {
+            std::env::remove_var("FERRIS_DOCS_BASE");
+        }
 
         let url = ErrorCode::E001.get_docs_url();
         assert!(url.contains("github.io"));
@@ -757,7 +759,9 @@ mod tests {
     #[test]
     fn test_get_docs_url_format() {
         // Test URL format structure with proper GitHub Pages slugification
-        std::env::remove_var("FERRIS_DOCS_BASE");
+        unsafe {
+            std::env::remove_var("FERRIS_DOCS_BASE");
+        }
 
         // Test that URLs are well-formed
         let url = ErrorCode::E001.get_docs_url();

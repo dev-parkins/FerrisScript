@@ -4,7 +4,7 @@
 **Status**: Planning (Updated with LSP Integration)  
 **Date**: October 13, 2025  
 **Priority**: High  
-**Dependencies**: Test harness crate, GDExtension runtime, LSP server (v0.0.5)  
+**Dependencies**: Test harness crate, GDExtension runtime, LSP server (v0.0.6)  
 
 ## Executive Summary
 
@@ -18,7 +18,7 @@ This document has been **updated to include critical gaps** identified in the fe
    - Code lens test status indicators (✅/❌/▶️)
    - "Run Test" command from editor
    - Real-time test result updates
-   - **Impact**: Essential for v0.0.5 editor experience
+   - **Impact**: Essential for v0.0.6 editor experience
    - **Timeline Impact**: +1-2 weeks
 
 2. **Test Assertions Validation** 🟡 IMPORTANT
@@ -1185,7 +1185,7 @@ fn extract_error_code(error_msg: &str) -> String {
 
 ### Phase 2.5: LSP Test Integration (2-3 days) 🆕
 
-**Critical for v0.0.5**: LSP needs to integrate with test framework for editor features.
+**Critical for v0.0.6**: LSP needs to integrate with test framework for editor features.
 
 #### 2.5.1 LSP Protocol Extensions
 
@@ -2657,15 +2657,15 @@ For more information, see:
 ### Soft Dependencies (Nice to Have)
 
 1. **Test Coverage Tooling**
-   - Not required for v0.0.5
+   - Not required for v0.0.6
    - Can defer to v0.0.6
 
 2. **Test Profiling/Benchmarking**
    - Nice for identifying slow tests
-   - Not blocking v0.0.5 release
+   - Not blocking v0.0.6 release
 
 2. **Performance Benchmarking**
-   - Not required for v0.0.5
+   - Not required for v0.0.6
    - Can defer to v0.0.6
 
 ### Integration Points with LSP
@@ -2708,7 +2708,7 @@ Test Execution   Test Status Cache
 - **Fallback**: Disable caching if bugs persist (graceful degradation)
 
 ### Risk 3: LSP Integration Complexity 🔴 HIGH
-**Impact**: Could delay entire v0.0.5 release  
+**Impact**: Could delay entire v0.0.6 release  
 **Probability**: Medium  
 **Mitigation**: 
 - Complete Phase 0 (compiler prerequisites) FIRST (Weeks 1-3)
@@ -2743,7 +2743,7 @@ Test Execution   Test Status Cache
 - **Target**: <100ms for typical edits (cache hit)
 
 ### Risk 8: Timeline Overrun (7 weeks → 9+ weeks) 🟡 MEDIUM 🆕
-**Impact**: Delayed v0.0.5 release  
+**Impact**: Delayed v0.0.6 release  
 **Probability**: Medium  
 **Mitigation**:
 - Phase 0 has highest risk (3 weeks of compiler changes)
@@ -3074,7 +3074,7 @@ RUST_LOG=debug cargo test -- --nocapture
 
 ---
 
-**Ready for Implementation**: This plan is production-ready and addresses all issues identified in the feedback phase, including LSP integration requirements for v0.0.5.
+**Ready for Implementation**: This plan is production-ready and addresses all issues identified in the feedback phase, including LSP integration requirements for v0.0.6.
 
 **Next Steps**:
 
@@ -3087,5 +3087,5 @@ RUST_LOG=debug cargo test -- --nocapture
 **Critical Dependencies**:
 
 - LSP server foundation must be ready before Phase 2.5
-- If LSP is delayed, ship test framework without editor integration in v0.0.5
+- If LSP is delayed, ship test framework without editor integration in v0.0.6
 - Add LSP integration in v0.0.6 as enhancement

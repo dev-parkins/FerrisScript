@@ -1,9 +1,32 @@
 # 🐛 Inspector Property Refresh Fix
 
-**Status**: 📋 Ready for Implementation  
+**Status**: ✅ Implemented (PR #60) and Verified  
 **Priority**: 🟢 Quick Win (1-2 hours)  
 **Phase**: 0.1.5 (can run in parallel with Phase 0.1)  
 **Delegation**: ✅ Background Agent Task  
+
+---
+
+## ✅ Verified in Godot 4.7 / gdext 0.5.4 (2026-07-21)
+
+PR #60's `clear_on_error()` fix was validated headlessly (no interactive editor
+available in this environment) against a live Godot 4.7.stable engine, after
+the gdext 0.4→0.5.4 upgrade (PR #63). `godot_test/scripts/inspector_refresh_test.gd`
+and `godot_test/test_inspector_refresh.tscn` drive a `FerrisScriptNode` directly
+through `script_path` changes and assert on `get_property_list()` results,
+covering the fix's checklist:
+
+| Checklist item | Result |
+|---|---|
+| 1. Properties clear on compile error | ✅ PASS |
+| 2. Properties repopulate on fix | ✅ PASS |
+| 3. Rapid edit toggling | ✅ PASS |
+| 4. Multiple scripts, only the broken one clears | Not directly exercised (single-node scenario); fix is instance-scoped (`self.env = None` etc.), so lower risk |
+| 5. File-not-found path clears properties | ✅ PASS |
+
+Run via: `godot --headless --path godot_test --scene test_inspector_refresh.tscn --quit-after 5`
+
+Output: `[SUMMARY] Total: 5, Passed: 5, Failed: 0`
 
 ---
 
@@ -267,7 +290,7 @@ mod tests {
 **Status**: ✅ Fixed in v0.0.5  
 **Solution**: Compilation errors now automatically clear Inspector properties  
 **Previous Workaround** (v0.0.4 only): Reload scene (Scene → Reload Saved Scene)  
-**Implementation**: See [INSPECTOR_PROPERTY_FIX.md](planning/v0.0.5/INSPECTOR_PROPERTY_FIX.md)
+**Implementation**: See [INSPECTOR_PROPERTY_FIX.md](INSPECTOR_PROPERTY_FIX.md)
 ```
 
 ---
@@ -329,7 +352,7 @@ mod tests {
 
 ## 🔗 Related Documents
 
-- **Planning**: [v0.0.5 README.md](README.md) (this fix is Phase 0.1.5)
+- **Planning**: [v0.0.6 README.md](README.md) (this fix is Phase 0.1.5)
 - **Issue**: [TROUBLESHOOTING.md](../../TROUBLESHOOTING.md#inspector-properties-not-updating)
 - **Implementation**: `crates/godot_bind/src/lib.rs`
 
@@ -344,7 +367,7 @@ This is a **quick win** that can run in parallel with Phase 0.1 (Source Spans). 
 - Clear root cause
 - Simple 2-line fix
 - Well-defined test procedure
-- No dependencies on other v0.0.5 work
+- No dependencies on other v0.0.6 work
 
 ### Agent Execution Steps
 

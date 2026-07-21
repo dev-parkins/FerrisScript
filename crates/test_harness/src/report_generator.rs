@@ -202,24 +202,24 @@ impl ReportGenerator {
                 symbol, result.test_name
             ));
 
-            if self.show_assertions {
-                if let Some(matched) = result.expected_error_matched {
-                    if matched {
-                        if let Some(error) = &result.actual_error {
-                            output.push_str(&format!(
-                                "  {} Error message: \"{}\"\n",
-                                self.colorize("✓", Color::Green),
-                                error
-                            ));
-                        }
-                    } else {
+            if self.show_assertions
+                && let Some(matched) = result.expected_error_matched
+            {
+                if matched {
+                    if let Some(error) = &result.actual_error {
                         output.push_str(&format!(
-                            "  {} Expected error not found\n",
-                            self.colorize("✗", Color::Red)
+                            "  {} Error message: \"{}\"\n",
+                            self.colorize("✓", Color::Green),
+                            error
                         ));
-                        if let Some(error) = &result.actual_error {
-                            output.push_str(&format!("  Actual error: \"{}\"\n", error));
-                        }
+                    }
+                } else {
+                    output.push_str(&format!(
+                        "  {} Expected error not found\n",
+                        self.colorize("✗", Color::Red)
+                    ));
+                    if let Some(error) = &result.actual_error {
+                        output.push_str(&format!("  Actual error: \"{}\"\n", error));
                     }
                 }
             }

@@ -56,11 +56,11 @@ func test_basic_functionality():
 	)
 	
 	run_test("property_hint_enum", func():
-		# Test that Godot PropertyHint enum is available
-		assert_equal(PropertyHint.NONE, 0, "PropertyHint.NONE value")
-		assert_equal(PropertyHint.RANGE, 1, "PropertyHint.RANGE value")
-		assert_equal(PropertyHint.ENUM, 2, "PropertyHint.ENUM value")
-		assert_equal(PropertyHint.FILE, 13, "PropertyHint.FILE value")
+		# Test that Godot PropertyHint constants are available
+		assert_equal(PROPERTY_HINT_NONE, 0, "PROPERTY_HINT_NONE value")
+		assert_equal(PROPERTY_HINT_RANGE, 1, "PROPERTY_HINT_RANGE value")
+		assert_equal(PROPERTY_HINT_ENUM, 2, "PROPERTY_HINT_ENUM value")
+		assert_equal(PROPERTY_HINT_FILE, 13, "PROPERTY_HINT_FILE value")
 	)
 	
 	run_test("variant_type_enum", func():

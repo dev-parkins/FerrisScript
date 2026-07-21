@@ -23,6 +23,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.0.5] - 2026-07-21
+
+**Codename**: "Stabilization & Engine Modernization"
+
+After 8 months of dormancy (last commit October 2025), this release returns
+the project to a healthy, current baseline before resuming feature work:
+lands two PRs that had been finished-but-unmerged since October, pays down
+accumulated documentation debt, and upgrades the Godot binding stack
+(gdext 0.4.5 → 0.5.4, targeting Godot 4.7) rather than letting the drift
+compound further.
+
+### Added
+
+- Source span tracking (`Position`/`Span` in `crates/compiler/src/span.rs`) across AST, parser, and type checker — foundation for future LSP support (#59)
+- `rust-version = "1.94"` MSRV declaration and Rust Edition 2024 across the workspace
+
+### Changed
+
+- **BREAKING (internal)**: Upgraded `godot` (gdext) dependency from 0.4.5 → 0.5.4, targeting Godot API level 4.7 (`api-4-7` feature, was `api-4-3`)
+  - `godot_test/ferrisscript.gdextension`: `compatibility_minimum` 4.1 → 4.2
+  - `godot_test/project.godot`: engine features "4.5" → "4.7"
+  - `crates/godot_bind/src/lib.rs`: `PropertyInfo`/`PropertyHintInfo` moved from `godot::meta` to `godot::register::info`; `export_info_functions` renamed `export_fns`; `PropertyInfo.class_id: ClassId` replaced by `class_name: StringName`; Inspector virtuals renamed `get_property_list`/`get_property`/`set_property` → `on_get_property_list`/`on_get`/`on_set`
+- `Cargo.lock` is now committed (previously gitignored) for reproducible builds of the cdylib/binary artifacts this workspace ships
+- README prerequisites narrowed to reflect what's actually tested: "Rust 1.94+ with Edition 2024", "Godot 4.2+ (tested against 4.7)"
+
+### Fixed
+
+- `.gdextension` library paths on Linux/macOS were missing the `lib` prefix cargo adds to cdylibs — the extension never loaded on non-Windows platforms (#61)
+- Test harness (`ferris-test`) deleted its own source `.ferris` scripts when the scripts directory under test was the project's live scripts directory (#61)
+- Inspector properties now clear when a script fails to compile, instead of showing stale values from the last successful load (#60)
+- Restored `docs/archive/` and `docs/planning/technical/` (accidentally deleted in earlier merges), fixing dangling links across CHANGELOG/RELEASE_NOTES/planning docs (#62)
+- `godot_test/scripts/godot_bind_tests.gd` used invalid `PropertyHint.NONE`-style enum access; fixed to use GDScript's flat `PROPERTY_HINT_*` constants, unblocking the headless integration test suite
+
+---
+
 ## [0.0.4] - 2025-10-08
 
 **Codename**: "Godot API Expansion" 🔔🌳

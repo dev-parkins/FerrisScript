@@ -63,11 +63,11 @@ pub fn extract_source_context_with_pointer(
         ));
 
         // Insert pointer right after the error line
-        if line_num == error_line {
-            if let Some(column) = error_column {
-                let pointer = format_error_pointer(column, line_num_width, hint);
-                result.push_str(&pointer);
-            }
+        if line_num == error_line
+            && let Some(column) = error_column
+        {
+            let pointer = format_error_pointer(column, line_num_width, hint);
+            result.push_str(&pointer);
         }
     }
 

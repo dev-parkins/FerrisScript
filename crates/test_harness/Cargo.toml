@@ -1,7 +1,8 @@
 [package]
 name = "ferrisscript_test_harness"
-version = "0.0.3"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 authors = ["dev-parkins"]
 description = "Headless testing harness for FerrisScript + Godot integration"
 
