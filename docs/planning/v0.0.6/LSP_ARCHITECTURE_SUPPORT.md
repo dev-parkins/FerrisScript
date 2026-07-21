@@ -1,6 +1,6 @@
 Excellent question! LSP is **the missing piece** that transforms FerrisScript from "static types for safety" to "static types for **developer experience**". Let me break down how LSP amplifies your type safety philosophy.
 
-## 📝 Decision Log (v0.0.5 Planning)
+## 📝 Decision Log (v0.0.6 Planning)
 
 **Date**: October 13, 2025
 
@@ -12,8 +12,8 @@ Excellent question! LSP is **the missing piece** that transforms FerrisScript fr
 
 **Options**:
 
-- **A**: Ship v0.0.5 with compiler prerequisites (+1 week)
-- B: Defer to v0.1.0 (ship test framework in v0.0.5, add compiler later)
+- **A**: Ship v0.0.6 with compiler prerequisites (+1 week)
+- B: Defer to v0.1.0 (ship test framework in v0.0.6, add compiler later)
 
 **Chosen**: **Option A**
 
@@ -28,7 +28,7 @@ Excellent question! LSP is **the missing piece** that transforms FerrisScript fr
 
 #### Decision 2: LSP Test Integration Scope
 
-**Question**: How much LSP integration in v0.0.5?
+**Question**: How much LSP integration in v0.0.6?
 
 **Options**:
 
@@ -52,7 +52,7 @@ Excellent question! LSP is **the missing piece** that transforms FerrisScript fr
 
 **Options**:
 
-- **A**: Add incremental compilation to v0.0.5 (+2-3 weeks)
+- **A**: Add incremental compilation to v0.0.6 (+2-3 weeks)
 - B: Defer to v0.1.0+ (ship without caching, add later)
 
 **Chosen**: **Option A**
@@ -428,7 +428,7 @@ async fn publish_diagnostics(&self, uri: &Url) {
 
 ## 🎯 LSP Features Priority for FerrisScript
 
-### Phase 0: Test-Specific LSP (v0.0.5) 🆕 UPDATED
+### Phase 0: Test-Specific LSP (v0.0.6) 🆕 UPDATED
 
 **Goal**: LSP integration for test framework
 
@@ -440,9 +440,9 @@ async fn publish_diagnostics(&self, uri: &Url) {
 - ✅ Test result caching
 - ✅ Real-time test status updates
 
-**Implementation**: ~1-2 weeks (Week 5 of v0.0.5)
+**Implementation**: ~1-2 weeks (Week 5 of v0.0.6)
 
-**Scope**: LSP features are **test-specific only** in v0.0.5. General LSP features (diagnostics for all code, autocomplete, etc.) come in v0.1.0.
+**Scope**: LSP features are **test-specific only** in v0.0.6. General LSP features (diagnostics for all code, autocomplete, etc.) come in v0.1.0.
 
 **Why Test-Specific First?**:
 
@@ -466,9 +466,9 @@ async fn publish_diagnostics(&self, uri: &Url) {
 
 **Implementation**: ~2 weeks
 
-**Dependencies**: Requires v0.0.5 compiler prerequisites (spans, symbol table, incremental compilation)
+**Dependencies**: Requires v0.0.6 compiler prerequisites (spans, symbol table, incremental compilation)
 
-**Note**: This expands the test-specific diagnostics from v0.0.5 to all FerrisScript code.
+**Note**: This expands the test-specific diagnostics from v0.0.6 to all FerrisScript code.
 
 ---
 
@@ -484,7 +484,7 @@ async fn publish_diagnostics(&self, uri: &Url) {
 
 **Implementation**: ~2 weeks
 
-**Dependencies**: v0.0.5 Phase 0.1 (spans) and Phase 0.2 (symbol table)
+**Dependencies**: v0.0.6 Phase 0.1 (spans) and Phase 0.2 (symbol table)
 
 ---
 
@@ -516,7 +516,7 @@ async fn publish_diagnostics(&self, uri: &Url) {
 
 **Implementation**: ~2 weeks
 
-**Dependencies**: v0.1.1 (navigation), v0.0.5 Phase 0.2 (symbol table)
+**Dependencies**: v0.1.1 (navigation), v0.0.6 Phase 0.2 (symbol table)
 
 ---
 
@@ -531,7 +531,7 @@ async fn publish_diagnostics(&self, uri: &Url) {
 
 **Dependencies**: v0.1.3 (full IntelliSense)
 
-## � Incremental Compilation Architecture (v0.0.5 Phase 0.3)
+## � Incremental Compilation Architecture (v0.0.6 Phase 0.3)
 
 ### Why Incremental Compilation is Critical for LSP
 
@@ -987,7 +987,7 @@ fn move_player(direction: Vector2) {
 
 ## 📋 Recommended Roadmap
 
-### v0.0.5 (Current Release) - UPDATED
+### v0.0.6 (Current Release) - UPDATED
 
 **Focus**: LSP Foundation + Test Framework + Incremental Compilation
 
@@ -995,9 +995,9 @@ fn move_player(direction: Vector2) {
 
 **Critical Decisions** (Option A for all):
 
-1. ✅ Ship v0.0.5 with compiler prerequisites (spans + symbol table) - adds 1 week
-2. ✅ Full LSP test integration in v0.0.5 - no deferral
-3. ✅ Add incremental compilation to v0.0.5 - adds 2-3 weeks
+1. ✅ Ship v0.0.6 with compiler prerequisites (spans + symbol table) - adds 1 week
+2. ✅ Full LSP test integration in v0.0.6 - no deferral
+3. ✅ Add incremental compilation to v0.0.6 - adds 2-3 weeks
 
 #### Phase 0: Compiler Prerequisites (Weeks 1-3) 🆕 BLOCKING
 
@@ -1077,9 +1077,9 @@ fn move_player(direction: Vector2) {
 
 **Decision Rationale**:
 
-- Chose Option A: Ship v0.0.5 with full compiler prerequisites
+- Chose Option A: Ship v0.0.6 with full compiler prerequisites
 - Chose Option A: Full LSP test integration (not deferred)
-- Chose Option A: Incremental compilation in v0.0.5 (not v0.1.0+)
+- Chose Option A: Incremental compilation in v0.0.6 (not v0.1.0+)
 
 ---
 
@@ -1096,9 +1096,9 @@ fn move_player(direction: Vector2) {
 - [ ] Document symbols (outline view, Ctrl+Shift+O)
 - [ ] Basic autocomplete (context-aware completions)
 
-**Note**: v0.0.5 already includes LSP test integration + compiler prerequisites, so v0.1.0 expands LSP to general coding features.
+**Note**: v0.0.6 already includes LSP test integration + compiler prerequisites, so v0.1.0 expands LSP to general coding features.
 
-**Dependencies**: v0.0.5 compiler prerequisites (spans, symbol table, incremental compilation)
+**Dependencies**: v0.0.6 compiler prerequisites (spans, symbol table, incremental compilation)
 
 ---
 
@@ -1140,7 +1140,7 @@ fn move_player(direction: Vector2) {
 
 ---
 
-## 📊 v0.0.5 Implementation Summary
+## 📊 v0.0.6 Implementation Summary
 
 **Timeline**: 6-7 weeks (was 2-3 weeks)
 
@@ -1150,7 +1150,7 @@ fn move_player(direction: Vector2) {
 - ✅ Test framework with LSP integration - Weeks 4-5
 - ✅ Godot test runner and CI - Weeks 6-7
 
-**v0.0.5 Delivers**:
+**v0.0.6 Delivers**:
 
 - LSP test integration (CodeLens, run test, status indicators)
 - Consolidated test framework (single source of truth in `/examples`)
@@ -1163,7 +1163,7 @@ fn move_player(direction: Vector2) {
 - Autocomplete and navigation
 - Hover tooltips and refactoring tools
 
-**Decision**: We chose Option A for all three decisions, accelerating LSP foundation into v0.0.5 to establish compiler infrastructure early.
+**Decision**: We chose Option A for all three decisions, accelerating LSP foundation into v0.0.6 to establish compiler infrastructure early.
 
 **See Also**:
 

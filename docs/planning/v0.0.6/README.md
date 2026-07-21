@@ -1,4 +1,4 @@
-# FerrisScript v0.0.5: LSP Foundation + Test Framework
+# FerrisScript v0.0.6: LSP Foundation + Test Framework
 
 **Timeline**: 6-7 weeks  
 **Status**: Planning Complete  
@@ -59,7 +59,7 @@
 
 ### What We're Building
 
-**v0.0.5 transforms FerrisScript from "compile-time safety" to "real-time developer experience"**
+**v0.0.6 transforms FerrisScript from "compile-time safety" to "real-time developer experience"**
 
 #### Three Pillars
 
@@ -645,7 +645,7 @@ Phase 5 (CI Integration) ← All above complete
 #### Risk 3: Timeline Overrun (7 weeks → 9+ weeks) 🟡 MEDIUM
 
 **Probability**: Medium  
-**Impact**: Delayed v0.0.5 release
+**Impact**: Delayed v0.0.6 release
 
 **Mitigation**:
 
@@ -722,7 +722,7 @@ Phase 5 (CI Integration) ← All above complete
 |--------|--------|-------------|
 | **LSP Usage** | >50% of contributors | VS Code extension installs |
 | **Test Additions** | +10% tests in 2 weeks | Track new `.ferris` files in `/examples` |
-| **Issue Reports** | <5 critical bugs | GitHub issues labeled `v0.0.5` |
+| **Issue Reports** | <5 critical bugs | GitHub issues labeled `v0.0.6` |
 | **Feedback Sentiment** | >80% positive | Survey or Discord reactions |
 
 ---
