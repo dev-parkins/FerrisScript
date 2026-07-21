@@ -6,6 +6,49 @@
 
 ---
 
+## v0.0.5 - Stabilization & Engine Modernization (July 21, 2026)
+
+**Status**: ✅ Complete  
+**Tag**: `v0.0.5`  
+**Codename**: "Stabilization & Engine Modernization"
+
+### 🎉 Highlights
+
+After 8 months of dormancy (last commit October 2025), this release returns FerrisScript to a healthy, current baseline before resuming feature work. It lands two PRs that had been finished-but-unmerged since October, restores documentation lost to earlier merge mishaps, and upgrades the Godot binding stack rather than letting the version drift compound further.
+
+### 🌟 What's New
+
+#### Stabilization
+
+- **Source span tracking**: `Position`/`Span` structs across AST, parser, and type checker (`crates/compiler/src/span.rs`) — foundation for future LSP work
+- **Inspector property refresh fix**: properties now clear when a `.ferris` script fails to compile, instead of showing stale values from the last successful load
+- **Linux/macOS extension loading fix**: `.gdextension` library paths were missing the `lib` prefix cargo adds to cdylibs — the extension had never loaded on non-Windows platforms until this release
+- Restored `docs/archive/` (97 files) and `docs/planning/technical/` (9 files), accidentally deleted in October 2025 merges, fixing dangling links throughout the docs
+
+#### Engine Modernization
+
+- **gdext upgraded 0.4.5 → 0.5.4**, targeting Godot API level 4.7 (was 4.3)
+- **Rust Edition 2021 → 2024**, MSRV declared at 1.94
+- Inspector integration code migrated to the 0.5 API: `PropertyInfo`/`PropertyHintInfo` module relocation, `export_info_functions` → `export_fns`, and the `get_property_list`/`get_property`/`set_property` virtuals renamed to `on_get_property_list`/`on_get`/`on_set`
+- `godot_test` project bumped to Godot 4.7; `Cargo.lock` now committed for reproducible builds
+
+### 📦 Dependencies & Compatibility
+
+- **Rust**: 1.94+ with Edition 2024 · **Godot**: 4.2+ (tested against 4.7) · **gdext**: 0.5.4
+- No FerrisScript language changes — `.ferris` scripts from v0.0.4 work unchanged
+
+### 📊 Metrics
+
+- **Tests**: 883 passing across the workspace, unchanged pass rate on the `ferris-test` integration corpus (19/33 — remaining failures are pre-existing test-script drift against unimplemented language features)
+- **PRs merged**: #59, #60, #61, #62, #63
+
+### 🔗 Resources
+
+- **Full Changelog**: [CHANGELOG.md v0.0.5](CHANGELOG.md#005---2026-07-21)
+- **Roadmap**: [ROADMAP_MASTER.md](docs/planning/ROADMAP_MASTER.md) — note the v0.0.5 LSP plan is renumbered to v0.0.6
+
+---
+
 ## v0.0.4 - Godot API Expansion (October 8, 2025)
 
 **Status**: ✅ Complete  

@@ -11,6 +11,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- None
+
+### Changed
+
+- None
+
+### Fixed
+
+- None
+
+---
+
+## [0.0.5] - 2026-07-21
+
+**Codename**: "Stabilization & Engine Modernization"
+
+After 8 months of dormancy (last commit October 2025), this release returns
+the project to a healthy, current baseline before resuming feature work:
+lands two PRs that had been finished-but-unmerged since October, pays down
+accumulated documentation debt, and upgrades the Godot binding stack
+(gdext 0.4.5 → 0.5.4, targeting Godot 4.7) rather than letting the drift
+compound further.
+
+### Added
+
 - Source span tracking (`Position`/`Span` in `crates/compiler/src/span.rs`) across AST, parser, and type checker — foundation for future LSP support (#59)
 - `rust-version = "1.94"` MSRV declaration and Rust Edition 2024 across the workspace
 
