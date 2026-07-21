@@ -39,8 +39,8 @@ pub fn levenshtein(a: &str, b: &str) -> usize {
     for (i, row) in matrix.iter_mut().enumerate().take(len_a + 1) {
         row[0] = i;
     }
-    for j in 0..=len_b {
-        matrix[0][j] = j;
+    for (j, cell) in matrix[0].iter_mut().enumerate() {
+        *cell = j;
     }
 
     // Fill matrix using dynamic programming

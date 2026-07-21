@@ -108,12 +108,22 @@ impl TestHarness {
         std::fs::create_dir_all(&scripts_dir)?;
         let dest_script = scripts_dir.join(script_name);
 
-        // Remove destination if it exists to avoid file lock issues
-        if dest_script.exists() {
-            let _ = std::fs::remove_file(&dest_script);
-        }
+        // When the scripts dir being tested IS the project scripts dir,
+        // source and destination are the same file — removing the
+        // "destination" would delete the source script itself.
+        let same_file = match (script_path.canonicalize(), dest_script.canonicalize()) {
+            (Ok(src), Ok(dst)) => src == dst,
+            _ => false,
+        };
 
-        std::fs::copy(script_path, &dest_script)?;
+        if !same_file {
+            // Remove destination if it exists to avoid file lock issues
+            if dest_script.exists() {
+                let _ = std::fs::remove_file(&dest_script);
+            }
+
+            std::fs::copy(script_path, &dest_script)?;
+        }
 
         // Build scene based on script requirements
         let script_res_path = format!("res://scripts/{}", script_name);
