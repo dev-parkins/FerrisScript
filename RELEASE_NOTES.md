@@ -6,6 +6,112 @@
 
 ---
 
+## v0.0.4 - Godot API Expansion (October 8, 2025)
+
+**Status**: ✅ Complete  
+**Tag**: `v0.0.4`  
+**Codename**: "Godot API Expansion" 🔔🌳
+
+### 🎉 Highlights
+
+FerrisScript v0.0.4 significantly expands Godot integration, adding signal support, lifecycle callbacks, node query functions, new Godot types with struct-literal syntax, and full `@export` property/Inspector integration. This release enables real 2D game development with event-driven programming and scene tree interaction.
+
+### 🌟 What's New
+
+#### Signal System
+
+- `signal name(param: Type);` declarations with compile-time type checking (E301–E304)
+- `emit_signal("name", args...)` built-in with runtime validation (E501–E502)
+- Signals registered dynamically via Godot's `add_user_signal()`; all FerrisScript types supported as parameters
+
+#### Lifecycle Callbacks
+
+- `_input(event: InputEvent)`, `_physics_process(delta: f32)`, `_enter_tree()`, `_exit_tree()` (E305)
+- New `InputEvent` type with `is_action_pressed()` / `is_action_released()`
+
+#### Node Queries
+
+- `get_node(path)`, `get_parent()`, `has_node(path)`, `find_child(name)` built-ins
+- `Value::Node` / `NodeHandle` infrastructure with 12 new error codes (E601–E613)
+
+#### Godot Types & Struct Literals
+
+- `Color`, `Rect2`, `Transform2D` types with field access (E701–E710)
+- Struct-literal syntax: `Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }` for all struct types
+
+#### Property Exports & Inspector Integration
+
+- `@export` annotations with hints: `@export(range(0, 100))`, `@export(file("*.png"))`, `@export(enum("A", "B"))`
+- Compile-time export validation (E801–E816), bidirectional Inspector ↔ runtime sync, hot-reload persistence
+- `let` → read-only in Inspector, `let mut` → read/write; Inspector sets clamp to range
+
+### 📦 Dependencies & Compatibility
+
+- **Rust**: 1.70+ · **Godot**: 4.2+ · **gdext**: 0.4.x
+- **No Breaking Changes**: v0.0.3 scripts work unchanged
+
+### 📊 Metrics
+
+- **Tests**: 843 passing (543 compiler + 110 runtime + 38 harness + 15 integration + 137 other)
+- **New crate**: `ferrisscript_test_harness` (`ferris-test` headless Godot runner)
+
+### 🔗 Resources
+
+- **Full Changelog**: [CHANGELOG.md v0.0.4](CHANGELOG.md#004---2025-10-08)
+- **Historical planning docs**: `docs/archive/v0.0.4/`
+
+---
+
+## v0.0.3 - Editor Experience Alpha (October 8, 2025)
+
+**Status**: ✅ Complete  
+**Tag**: `v0.0.3`  
+**Codename**: "Editor Experience Alpha" 💡🔍
+
+### 🎉 Highlights
+
+FerrisScript v0.0.3 transforms the development experience with structured error diagnostics, a full-featured VS Code extension, parser error recovery, and comprehensive development tooling.
+
+### 🌟 What's New
+
+#### Enhanced Error Diagnostics
+
+- **Structured error codes** E001–E499 across 5 categories, documented in [ERROR_CODES.md](docs/ERROR_CODES.md)
+- **"Did you mean?" suggestions** via Levenshtein distance for variables, functions, and types
+- **Parser error recovery**: panic-mode recovery with synchronization points (`;`, `}`, `fn`, `let`) — no more cascading errors
+- Jekyll documentation site at <https://dev-parkins.github.io/FerrisScript> with error code lookup
+
+#### VS Code Extension
+
+- Keyword, type, and built-in function completion (context-aware)
+- Hover tooltips with markdown-formatted docs
+- Problem panel integration with real-time diagnostics
+- `.ferris` file icons and improved marketplace presentation
+
+#### Development Tooling & CI
+
+- `scripts/` suite: lint, test, bench, format, coverage (bash + PowerShell)
+- Pre-commit hooks with `scripts/install-git-hooks`
+- Benchmark CI workflow; consolidated code scanning & coverage (SonarQube + Codecov)
+- SHA-pinned GitHub Actions for supply-chain protection
+
+### 🐛 Notable Fixes
+
+- **Critical parser bug**: infinite loop in error recovery that consumed all RAM on unexpected top-level tokens
+- Dependency updates: criterion 0.5 → 0.7, **godot (gdext) 0.1 → 0.4**
+
+### 📦 Dependencies & Compatibility
+
+- **Rust**: 1.70+ · **Godot**: 4.2+ · **gdext**: 0.4.x (upgraded from 0.1.x)
+- **No Breaking Changes**: v0.0.2 scripts work unchanged
+
+### 🔗 Resources
+
+- **Full Changelog**: [CHANGELOG.md v0.0.3](CHANGELOG.md#003---2025-10-08)
+- **Historical planning docs**: `docs/archive/v0.0.3/`
+
+---
+
 ## v0.0.2 - Foundation & Polish (October 5, 2025)
 
 **Status**: ✅ Complete  

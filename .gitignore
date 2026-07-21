@@ -2,7 +2,6 @@
 /target/
 **/*.rs.bk
 *.pdb
-Cargo.lock
 
 # Godot 4.x
 .godot/
@@ -55,3 +54,6 @@ tarpaulin-report.html
 # Godot UID files (auto-generated)
 *.gdextension.uid
 *.gd.uid
+
+# Harness-generated test scenes (rebuilt every ferris-test run)
+godot_test/tests/generated/
