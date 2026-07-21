@@ -1,0 +1,141 @@
+---
+description: FerrisScript project-wide conventions for Cursor
+globs: ["**/*.rs", "**/*.ferris", "**/*.md"]
+alwaysApply: true
+---
+
+# FerrisScript Cursor Rules
+
+## Project Overview
+
+FerrisScript is a statically-typed, Rust-inspired scripting language for Godot 4.x game development.
+
+**Tech stack:**
+- Rust 1.94+ (edition 2024)
+- Godot 4.2+ (GDExtension via gdext 0.5.4)
+- Tree-walking interpreter
+- `.ferris` file extension
+
+## Commands
+
+```bash
+# Build
+cargo build --workspace
+
+# Test
+cargo test --workspace
+cargo test -p ferrisscript_compiler
+
+# Quality checks (MUST pass)
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+npm run docs:lint
+
+# Coverage
+./scripts/coverage.sh
+```
+
+## Architecture
+
+```
+crates/compiler/     → Lexer → Parser → Type Checker → AST (543 tests)
+crates/runtime/      → Tree-walking interpreter (110 tests)
+crates/godot_bind/   → GDExtension integration (11 tests)
+crates/test_harness/ → Integration test framework (38 tests)
+```
+
+## Code Style
+
+**Naming:**
+- `snake_case` for functions, variables, modules
+- `PascalCase` for types, traits, enums
+- `SCREAMING_SNAKE_CASE` for constants
+
+**Error handling:**
+```rust
+// CORRECT
+pub fn check_type(expr: &Expression, expected: &Type) -> Result<(), TypeError> {
+    if !types_match(expr, expected) {
+        return Err(TypeError::Mismatch { ... });
+    }
+    Ok(())
+}
+
+// WRONG — never panic in the compiler
+pub fn check_type(expr: &Expression, expected: &Type) {
+    if !types_match(expr, expected) {
+        panic!("Type mismatch!");  // ❌ Never do this
+    }
+}
+```
+
+**Testing:**
+```rust
+// CORRECT — descriptive test names
+#[test]
+fn test_type_mismatch_string_to_i32() {
+    let source = "let x: i32 = \"hello\";";
+    let result = compile(source);
+    assert!(result.is_err());
+}
+
+// WRONG — vague test names
+#[test]
+fn test_types() {
+    // ...
+}
+```
+
+## Boundaries
+
+**Always do:**
+- Run `cargo test --workspace` before committing
+- Update `CHANGELOG.md` for user-facing changes
+- Add tests for new features
+- Use conventional commits: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`
+
+**Never do:**
+- Modify `target/` or `node_modules/`
+- Hardcode Godot version numbers
+- Add dependencies without updating `Cargo.toml` workspace.dependencies
+- Convert sync patterns to async without discussion
+- Commit without running quality checks
+
+## Git Workflow
+
+**Branch naming:**
+- `bugfix/` or `fix/` → Bug fixes
+- `feature/` or `feat/` → New features
+- `docs/` or `doc/` → Documentation
+
+**Commit format:**
+```
+type(scope): description
+
+feat(parser): add support for array types
+fix(runtime): handle division by zero correctly
+```
+
+**PR process:**
+1. Create branch from `main`
+2. Make changes with conventional commits
+3. Run quality checks locally
+4. Push and create PR (template auto-applied based on branch name)
+5. Squash merge after approval
+
+## Skills (Load on Demand)
+
+Read the relevant skill before working in a specific area:
+
+- **compiler-conventions**: `docs/agent-skills/compiler-conventions.md`
+- **runtime-patterns**: `docs/agent-skills/runtime-patterns.md`
+- **godot-bindings**: `docs/agent-skills/godot-bindings.md`
+- **testing-guide**: `docs/agent-skills/testing-guide.md`
+
+## Additional Context
+
+- **Current version**: v0.0.5 (alpha)
+- **Test coverage**: ~82% (target: 80%+)
+- **Total tests**: 843+ across all layers
+- **CI**: GitHub Actions with cross-platform builds
+- **Documentation**: See `docs/ARCHITECTURE.md` for detailed design

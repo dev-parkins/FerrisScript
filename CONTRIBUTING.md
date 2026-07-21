@@ -303,6 +303,44 @@ cargo run --bin rustyscript_runtime examples/hello.ferris
 
 You should see "Hello from FerrisScript!" printed to the console.
 
+## Working with AI Coding Agents
+
+FerrisScript supports multiple AI coding agents through a modern, standards-based documentation structure. If you're using AI assistants (Claude Code, OpenCode, GitHub Copilot, Cursor, etc.) to contribute to FerrisScript, please follow these guidelines:
+
+### Agent Documentation Structure
+
+FerrisScript uses **progressive disclosure** to minimize context window usage:
+
+- **`AGENTS.md`** (root) — Universal entry point for all agents (~120 lines)
+- **`CLAUDE.md`** (root) — Claude Code-specific notes (imports AGENTS.md)
+- **`docs/agent-skills/`** — Progressive disclosure for deep crate work
+  - `compiler-conventions.md` — Parser, type checker, AST patterns
+  - `runtime-patterns.md` — Interpreter, scoping, builtins
+  - `godot-bindings.md` — GDExtension integration
+  - `testing-guide.md` — Test patterns and coverage
+- **`.github/prompts/WORKFLOW.md`** — Agent-agnostic execution methodology
+
+### Best Practices for AI-Assisted Contributions
+
+1. **Start with AGENTS.md** — All agents should read this first for project-wide conventions
+2. **Load skills on demand** — Only load the relevant skill file for the crate you're working in
+3. **Follow WORKFLOW.md** — Structured execution methodology reduces errors
+4. **Document assumptions** — Use `⚠️ ASSUMPTION:` markers when making inference-based decisions
+5. **Run quality checks** — Always run `cargo test`, `cargo clippy`, and `cargo fmt` before committing
+
+### Updating Agent Documentation
+
+When making changes that affect agent workflows:
+
+- **Project-wide conventions**: Update `AGENTS.md`
+- **Crate-specific patterns**: Update the relevant skill file in `docs/agent-skills/`
+- **Claude Code specifics**: Update `CLAUDE.md`
+- **Cursor rules**: Update `.cursor/rules/ferrisscript.mdc`
+
+**Keep files concise**: Under 150 lines for main files. Bloated files cause agents to drop instructions.
+
+See [`.github/prompts/README.md`](.github/prompts/README.md) for complete documentation on the agentic workflow system.
+
 ## Development Workflow
 
 **As of October 2025**, FerrisScript uses a **direct-to-main workflow** (GitHub Flow) with two branch types:
