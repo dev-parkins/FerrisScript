@@ -3,11 +3,14 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
 jobs:
-  # Generate coverage for all branches (PRs + main)
-  # Codecov tracks coverage trends across all branches
+  # Coverage only runs on main branch pushes to reduce CI time on PRs
+  # Codecov tracks coverage trends from main branch merges
   coverage:
     name: Generate Coverage Report
     runs-on: ubuntu-latest
