@@ -1229,10 +1229,10 @@ fn assign_field(
                     },
                     Value::Rect2 { position, size } => match field {
                         "position" => {
-                            *position = Box::new(value);
+                            **position = value;
                         }
                         "size" => {
-                            *size = Box::new(value);
+                            **size = value;
                         }
                         _ => return Err(format!("Error[E702]: Rect2 has no field '{}'", field)),
                     },
@@ -1242,7 +1242,7 @@ fn assign_field(
                         scale,
                     } => match field {
                         "position" => {
-                            *position = Box::new(value);
+                            **position = value;
                         }
                         "rotation" => {
                             if let Some(f) = value.to_float() {
@@ -1255,7 +1255,7 @@ fn assign_field(
                             }
                         }
                         "scale" => {
-                            *scale = Box::new(value);
+                            **scale = value;
                         }
                         _ => {
                             return Err(format!(
