@@ -31,7 +31,7 @@ jobs:
             components: rustfmt, clippy
 
       - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4
 
       - name: Run compiler benchmarks
         run: cargo bench --package ferrisscript_compiler -- --output-format bencher | tee compiler_bench.txt
