@@ -696,6 +696,35 @@ impl INode2D for FerrisScriptNode {
 
 #[godot_api]
 impl FerrisScriptNode {
+    /// Clears all script state and notifies Godot Inspector to refresh.
+    ///
+    /// Called when compilation or execution fails to prevent stale properties
+    /// from lingering in the Inspector. This ensures users see an empty property
+    /// list when their script has errors, making it clear the script is broken.
+    ///
+    /// **What it does**:
+    /// - Clears internal state (program, env, script_loaded flag)
+    /// - Notifies Inspector to refresh UI via `notify_property_list_changed()`
+    /// - Logs the state clear for debugging
+    ///
+    /// **Why notify on error**:
+    /// Without notification, Godot's Inspector caches the property list from the
+    /// last successful compilation, showing stale properties that no longer exist.
+    /// With notification, the Inspector calls `get_property_list()` again, which
+    /// returns an empty Vec when `program` is None, clearing the displayed properties.
+    fn clear_on_error(&mut self) {
+        // Clear internal state
+        self.program = None;
+        self.env = None;
+        self.script_loaded = false;
+
+        // Notify Godot Inspector to refresh UI
+        // This ensures stale properties don't linger in the Inspector
+        self.base_mut().notify_property_list_changed();
+
+        godot_print!("Cleared script state due to compilation/execution error");
+    }
+
     /// Load and compile the FerrisScript file
     fn load_script(&mut self) {
         let path_gstring = self.script_path.clone();
@@ -709,6 +738,7 @@ impl FerrisScriptNode {
                     "Failed to open script file '{}': File not found or cannot be accessed",
                     path
                 );
+                self.clear_on_error();
                 return;
             }
         };
@@ -721,6 +751,7 @@ impl FerrisScriptNode {
             Ok(prog) => prog,
             Err(e) => {
                 godot_error!("Failed to compile script '{}': {}", path, e);
+                self.clear_on_error();
                 return;
             }
         };
@@ -733,6 +764,7 @@ impl FerrisScriptNode {
 
         if let Err(e) = execute(&program, &mut env) {
             godot_error!("Failed to initialize script '{}': {}", path, e);
+            self.clear_on_error();
             return;
         }
 

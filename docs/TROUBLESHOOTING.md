@@ -662,36 +662,27 @@ cargo test  # Some tests fail
 
 ### Issue: Inspector properties don't update when switching from script with type errors
 
-**Symptoms:**
+**Status:** ✅ **Fixed in v0.0.5**
+
+**What Was the Problem:**
 
 - Attach a `.ferris` script with a type error (e.g., `@export let mut health: i32 = "Banana";`)
 - Godot console shows compilation error (E200: Type mismatch)
-- Switch to a different valid `.ferris` script
-- Inspector shows "Script path changed" message
-- **But Inspector properties don't update** - still shows old/empty properties
+- Inspector continued showing stale properties from previous successful compilation
+- Switching to a different script didn't clear the stale properties
 
-**Example Error:**
+**How It's Fixed:**
 
-```
-ERROR: crates\godot_bind\src\lib.rs:719 - Failed to compile script 'res://scripts/inspector_minimal.ferris': Error[E200]: Type mismatch
-ERROR: Type mismatch in global variable 'health': expected i32, found String at line 1, column 1
-ERROR: 
-ERROR:  1 | @export let mut health: i32 = "Banana";
-ERROR:    | ^ Value type String cannot be coerced to i32
-```
+Compilation errors now automatically clear the property list and notify the Inspector to refresh. When a script fails to compile:
 
-**Then switching scripts:**
+1. Internal state is cleared (`program`, `env`, `script_loaded` flag)
+2. Inspector is notified via `notify_property_list_changed()`
+3. `get_property_list()` returns empty Vec, clearing displayed properties
+4. User sees empty Inspector, making it clear the script is broken
 
-```
-Set script_path
-📝 Script path changed: res://scripts/inspector_minimal.ferris → res://scripts/other_script.ferris
-```
+**Previous Workaround (v0.0.4 and earlier):**
 
-**Cause:** When a script fails to compile, the property list isn't cleared. Switching to a new script doesn't trigger property list refresh if the old script left the node in an error state.
-
-**Solution (Workaround):**
-
-1. **Fix type errors before switching scripts**
+If you're still on v0.0.4, fix type errors before switching scripts:
 
    ```ferris
    // ✅ Correct
