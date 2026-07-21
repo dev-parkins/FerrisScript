@@ -61,12 +61,7 @@ FerrisScript provides comprehensive error documentation with:
 
 ### Planning & Roadmap
 
-Current development planning for v0.0.3:
-
-- [v0.0.3 Overview](planning/v0.0.3/README)
-- [Phase 1: Error Codes](planning/v0.0.3/PHASE_1_ERROR_CODES)
-- [Phase 2: Error Suggestions](planning/v0.0.3/PHASE_2_ERROR_SUGGESTIONS)
-- [Phase 3: Error Documentation](planning/v0.0.3/PHASE_3_ERROR_DOCS_RECOVERY)
+See the [Master Roadmap](https://github.com/dev-parkins/FerrisScript/blob/main/docs/planning/ROADMAP_MASTER.md) for current version status and what's planned next.
 
 ### Development Resources
 
@@ -79,20 +74,10 @@ Current development planning for v0.0.3:
 
 ## 🎯 Version Status
 
-**Current Version**: v0.0.2  
-**In Development**: v0.0.3 (Error System Enhancements)
+**Current Version**: v0.0.5 ("Stabilization & Engine Modernization")  
+**Godot**: 4.2+ (tested against 4.7) · **gdext**: 0.5.4 · **Rust**: 1.94+ (Edition 2024)
 
-### v0.0.3 Progress
-
-- ✅ **Phase 1**: Error Code System (E001-E499)
-- ✅ **Phase 2**: Error Suggestions ("Did you mean?")
-- ✅ **Phase 3A**: Documentation URLs in error messages
-- ✅ **Phase 3B**: Cross-references in ERROR_CODES.md
-- 🚧 **Phase 3C**: Parser error recovery (in progress)
-- ⏳ **Phase 3D**: Multi-error reporting
-- ⏳ **Phase 3E**: Integration and testing
-
-[View detailed roadmap →](planning/v0.0.3/README)
+[View detailed roadmap →](https://github.com/dev-parkins/FerrisScript/blob/main/docs/planning/ROADMAP_MASTER.md)
 
 ---
 

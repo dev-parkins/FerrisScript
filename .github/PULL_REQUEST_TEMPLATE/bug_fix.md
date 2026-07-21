@@ -1,10 +1,5 @@
 ## 🐛 Bug Fix
 
-<!-- 
-⚠️ IMPORTANT: This PR should target the 'develop' branch, not 'main'.
-Bug fixes go through develop for integration testing before reaching main.
--->
-
 <!-- Provide a clear and concise description of the bug you're fixing -->
 
 ## Related Issues
