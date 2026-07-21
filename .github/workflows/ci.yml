@@ -32,7 +32,7 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@6d653acede28d24f02e3cd41383119e8b1b35921
@@ -75,7 +75,7 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@6d653acede28d24f02e3cd41383119e8b1b35921
@@ -141,7 +141,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@6d653acede28d24f02e3cd41383119e8b1b35921
@@ -169,7 +169,7 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Download all artifacts
       uses: actions/download-artifact@v4
