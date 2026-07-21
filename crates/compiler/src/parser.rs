@@ -165,11 +165,11 @@ impl<'a> Parser<'a> {
             // Check if previous token was a statement boundary
             if self.position > 0 {
                 let prev_idx = self.position - 1;
-                if let Some(pt) = self.tokens.get(prev_idx) {
-                    if matches!(pt.token, Token::Semicolon) {
-                        self.panic_mode = false;
-                        return;
-                    }
+                if let Some(pt) = self.tokens.get(prev_idx)
+                    && matches!(pt.token, Token::Semicolon)
+                {
+                    self.panic_mode = false;
+                    return;
                 }
             }
 
@@ -1109,7 +1109,7 @@ impl<'a> Parser<'a> {
                         t.name(),
                         self.current_line,
                         self.current_column
-                    ))
+                    ));
                 }
             };
             self.advance();

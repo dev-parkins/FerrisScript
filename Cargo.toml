@@ -8,8 +8,9 @@ members = [
 ]
 
 [workspace.package]
-version = "0.0.4"
-edition = "2021"
+version = "0.0.5"
+edition = "2024"
+rust-version = "1.94"
 authors = ["FerrisScript Contributors"]
 license = "MIT"
 

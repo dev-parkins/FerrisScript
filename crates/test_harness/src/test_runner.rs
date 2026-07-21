@@ -195,10 +195,10 @@ impl TestHarness {
                 println!("  ✗ {} ({} ms)", result.script_name, result.duration_ms);
                 if !result.markers.is_empty() {
                     for marker in &result.markers {
-                        if marker.kind == crate::TestMarkerKind::Fail {
-                            if let Some(msg) = &marker.message {
-                                println!("    - {}", msg);
-                            }
+                        if marker.kind == crate::TestMarkerKind::Fail
+                            && let Some(msg) = &marker.message
+                        {
+                            println!("    - {}", msg);
                         }
                     }
                 }

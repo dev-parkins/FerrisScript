@@ -206,8 +206,8 @@ See [extensions/vscode/README.md](extensions/vscode/README.md) for full features
 
 ### Prerequisites
 
-- **Rust 1.70+** ([Install Rust](https://www.rust-lang.org/tools/install))
-- **Godot 4.2+** ([Download Godot](https://godotengine.org/download))
+- **Rust 1.94+ with Edition 2024** ([Install Rust](https://www.rust-lang.org/tools/install))
+- **Godot 4.2+ (tested against 4.7)** ([Download Godot](https://godotengine.org/download))
 - **Git** (for cloning the repository)
 
 ### Installation
@@ -232,10 +232,10 @@ cargo test --workspace
    cargo build --package ferrisscript_godot_bind
    ```
 
-   > **Note for Godot 4.3+**: The project is configured with `api-4-3` feature for compatibility. If you encounter initialization errors, ensure `crates/godot_bind/Cargo.toml` has the correct API version feature enabled.
+   > The project is configured with the `api-4-7` feature (`crates/godot_bind/Cargo.toml`), matching `godot_test`'s `compatibility_minimum = 4.2` and the Godot 4.7 editor it's tested against. If you encounter initialization errors on a different Godot version, check that this feature matches your engine's minor version.
 
 2. **Open the test project:**
-   - Open Godot 4.2+
+   - Open Godot 4.2+ (tested against 4.7)
    - Import project from `godot_test/project.godot`
 
 3. **Create your first script:**

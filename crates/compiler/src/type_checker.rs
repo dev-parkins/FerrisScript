@@ -752,8 +752,7 @@ impl<'a> TypeChecker<'a> {
                 if param_type != Type::InputEvent {
                     let base_msg = format!(
                         "Lifecycle function '_input' parameter must be of type InputEvent, found {} at {}",
-                        func.params[0].ty,
-                        func.span
+                        func.params[0].ty, func.span
                     );
                     self.error(format_error_with_code(
                         ErrorCode::E305,
@@ -789,8 +788,7 @@ impl<'a> TypeChecker<'a> {
                 if param_type != Type::F32 {
                     let base_msg = format!(
                         "Lifecycle function '_physics_process' parameter must be of type f32, found {} at {}",
-                        func.params[0].ty,
-                        func.span
+                        func.params[0].ty, func.span
                     );
                     self.error(format_error_with_code(
                         ErrorCode::E305,
@@ -2437,9 +2435,11 @@ fn _process(delta: f32) {
         let program = parse(&tokens, input).unwrap();
         let result = check(&program, input);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains("must have exactly 1 parameter"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("must have exactly 1 parameter")
+        );
 
         // Test with two parameters
         let input2 = r#"fn _input(event: InputEvent, extra: i32) {
@@ -2449,9 +2449,11 @@ fn _process(delta: f32) {
         let program2 = parse(&tokens2, input2).unwrap();
         let result2 = check(&program2, input2);
         assert!(result2.is_err());
-        assert!(result2
-            .unwrap_err()
-            .contains("must have exactly 1 parameter"));
+        assert!(
+            result2
+                .unwrap_err()
+                .contains("must have exactly 1 parameter")
+        );
     }
 
     #[test]
@@ -2488,9 +2490,11 @@ fn _process(delta: f32) {
         let program = parse(&tokens, input).unwrap();
         let result = check(&program, input);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains("must have exactly 1 parameter"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("must have exactly 1 parameter")
+        );
 
         // Test with two parameters
         let input2 = r#"fn _physics_process(delta: f32, extra: i32) {
@@ -2500,9 +2504,11 @@ fn _process(delta: f32) {
         let program2 = parse(&tokens2, input2).unwrap();
         let result2 = check(&program2, input2);
         assert!(result2.is_err());
-        assert!(result2
-            .unwrap_err()
-            .contains("must have exactly 1 parameter"));
+        assert!(
+            result2
+                .unwrap_err()
+                .contains("must have exactly 1 parameter")
+        );
     }
 
     #[test]
@@ -3419,9 +3425,11 @@ let x: float = 3.14;
         let program2 = parse(&tokens2, input2).unwrap();
         let result2 = check(&program2, input2);
         assert!(result2.is_err());
-        assert!(result2
-            .unwrap_err()
-            .contains("expects 1 arguments, found 2"));
+        assert!(
+            result2
+                .unwrap_err()
+                .contains("expects 1 arguments, found 2")
+        );
     }
 
     #[test]
@@ -4684,11 +4692,13 @@ let x: float = 3.14;
         assert_eq!(metadata.len(), 1);
         assert_eq!(metadata[0].name, "position");
         assert_eq!(metadata[0].type_name, "Vector2");
-        assert!(metadata[0]
-            .default_value
-            .as_ref()
-            .unwrap()
-            .contains("Vector2"));
+        assert!(
+            metadata[0]
+                .default_value
+                .as_ref()
+                .unwrap()
+                .contains("Vector2")
+        );
         assert!(metadata[0].default_value.as_ref().unwrap().contains("x:"));
         assert!(metadata[0].default_value.as_ref().unwrap().contains("y:"));
     }

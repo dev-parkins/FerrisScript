@@ -1,12 +1,14 @@
 [package]
 name = "ferrisscript_godot_bind"
-version = "0.0.3"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 
 [dependencies]
 # gdext is the Godot 4.x Rust binding (formerly gdextension)
-# Using version 0.4 with api-4-3 feature for Godot 4.3+ compatibility
-godot = { version = "0.4", features = ["api-4-3"] }
+# api-4-7 pins codegen to the Godot minor we test against; keep in sync with
+# godot_test/ferrisscript.gdextension and godot_test/project.godot
+godot = { version = "0.5", features = ["api-4-7"] }
 ferrisscript_compiler = { path = "../compiler" }
 ferrisscript_runtime = { path = "../runtime" }
 

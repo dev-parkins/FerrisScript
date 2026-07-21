@@ -436,7 +436,7 @@ impl Env {
                 _ => {
                     return Err(
                         "Error[E502]: emit_signal first argument must be a string".to_string()
-                    )
+                    );
                 }
             };
 
@@ -626,51 +626,51 @@ impl Env {
             "Vector2" => {
                 // Parse "Vector2 { x: 0.0, y: 0.0 }" format
                 // Simplified parsing since format is guaranteed by compiler
-                if let Some(fields_str) = default_str.strip_prefix("Vector2 {") {
-                    if let Some(fields_str) = fields_str.strip_suffix('}') {
-                        let mut x = 0.0;
-                        let mut y = 0.0;
-                        for field in fields_str.split(',') {
-                            let parts: Vec<&str> = field.split(':').collect();
-                            if parts.len() == 2 {
-                                let name = parts[0].trim();
-                                let value = parts[1].trim();
-                                if name == "x" {
-                                    x = value.parse().unwrap_or(0.0);
-                                } else if name == "y" {
-                                    y = value.parse().unwrap_or(0.0);
-                                }
+                if let Some(fields_str) = default_str.strip_prefix("Vector2 {")
+                    && let Some(fields_str) = fields_str.strip_suffix('}')
+                {
+                    let mut x = 0.0;
+                    let mut y = 0.0;
+                    for field in fields_str.split(',') {
+                        let parts: Vec<&str> = field.split(':').collect();
+                        if parts.len() == 2 {
+                            let name = parts[0].trim();
+                            let value = parts[1].trim();
+                            if name == "x" {
+                                x = value.parse().unwrap_or(0.0);
+                            } else if name == "y" {
+                                y = value.parse().unwrap_or(0.0);
                             }
                         }
-                        return Value::Vector2 { x, y };
                     }
+                    return Value::Vector2 { x, y };
                 }
                 Value::Vector2 { x: 0.0, y: 0.0 } // Default
             }
             "Color" => {
                 // Parse "Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 }" format
-                if let Some(fields_str) = default_str.strip_prefix("Color {") {
-                    if let Some(fields_str) = fields_str.strip_suffix('}') {
-                        let mut r = 0.0;
-                        let mut g = 0.0;
-                        let mut b = 0.0;
-                        let mut a = 1.0;
-                        for field in fields_str.split(',') {
-                            let parts: Vec<&str> = field.split(':').collect();
-                            if parts.len() == 2 {
-                                let name = parts[0].trim();
-                                let value = parts[1].trim();
-                                match name {
-                                    "r" => r = value.parse().unwrap_or(0.0),
-                                    "g" => g = value.parse().unwrap_or(0.0),
-                                    "b" => b = value.parse().unwrap_or(0.0),
-                                    "a" => a = value.parse().unwrap_or(1.0),
-                                    _ => {}
-                                }
+                if let Some(fields_str) = default_str.strip_prefix("Color {")
+                    && let Some(fields_str) = fields_str.strip_suffix('}')
+                {
+                    let mut r = 0.0;
+                    let mut g = 0.0;
+                    let mut b = 0.0;
+                    let mut a = 1.0;
+                    for field in fields_str.split(',') {
+                        let parts: Vec<&str> = field.split(':').collect();
+                        if parts.len() == 2 {
+                            let name = parts[0].trim();
+                            let value = parts[1].trim();
+                            match name {
+                                "r" => r = value.parse().unwrap_or(0.0),
+                                "g" => g = value.parse().unwrap_or(0.0),
+                                "b" => b = value.parse().unwrap_or(0.0),
+                                "a" => a = value.parse().unwrap_or(1.0),
+                                _ => {}
                             }
                         }
-                        return Value::Color { r, g, b, a };
                     }
+                    return Value::Color { r, g, b, a };
                 }
                 Value::Color {
                     r: 0.0,
@@ -1138,16 +1138,17 @@ fn assign_field(
     match object {
         ast::Expr::Variable(name, _) => {
             // Check if this is 'self'
-            if let Some(var) = env.get(name) {
-                if matches!(var, Value::SelfObject) {
-                    // Assigning to self.property - use property setter callback
-                    if let Some(setter) = env.property_setter {
-                        return setter(field, value);
-                    } else {
-                        return Err(
-                            "Error[E404]: Cannot set self properties: no property setter registered".to_string()
-                        );
-                    }
+            if let Some(var) = env.get(name)
+                && matches!(var, Value::SelfObject)
+            {
+                // Assigning to self.property - use property setter callback
+                if let Some(setter) = env.property_setter {
+                    return setter(field, value);
+                } else {
+                    return Err(
+                        "Error[E404]: Cannot set self properties: no property setter registered"
+                            .to_string(),
+                    );
                 }
             }
 
@@ -1261,14 +1262,14 @@ fn assign_field(
                             return Err(format!(
                                 "Error[E703]: Transform2D has no field '{}'",
                                 field
-                            ))
+                            ));
                         }
                     },
                     _ => {
                         return Err(format!(
                             "Error[E408]: Cannot access field '{}' on {:?}",
                             field, var
-                        ))
+                        ));
                     }
                 }
                 Ok(())
@@ -1281,65 +1282,65 @@ fn assign_field(
             // Handle nested field access (e.g., self.position.x)
             if let ast::Expr::Variable(name, _) = &**object {
                 // Check if this is self.property.field
-                if let Some(var) = env.get(name) {
-                    if matches!(var, Value::SelfObject) {
-                        // Get the property from Godot (e.g., position)
-                        if let Some(getter) = env.property_getter {
-                            let mut prop_value = getter(parent_field)?;
+                if let Some(var) = env.get(name)
+                    && matches!(var, Value::SelfObject)
+                {
+                    // Get the property from Godot (e.g., position)
+                    if let Some(getter) = env.property_getter {
+                        let mut prop_value = getter(parent_field)?;
 
-                            // Modify the field (e.g., x or y)
-                            match &mut prop_value {
-                                Value::Vector2 { x, y } => match field {
-                                    "x" => {
-                                        if let Some(f) = value.to_float() {
-                                            *x = f;
-                                        } else {
-                                            return Err(format!(
-                                                "Error[E406]: Cannot assign {:?} to Vector2.x",
-                                                value
-                                            ));
-                                        }
-                                    }
-                                    "y" => {
-                                        if let Some(f) = value.to_float() {
-                                            *y = f;
-                                        } else {
-                                            return Err(format!(
-                                                "Error[E406]: Cannot assign {:?} to Vector2.y",
-                                                value
-                                            ));
-                                        }
-                                    }
-                                    _ => {
+                        // Modify the field (e.g., x or y)
+                        match &mut prop_value {
+                            Value::Vector2 { x, y } => match field {
+                                "x" => {
+                                    if let Some(f) = value.to_float() {
+                                        *x = f;
+                                    } else {
                                         return Err(format!(
-                                            "Error[E407]: Vector2 has no field '{}'",
-                                            field
-                                        ))
+                                            "Error[E406]: Cannot assign {:?} to Vector2.x",
+                                            value
+                                        ));
                                     }
-                                },
+                                }
+                                "y" => {
+                                    if let Some(f) = value.to_float() {
+                                        *y = f;
+                                    } else {
+                                        return Err(format!(
+                                            "Error[E406]: Cannot assign {:?} to Vector2.y",
+                                            value
+                                        ));
+                                    }
+                                }
                                 _ => {
                                     return Err(format!(
-                                        "Error[E409]: Property '{}' is not a Vector2",
-                                        parent_field
-                                    ))
+                                        "Error[E407]: Vector2 has no field '{}'",
+                                        field
+                                    ));
                                 }
+                            },
+                            _ => {
+                                return Err(format!(
+                                    "Error[E409]: Property '{}' is not a Vector2",
+                                    parent_field
+                                ));
                             }
+                        }
 
-                            // Set the property back to Godot
-                            if let Some(setter) = env.property_setter {
-                                return setter(parent_field, prop_value);
-                            } else {
-                                return Err(
+                        // Set the property back to Godot
+                        if let Some(setter) = env.property_setter {
+                            return setter(parent_field, prop_value);
+                        } else {
+                            return Err(
                                     "Error[E404]: Cannot set self properties: no property setter registered"
                                         .to_string(),
                                 );
-                            }
-                        } else {
-                            return Err(
+                        }
+                    } else {
+                        return Err(
                                 "Error[E410]: Cannot get self properties: no property getter registered"
                                     .to_string(),
                             );
-                        }
                     }
                 }
 
@@ -2229,9 +2230,11 @@ mod tests {
 
         let result = call_function("test", &[], &mut env);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains("Cannot assign to immutable variable"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("Cannot assign to immutable variable")
+        );
     }
 
     #[test]
@@ -2320,9 +2323,11 @@ mod tests {
 
         let result = call_function("test", &[], &mut env);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains("Cannot assign to field of immutable variable"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("Cannot assign to field of immutable variable")
+        );
     }
 
     #[test]
@@ -2799,9 +2804,11 @@ mod tests {
         let mut env = Env::new();
         let result = env.call_builtin("nonexistent_func", &[]);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains("Unknown built-in function: nonexistent_func"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("Unknown built-in function: nonexistent_func")
+        );
     }
 
     #[test]
@@ -2854,9 +2861,11 @@ mod tests {
 
         let result = call_function("get_prop", &[], &mut env);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains("no property getter registered"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("no property getter registered")
+        );
     }
 
     #[test]
@@ -3306,9 +3315,11 @@ mod tests {
 
         let result = call_function("test", &[], &mut env);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains("Failed to emit signal: test_signal"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("Failed to emit signal: test_signal")
+        );
     }
 
     #[test]
@@ -3318,9 +3329,11 @@ mod tests {
         // Test calling emit_signal with no arguments
         let result = env.call_builtin("emit_signal", &[]);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains("emit_signal requires at least a signal name"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("emit_signal requires at least a signal name")
+        );
     }
 
     #[test]
@@ -3330,9 +3343,11 @@ mod tests {
         // Test calling emit_signal with non-string first argument
         let result = env.call_builtin("emit_signal", &[Value::Int(42)]);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains("emit_signal first argument must be a string"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("emit_signal first argument must be a string")
+        );
     }
 
     // Phase 2: Lifecycle callback runtime tests
