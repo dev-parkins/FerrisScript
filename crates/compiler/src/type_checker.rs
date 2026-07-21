@@ -39,6 +39,7 @@
 use crate::ast::*;
 use crate::error_code::ErrorCode;
 use crate::error_context::format_error_with_code;
+use crate::span::Span;
 use crate::suggestions::find_similar_identifiers;
 use std::collections::HashMap;
 
@@ -323,8 +324,8 @@ impl<'a> TypeChecker<'a> {
                 ErrorCode::E810,
                 &base_msg,
                 self.source,
-                span.line,
-                span.column,
+                span.line(),
+                span.column(),
                 "Each variable can only have one @export annotation. Remove the duplicate annotation.",
             ));
             return; // Don't continue validation for duplicate
@@ -340,8 +341,8 @@ impl<'a> TypeChecker<'a> {
                 ErrorCode::E813,
                 &base_msg,
                 self.source,
-                span.line,
-                span.column,
+                span.line(),
+                span.column(),
                 "Default values for exported variables must be literals (e.g., 42, 3.14, true, \"text\") or struct literals (e.g., Vector2 { x: 0.0, y: 0.0 }). Complex expressions like function calls are not allowed.",
             ));
             return; // Don't continue validation for non-constant defaults
@@ -362,8 +363,8 @@ impl<'a> TypeChecker<'a> {
                 ErrorCode::E802,
                 &base_msg,
                 self.source,
-                span.line,
-                span.column,
+                span.line(),
+                span.column(),
                 &format!(
                     "Type {} cannot be exported. Exportable types: i32, f32, bool, String, Vector2, Color, Rect2, Transform2D",
                     var_type.name()
@@ -382,8 +383,8 @@ impl<'a> TypeChecker<'a> {
                 ErrorCode::E812,
                 &base_msg,
                 self.source,
-                span.line,
-                span.column,
+                span.line(),
+                span.column(),
                 "Exported variables should be mutable (let mut) to allow editing in Godot Inspector. Consider using 'let mut' instead of 'let'.",
             ));
         }
@@ -418,8 +419,8 @@ impl<'a> TypeChecker<'a> {
                 error_code,
                 &base_msg,
                 self.source,
-                span.line,
-                span.column,
+                span.line(),
+                span.column(),
                 hint_msg,
             ));
             return; // Don't validate hint format if type is incompatible
@@ -438,8 +439,8 @@ impl<'a> TypeChecker<'a> {
                         ErrorCode::E807,
                         &base_msg,
                         self.source,
-                        span.line,
-                        span.column,
+                        span.line(),
+                        span.column(),
                         "Range hint requires min to be less than max. Example: @export(range(0, 100, 1))",
                     ));
                 }
@@ -456,8 +457,8 @@ impl<'a> TypeChecker<'a> {
                             ErrorCode::E805,
                             &base_msg,
                             self.source,
-                            span.line,
-                            span.column,
+                            span.line(),
+                            span.column(),
                             "File extensions must start with '*' (e.g., '*.png') or '.' (e.g., '.png')",
                         ));
                     }
@@ -474,8 +475,8 @@ impl<'a> TypeChecker<'a> {
                         ErrorCode::E808,
                         &base_msg,
                         self.source,
-                        span.line,
-                        span.column,
+                        span.line(),
+                        span.column(),
                         "Enum hint requires at least one value. Example: @export(enum(\"Value1\", \"Value2\"))",
                     ));
                 }
@@ -553,8 +554,8 @@ impl<'a> TypeChecker<'a> {
                         ErrorCode::E203,
                         &base_msg,
                         self.source,
-                        var.span.line,
-                        var.span.column,
+                        var.span.line(),
+                        var.span.column(),
                         &hint,
                     ));
                 }
@@ -573,8 +574,8 @@ impl<'a> TypeChecker<'a> {
                         ErrorCode::E218,
                         &base_msg,
                         self.source,
-                        var.span.line,
-                        var.span.column,
+                        var.span.line(),
+                        var.span.column(),
                         "Add an explicit type annotation (e.g., let name: type = value)",
                     ));
                 }
@@ -598,8 +599,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E200,
                     &base_msg,
                     self.source,
-                    var.span.line,
-                    var.span.column,
+                    var.span.line(),
+                    var.span.column(),
                     &format!(
                         "Value type {} cannot be coerced to {}",
                         init_ty.name(),
@@ -647,8 +648,8 @@ impl<'a> TypeChecker<'a> {
                             ErrorCode::E203,
                             &base_msg,
                             self.source,
-                            func.span.line,
-                            func.span.column,
+                            func.span.line(),
+                            func.span.column(),
                             &hint,
                         ));
                     }
@@ -683,8 +684,8 @@ impl<'a> TypeChecker<'a> {
                             ErrorCode::E203,
                             &base_msg,
                             self.source,
-                            func.span.line,
-                            func.span.column,
+                            func.span.line(),
+                            func.span.column(),
                             &hint,
                         ));
                     }
@@ -742,8 +743,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E305,
                     &base_msg,
                     self.source,
-                    func.span.line,
-                    func.span.column,
+                    func.span.line(),
+                    func.span.column(),
                     "Expected signature: fn _input(event: InputEvent)",
                 ));
             } else {
@@ -758,8 +759,8 @@ impl<'a> TypeChecker<'a> {
                         ErrorCode::E305,
                         &base_msg,
                         self.source,
-                        func.span.line,
-                        func.span.column,
+                        func.span.line(),
+                        func.span.column(),
                         &format!("Expected type 'InputEvent', found '{}'", func.params[0].ty),
                     ));
                 }
@@ -779,8 +780,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E305,
                     &base_msg,
                     self.source,
-                    func.span.line,
-                    func.span.column,
+                    func.span.line(),
+                    func.span.column(),
                     "Expected signature: fn _physics_process(delta: f32)",
                 ));
             } else {
@@ -795,8 +796,8 @@ impl<'a> TypeChecker<'a> {
                         ErrorCode::E305,
                         &base_msg,
                         self.source,
-                        func.span.line,
-                        func.span.column,
+                        func.span.line(),
+                        func.span.column(),
                         &format!("Expected type 'f32', found '{}'", func.params[0].ty),
                     ));
                 }
@@ -816,8 +817,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E305,
                     &base_msg,
                     self.source,
-                    func.span.line,
-                    func.span.column,
+                    func.span.line(),
+                    func.span.column(),
                     "Expected signature: fn _enter_tree()",
                 ));
             }
@@ -836,8 +837,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E305,
                     &base_msg,
                     self.source,
-                    func.span.line,
-                    func.span.column,
+                    func.span.line(),
+                    func.span.column(),
                     "Expected signature: fn _exit_tree()",
                 ));
             }
@@ -855,8 +856,8 @@ impl<'a> TypeChecker<'a> {
                 ErrorCode::E301,
                 &base_msg,
                 self.source,
-                signal.span.line,
-                signal.span.column,
+                signal.span.line(),
+                signal.span.column(),
                 "Each signal must have a unique name",
             ));
             return;
@@ -887,8 +888,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E203,
                     &base_msg,
                     self.source,
-                    signal.span.line,
-                    signal.span.column,
+                    signal.span.line(),
+                    signal.span.column(),
                     &hint,
                 ));
             }
@@ -910,8 +911,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E302,
                     &base_msg,
                     self.source,
-                    span.line,
-                    span.column,
+                    span.line(),
+                    span.column(),
                     "Signal must be declared before it can be emitted",
                 ));
                 return;
@@ -931,8 +932,8 @@ impl<'a> TypeChecker<'a> {
                 ErrorCode::E303,
                 &base_msg,
                 self.source,
-                span.line,
-                span.column,
+                span.line(),
+                span.column(),
                 &format!(
                     "Expected {} argument(s), found {}",
                     signal_params.len(),
@@ -958,8 +959,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E304,
                     &base_msg,
                     self.source,
-                    span.line,
-                    span.column,
+                    span.line(),
+                    span.column(),
                     &format!(
                         "Cannot coerce {} to {}",
                         arg_type.name(),
@@ -1003,8 +1004,8 @@ impl<'a> TypeChecker<'a> {
                             ErrorCode::E203,
                             &base_msg,
                             self.source,
-                            span.line,
-                            span.column,
+                            span.line(),
+                            span.column(),
                             &hint,
                         ));
                     }
@@ -1021,8 +1022,8 @@ impl<'a> TypeChecker<'a> {
                             ErrorCode::E218,
                             &base_msg,
                             self.source,
-                            span.line,
-                            span.column,
+                            span.line(),
+                            span.column(),
                             "Add an explicit type annotation (e.g., let name: type = value)",
                         ));
                     }
@@ -1043,8 +1044,8 @@ impl<'a> TypeChecker<'a> {
                         ErrorCode::E200,
                         &base_msg,
                         self.source,
-                        span.line,
-                        span.column,
+                        span.line(),
+                        span.column(),
                         &format!(
                             "Value type {} cannot be coerced to {}",
                             value_ty.name(),
@@ -1074,8 +1075,8 @@ impl<'a> TypeChecker<'a> {
                         ErrorCode::E219,
                         &base_msg,
                         self.source,
-                        span.line,
-                        span.column,
+                        span.line(),
+                        span.column(),
                         &format!(
                             "Value type {} cannot be coerced to {}",
                             value_ty.name(),
@@ -1101,8 +1102,8 @@ impl<'a> TypeChecker<'a> {
                         ErrorCode::E211,
                         &base_msg,
                         self.source,
-                        span.line,
-                        span.column,
+                        span.line(),
+                        span.column(),
                         "Condition must evaluate to a boolean value (true or false)",
                     ));
                 }
@@ -1133,8 +1134,8 @@ impl<'a> TypeChecker<'a> {
                         ErrorCode::E211,
                         &base_msg,
                         self.source,
-                        span.line,
-                        span.column,
+                        span.line(),
+                        span.column(),
                         "Condition must evaluate to a boolean value (true or false)",
                     ));
                 }
@@ -1187,8 +1188,8 @@ impl<'a> TypeChecker<'a> {
                         ErrorCode::E201,
                         &base_msg,
                         self.source,
-                        span.line,
-                        span.column,
+                        span.line(),
+                        span.column(),
                         &hint,
                     ));
                     Type::Unknown
@@ -1222,8 +1223,8 @@ impl<'a> TypeChecker<'a> {
                                 ErrorCode::E212,
                                 &base_msg,
                                 self.source,
-                                span.line,
-                                span.column,
+                                span.line(),
+                                span.column(),
                                 "Arithmetic operations (+, -, *, /) require i32 or f32 types",
                             ));
                             Type::Unknown
@@ -1251,8 +1252,8 @@ impl<'a> TypeChecker<'a> {
                                 ErrorCode::E212,
                                 &base_msg,
                                 self.source,
-                                span.line,
-                                span.column,
+                                span.line(),
+                                span.column(),
                                 "Comparison operators (<, <=, >, >=) require i32 or f32 types",
                             ));
                             Type::Bool
@@ -1272,8 +1273,8 @@ impl<'a> TypeChecker<'a> {
                                 ErrorCode::E212,
                                 &base_msg,
                                 self.source,
-                                span.line,
-                                span.column,
+                                span.line(),
+                                span.column(),
                                 "Logical operators (and, or) require boolean operands",
                             ));
                         }
@@ -1295,8 +1296,8 @@ impl<'a> TypeChecker<'a> {
                                 ErrorCode::E213,
                                 &base_msg,
                                 self.source,
-                                span.line,
-                                span.column,
+                                span.line(),
+                                span.column(),
                                 "Negation operator (-) requires i32 or f32 type",
                             ));
                         }
@@ -1313,8 +1314,8 @@ impl<'a> TypeChecker<'a> {
                                 ErrorCode::E213,
                                 &base_msg,
                                 self.source,
-                                span.line,
-                                span.column,
+                                span.line(),
+                                span.column(),
                                 "Not operator (!) requires boolean type",
                             ));
                         }
@@ -1332,8 +1333,8 @@ impl<'a> TypeChecker<'a> {
                             ErrorCode::E204,
                             &base_msg,
                             self.source,
-                            span.line,
-                            span.column,
+                            span.line(),
+                            span.column(),
                             "First argument must be the signal name as a string literal",
                         ));
                         return Type::Void;
@@ -1352,8 +1353,8 @@ impl<'a> TypeChecker<'a> {
                             ErrorCode::E205,
                             &base_msg,
                             self.source,
-                            span.line,
-                            span.column,
+                            span.line(),
+                            span.column(),
                             "Signal name must be known at compile time (use a string literal)",
                         ));
                     }
@@ -1373,8 +1374,8 @@ impl<'a> TypeChecker<'a> {
                             ErrorCode::E204,
                             &base_msg,
                             self.source,
-                            span.line,
-                            span.column,
+                            span.line(),
+                            span.column(),
                             &format!("Expected {} argument(s)", sig.params.len()),
                         ));
                     } else {
@@ -1395,8 +1396,8 @@ impl<'a> TypeChecker<'a> {
                                     ErrorCode::E205,
                                     &base_msg,
                                     self.source,
-                                    span.line,
-                                    span.column,
+                                    span.line(),
+                                    span.column(),
                                     &format!(
                                         "Argument {} must be of type {}",
                                         i,
@@ -1427,8 +1428,8 @@ impl<'a> TypeChecker<'a> {
                         ErrorCode::E202,
                         &base_msg,
                         self.source,
-                        span.line,
-                        span.column,
+                        span.line(),
+                        span.column(),
                         &hint,
                     ));
                     Type::Unknown
@@ -1446,8 +1447,8 @@ impl<'a> TypeChecker<'a> {
                                 ErrorCode::E215,
                                 &base_msg,
                                 self.source,
-                                span.line,
-                                span.column,
+                                span.line(),
+                                span.column(),
                                 "Vector2 only has fields 'x' and 'y'",
                             ));
                             Type::Unknown
@@ -1462,8 +1463,8 @@ impl<'a> TypeChecker<'a> {
                                 ErrorCode::E701,
                                 &base_msg,
                                 self.source,
-                                span.line,
-                                span.column,
+                                span.line(),
+                                span.column(),
                                 "Color only has fields 'r', 'g', 'b', and 'a'",
                             ));
                             Type::Unknown
@@ -1478,8 +1479,8 @@ impl<'a> TypeChecker<'a> {
                                 ErrorCode::E702,
                                 &base_msg,
                                 self.source,
-                                span.line,
-                                span.column,
+                                span.line(),
+                                span.column(),
                                 "Rect2 only has fields 'position' and 'size'",
                             ));
                             Type::Unknown
@@ -1495,8 +1496,8 @@ impl<'a> TypeChecker<'a> {
                                 ErrorCode::E703,
                                 &base_msg,
                                 self.source,
-                                span.line,
-                                span.column,
+                                span.line(),
+                                span.column(),
                                 "Transform2D only has fields 'position', 'rotation', and 'scale'",
                             ));
                             Type::Unknown
@@ -1517,8 +1518,8 @@ impl<'a> TypeChecker<'a> {
                             ErrorCode::E209,
                             &base_msg,
                             self.source,
-                            span.line,
-                            span.column,
+                            span.line(),
+                            span.column(),
                             "Field access is only valid for structured types",
                         ));
                         Type::Unknown
@@ -1560,8 +1561,8 @@ impl<'a> TypeChecker<'a> {
                 ErrorCode::E704,
                 &base_msg,
                 self.source,
-                span.line,
-                span.column,
+                span.line(),
+                span.column(),
                 &format!(
                     "Type '{}' does not exist or does not support struct literal syntax",
                     type_name
@@ -1585,8 +1586,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E704,
                     &base_msg,
                     self.source,
-                    span.line,
-                    span.column,
+                    span.line(),
+                    span.column(),
                     "Only Color, Rect2, Transform2D, and Vector2 support struct literal construction",
                 ));
                 Type::Unknown
@@ -1608,8 +1609,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E704,
                     &base_msg,
                     self.source,
-                    span.line,
-                    span.column,
+                    span.line(),
+                    span.column(),
                     "Color requires fields: r, g, b, a (all f32)",
                 ));
                 return Type::Unknown;
@@ -1628,8 +1629,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E701,
                     &base_msg,
                     self.source,
-                    field_expr.span().line,
-                    field_expr.span().column,
+                    field_expr.span().line(),
+                    field_expr.span().column(),
                     "Color only has fields: r, g, b, a",
                 ));
             }
@@ -1647,8 +1648,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E707,
                     &base_msg,
                     self.source,
-                    field_expr.span().line,
-                    field_expr.span().column,
+                    field_expr.span().line(),
+                    field_expr.span().column(),
                     "Color fields must be numeric (f32 or i32)",
                 ));
             }
@@ -1671,8 +1672,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E705,
                     &base_msg,
                     self.source,
-                    span.line,
-                    span.column,
+                    span.line(),
+                    span.column(),
                     "Rect2 requires fields: position (Vector2), size (Vector2)",
                 ));
                 return Type::Unknown;
@@ -1691,8 +1692,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E702,
                     &base_msg,
                     self.source,
-                    field_expr.span().line,
-                    field_expr.span().column,
+                    field_expr.span().line(),
+                    field_expr.span().column(),
                     "Rect2 only has fields: position, size",
                 ));
             }
@@ -1710,8 +1711,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E708,
                     &base_msg,
                     self.source,
-                    field_expr.span().line,
-                    field_expr.span().column,
+                    field_expr.span().line(),
+                    field_expr.span().column(),
                     "Rect2 fields must be Vector2",
                 ));
             }
@@ -1734,8 +1735,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E706,
                     &base_msg,
                     self.source,
-                    span.line,
-                    span.column,
+                    span.line(),
+                    span.column(),
                     "Transform2D requires fields: position (Vector2), rotation (f32), scale (Vector2)",
                 ));
                 return Type::Unknown;
@@ -1754,8 +1755,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E703,
                     &base_msg,
                     self.source,
-                    field_expr.span().line,
-                    field_expr.span().column,
+                    field_expr.span().line(),
+                    field_expr.span().column(),
                     "Transform2D only has fields: position, rotation, scale",
                 ));
             }
@@ -1788,8 +1789,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E709,
                     &base_msg,
                     self.source,
-                    field_expr.span().line,
-                    field_expr.span().column,
+                    field_expr.span().line(),
+                    field_expr.span().column(),
                     &format!(
                         "Transform2D field '{}' must be of type {}",
                         field_name,
@@ -1816,8 +1817,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E704, // Reuse Color construction error code for Vector2
                     &base_msg,
                     self.source,
-                    span.line,
-                    span.column,
+                    span.line(),
+                    span.column(),
                     "Vector2 requires fields: x, y (both f32)",
                 ));
                 return Type::Unknown;
@@ -1836,8 +1837,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E205, // Reuse Vector2 field access error
                     &base_msg,
                     self.source,
-                    field_expr.span().line,
-                    field_expr.span().column,
+                    field_expr.span().line(),
+                    field_expr.span().column(),
                     "Vector2 only has fields: x, y",
                 ));
             }
@@ -1855,8 +1856,8 @@ impl<'a> TypeChecker<'a> {
                     ErrorCode::E707, // Reuse Color type mismatch error
                     &base_msg,
                     self.source,
-                    field_expr.span().line,
-                    field_expr.span().column,
+                    field_expr.span().line(),
+                    field_expr.span().column(),
                     "Vector2 fields must be numeric (f32 or i32)",
                 ));
             }
