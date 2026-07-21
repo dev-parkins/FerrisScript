@@ -1,7 +1,11 @@
 # FerrisScript Test Harness Configuration
 
-# Path to Godot console executable for headless testing
-godot_executable = "Y:\\cpark\\Projects\\Godot\\Godot_v4.5-dev4_win64.exe\\Godot_v4.5-dev4_win64_console.exe"
+# Path to Godot console executable for headless testing.
+# "godot" relies on it being on PATH (true after e.g. `pacman -S godot` on
+# Arch/CachyOS, or after adding the Godot install dir to PATH elsewhere).
+# Override per-machine with the GODOT_EXE env var instead of editing this
+# file, e.g.: GODOT_EXE=/path/to/godot cargo run -p ferrisscript_test_harness ...
+godot_executable = "godot"
 
 # Path to the Godot project directory
 project_path = "./godot_test"

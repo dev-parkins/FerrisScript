@@ -1,10 +1,5 @@
 ## 📝 Documentation Update
 
-<!-- 
-⚠️ IMPORTANT: This PR should target the 'develop' branch, not 'main'.
-Documentation updates go through develop for integration testing before reaching main.
--->
-
 <!-- Provide a clear description of what documentation you're adding or improving -->
 
 ## Related Issues

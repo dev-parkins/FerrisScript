@@ -2484,8 +2484,7 @@ mod tests {
 
     #[test]
     fn test_edge_case_division_by_zero() {
-        // Test division by zero behavior
-        // TODO: Should return an error instead of potentially undefined behavior
+        // Integer division by zero must return Error[E413], not panic.
         let mut env = Env::new();
         let source = r#"
             fn divide_by_zero() -> i32 {
@@ -2499,14 +2498,8 @@ mod tests {
         execute(&program, &mut env).unwrap();
 
         let result = call_function("divide_by_zero", &[], &mut env);
-        // Current behavior: division by zero may panic, error, or return undefined value
-        match result {
-            Ok(v) => println!(
-                "⚠️  Division by zero returned value (undefined behavior): {:?}",
-                v
-            ),
-            Err(e) => println!("✅ Division by zero produced error: {}", e),
-        }
+        assert!(result.is_err(), "division by zero should error, not panic");
+        assert!(result.unwrap_err().contains("E413"));
     }
 
     #[test]
