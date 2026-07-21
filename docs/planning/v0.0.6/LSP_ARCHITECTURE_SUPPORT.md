@@ -1167,5 +1167,5 @@ fn move_player(direction: Vector2) {
 
 **See Also**:
 
-- `docs/planning/v0.0.5/CONSOLIDATED_TEST_FRAMEWORK_IMPLEMENTATION.md` - Detailed implementation guide
+- `docs/planning/v0.0.6/CONSOLIDATED_TEST_FRAMEWORK_IMPLEMENTATION.md` - Detailed implementation guide
 - `docs/planning/ROADMAP_MASTER.md` - Version roadmap and consistency checklist

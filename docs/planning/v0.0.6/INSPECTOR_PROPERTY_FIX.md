@@ -12,7 +12,7 @@
 PR #60's `clear_on_error()` fix was validated headlessly (no interactive editor
 available in this environment) against a live Godot 4.7.stable engine, after
 the gdext 0.4→0.5.4 upgrade (PR #63). `godot_test/scripts/inspector_refresh_test.gd`
-+ `godot_test/test_inspector_refresh.tscn` drive a `FerrisScriptNode` directly
+and `godot_test/test_inspector_refresh.tscn` drive a `FerrisScriptNode` directly
 through `script_path` changes and assert on `get_property_list()` results,
 covering the fix's checklist:
 
@@ -290,7 +290,7 @@ mod tests {
 **Status**: ✅ Fixed in v0.0.5  
 **Solution**: Compilation errors now automatically clear Inspector properties  
 **Previous Workaround** (v0.0.4 only): Reload scene (Scene → Reload Saved Scene)  
-**Implementation**: See [INSPECTOR_PROPERTY_FIX.md](planning/v0.0.5/INSPECTOR_PROPERTY_FIX.md)
+**Implementation**: See [INSPECTOR_PROPERTY_FIX.md](INSPECTOR_PROPERTY_FIX.md)
 ```
 
 ---

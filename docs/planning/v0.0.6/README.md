@@ -225,8 +225,8 @@
 - [x] Parser creates spans from token positions
 - [x] Error messages include `Span` information
 - [x] All 568 compiler tests pass with spans (31 new span unit tests + 5 integration tests)
-- [ ] **🆕 Inspector clears properties on compilation failure**
-- [ ] **🆕 Switching scripts after type error updates Inspector correctly**
+- [x] **🆕 Inspector clears properties on compilation failure** (PR #60, shipped in v0.0.5)
+- [x] **🆕 Switching scripts after type error updates Inspector correctly** (PR #60, verified headlessly in v0.0.5 — see `INSPECTOR_PROPERTY_FIX.md`)
 
 **Complexity**: 🔴 HIGH (touches entire AST, all tests)  
 **Delegation**: ❌ **User-Interactive** (requires careful review of each AST node)

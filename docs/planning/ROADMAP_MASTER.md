@@ -1,8 +1,18 @@
 # FerrisScript Master Roadmap
 
 **Single Source of Truth for Version Planning**  
-**Last Updated**: October 11, 2025  
-**Current Version**: v0.0.4 (Phases 1-5 complete, documentation polish remaining)
+**Last Updated**: July 21, 2026  
+**Current Version**: v0.0.5 in progress (Stabilization & Engine Modernization)
+
+**Note (2026-07-21)**: The version originally planned as "v0.0.5: LSP
+Foundation and Safety Fix" has been renumbered to **v0.0.6** and every
+version after it shifted up by one (old v0.0.6 → v0.0.7, old v0.0.7 →
+v0.0.8, etc.). After 8 months of dormancy, v0.0.5 was re-scoped to
+stabilization (landing two stalled PRs, housekeeping) and engine
+modernization (gdext 0.4→0.5.4, Godot 4.7) instead — see the new `v0.0.5`
+section below. The LSP/test-framework plan itself is unchanged in content,
+just renumbered; its planning docs live in `docs/planning/v0.0.6/` (moved
+from `docs/planning/v0.0.5/`).
 
 ---
 
@@ -49,7 +59,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ---
 
-## 📍 Current State (v0.0.4)
+## 📍 Current State (v0.0.5 in progress, built on v0.0.4)
 
 ### What Works Today ✅
 
@@ -69,13 +79,13 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ### In Progress 🔄
 
-- None (v0.0.4 feature-complete, preparing release)
+- 🔄 v0.0.5 "Stabilization & Engine Modernization" — see version details below
 
 ### What's Missing ❌
 
-- ❌ LSP / editor support (coming in v0.0.5)
-- ❌ Arrays and for loops (coming in v0.0.6)
-- ❌ Advanced Godot types (Vector3, Basis, etc. - coming in v0.0.7)
+- ❌ LSP / editor support (coming in v0.0.6)
+- ❌ Arrays and for loops (coming in v0.0.7)
+- ❌ Advanced Godot types (Vector3, Basis, etc. - coming in v0.0.8)
 - ❌ Metadata/manifest system (coming in v0.1.0)
 - ❌ Extended type system (i64, f64, u8, i16, u16 - coming in v0.2.0)
 - ❌ Arithmetic safety (checked/saturating methods - coming in v0.3.0)
@@ -89,9 +99,10 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 | Version | Status | Focus | Timeline | Premium Requests |
 |---------|--------|-------|----------|------------------|
 | **v0.0.4** | ✅ Complete | Godot API + Inspector integration | Completed Oct 10, 2025 | 6-8 used |
-| **v0.0.5** | 📋 Next | LSP + Compiler Prerequisites + Test Framework 🛡️ | 6-7 weeks | 20-25 ⬆️ |
-| **v0.0.6** | 📋 Planned | Language features (arrays/for) | 2-3 weeks | 8-12 |
-| **v0.0.7** | 📋 Planned | Godot API + node safety 🛡️ | 2-3 weeks | 9-12 ⬆️ |
+| **v0.0.5** | 🔄 In Progress | Stabilization & Engine Modernization (gdext 0.5.4, Godot 4.7) | ~1 week | 4-6 |
+| **v0.0.6** | 📋 Next | LSP + Compiler Prerequisites + Test Framework 🛡️ | 6-7 weeks | 20-25 ⬆️ |
+| **v0.0.7** | 📋 Planned | Language features (arrays/for) | 2-3 weeks | 8-12 |
+| **v0.0.8** | 📋 Planned | Godot API + node safety 🛡️ | 2-3 weeks | 9-12 ⬆️ |
 | **v0.1.0** | 🎯 Milestone | LSP UX + Type Safety + Metadata | 3-4 weeks | 10-15 ⬆️ |
 | **v0.2.0** | 🚀 Planned | Extended types + LSP Navigation + Validation | 4-5 weeks | 12-16 ⬆️ |
 | **v0.3.0** | 🚀 Planned | Arithmetic safety + LSP Advanced + Type Safety Advanced | 5-7 weeks | 14-20 ⬆️ |
@@ -113,7 +124,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ## 📦 Version Details
 
-### v0.0.4: Godot API Expansion (CURRENT - 90% Complete)
+### v0.0.4: Godot API Expansion (✅ Complete)
 
 **Goal**: Comprehensive Godot integration for 2D game development
 
@@ -139,7 +150,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 - [x] 12 new error codes (E601-E613)
 - [x] Test harness infrastructure (38 test_harness tests, 3,500+ lines)
 - [x] Test coverage analysis (31% scenario coverage, 64 scenarios tracked)
-- [x] Node invalidation research (safety roadmap for v0.0.5/v0.0.7)
+- [x] Node invalidation research (safety roadmap for v0.0.6/v0.0.8)
 - [x] 4 example scripts with metadata protocol
 
 **Phase 4** ✅ Complete (Commit 6b51076, 00e47b0):
@@ -190,7 +201,99 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ---
 
-### v0.0.5: LSP Foundation + Safety Fix (HIGHEST PRIORITY)
+### v0.0.5: Stabilization & Engine Modernization (🔄 In Progress)
+
+**Goal**: Return the project to a healthy, current baseline after 8 months of
+dormancy (last commit Oct 2025 → resumed July 2026) before continuing feature
+work — land the two stalled PRs, pay down housekeeping debt, and bring the
+Godot binding stack up to date.
+
+**Why this exists / why it's not LSP work**: The project's `v0.0.5` slot was
+originally slated for LSP Foundation work (see `v0.0.6` below, its
+renumbered home). On return, two finished-but-unmerged PRs were sitting on
+`origin` and the `godot` (gdext) dependency was a full major version behind
+current, with the property/Inspector binding code being the most
+version-fragile part of the codebase. Rather than resume a 6-7 week LSP
+effort on top of a stale foundation, this cycle stabilizes first.
+
+**Phase 0 — Environment & baseline**:
+
+- [x] Installed Godot 4.7.stable locally (first time this project has run
+      on a non-Windows dev machine)
+- [x] Verified `ferris-test` harness works via `GODOT_EXE`/`GODOT_PROJECT`
+      env overrides (no `ferris-test.toml` edit needed)
+
+**Phase 1 — Land stalled PRs**:
+
+- [x] Merged PR #59 (source span tracking — `crates/compiler/src/span.rs`,
+      `Position`/`Span` across AST/parser/type checker; LSP foundation Phase
+      0.1, now filed under `v0.0.6` below)
+- [x] Merged PR #60 (Inspector `clear_on_error()` fix — stale exported
+      properties no longer persist after a compile error)
+- [x] Fixed a GitHub repo ruleset that required a "Full Test Suite" status
+      check which never runs on `pull_request` events, permanently blocking
+      merges on a solo-maintainer repo; now requires only "Quick Check" +
+      "Generate Coverage Report", 0 approvals, squash-only
+
+**Phase 2 — Housekeeping** (PR #61, #62):
+
+- [x] Fixed `.gdextension` library paths for Linux/macOS (missing the `lib`
+      prefix cargo adds to cdylibs — the extension had never loaded on
+      non-Windows platforms)
+- [x] Fixed the test harness deleting its own source `.ferris` scripts when
+      the scripts directory under test was the project's live scripts
+      directory
+- [x] Fixed clippy lints introduced by newer stable Rust
+- [x] Restored `docs/archive/` (97 files) and `docs/planning/technical/` (9
+      files), unintentionally deleted across the PR #53 revert and #54
+      squash-merge; fixed the resulting dangling links
+- [x] Added v0.0.3/v0.0.4 sections to `RELEASE_NOTES.md` (was stale at
+      v0.0.2)
+- [x] Untracked harness-generated `.tscn` scenes; committed `Cargo.lock`
+
+**Phase 3 — gdext 0.4.5 → 0.5.4, Godot 4.7 (PR #63)**:
+
+- [x] `godot` crate 0.4 → 0.5 (`api-4-3` → `api-4-7`), Rust Edition 2021 →
+      2024, MSRV declared 1.94
+- [x] Migrated `crates/godot_bind/src/lib.rs`'s Inspector integration:
+      `PropertyInfo`/`PropertyHintInfo` module move, `export_info_functions`
+      → `export_fns` rename, `class_id: ClassId` → `class_name: StringName`,
+      and the `get_property_list`/`get_property`/`set_property` virtuals
+      renamed to `on_get_property_list`/`on_get`/`on_set`
+- [x] `godot_test/ferrisscript.gdextension` `compatibility_minimum` 4.1 →
+      4.2; `godot_test/project.godot` engine features "4.5" → "4.7"
+- [x] Verified: full test suite green (883 tests), release build succeeds,
+      extension loads cleanly under Godot 4.7.stable headless, `ferris-test`
+      corpus pass rate unchanged (19/33 — remaining failures are pre-existing
+      test-script drift against unimplemented language features, unrelated
+      to this upgrade)
+
+**Phase 4 — Inspector fix verification**:
+
+- [x] Verified PR #60's fix headlessly (no interactive editor in this
+      environment) via a scripted GDScript test
+      (`godot_test/scripts/inspector_refresh_test.gd`) driving a
+      `FerrisScriptNode` through compile-error/fix/missing-file scenarios —
+      5/5 checks pass under Godot 4.7 / gdext 0.5.4
+
+**Phase 5 — Release** (this section + roadmap renumbering):
+
+- [x] Renumbered `v0.0.5` (LSP Foundation) → `v0.0.6` and cascaded every
+      later version up by one; moved `docs/planning/v0.0.5/` →
+      `docs/planning/v0.0.6/`
+- [ ] Version bumps (workspace + all crates → 0.0.5), CHANGELOG/RELEASE_NOTES
+      finalization, tag `v0.0.5`
+
+**Deliverables Remaining**: version bump finalization and release tag (see
+Phase 5 above).
+
+**What Was Delivered**: a current, healthy baseline — no code changes beyond
+dependency/API migration and bug fixes already merged in prior versions;
+zero new language features (that resumes in `v0.0.7`, see below).
+
+---
+
+### v0.0.6: LSP Foundation + Safety Fix (HIGHEST PRIORITY)
 
 **Goal**: Real-time diagnostics and node safety foundation
 
@@ -274,7 +377,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 - ❌ Autocomplete (needs Phase 0.2 symbol table, but UI deferred)
 - ❌ Go-to-definition (needs Phase 0.1 spans, but UI deferred)
 - ❌ Find references (needs Phase 0.2 symbol table, but UI deferred)
-- ❌ Node invalidation Phase 1 (moved to v0.0.7)
+- ❌ Node invalidation Phase 1 (moved to v0.0.8)
 
 **Timeline**: 6-7 weeks (was 3-4 weeks, then 4-5 weeks)  
 **Estimated Premium Requests**: 20-25 (was 11-16, then 13-18)
@@ -291,17 +394,17 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 **Note**: Focus on **diagnostics only** (Minimum Viable LSP). Additional features come in v0.1.0.
 
-**See**: `docs/planning/v0.0.5/LSP_ARCHITECTURE_SUPPORT.md` for detailed architecture
+**See**: `docs/planning/v0.0.6/LSP_ARCHITECTURE_SUPPORT.md` for detailed architecture
 
-#### v0.0.5 Consistency Checklist 🆕
+#### v0.0.6 Consistency Checklist 🆕
 
-**Purpose**: Ensure all v0.0.5 planning documents align with master roadmap decisions.
+**Purpose**: Ensure all v0.0.6 planning documents align with master roadmap decisions.
 
 **Critical Decisions Made** (Option A for all):
 
-1. ✅ Ship v0.0.5 with compiler prerequisites (spans + symbol table) - adds 1 week
-2. ✅ Full LSP test integration in v0.0.5 - no deferral
-3. ✅ Add incremental compilation to v0.0.5 - adds 2-3 weeks
+1. ✅ Ship v0.0.6 with compiler prerequisites (spans + symbol table) - adds 1 week
+2. ✅ Full LSP test integration in v0.0.6 - no deferral
+3. ✅ Add incremental compilation to v0.0.6 - adds 2-3 weeks
 
 **Updated Timeline**: 6-7 weeks (was 3-4 weeks, then 4-5 weeks)
 
@@ -321,10 +424,10 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
   - [x] Ensure span tracking matches Phase 0.1
   - [x] Timeline reflects 6-7 weeks total (not just LSP-specific time)
   - [x] Decision log documents Option A choices
-  - [x] Roadmap section updated with v0.0.5/v0.1.0 split
+  - [x] Roadmap section updated with v0.0.6/v0.1.0 split
 
 - [ ] **ROADMAP_MASTER.md**: (This document)
-  - [x] v0.0.5 timeline updated to 6-7 weeks
+  - [x] v0.0.6 timeline updated to 6-7 weeks
   - [x] Premium request estimate updated (13-18 → likely 20-25 with added scope)
   - [ ] Phases 0-3 clearly documented
   - [ ] Dependencies call out compiler prerequisites
@@ -355,7 +458,7 @@ Priority 1 (Keep):
 - Basic LSP diagnostics
 - Test framework foundation
 
-Priority 2 (Defer to v0.0.6 if needed):
+Priority 2 (Defer to v0.0.7 if needed):
 
 - Incremental compilation (fallback: always recompile)
 - LSP test integration (ship test framework standalone)
@@ -367,7 +470,7 @@ Priority 3 (Defer to v0.1.0):
 
 ---
 
-### v0.0.6: Language Features
+### v0.0.7: Language Features
 
 **Goal**: Arrays, loops, and pattern matching
 
@@ -403,13 +506,13 @@ Priority 3 (Defer to v0.1.0):
 **Timeline**: 2-3 weeks  
 **Estimated Premium Requests**: 8-12
 
-**Dependencies**: v0.0.5 Phase 2 (compiler integration)
+**Dependencies**: v0.0.6 Phase 2 (compiler integration)
 
-**Parallelization**: Can start during v0.0.5 phases 3-5
+**Parallelization**: Can start during v0.0.6 phases 3-5
 
 ---
 
-### v0.0.7: Godot API Expansion + Node Safety
+### v0.0.8: Godot API Expansion + Node Safety
 
 **Goal**: Comprehensive type coverage for 2D game development + robust node references
 
@@ -456,7 +559,7 @@ Priority 3 (Defer to v0.1.0):
 **Timeline**: 2-3 weeks  
 **Estimated Premium Requests**: 9-12 ⬆️ (increased by 1 PR for node safety)
 
-**Dependencies**: Arrays (v0.0.6) for `get_children()`, Phase 1 (v0.0.5) for validity checking
+**Dependencies**: Arrays (v0.0.7) for `get_children()`, Phase 1 (v0.0.6) for validity checking
 
 ---
 
@@ -559,7 +662,7 @@ Priority 3 (Defer to v0.1.0):
 **Timeline**: 3-4 weeks (was 2-3 weeks)  
 **Estimated Premium Requests**: 10-15 (was 6-9)
 
-**Dependencies**: All v0.0.5-7 complete
+**Dependencies**: All v0.0.6-7 complete
 
 **Blocks**: 🚨 All Godot editor integration (v0.5.0)
 
@@ -567,7 +670,7 @@ Priority 3 (Defer to v0.1.0):
 
 - `docs/planning/v0.1.0-release-plan.md` for execution plan
 - `docs/TYPE_SAFETY_ROADMAP_ANALYSIS.md` for type safety details
-- `docs/planning/v0.0.5/LSP_ARCHITECTURE_SUPPORT.md` for LSP architecture
+- `docs/planning/v0.0.6/LSP_ARCHITECTURE_SUPPORT.md` for LSP architecture
 
 ---
 
@@ -578,10 +681,10 @@ Priority 3 (Defer to v0.1.0):
 | Week | Primary Track | Secondary Track | Deliverable |
 |------|---------------|-----------------|-------------|
 | 1-2 | v0.0.4 Phase 2 | - | Lifecycle callbacks ✅ |
-| 3-6 | v0.0.5 Phases 1-2 | - | LSP foundation + diagnostics |
-| 7-9 | v0.0.5 Phases 3-4 | v0.0.6 arrays start | Autocomplete + navigation |
-| 10-11 | v0.0.5 Phase 5 | v0.0.6 for/match | VS Code extension published |
-| 12-14 | v0.0.7 Godot API | v0.0.6 string interp | API expansion complete |
+| 3-6 | v0.0.6 Phases 1-2 | - | LSP foundation + diagnostics |
+| 7-9 | v0.0.6 Phases 3-4 | v0.0.7 arrays start | Autocomplete + navigation |
+| 10-11 | v0.0.6 Phase 5 | v0.0.7 for/match | VS Code extension published |
+| 12-14 | v0.0.8 Godot API | v0.0.7 string interp | API expansion complete |
 | 15-16 | v0.1.0 polish | - | v0.1.0 release 🎉 |
 
 **Key Insight**: Different crates can be developed simultaneously (LSP + language features)
@@ -592,7 +695,7 @@ Priority 3 (Defer to v0.1.0):
 
 ### 1. Editor Experience First
 
-**Decision**: LSP in v0.0.5 (not v0.2.0 as originally planned)
+**Decision**: LSP in v0.0.6 (not v0.2.0 as originally planned)
 
 **Rationale**:
 
@@ -603,7 +706,7 @@ Priority 3 (Defer to v0.1.0):
 
 ### 2. Smaller, Faster Releases
 
-**Decision**: Split v0.1.0 into v0.0.5-7 + v0.1.0 polish
+**Decision**: Split v0.1.0 into v0.0.6-7 + v0.1.0 polish
 
 **Rationale**:
 
@@ -704,7 +807,7 @@ Priority 3 (Defer to v0.1.0):
 
 - `docs/planning/v0.2.0-roadmap.md` for type system details
 - `docs/TYPE_SAFETY_ROADMAP_ANALYSIS.md` for validation details
-- `docs/planning/v0.0.5/LSP_ARCHITECTURE_SUPPORT.md` for LSP navigation
+- `docs/planning/v0.0.6/LSP_ARCHITECTURE_SUPPORT.md` for LSP navigation
 
 ---
 
@@ -779,7 +882,7 @@ Priority 3 (Defer to v0.1.0):
 **See**:
 
 - `docs/planning/v0.3.0-roadmap.md` for arithmetic safety details
-- `docs/planning/v0.0.5/LSP_ARCHITECTURE_SUPPORT.md` for LSP advanced features
+- `docs/planning/v0.0.6/LSP_ARCHITECTURE_SUPPORT.md` for LSP advanced features
 - `docs/TYPE_SAFETY_ROADMAP_ANALYSIS.md` for type safety advanced (community validation required)
 
 ---
@@ -971,14 +1074,14 @@ See `planning/VISION.md` for aspirational multi-year goals including:
 ### Decision & Analysis Documents (Historical Context)
 
 - **planning/ROADMAP_CONSOLIDATION_ANALYSIS.md** - Strategic analysis (Oct 2025)
-- **planning/LSP_VERSION_RECONCILIATION.md** - LSP priority decision (v0.0.5)
+- **planning/LSP_VERSION_RECONCILIATION.md** - LSP priority decision (v0.0.6)
 - **planning/NODE_INVALIDATION_PRIORITY_RECONCILIATION.md** - Node safety phasing
 - **planning/EDITOR_INTEGRATION_IMPACT.md** - Editor integration scope analysis (v0.5.0)
 
 ### Version-Specific Implementation Plans (Detailed Reference)
 
-- **planning/v0.0.5-roadmap.md** - Detailed 5-phase LSP implementation
-- **planning/v0.0.6-7-roadmap.md** - Arrays, for loops, match + Node Invalidation Phase 2
+- **planning/v0.0.6-roadmap.md** - Detailed 5-phase LSP implementation
+- **planning/v0.0.7-7-roadmap.md** - Arrays, for loops, match + Node Invalidation Phase 2
 - **planning/v0.1.0-ROADMAP.md** - Feature specifications & requirements
 - **planning/v0.1.0-release-plan.md** - Release execution (demo game, docs, QA) ✅ Merged into v0.1.0 above
 - **planning/v0.2.0-roadmap.md** - Extended type system implementation details ✅ Merged into v0.2.0 above
@@ -1052,20 +1155,20 @@ See `planning/VISION.md` for aspirational multi-year goals including:
 1. ✅ Complete roadmap consolidation analysis
 2. ✅ Review and approve strategic direction
 3. 🔄 Execute v0.0.4 Phase 2 (`_ready()` callback first)
-4. ⏳ Begin v0.0.5 LSP research
+4. ⏳ Begin v0.0.6 LSP research
 
 ### Next 2-4 Weeks
 
 1. ⏳ Complete v0.0.4 Phase 2 (all lifecycle callbacks)
 2. ⏳ Ship v0.0.4 release
-3. ⏳ Start v0.0.5 LSP implementation
+3. ⏳ Start v0.0.6 LSP implementation
 4. ⏳ Archive superseded planning docs
 
 ### Next 2-3 Months
 
-1. ⏳ Complete v0.0.5 (LSP alpha)
-2. ⏳ Complete v0.0.6 (language features)
-3. ⏳ Complete v0.0.7 (Godot API)
+1. ⏳ Complete v0.0.6 (LSP alpha)
+2. ⏳ Complete v0.0.7 (language features)
+3. ⏳ Complete v0.0.8 (Godot API)
 4. ⏳ Ship v0.1.0 milestone 🎉
 
 ---

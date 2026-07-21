@@ -6,6 +6,14 @@ This folder contains detailed roadmaps for each development version on the path 
 
 **Last Updated**: October 5, 2025
 
+> **⚠️ Superseded (2026-07-21)**: The version numbers and `-roadmap.md` filenames
+> below predate the actual v0.0.4/v0.0.5 planning that happened in October
+> 2025 and the July 2026 stabilization cycle. **[`ROADMAP_MASTER.md`](ROADMAP_MASTER.md)
+> is the current single source of truth** for version status and numbering
+> (note in particular that the LSP work referenced here as "v0.0.5" is now
+> `v0.0.6` — see the renumbering note at the top of `ROADMAP_MASTER.md`). The
+> content below is kept for historical context only.
+
 **Current Status**:
 
 - ✅ v0.0.1: Released (October 2, 2025)
