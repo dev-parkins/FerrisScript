@@ -851,6 +851,57 @@ Before submitting a PR:
 
 ---
 
+## 🤖 AI Agent Documentation
+
+FerrisScript supports multiple AI coding agents through a modern, standards-based documentation structure.
+
+### Quick Reference
+
+| File | Purpose | Size |
+|------|---------|------|
+| `AGENTS.md` | Universal entry point for all agents | ~120 lines |
+| `CLAUDE.md` | Claude Code-specific notes | ~50 lines |
+| `docs/agent-skills/*.md` | Crate-specific patterns (progressive disclosure) | ~100 lines each |
+| `.github/prompts/WORKFLOW.md` | Agent-agnostic execution methodology | ~300 lines |
+| `.cursor/rules/ferrisscript.mdc` | Cursor-specific rules | ~120 lines |
+
+### Supported Agents
+
+- ✅ **Claude Code** — Reads `CLAUDE.md` (imports `AGENTS.md`)
+- ✅ **OpenCode** — Reads `AGENTS.md` directly
+- ✅ **GitHub Copilot** — Reads `AGENTS.md`
+- ✅ **Cursor** — Reads `.cursor/rules/` + `AGENTS.md`
+- ✅ **DeepSeek / Others** — Reads `AGENTS.md`
+
+### Progressive Disclosure
+
+We use a **three-layer architecture** to minimize context window usage:
+
+1. **Layer 1** (always loaded): `AGENTS.md` / `CLAUDE.md` — Commands, conventions, boundaries
+2. **Layer 2** (on demand): `docs/agent-skills/*.md` — Crate-specific patterns
+3. **Layer 3** (on demand): Full docs — `ARCHITECTURE.md`, `DEVELOPMENT.md`
+
+**Why this matters:**
+
+- Bloated files (>200 lines) cause agents to drop instructions
+- Every token in `AGENTS.md` competes with the actual task for attention
+- Progressive disclosure keeps context focused and relevant
+
+### For Contributors
+
+When making changes that affect agent workflows:
+
+- **Project-wide conventions**: Update `AGENTS.md`
+- **Crate-specific patterns**: Update the relevant skill file in `docs/agent-skills/`
+- **Claude Code specifics**: Update `CLAUDE.md`
+- **Cursor rules**: Update `.cursor/rules/ferrisscript.mdc`
+
+**Keep files concise**: Under 150 lines for main files.
+
+See [`.github/prompts/README.md`](../.github/prompts/README.md) for complete documentation.
+
+---
+
 ## 📚 Resources
 
 ### FerrisScript Docs
