@@ -1,9 +1,32 @@
 # 🐛 Inspector Property Refresh Fix
 
-**Status**: 📋 Ready for Implementation  
+**Status**: ✅ Implemented (PR #60) and Verified  
 **Priority**: 🟢 Quick Win (1-2 hours)  
 **Phase**: 0.1.5 (can run in parallel with Phase 0.1)  
 **Delegation**: ✅ Background Agent Task  
+
+---
+
+## ✅ Verified in Godot 4.7 / gdext 0.5.4 (2026-07-21)
+
+PR #60's `clear_on_error()` fix was validated headlessly (no interactive editor
+available in this environment) against a live Godot 4.7.stable engine, after
+the gdext 0.4→0.5.4 upgrade (PR #63). `godot_test/scripts/inspector_refresh_test.gd`
++ `godot_test/test_inspector_refresh.tscn` drive a `FerrisScriptNode` directly
+through `script_path` changes and assert on `get_property_list()` results,
+covering the fix's checklist:
+
+| Checklist item | Result |
+|---|---|
+| 1. Properties clear on compile error | ✅ PASS |
+| 2. Properties repopulate on fix | ✅ PASS |
+| 3. Rapid edit toggling | ✅ PASS |
+| 4. Multiple scripts, only the broken one clears | Not directly exercised (single-node scenario); fix is instance-scoped (`self.env = None` etc.), so lower risk |
+| 5. File-not-found path clears properties | ✅ PASS |
+
+Run via: `godot --headless --path godot_test --scene test_inspector_refresh.tscn --quit-after 5`
+
+Output: `[SUMMARY] Total: 5, Passed: 5, Failed: 0`
 
 ---
 
