@@ -352,7 +352,7 @@ mod tests {
 
 ## 🔗 Related Documents
 
-- **Planning**: [v0.0.6 README.md](README.md) (this fix is Phase 0.1.5)
+- **Planning**: [v0.0.7 README.md](README.md) (this fix is Phase 0.1.5)
 - **Issue**: [TROUBLESHOOTING.md](../../TROUBLESHOOTING.md#inspector-properties-not-updating)
 - **Implementation**: `crates/godot_bind/src/lib.rs`
 
@@ -367,7 +367,7 @@ This is a **quick win** that can run in parallel with Phase 0.1 (Source Spans). 
 - Clear root cause
 - Simple 2-line fix
 - Well-defined test procedure
-- No dependencies on other v0.0.6 work
+- No dependencies on other v0.0.7 work
 
 ### Agent Execution Steps
 

@@ -63,7 +63,7 @@ Five research documents explore FerrisScript's long-term potential across use ca
 
 ## 🔧 Developer Experience Features
 
-### v0.0.5-v0.1.0 (Immediate) ✅
+### v0.0.6-v0.1.0 (Immediate, updated 2026-07-21) ✅
 
 **Already Planned**:
 

@@ -1,807 +1,131 @@
-# FerrisScript v0.0.6: LSP Foundation + Test Framework
+# FerrisScript v0.0.6: Language Features (Arrays, For-Loops, Match, String Interpolation)
 
-**Timeline**: 6-7 weeks  
-**Status**: Planning Complete  
-**Start Date**: TBD  
-**Target Completion**: TBD
+**Status**: Scoping (written 2026-07-21, no implementation started)
+**Timeline**: 1-3 sessions (see "On estimates" below — deliberately not given in calendar weeks)
 
 ---
 
-## 📋 Table of Contents
+## Why this exists
 
-- [Problem Statement](#-problem-statement)
-- [Solution Overview](#-solution-overview)
-- [Key Deliverables](#-key-deliverables)
-- [Acceptance Criteria](#-acceptance-criteria)
-- [Phase Breakdown](#-phase-breakdown)
-- [Work Delegation Strategy](#-work-delegation-strategy)
-- [Dependencies & Critical Path](#-dependencies--critical-path)
-- [Risk Management](#️-risk-management)
-- [Success Metrics](#-success-metrics)
+This is the first dedicated scoping doc for this version. Prior to 2026-07-21 it existed only as a four-bullet feature list inside `ROADMAP_MASTER.md`, with no syntax spec, no semantics decisions, and no reserved error-code range — in sharp contrast to the LSP plan (`docs/planning/v0.0.7/`, ~7,000 lines across 5 documents) that used to occupy this "next" slot. A 2026-07-21 roadmap review swapped the two: this version now ships first, because **FerrisScript currently cannot express a loop over a collection** — no arrays, no iteration, no pattern matching — which blocks every other goal (a real demo game, any external user trying the language, even giving LSP something non-trivial to diagnose later). See `ROADMAP_MASTER.md`'s v0.0.6 section for the full resequencing rationale.
 
----
+## Goal
 
-## 🎯 Problem Statement
+Give FerrisScript the minimum language surface needed to write a real, if simple, gameplay script — something with a list of enemies, an inventory, a state machine — end to end.
 
-### Current Pain Points
+## On estimates
 
-1. **No Real-Time Feedback**: Developers must compile manually to see type errors
-   - Write code → Save → Run `cargo build` → Read terminal output → Fix
-   - Feedback loop takes 30+ seconds per iteration
-   - Type safety feels like a burden, not a benefit
-
-2. **Fragmented Test Infrastructure**: Tests duplicated between `/examples` and `/godot_test/scripts`
-   - Manual test registration required
-   - No automated test discovery
-   - Platform-specific failures (Windows symlinks)
-   - CI doesn't catch all issues
-
-3. **Slow Compilation for LSP**: Full recompilation on every keystroke
-   - 150ms+ per edit is too slow for good editor experience
-   - No caching or incremental compilation
-   - LSP would feel sluggish and unresponsive
-
-4. **Missing LSP Foundation**: Compiler lacks infrastructure for editor integration
-   - No source span tracking (can't map errors to exact locations)
-   - No symbol table (can't implement go-to-definition)
-   - No incremental compilation (can't respond fast enough)
-
-### Impact on Adoption
-
-- **Developer Experience**: Static types without LSP = "annoying compile errors"
-- **Competitive Position**: GDScript has better IDE support despite dynamic typing
-- **Testing Friction**: Hard to add new tests, easy to break existing ones
-- **Iteration Speed**: Slow feedback loops discourage experimentation
+Do not estimate this in calendar weeks. The v0.0.7 (LSP) plan's "6-7 weeks" estimate was written in October 2025 under human-sprint-cadence assumptions and had already doubled from an original "3-4 weeks" before a single line of code was written — a signal the estimation *method* was unreliable, not just the number. Meanwhile the actual evidence from this project (v0.0.1→v0.0.4 shipped in 6 calendar days; the entire v0.0.5 stabilization + major gdext upgrade + release shipped in one AI-assisted session) shows multi-week-shaped work compressing into single-session work when this maintainer works with AI assistance. Track actual session count as you go and use it to calibrate v0.0.7's estimate afterward, rather than trusting either number in isolation.
 
 ---
 
-## 💡 Solution Overview
+## Current state (grounding this plan in the actual codebase, not assumptions)
 
-### What We're Building
-
-**v0.0.6 transforms FerrisScript from "compile-time safety" to "real-time developer experience"**
-
-#### Three Pillars
-
-1. **Compiler Prerequisites** (Weeks 1-3)
-   - Source spans: Map every AST node to exact source location
-   - Symbol table: Track all variables, functions, types across files
-   - Incremental compilation: Cache ASTs, recompile only changed regions
-   - **Goal**: Foundation for fast, accurate LSP
-
-2. **Test Framework Consolidation** (Weeks 4-7)
-   - Single source of truth: All tests in `/examples` with metadata
-   - Automated discovery: No manual registration
-   - LSP integration: Run tests from editor with "Run Test" button
-   - CI automation: JSON output for automated parsing
-   - **Goal**: Zero-friction testing for contributors
-
-3. **LSP Test Integration** (Week 5)
-   - Custom LSP protocol: `ferrisscript/documentTests`, `ferrisscript/runTest`
-   - CodeLens provider: Visual "Run Test" buttons in editor
-   - Real-time status: ✅/❌/⏱️ indicators
-   - Test result cache: Fast status updates
-   - **Goal**: Validate LSP infrastructure with low-risk scope
-
-### Why This Order?
-
-1. **Compiler first**: LSP needs spans, symbol table, incremental compilation
-2. **Test framework second**: Provides structured test cases for LSP validation
-3. **LSP test integration third**: Proves LSP works end-to-end before full diagnostics
-4. **General LSP later** (v0.1.0): Expand to all code once foundation is solid
+- `crates/compiler/src/type_checker.rs::Type` enum: `I32, F32, Bool, String, Vector2, Color, Rect2, Transform2D, Node, InputEvent, Void, Unknown`. No `Array`/`List` variant exists.
+- `crates/compiler/src/ast.rs::Stmt`: has `Let`, `Assign`, `If`, `While`, `Return`, `ExprStmt`, function/signal declarations. No `For`, no `Match`.
+- `crates/compiler/src/ast.rs::Expr`: literals, binary/unary ops, calls, field access, struct literals. No indexing (`arr[0]`), no array literal, no match expression, no string-interpolation literal.
+- Error codes currently run through **E815** (exports) with **E799/E800** as the highest reserved boundary before that range. Node-query errors are E601-E613, Godot-type errors are E701-E710. No range is reserved for arrays/loops/match/interpolation.
+- `docs/planning/v0.0.5/../archive` and `crates/runtime/src/lib.rs`/`type_checker.rs` already track a few open bugs relevant here: **`Stmt::Return` doesn't validate the return type against the function signature** (issue filed 2026-07-21) — worth fixing *before or alongside* this work, since match-as-expression and function returns interact, and a soundness hole here will make match/array bugs harder to diagnose.
 
 ---
 
-## 🎁 Key Deliverables
+## Feature 1: Arrays
 
-### Phase 0: Compiler Prerequisites (Weeks 1-3)
+### Syntax decisions
 
-| Deliverable | Description | Impact |
-|-------------|-------------|--------|
-| **Source Spans** | Every AST node tracks `(file, line, column, offset)` | LSP can show red squiggles at exact locations |
-| **Symbol Table** | Public API: `lookup(name) -> Symbol`, `all_symbols() -> Vec<Symbol>` | LSP can implement go-to-definition, autocomplete |
-| **Incremental Compiler** | `compile_file(uri, source)` with AST caching | <100ms compilation on typical edits |
-| **Dependency Graph** | Tracks which files import which, transitive invalidation | Cache invalidation works correctly |
+- **Type syntax**: `[T]` (e.g. `[i32]`, `[Vector2]`) — matches the original roadmap bullet and Rust-family conventions the language already leans on.
+- **Literals**: `[1, 2, 3]`. Empty array literal `[]` requires either a type annotation on the `let` (`let x: [i32] = [];`) or is a compile error without one (E9xx, "cannot infer type of empty array literal") — do not attempt bidirectional type inference for this version; require the annotation.
+- **Indexing**: `arr[0]`. Out-of-bounds access is a **runtime error** (new error code, not a panic — consistent with the existing division-by-zero E413 pattern), not a silently-wrapped/clamped value.
+- **Mutation semantics — the single most important open decision**: does `let mut arr: [i32] = [1,2,3]; arr.push(4);` mutate in place, or is `push` a method that returns a new array (functional style)? **Recommendation: in-place mutation, gated by `mut` the same way struct field mutation already works** (`let` = immutable/read-only, `let mut` = mutable — this pattern is already established for `@export` properties per `docs/ARCHITECTURE.md`). Functional/persistent arrays would be a bigger design commitment (immutable data structures, `arr.pushed(4)`-style non-mutating methods) that nothing else in the language currently does — don't introduce a novel mutation model just for arrays.
+- **Methods for v0.0.6**: `len()`, `push(item)`, `pop() -> Option<T>` (or a runtime error if empty — decide alongside whether the language has any `Option`-like type yet; if not, prefer an error over inventing `Option` as a side effect of this work). `get(i) -> T` (bounds-checked, same error as `[i]` indexing) is redundant with `[i]` — skip it unless there's a reason to distinguish "may fail" access.
+- **Explicitly out of scope for v0.0.6**: generic user-defined collection types, `HashMap`/dictionary types (the roadmap's `collections.ferris` placeholder conflates "arrays" with "collections" generally — this version is arrays only), slicing (`arr[1..3]`), array-of-arrays beyond what falls out naturally from `[T]` being recursively valid.
 
-### Phase 1: Test Framework (Week 4)
+### Error codes (proposed range: E900-E919)
 
-| Deliverable | Description | Impact |
-|-------------|-------------|--------|
-| **Test Harness Crate** | `crates/test_harness` with metadata parser | Discovers tests from `/examples` automatically |
-| **Rust Integration** | `tests/ferris_integration_tests.rs` | `cargo test` runs all FerrisScript tests |
-| **Test Filtering** | `FERRIS_TEST_FILTER=bounce cargo test` | Run specific tests during development |
-| **Cross-Platform** | Works on Windows/Linux/macOS | No more symlink failures |
-
-### Phase 2-2.5: LSP Foundation + Test Integration (Week 5)
-
-| Deliverable | Description | Impact |
-|-------------|-------------|--------|
-| **LSP Server** | `crates/lsp` with tower-lsp | Foundation for all LSP features |
-| **Document Manager** | Tracks open files, incremental updates | Handles `textDocument/didChange` efficiently |
-| **Custom Protocol** | `ferrisscript/documentTests`, `ferrisscript/runTest` | Editor can discover and run tests |
-| **CodeLens Provider** | VS Code extension shows "Run Test" buttons | Visual test execution from editor |
-
-### Phase 3-4: Godot Test Runner + Diagnostics (Week 6)
-
-| Deliverable | Description | Impact |
-|-------------|-------------|--------|
-| **Test Runner GDScript** | `godot_test/test_runner.gd` | Headless Godot test execution |
-| **Assertion Validation** | `get_variable()`, `get_emitted_signals()` | Tests actually validate behavior |
-| **Timeout Mechanism** | Configurable timeouts (default 10s) | Prevents hanging tests |
-| **Real-Time Diagnostics** | LSP publishes errors as you type | Red squiggles for type errors |
-
-### Phase 5: CI Integration (Week 7)
-
-| Deliverable | Description | Impact |
-|-------------|-------------|--------|
-| **GitHub Actions** | Updated workflow with new test harness | Automated testing on every PR |
-| **JSON Output** | `test_runner.gd --json` mode | CI can parse results |
-| **Test Migration** | All tests moved to `/examples` | Single source of truth |
+- E900: Array literal type mismatch (mixed element types)
+- E901: Cannot infer type of empty array literal (no annotation)
+- E902: Array index out of bounds (runtime)
+- E903: Cannot index into non-array type
+- E904: Array method called on non-array type
 
 ---
 
-## ✅ Acceptance Criteria
+## Feature 2: For loops
 
-### Must Have (Blocking Release)
+### Syntax decisions
 
-- [ ] **All AST nodes have source spans**
-  - Parser tracks spans from tokens
-  - All tests updated with span assertions
-  - Error messages show exact locations
+- **For-in**: `for item in array { ... }` — iterates by value (consistent with the language's existing "clone, don't reference-count" evaluation model per `docs/ARCHITECTURE.md`'s known limitations).
+- **Range**: `for i in 0..10 { ... }` (exclusive end, matching Rust). Whether to also support inclusive `0..=10` is a nice-to-have, not required for v0.0.6 — cut it if time-constrained, the language is not trying to be a complete Rust clone.
+- **Break/continue**: standard, no labeled loops (`'outer: for ...`) — the language has no `while`-loop labels today either, don't introduce label syntax for the first loop construct that needs it.
+- **Scoping**: the loop variable (`item`, `i`) is scoped to the loop body only, immutable by default within the body unless the language's existing `mut` rules are extended to loop variables (recommend: loop variables follow the same immutable-by-default rule as `let`, since mutating the iteration variable of a `for-in` doesn't affect the underlying array anyway given by-value iteration above).
 
-- [ ] **Symbol table built during type checking**
-  - `SymbolTable` API: `lookup()`, `all_symbols()`, `symbols_in_scope()`
-  - Integration tests verify symbol resolution
-  - Public API documented
+### Error codes (proposed range: E920-E939)
 
-- [ ] **Incremental compilation working**
-  - Cache hit rate >80% for typical edits
-  - <100ms latency for cache hits
-  - 5-10x speedup vs full recompilation
-
-- [ ] **Test framework consolidated**
-  - Zero `.ferris` files in `/godot_test/scripts`
-  - All tests in `/examples` with metadata
-  - `cargo test` discovers and runs all tests
-
-- [ ] **LSP test integration working**
-  - CodeLens shows "Run Test" button
-  - Clicking runs test and shows result (✅/❌)
-  - Test status persists in cache
-
-- [ ] **Cross-platform compatibility**
-  - Tests pass on Windows, Linux, macOS
-  - No platform-specific workarounds
-  - CI validates all platforms
-
-### Should Have (Nice to Have)
-
-- [ ] **Performance optimizations**
-  - Cache eviction policy (LRU)
-  - Disk cache for persistence
-  - Metrics dashboard
-
-- [ ] **Enhanced test metadata**
-  - Regex patterns for assertions
-  - Multiple timeout values
-  - Test categories/tags
-
-- [ ] **Better error messages**
-  - Span-based error highlighting
-  - Suggested fixes
-  - Error code links to docs
-
-### Won't Have (Deferred to v0.1.0)
-
-- ❌ **Hover tooltips** (needs Phase 0.2, but UI deferred)
-- ❌ **Autocomplete** (needs Phase 0.2, but UI deferred)
-- ❌ **Go-to-definition** (needs Phase 0.1, but UI deferred)
-- ❌ **Find references** (needs Phase 0.2, but UI deferred)
+- E920: `for-in` target is not iterable (not an array or range)
+- E921: `break`/`continue` used outside a loop
 
 ---
 
-## 📦 Phase Breakdown
+## Feature 3: Match expressions
 
-### Phase 0: Compiler Prerequisites (Weeks 1-3) 🔴 CRITICAL PATH
+### Syntax decisions
 
-**Why First**: LSP fundamentally requires these features. Cannot proceed without them.
+- **Match as expression** (not just statement) — `let x = match y { ... };` — per the original roadmap bullet. This is more work than statement-only match but is consistent with `if` already being usable as an expression-like construct in the language (verify this against the current parser before committing — if `if` is statement-only today, match should probably also start statement-only and become an expression in a later version, rather than match leapfrogging if in expressiveness).
+- **Patterns for v0.0.6**: literal patterns (`match x { 1 => ..., 2 => ..., _ => ... }`) and the wildcard `_`. **Explicitly defer enum/struct pattern destructuring** — the language has no user-defined enums yet (only built-in struct types like `Color`/`Rect2`), so there's nothing to destructure beyond literals. Don't build pattern-matching infrastructure for a type system feature (enums) that doesn't exist yet.
+- **Exhaustiveness checking**: required for literal-int/bool matches where the domain is enumerable in a useful way is impractical (i32 has 2^32 values) — in practice this means **exhaustiveness checking reduces to "does this match have a `_` wildcard arm or a `bool` match covering both `true`/`false`."** Don't try to build general exhaustiveness analysis (e.g. detecting `match x { 1 => .., 2 => .. }` on an i32 as "non-exhaustive" is trivially true and not useful to flag beyond "you're missing a `_` arm").
 
-#### Week 1: Source Spans + Inspector Fix
+### Error codes (proposed range: E940-E959)
 
-**Goal**: Every AST node knows where it came from in the source code + fix Inspector property refresh bug
-
-**Tasks**:
-
-1. Define `Span` and `Position` structs (`crates/compiler/src/span.rs`)
-2. Add `span` field to all AST nodes (`crates/compiler/src/ast.rs`)
-3. Update parser to track spans from tokens
-4. Update all tests with span assertions (543 compiler tests)
-5. **🆕 Fix Inspector property refresh on compilation errors** (Quick win, 1-2 hours)
-
-**Acceptance Criteria**:
-
-- [x] `Span::new(start, end)` and `Span::merge(other)` work
-- [x] Every `Expr`, `Stmt`, `Type` has a `span()` method
-- [x] Parser creates spans from token positions
-- [x] Error messages include `Span` information
-- [x] All 568 compiler tests pass with spans (31 new span unit tests + 5 integration tests)
-- [x] **🆕 Inspector clears properties on compilation failure** (PR #60, shipped in v0.0.5)
-- [x] **🆕 Switching scripts after type error updates Inspector correctly** (PR #60, verified headlessly in v0.0.5 — see `INSPECTOR_PROPERTY_FIX.md`)
-
-**Complexity**: 🔴 HIGH (touches entire AST, all tests)  
-**Delegation**: ❌ **User-Interactive** (requires careful review of each AST node)
-
-**Quick Win**: Inspector fix can run in parallel as background agent task  
-**📄 Inspector Fix Details**: See [INSPECTOR_PROPERTY_FIX.md](INSPECTOR_PROPERTY_FIX.md)
-
-**✅ Completed (PR #TBD)**: Tasks 1-4 complete. Created `span.rs` module with Position/Span structs, updated AST/parser/type_checker, all tests passing.
-
-**⚠️ Implementation Notes**:
-
-- **Byte offset tracking**: Currently using placeholder `0` values. Lexer doesn't track byte positions yet. Deferred to future enhancement (can calculate from line/column if needed, but adds overhead).
-- **Point spans**: Most spans are zero-length (start == end) because `span_from()` helper exists but isn't called yet. Multi-token span tracking deferred to Week 2 parser enhancements.
-- **Backward compatibility**: Re-exported `Span` from `ast` module to avoid breaking runtime crate. All existing `ast::Span` references still work.
+- E940: Non-exhaustive match (missing `_` wildcard, or missing a `bool` arm)
+- E941: Unreachable match arm (duplicate literal pattern)
+- E942: Match arms have inconsistent types (when used as an expression)
 
 ---
 
-#### Week 2: Symbol Table
+## Feature 4: String interpolation
 
-**Goal**: Extract symbol information for LSP (variables, functions, types)
+### Syntax decisions
 
-**Tasks**:
+- **Syntax**: `"Hello {name}"` per the original roadmap bullet (Rust itself uses this exact syntax as of `format!("Hello {name}")` shorthand — consistent with the language's Rust-inspired positioning).
+- **Expression support**: `"{x + 1}"` (arbitrary expressions inside braces) vs. identifier-only (`"{x}"`, no expressions). **Recommendation: identifiers only for v0.0.6**, matching the "String Interpolation (1-2 PRs)" small sizing already in the roadmap — full expression support inside string literals is a lexer/parser interaction (re-entering expression parsing mid-string-token) that's disproportionate scope for what's meant to be the smallest of the four features here. Expand to full expressions in a later version if identifier-only proves limiting in practice.
+- **Escaping**: literal `{` / `}` via `{{` / `}}`, matching Rust's `format!` convention (keeps this consistent with the "Rust-inspired" pitch and avoids inventing a new escaping convention).
 
-1. Define `SymbolTable`, `Symbol`, `Scope` structs (`crates/compiler/src/symbol_table.rs`)
-2. Refactor `TypeChecker` to build `SymbolTable` during type checking
-3. Update `compile()` to return `(Type, SymbolTable)`
-4. Add integration tests for symbol resolution
+### Error codes (proposed range: E960-E969)
 
-**Acceptance Criteria**:
-
-- [ ] `SymbolTable::lookup(name)` returns `Option<&Symbol>`
-- [ ] `SymbolTable::all_symbols()` returns all symbols
-- [ ] `SymbolTable::symbols_in_scope(id)` walks scope chain
-- [ ] `TypeChecker` inserts symbols for variables, functions, parameters
-- [ ] Integration tests verify symbol table correctness
-
-**Complexity**: 🟡 MEDIUM (refactoring existing type checker)  
-**Delegation**: ⚠️ **User-Guided** (needs review of type checker logic)
+- E960: Undefined variable inside string interpolation
+- E961: Unmatched `{` in string literal (missing `}` or invalid escape)
 
 ---
 
-#### Week 3: Incremental Compilation
+## Suggested implementation order
 
-**Goal**: Cache ASTs and recompile only changed regions
+1. **Arrays** first — everything else (for-in, and eventually match on array contents) depends on there being something to iterate over. Also the most self-contained: new `Type::Array(Box<Type>)` variant, new `Expr::ArrayLiteral`/`Expr::Index`, new methods.
+2. **For loops** second — directly depends on arrays existing (for-in) plus ranges (independent of arrays, could be done in either order, but pairing them keeps "iteration" as one coherent unit of work).
+3. **Match expressions** third — independent of arrays/loops, could run in parallel if splitting work, but sequencing after them keeps error-code ranges and testing patterns consistent with what's just been established.
+4. **String interpolation** last — smallest, most isolated (lexer-level change), least likely to interact with the other three.
 
-**Tasks**:
+Each feature should land as its own PR (or small PR sequence) with its own tests, mirroring the pattern already used for v0.0.4's phases (signals, lifecycle callbacks, node queries, etc. each shipped as separable PRs) rather than one large PR bundling all four.
 
-1. Implement `IncrementalCompiler` with AST caching (`crates/compiler/src/incremental.rs`)
-2. Add source hash-based cache invalidation
-3. Create `DependencyGraph` for transitive invalidation
-4. Performance benchmarks (cache hit rate, latency)
+## Test plan
 
-**Acceptance Criteria**:
+- Unit tests in `crates/compiler/src/*.rs` for lexer/parser/type-checker coverage of each feature (matching the existing pattern — the compiler crate currently has 543+ tests structured this way).
+- Runtime tests in `crates/runtime/src/lib.rs` for evaluation semantics (array mutation, loop execution, match dispatch, interpolation formatting).
+- **At least one `godot_test/scripts/*.ferris` example per feature that exercises a real gameplay pattern** (an enemy list iterated with `for`, a simple state machine via `match`, a score/health display via string interpolation) — not just a syntax-demonstration script. This directly addresses a gap the July 2026 roadmap review flagged: current examples don't demonstrate real usage because the language couldn't express real usage yet.
+- Ensure new `ferris-test` corpus scripts use the harness's structured `// ASSERT:` metadata format (literal substring matching), not free-form prose — a July 2026 tech-debt review found most of the current corpus's "failures" were exactly this mistake, not real bugs.
 
-- [ ] `IncrementalCompiler::compile_file(uri, source)` uses cache
-- [ ] Cache hit returns result in <50ms (target: <100ms acceptable)
-- [ ] Cache miss does full compilation and caches result
-- [ ] `DependencyGraph` invalidates dependent files
-- [ ] Benchmarks show 5-10x speedup for cache hits
-- [ ] Cache hit rate >80% for typical editing sessions
+## Explicitly out of scope for v0.0.6
 
-**Complexity**: 🟡 MEDIUM (new module, integration with compiler)  
-**Delegation**: ✅ **Background Agent** (well-defined spec, testable in isolation)
+- Generics of any kind (arrays are `[T]` for a fixed concrete `T`, not `Array<T>` with user-provided type parameters beyond the one being iterated)
+- Dictionaries/maps/hashmaps (tracked separately, likely v0.2.0+ per the "Extended Types" version)
+- User-defined enums (match's pattern vocabulary stays literal-only until these exist)
+- Full expression interpolation (`"{x + 1}"`) — identifiers only this round
+- Slicing, array concatenation, sorting, or other higher-order array methods beyond `len`/`push`/`pop`
 
----
+## Dependencies
 
-### Phase 1: Test Framework Foundation (Week 4)
+v0.0.5 complete (shipped 2026-07-21).
 
-**Why Now**: Provides test infrastructure for validating LSP integration
+## See also
 
-#### Tasks
-
-1. **Create Test Harness Crate** (2 days)
-   - `crates/test_harness/Cargo.toml`
-   - Metadata parser: `parse_test_metadata(source) -> TestMetadata`
-   - Test discovery: `discover_tests(examples_dir) -> Vec<TestFile>`
-   - Error handling with `thiserror`
-
-2. **Rust Test Integration** (2 days)
-   - `tests/ferris_integration_tests.rs`
-   - Test filtering: `FERRIS_TEST_FILTER=bounce cargo test`
-   - Parallel execution with `rayon`
-   - Negative testing support
-
-3. **Cross-Platform Validation** (1 day)
-   - Test on Windows (absolute paths, no symlinks)
-   - Test on Linux (standard paths)
-   - Test on macOS (if available)
-
-**Acceptance Criteria**:
-
-- [ ] `cargo test` discovers all `.ferris` files in `/examples`
-- [ ] Metadata parsing handles all fields: `TEST:`, `CATEGORY:`, `EXPECT:`, `ASSERT:`, `TIMEOUT:`
-- [ ] Test filtering works: `FERRIS_TEST_FILTER=bounce cargo test` runs only bounce test
-- [ ] Cross-platform: Tests pass on Windows, Linux, macOS
-- [ ] All tests have clear error messages for malformed metadata
-
-**Complexity**: 🟢 LOW (new crate, clear spec)  
-**Delegation**: ✅ **Background Agent** (unambiguous requirements, well-tested)
-
----
-
-### Phase 2: LSP Server Foundation (Week 5a - Days 1-3)
-
-**Why Now**: Needs Phase 0 (compiler prerequisites) complete
-
-#### Tasks
-
-1. **Create LSP Crate** (1 day)
-   - `crates/lsp/Cargo.toml` with `tower-lsp` dependency
-   - Basic server struct: `FerrisScriptServer`
-   - Initialize/shutdown handlers
-
-2. **Document Manager** (1 day)
-   - Track open documents: `HashMap<Url, Document>`
-   - Apply incremental changes: `did_change` handler
-   - Integrate with `IncrementalCompiler` from Phase 0.3
-
-3. **Text Synchronization** (1 day)
-   - Handle `textDocument/didOpen`
-   - Handle `textDocument/didChange` (incremental)
-   - Handle `textDocument/didClose`
-
-**Acceptance Criteria**:
-
-- [ ] LSP server starts and responds to `initialize` request
-- [ ] Document manager tracks open files
-- [ ] Incremental changes apply correctly (no corruption)
-- [ ] `IncrementalCompiler` recompiles on each change
-- [ ] Server handles multiple documents simultaneously
-
-**Complexity**: 🟡 MEDIUM (new LSP infrastructure)  
-**Delegation**: ⚠️ **User-Guided** (LSP protocol requires careful implementation)
-
----
-
-### Phase 2.5: LSP Test Integration (Week 5b - Days 4-5)
-
-**Why Now**: Validates LSP works before full diagnostics (lower risk)
-
-#### Tasks
-
-1. **Custom LSP Protocol** (1 day)
-   - Define `ferrisscript/documentTests` request/response
-   - Define `ferrisscript/runTest` request/response
-   - Implement handlers in LSP server
-
-2. **Test Discovery API** (1 day)
-   - Use `test_harness` crate from Phase 1
-   - Parse test metadata from open documents
-   - Return test ranges (line numbers)
-
-3. **VS Code Extension** (1 day)
-   - `testProvider.ts` with CodeLens provider
-   - "Run Test" command
-   - Test result UI (✅/❌/⏱️)
-
-**Acceptance Criteria**:
-
-- [ ] Opening `.ferris` file shows "Run Test" button above test
-- [ ] Clicking button runs test via LSP
-- [ ] Test result appears in editor (✅ pass, ❌ fail)
-- [ ] Test status persists in cache (doesn't re-run on every edit)
-- [ ] Multiple tests in same file all work
-
-**Complexity**: 🟡 MEDIUM (custom LSP protocol, VS Code extension)  
-**Delegation**: ⚠️ **User-Guided** (integration between LSP server and VS Code)
-
----
-
-### Phase 3: Real-Time Diagnostics (Week 6a - Days 1-3)
-
-**Why Now**: Validates incremental compilation works with LSP
-
-#### Tasks
-
-1. **Diagnostic Publishing** (1 day)
-   - Convert compile errors to LSP `Diagnostic` format
-   - Use `Span` from Phase 0.1 for accurate ranges
-   - Publish on every `textDocument/didChange`
-
-2. **Error Recovery** (1 day)
-   - Parser continues on errors (don't stop at first error)
-   - Type checker handles incomplete ASTs
-   - Show partial diagnostics even with syntax errors
-
-3. **Performance Validation** (1 day)
-   - Benchmark latency: target <100ms for typical edits
-   - Verify cache hit rate >80%
-   - Profile slow paths
-
-**Acceptance Criteria**:
-
-- [ ] Red squiggles appear as you type (not just on save)
-- [ ] Error messages accurate to exact location (uses spans)
-- [ ] Latency <100ms for cache hits (typical single-line edit)
-- [ ] Multiple errors shown simultaneously
-- [ ] Parser doesn't crash on incomplete code
-
-**Complexity**: 🟡 MEDIUM (error recovery is tricky)  
-**Delegation**: ⚠️ **User-Guided** (performance tuning requires iteration)
-
----
-
-### Phase 4: Godot Test Runner (Week 6b - Days 4-5)
-
-**Why Now**: Can run in parallel with Phase 3 (different codebase)
-
-#### Tasks
-
-1. **Test Runner Script** (1 day)
-   - `godot_test/test_runner.gd`
-   - Discover tests via `FileAccess.open()` (no symlinks)
-   - Load and run FerrisScript via `FerrisScriptRunner`
-   - JSON output mode
-
-2. **Assertion Validation** (1 day)
-   - Add `get_variable(name)` to `FerrisScriptRunner`
-   - Add `get_emitted_signals()` to `FerrisScriptRunner`
-   - Parse `ASSERT:` metadata and validate
-   - Timeout mechanism (default 10s)
-
-**Acceptance Criteria**:
-
-- [ ] `godot --headless --script test_runner.gd` runs all tests
-- [ ] Tests timeout after 10s (configurable via `TIMEOUT:` metadata)
-- [ ] Assertions validate actual runtime behavior (not just "compiles")
-- [ ] JSON output parses correctly in CI
-- [ ] Works on Windows (no symlink issues)
-
-**Complexity**: 🟢 LOW (GDScript, clear spec)  
-**Delegation**: ✅ **Background Agent** (well-defined, testable in Godot)
-
----
-
-### Phase 5: CI Integration & Migration (Week 7)
-
-**Why Now**: Final integration, migration, polish
-
-#### Tasks
-
-1. **GitHub Actions Workflow** (1 day)
-   - Update `.github/workflows/test.yml`
-   - Run `cargo test` (Phase 1 harness)
-   - Run `godot --headless` (Phase 4 runner)
-   - Parse JSON results
-
-2. **Test Migration** (2 days)
-   - Move all `.ferris` files from `/godot_test/scripts` to `/examples`
-   - Add metadata to each test
-   - Update documentation
-
-3. **Cleanup** (1 day)
-   - Remove old test infrastructure
-   - Update README
-   - Create migration guide for contributors
-
-4. **Final Validation** (1 day)
-   - Run full test suite on CI
-   - Verify all platforms pass
-   - Check performance metrics
-
-**Acceptance Criteria**:
-
-- [ ] CI runs on every PR and passes
-- [ ] No `.ferris` files remain in `/godot_test/scripts`
-- [ ] All tests have metadata headers
-- [ ] Documentation updated (README, CONTRIBUTING)
-- [ ] Migration guide written
-
-**Complexity**: 🟢 LOW (mostly migration, documentation)  
-**Delegation**: ✅ **Background Agent** (bulk file operations, well-defined)
-
----
-
-## 🤖 Work Delegation Strategy
-
-### Background Agent Tasks (Can Run Unattended)
-
-These tasks have:
-
-- ✅ Clear, unambiguous requirements
-- ✅ Well-defined acceptance criteria
-- ✅ No complex design decisions
-- ✅ Easy to verify automatically (tests)
-
-| Phase | Task | Rationale |
-|-------|------|-----------|
-| **0.3** | Incremental Compilation | Well-specified caching logic, testable in isolation |
-| **1** | Test Harness Crate | New crate, clear spec, comprehensive tests |
-| **4** | Godot Test Runner | GDScript implementation, clear inputs/outputs |
-| **5** | Test Migration | Bulk file operations, metadata addition |
-| **5** | CI Integration | GitHub Actions YAML, JSON parsing |
-
-**Estimated Background Work**: ~2-3 weeks of the 6-7 week timeline
-
----
-
-### User-Guided Tasks (Need Iteration & Feedback)
-
-These tasks have:
-
-- ⚠️ Complex design decisions
-- ⚠️ Integration with existing code
-- ⚠️ Performance tuning required
-- ⚠️ Multiple valid approaches
-
-| Phase | Task | Why User-Guided |
-|-------|------|-----------------|
-| **0.1** | Source Spans in AST | Touches 543 tests, every AST node, needs careful review |
-| **0.2** | Symbol Table Extraction | Refactors type checker, complex scope handling |
-| **2** | LSP Server Foundation | LSP protocol requires careful implementation |
-| **2.5** | LSP Test Integration | Custom protocol, VS Code extension integration |
-| **3** | Real-Time Diagnostics | Error recovery is tricky, performance tuning |
-
-**Estimated User-Guided Work**: ~3-4 weeks of the 6-7 week timeline
-
----
-
-### Parallelization Opportunities
-
-| Primary Track | Secondary Track (Background Agent) | Week |
-|---------------|-----------------------------------|------|
-| Phase 0.1: Source Spans | - | 1 |
-| Phase 0.2: Symbol Table | - | 2 |
-| Phase 0.3: Incremental Compilation ⚠️ | Can be background if spec clear | 3 |
-| Phase 1: Test Harness (user review) | Phase 1: Tests/docs (agent writes) | 4 |
-| Phase 2: LSP Server (user guided) | Phase 4: Godot Runner (agent writes) | 5 |
-| Phase 2.5 + 3: LSP Test Integration | - | 6 |
-| Phase 5: Final validation | Phase 5: Migration (agent executes) | 7 |
-
-**Key Insight**: Weeks 4-6 have the most parallelization potential. User works on LSP while agent handles Godot test runner.
-
----
-
-## 🔗 Dependencies & Critical Path
-
-### Critical Path (Must Complete in Order)
-
-```
-Phase 0.1 (Spans) 
-    ↓
-Phase 0.2 (Symbol Table) 
-    ↓
-Phase 0.3 (Incremental Compilation)
-    ↓
-Phase 2 (LSP Server Foundation)
-    ↓
-Phase 2.5 (LSP Test Integration)
-    ↓
-Phase 3 (Real-Time Diagnostics)
-```
-
-**Timeline**: 6 weeks (Weeks 1-6)
-
-**Blocker**: Cannot start Phase 2 until Phase 0 complete (needs spans, symbol table, incremental compiler)
-
----
-
-### Parallel Paths (Can Run Simultaneously)
-
-```
-Phase 1 (Test Harness) ─┐
-                        ├─→ Phase 2.5 (LSP Test Integration)
-Phase 4 (Godot Runner) ─┘
-
-Phase 5 (CI Integration) ← All above complete
-```
-
-**Optimization**:
-
-- Phase 1 (Week 4) can run while finishing Phase 0 if Phase 0 is ahead of schedule
-- Phase 4 (Week 6) can run in parallel with Phase 3 (different codebase)
-- Phase 5 (Week 7) waits for everything
-
----
-
-## ⚠️ Risk Management
-
-### High-Risk Items (Require Mitigation)
-
-#### Risk 1: Compiler Refactoring Breaks Tests 🔴 HIGH
-
-**Probability**: Very High  
-**Impact**: All 543 compiler tests may fail after adding spans
-
-**Mitigation**:
-
-- Add spans incrementally (one AST node type at a time)
-- Use default/dummy spans for unmodified nodes during transition
-- Run full test suite after each AST change
-- Create migration script to bulk-update test assertions
-- **Timeline Buffer**: 1 week contingency built into Phase 0
-
-**Decision Point**: End of Week 1 - if span migration is slower than expected, consider temporary dummy spans
-
----
-
-#### Risk 2: Incremental Compilation Cache Bugs 🔴 HIGH
-
-**Probability**: Medium  
-**Impact**: LSP shows stale errors, incorrect completions
-
-**Mitigation**:
-
-- Extensive unit tests for cache invalidation (test each scenario)
-- Add cache validation mode (compare cached vs fresh compilation)
-- Implement "force full recompilation" command in LSP
-- Monitor cache hit rate in production
-- **Fallback**: Disable caching if bugs persist (graceful degradation)
-
-**Decision Point**: End of Week 3 - verify cache correctness before proceeding to LSP
-
----
-
-#### Risk 3: Timeline Overrun (7 weeks → 9+ weeks) 🟡 MEDIUM
-
-**Probability**: Medium  
-**Impact**: Delayed v0.0.6 release
-
-**Mitigation**:
-
-- Phase 0 has highest risk (3 weeks of compiler changes)
-- Weekly check-ins to assess timeline
-- De-scope features if falling behind (see Priority Plan below)
-- **Decision Point**: End of Week 3 (reassess after Phase 0)
-
-**De-Scoping Priority**:
-
-**Priority 1 (Must Keep)**:
-
-- Source spans in AST
-- Symbol table extraction
-- Basic LSP diagnostics
-- Test framework foundation
-
-**Priority 2 (Defer to v0.0.6 if behind)**:
-
-- Incremental compilation (fallback: always recompile)
-- LSP test integration (ship test framework standalone)
-
-**Priority 3 (Defer to v0.1.0)**:
-
-- Advanced caching strategies
-- Dependency graph optimizations
-
----
-
-### Medium-Risk Items (Monitor Closely)
-
-#### Risk 4: LSP Protocol Complexity 🟡 MEDIUM
-
-**Mitigation**: Start with simple test-specific LSP (Phase 2.5) before full diagnostics
-
-#### Risk 5: Cross-Platform Test Failures 🟡 MEDIUM
-
-**Mitigation**: Test on all platforms early (Phase 1, Week 4)
-
-#### Risk 6: Performance Regression 🟡 MEDIUM
-
-**Mitigation**: Benchmark cache hit rate, establish performance baselines
-
----
-
-## 📊 Success Metrics
-
-### Performance Metrics
-
-| Metric | Target | Acceptable | Measurement |
-|--------|--------|------------|-------------|
-| **Cache Hit Rate** | >95% | >80% | Track in `IncrementalCompiler::metrics()` |
-| **Cache Hit Latency** | <50ms | <100ms | Benchmark on typical edits |
-| **Cache Miss Latency** | <200ms | <500ms | Full recompilation time |
-| **Speedup vs Full Recompile** | 10x | 5x | Compare cache hit vs miss |
-| **LSP Response Time** | <100ms | <200ms | `textDocument/didChange` → diagnostics published |
-
----
-
-### Quality Metrics
-
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| **Test Coverage** | >80% | Lines covered by `cargo test` |
-| **Cross-Platform** | 100% pass | Tests pass on Windows, Linux, macOS |
-| **Zero Regressions** | 0 | All 843 existing tests still pass |
-| **Documentation** | 100% | All public APIs documented |
-
----
-
-### Adoption Metrics (Post-Release)
-
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| **LSP Usage** | >50% of contributors | VS Code extension installs |
-| **Test Additions** | +10% tests in 2 weeks | Track new `.ferris` files in `/examples` |
-| **Issue Reports** | <5 critical bugs | GitHub issues labeled `v0.0.6` |
-| **Feedback Sentiment** | >80% positive | Survey or Discord reactions |
-
----
-
-## 📚 Related Documents
-
-- **[CONSOLIDATED_TEST_FRAMEWORK_IMPLEMENTATION.md](./CONSOLIDATED_TEST_FRAMEWORK_IMPLEMENTATION.md)**: Detailed implementation guide with code examples
-- **[LSP_ARCHITECTURE_SUPPORT.md](./LSP_ARCHITECTURE_SUPPORT.md)**: LSP architecture, rationale, and incremental compilation details
-- **[ROADMAP_MASTER.md](../ROADMAP_MASTER.md)**: High-level version roadmap and consistency checklist
-
----
-
-## 🚀 Getting Started
-
-### For Contributors
-
-1. **Read this README** to understand the big picture
-2. **Review Phase 0** (Compiler Prerequisites) - this is the critical path
-3. **Check [CONSOLIDATED_TEST_FRAMEWORK_IMPLEMENTATION.md](./CONSOLIDATED_TEST_FRAMEWORK_IMPLEMENTATION.md)** for detailed implementation
-4. **Start with Phase 0.1** (Source Spans) - Week 1
-
-### For Project Leads
-
-1. **Review delegation strategy** (Background Agent vs User-Guided)
-2. **Set up weekly check-ins** (especially end of Week 3 decision point)
-3. **Monitor risk items** (compiler refactoring, cache bugs, timeline)
-4. **Prepare de-scoping plan** if timeline slips
-
-### For Background Agents
-
-**Week 3-4**: Incremental Compilation (Phase 0.3) + Test Harness (Phase 1)  
-**Week 5-6**: Godot Test Runner (Phase 4)  
-**Week 7**: Test Migration + CI Integration (Phase 5)
-
----
-
-## 🔗 Related Documents
-
-### Planning Documents
-
-- **[CONSOLIDATED_TEST_FRAMEWORK_IMPLEMENTATION.md](CONSOLIDATED_TEST_FRAMEWORK_IMPLEMENTATION.md)**: Detailed technical implementation guide with code examples
-- **[LSP_ARCHITECTURE_SUPPORT.md](LSP_ARCHITECTURE_SUPPORT.md)**: LSP architecture, incremental compilation design, decision log
-- **[ROADMAP_MASTER.md](../ROADMAP_MASTER.md)**: High-level version roadmap and consistency checklist
-
-### Task Documents
-
-- **[INSPECTOR_PROPERTY_FIX.md](INSPECTOR_PROPERTY_FIX.md)**: 🆕 Quick win bug fix (Phase 0.1.5) - Inspector property refresh on compilation error
-
-### Reference Documents
-
-- **[TROUBLESHOOTING.md](../../TROUBLESHOOTING.md)**: Known issues and workarounds
-- **[DEVELOPMENT.md](../../DEVELOPMENT.md)**: Development workflow and contribution guide
-- **[ARCHITECTURE.md](../../ARCHITECTURE.md)**: System architecture overview
-
----
-
-## ✅ Current Status
-
-- [x] **Planning Complete** (October 13, 2025)
-  - [x] Option A decisions documented
-  - [x] All three documents aligned (CONSOLIDATED, LSP, ROADMAP)
-  - [x] README.md created with phase breakdown
-  - [x] Delegation strategy defined
-  - [x] Inspector fix task document created (INSPECTOR_PROPERTY_FIX.md)
-
-- [ ] **Phase 0.1: Source Spans** (Week 1)
-  - [ ] Define `Span` and `Position` structs
-  - [ ] Add spans to all AST nodes
-  - [ ] Update parser to track spans
-  - [ ] Update all 543 compiler tests
-
-- [ ] **Phase 0.2: Symbol Table** (Week 2)
-- [ ] **Phase 0.3: Incremental Compilation** (Week 3)
-- [ ] **Phase 1: Test Framework** (Week 4)
-- [ ] **Phase 2-2.5: LSP Foundation + Test Integration** (Week 5)
-- [ ] **Phase 3-4: Diagnostics + Godot Runner** (Week 6)
-- [ ] **Phase 5: CI Integration & Migration** (Week 7)
-
----
-
-**Last Updated**: October 13, 2025  
-**Next Review**: End of Week 3 (Decision Point)
+- `ROADMAP_MASTER.md` — version summary, resequencing rationale
+- `docs/planning/v0.0.7/` — the LSP plan this version displaced; its compiler-prerequisites work (spans, symbol table) is independent of this version and not a blocker

@@ -40,12 +40,14 @@ This document outlines FerrisScript's aspirational future beyond v0.2.0. These a
 **Timeline**: 0-18 months  
 **Status**: ✅ Committed (see ROADMAP_MASTER.md)
 
-**Milestones**:
+**Milestones** (updated 2026-07-21 to match `ROADMAP_MASTER.md` — see that
+doc for why LSP moved behind language features):
 
-- v0.0.4: Runtime stability + lifecycle callbacks
-- v0.0.5: LSP Alpha for external editors
-- v0.0.6: Language features (arrays, for loops)
-- v0.0.7: Godot API expansion
+- v0.0.4: Runtime stability + lifecycle callbacks ✅ complete
+- v0.0.5: Stabilization & engine modernization (gdext 0.5.4, Godot 4.7) ✅ complete
+- v0.0.6: Language features (arrays, for loops, match, string interpolation)
+- v0.0.7: LSP Alpha for external editors
+- v0.0.8: Godot API expansion
 - v0.1.0: Manifest system + metadata
 - v0.2.0: Godot editor plugins + hot reload
 

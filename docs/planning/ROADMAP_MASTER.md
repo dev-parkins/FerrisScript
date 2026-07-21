@@ -2,7 +2,7 @@
 
 **Single Source of Truth for Version Planning**  
 **Last Updated**: July 21, 2026  
-**Current Version**: v0.0.5 in progress (Stabilization & Engine Modernization)
+**Current Version**: v0.0.5 shipped (Stabilization & Engine Modernization); v0.0.6 (language features) is next
 
 **Note (2026-07-21)**: The version originally planned as "v0.0.5: LSP
 Foundation and Safety Fix" has been renumbered to **v0.0.6** and every
@@ -26,19 +26,35 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ## 🎮 Positioning & Use Cases
 
+> **Note added 2026-07-21**: the differentiators and use cases below mix
+> **things that are true today** with **long-term aspiration**. A 2026-07-21
+> roadmap review found this table read as present-tense to a newcomer while
+> several claims (determinism, lockstep multiplayer, 1000+ agent simulations)
+> are explicitly marked "Aspirational"/"conditional on community validation"
+> in `VISION_USE_CASE_ANALYSIS.md` but that caveat doesn't survive into this
+> summary. Each item below is now marked ✅ **Today** or 🔮 **Aspirational**
+> — the aspirational ones have no fixed-point math, no `#[deterministic]`
+> annotation, no networking primitives, and no measured performance
+> benchmark against GDScript as of v0.0.5. Treat them as long-term direction,
+> not current capability.
+
 ### What FerrisScript Is
 
-> **"Rust-powered, statically compiled, Godot-native scripting for deterministic, high-performance gameplay systems"**
+> **"Rust-powered, statically compiled, Godot-native scripting for deterministic, high-performance gameplay systems"** 🔮 *(aspirational framing — see note above; today it's more accurately "a statically-typed, compile-time-checked scripting language for Godot")*
 
 **Key Differentiators vs GDScript**:
 
-1. **Compile-Time Safety**: Catch errors before running Godot
-2. **Deterministic Execution**: Perfect for lockstep multiplayer and replays
-3. **Predictable Performance**: Zero-cost abstractions, no GC pauses
-4. **Systems Integration**: Access Rust crates and native libraries
-5. **CI-Friendly**: Compile and test without launching the editor
+1. ✅ **Compile-Time Safety**: Catch errors before running Godot — true today
+2. 🔮 **Deterministic Execution**: Perfect for lockstep multiplayer and replays — aspirational, no determinism guarantees exist yet (Godot physics itself isn't deterministic either)
+3. ✅ **Predictable Performance**: Zero-cost abstractions, no GC pauses — true today (tree-walking interpreter, not yet benchmarked against GDScript)
+4. 🔮 **Systems Integration**: Access Rust crates and native libraries — not yet exposed to `.ferris` scripts
+5. ✅ **CI-Friendly**: Compile and test without launching the editor — true today
 
 ### Target Use Cases
+
+> 🔮 All rows below are aspirational positioning, not validated today — none
+> of these use cases has been built or benchmarked yet, and several require
+> language features (arrays, collections) that don't exist until v0.0.6+.
 
 | Use Case | Why FerrisScript | Example Games |
 |----------|------------------|---------------|
@@ -59,7 +75,41 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ---
 
-## 📍 Current State (v0.0.5 in progress, built on v0.0.4)
+## 🕳️ Known Gaps (Not Yet Planned)
+
+A 2026-07-21 roadmap review found several categories of work that don't appear
+*anywhere* in this roadmap, despite being real needs for a project at this
+stage. These are flagged, not solved — they need the maintainer's judgment,
+not a unilateral scoping decision:
+
+- **Community/adoption plan**: "community" appears elsewhere in this doc only
+  as a *gate* ("requires community validation before committing") — there is
+  no plan for how that validation signal would ever be generated. Zero known
+  external users today, no alpha/beta program, no outreach tied to any
+  milestone. `VISION_USE_CASE_ANALYSIS.md` floats "alpha/beta program for
+  simulation game developers" under "Missing Opportunities" but it was never
+  carried into this roadmap as a scoped deliverable.
+- **A "real playable game" checkpoint**: nothing explicitly targets "can a
+  solo dev ship a jam-sized game with FerrisScript." The closest proxy is a
+  "Demo Game Development" line item buried inside v0.1.0's 8-item feature
+  list — arguably the single most important validation the project needs,
+  undersold by its placement.
+- **Pre-1.0 compatibility/versioning policy**: nothing states what SemVer
+  means for this project pre-1.0 — whether `.ferris` scripts written against
+  v0.0.6 will still parse under v0.0.8, or what the breaking-change policy
+  is. For a language whose core pitch is compile-time reliability, having no
+  stated compatibility policy for its own version numbers is a gap worth
+  closing before v0.1.0.
+- **A recalibration trigger**: nothing says "after each version ships,
+  compare actual session count to the estimate and recalibrate the next
+  version's estimate by the same ratio." This is exactly why the LSP
+  estimate (`v0.0.7` now) survived two rounds of upward revision unchallenged
+  for 9 months — nobody had a standing reason to ask whether the unit
+  ("weeks") even made sense for how this project actually gets built.
+
+---
+
+## 📍 Current State (v0.0.5 complete, v0.0.6 next)
 
 ### What Works Today ✅
 
@@ -79,12 +129,12 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ### In Progress 🔄
 
-- 🔄 v0.0.5 "Stabilization & Engine Modernization" — see version details below
+- None — v0.0.5 shipped 2026-07-21; v0.0.6 (language features) is scoped but not started
 
 ### What's Missing ❌
 
-- ❌ LSP / editor support (coming in v0.0.6)
-- ❌ Arrays and for loops (coming in v0.0.7)
+- ❌ Arrays, for loops, match, string interpolation (coming in v0.0.6, next)
+- ❌ LSP / editor support (coming in v0.0.7)
 - ❌ Advanced Godot types (Vector3, Basis, etc. - coming in v0.0.8)
 - ❌ Metadata/manifest system (coming in v0.1.0)
 - ❌ Extended type system (i64, f64, u8, i16, u16 - coming in v0.2.0)
@@ -99,9 +149,9 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 | Version | Status | Focus | Timeline | Premium Requests |
 |---------|--------|-------|----------|------------------|
 | **v0.0.4** | ✅ Complete | Godot API + Inspector integration | Completed Oct 10, 2025 | 6-8 used |
-| **v0.0.5** | 🔄 In Progress | Stabilization & Engine Modernization (gdext 0.5.4, Godot 4.7) | ~1 week | 4-6 |
-| **v0.0.6** | 📋 Next | LSP + Compiler Prerequisites + Test Framework 🛡️ | 6-7 weeks | 20-25 ⬆️ |
-| **v0.0.7** | 📋 Planned | Language features (arrays/for) | 2-3 weeks | 8-12 |
+| **v0.0.5** | ✅ Complete | Stabilization & Engine Modernization (gdext 0.5.4, Godot 4.7) | 1 session | ~4 used |
+| **v0.0.6** | 📋 Next | Language features: arrays, for-loops, match, string interpolation | 1-3 sessions (was "2-3 weeks") | 8-12 |
+| **v0.0.7** | 📋 Planned | LSP + Compiler Prerequisites + Test Framework 🛡️ | unknown — re-baseline after v0.0.6 ships (was "6-7 weeks") | 20-25 (unverified) |
 | **v0.0.8** | 📋 Planned | Godot API + node safety 🛡️ | 2-3 weeks | 9-12 ⬆️ |
 | **v0.1.0** | 🎯 Milestone | LSP UX + Type Safety + Metadata | 3-4 weeks | 10-15 ⬆️ |
 | **v0.2.0** | 🚀 Planned | Extended types + LSP Navigation + Validation | 4-5 weeks | 12-16 ⬆️ |
@@ -201,7 +251,7 @@ Build a statically-typed, Rust-inspired scripting language for Godot with **comp
 
 ---
 
-### v0.0.5: Stabilization & Engine Modernization (🔄 In Progress)
+### v0.0.5: Stabilization & Engine Modernization (✅ Complete, 2026-07-21)
 
 **Goal**: Return the project to a healthy, current baseline after 8 months of
 dormancy (last commit Oct 2025 → resumed July 2026) before continuing feature
@@ -281,11 +331,10 @@ effort on top of a stale foundation, this cycle stabilizes first.
 - [x] Renumbered `v0.0.5` (LSP Foundation) → `v0.0.6` and cascaded every
       later version up by one; moved `docs/planning/v0.0.5/` →
       `docs/planning/v0.0.6/`
-- [ ] Version bumps (workspace + all crates → 0.0.5), CHANGELOG/RELEASE_NOTES
-      finalization, tag `v0.0.5`
+- [x] Version bumps (workspace + all crates → 0.0.5), CHANGELOG/RELEASE_NOTES
+      finalization, tagged and released `v0.0.5`
 
-**Deliverables Remaining**: version bump finalization and release tag (see
-Phase 5 above).
+**Deliverables Remaining**: none — shipped.
 
 **What Was Delivered**: a current, healthy baseline — no code changes beyond
 dependency/API migration and bug fixes already merged in prior versions;
@@ -293,186 +342,11 @@ zero new language features (that resumes in `v0.0.7`, see below).
 
 ---
 
-### v0.0.6: LSP Foundation + Safety Fix (HIGHEST PRIORITY)
+### v0.0.6: Language Features (arrays, for-loops, match, string interpolation)
 
-**Goal**: Real-time diagnostics and node safety foundation
+**Goal**: Give FerrisScript the ability to express a real gameplay loop for the first time — arrays, iteration, and pattern matching.
 
-**Why This Matters**:
-
-- 🔥 **Editor Support**: Makes type safety visible while coding (red squiggles)
-- 🔥 **Differentiation**: Positions FerrisScript vs GDScript on developer experience
-- 🔥 **Adoption**: Attracts Rust developers who expect great tooling
-- 🛡️ **Safety**: Prevents crashes from freed nodes
-
-**Philosophy**: LSP transforms type safety from "annoying batch errors" to "helpful real-time guidance"
-
-**Phases** (Updated with Option A decisions):
-
-0. **Compiler Prerequisites** (3 PRs, 2-3 weeks) 🆕 BLOCKING
-   - **Phase 0.1**: Source spans in AST (1 week)
-     - Add `Span` and `Position` structs to all AST nodes
-     - Update parser to track spans from tokens
-     - Required for LSP error reporting
-   - **Phase 0.2**: Symbol table extraction (1 week)
-     - Extract symbol table from type checker
-     - Public API for LSP (go-to-definition, autocomplete)
-     - Scope chain tracking
-   - **Phase 0.3**: Incremental compilation (1 week)
-     - AST caching with source hash invalidation
-     - Dependency graph for transitive invalidation
-     - Target: 5-10x speedup for LSP responsiveness
-
-1. **Test Framework Foundation** (3-4 PRs, 1 week)
-   - Create `crates/test_harness` with metadata parsing
-   - Test discovery from `/examples` directory
-   - Rust test integration with filtering
-   - Cross-platform compatibility (Windows/Linux/macOS)
-
-2. **LSP Server Foundation** (2-3 PRs, 1 week)
-   - Create `ferrisscript_lsp` crate with tower-lsp
-   - Basic LSP protocol (initialize, shutdown, capabilities)
-   - Document manager with incremental compiler integration
-   - Text document synchronization (incremental updates)
-
-3. **LSP Test Integration** (2-3 PRs, 1 week)
-   - Custom LSP protocol (`ferrisscript/documentTests`, `ferrisscript/runTest`)
-   - Test discovery API in LSP
-   - Test result cache for status tracking
-   - VS Code CodeLens provider ("Run Test" buttons)
-
-4. **Real-Time Diagnostics** (2-3 PRs, 1 week)
-   - Integrate compiler with LSP (lexer → parser → type checker)
-   - Incremental compilation on each keystroke (using Phase 0.3 cache)
-   - Publish diagnostics (errors, warnings) to client
-   - Error recovery for partial syntax
-   - Performance target: <100ms for typical edits (cache hit)
-
-5. **Godot Test Runner** (2-3 PRs, 1 week)
-   - Implement `test_runner.gd` with assertion validation
-   - Timeout mechanism and signal monitoring
-   - JSON output for CI integration
-   - Cross-platform filesystem access
-
-6. **VS Code Extension** (2-3 PRs, 1 week)
-   - Extension scaffolding (package.json, activation)
-   - LSP client integration (vscode-languageclient)
-   - Enhanced syntax highlighting (TextMate grammar reuse)
-   - Marketplace publishing (extension ID, icon, README)
-
-**Deliverables**:
-
-- ✅ Compiler with source spans, symbol table, and incremental compilation
-- ✅ Consolidated test framework (single source of truth in `/examples`)
-- ✅ Working LSP server with real-time error checking
-- ✅ LSP test integration (CodeLens "Run Test" buttons)
-- ✅ VS Code extension published to marketplace
-- ✅ Red squiggles for type errors (instant feedback)
-- ✅ Godot headless test runner with assertion validation
-- ✅ CI integration with JSON test results
-- ✅ Documentation and installation guide
-
-**What's NOT Included** (deferred to v0.1.0):
-
-- ❌ Hover tooltips (needs Phase 0.2 symbol table, but UI deferred)
-- ❌ Autocomplete (needs Phase 0.2 symbol table, but UI deferred)
-- ❌ Go-to-definition (needs Phase 0.1 spans, but UI deferred)
-- ❌ Find references (needs Phase 0.2 symbol table, but UI deferred)
-- ❌ Node invalidation Phase 1 (moved to v0.0.8)
-
-**Timeline**: 6-7 weeks (was 3-4 weeks, then 4-5 weeks)  
-**Estimated Premium Requests**: 20-25 (was 11-16, then 13-18)
-
-**Timeline Breakdown**:
-
-- Weeks 1-3: Compiler prerequisites (spans, symbol table, incremental compilation)
-- Week 4: Test framework foundation
-- Week 5: LSP test integration
-- Week 6: Godot test runner
-- Week 7: CI integration and migration
-
-**Dependencies**: v0.0.4 complete
-
-**Note**: Focus on **diagnostics only** (Minimum Viable LSP). Additional features come in v0.1.0.
-
-**See**: `docs/planning/v0.0.6/LSP_ARCHITECTURE_SUPPORT.md` for detailed architecture
-
-#### v0.0.6 Consistency Checklist 🆕
-
-**Purpose**: Ensure all v0.0.6 planning documents align with master roadmap decisions.
-
-**Critical Decisions Made** (Option A for all):
-
-1. ✅ Ship v0.0.6 with compiler prerequisites (spans + symbol table) - adds 1 week
-2. ✅ Full LSP test integration in v0.0.6 - no deferral
-3. ✅ Add incremental compilation to v0.0.6 - adds 2-3 weeks
-
-**Updated Timeline**: 6-7 weeks (was 3-4 weeks, then 4-5 weeks)
-
-**Scope Consistency Checklist**:
-
-- [x] **CONSOLIDATED_TEST_FRAMEWORK_IMPLEMENTATION.md**:
-  - [x] Timeline updated to 6-7 weeks
-  - [x] Phase 0 added (Compiler Prerequisites: Spans, Symbol Table, Incremental Compilation)
-  - [x] Phase 2.5 includes test discovery API and result cache
-  - [x] Success criteria includes incremental compilation metrics
-  - [x] Dependencies section lists Phase 0 as blocking
-  - [x] Risk mitigation covers compiler refactoring and cache bugs
-
-- [x] **LSP_ARCHITECTURE_SUPPORT.md**: ✅ UPDATED
-  - [x] Verify incremental compilation architecture matches Phase 0.3
-  - [x] Confirm symbol table API matches Phase 0.2
-  - [x] Ensure span tracking matches Phase 0.1
-  - [x] Timeline reflects 6-7 weeks total (not just LSP-specific time)
-  - [x] Decision log documents Option A choices
-  - [x] Roadmap section updated with v0.0.6/v0.1.0 split
-
-- [ ] **ROADMAP_MASTER.md**: (This document)
-  - [x] v0.0.6 timeline updated to 6-7 weeks
-  - [x] Premium request estimate updated (13-18 → likely 20-25 with added scope)
-  - [ ] Phases 0-3 clearly documented
-  - [ ] Dependencies call out compiler prerequisites
-
-**Verification Steps**:
-
-1. **Before starting Phase 0**:
-   - [ ] All three documents agree on 6-7 week timeline
-   - [ ] Phase 0 tasks match across documents
-   - [ ] Compiler refactoring risks acknowledged
-
-2. **End of Week 3** (Decision Point):
-   - [ ] Phase 0 complete or on track
-   - [ ] Re-assess timeline if falling behind
-   - [ ] Consider de-scoping incremental compilation if critical
-
-3. **Before starting Phase 2.5** (Week 5):
-   - [ ] Compiler prerequisites (Phase 0) verified complete
-   - [ ] Symbol table API stable and tested
-   - [ ] Incremental compilation benchmarked
-
-**De-Scoping Plan** (if timeline slips):
-
-Priority 1 (Keep):
-
-- Source spans in AST
-- Symbol table extraction
-- Basic LSP diagnostics
-- Test framework foundation
-
-Priority 2 (Defer to v0.0.7 if needed):
-
-- Incremental compilation (fallback: always recompile)
-- LSP test integration (ship test framework standalone)
-
-Priority 3 (Defer to v0.1.0):
-
-- Advanced caching strategies
-- Dependency graph optimizations
-
----
-
-### v0.0.7: Language Features
-
-**Goal**: Arrays, loops, and pattern matching
+**Why this is next, ahead of LSP** (resequenced 2026-07-21, see "Roadmap Review" note below): FerrisScript cannot today express a collection of enemies, an inventory list, or a state machine — no arrays, no for-loops, no match. Every downstream goal (a real demo game, any external user trying the language, even LSP having something non-trivial to diagnose) depends on this landing first. It is also lower-risk than the LSP work it's swapping places with: additive language features rather than an AST-wide refactor touching 543+ existing compiler tests.
 
 **Features**:
 
@@ -500,15 +374,152 @@ Priority 3 (Defer to v0.1.0):
 
 - All language features implemented
 - Comprehensive tests
-- Examples for each feature
+- Examples for each feature (ideally exercising a real gameplay pattern — an enemy list, an inventory — not just syntax demonstrations)
 - Documentation updated
+- A short design doc (array mutation semantics, match exhaustiveness rules, reserved error-code range) written *before* implementation starts — this version had no scoping doc at all prior to the 2026-07-21 roadmap review; see `docs/planning/v0.0.6/README.md`
 
-**Timeline**: 2-3 weeks  
-**Estimated Premium Requests**: 8-12
+**Estimated effort**: 1-3 sessions (previously estimated "2-3 weeks / 8-12 premium requests" under the old human-sprint-cadence estimation model; re-baseline against actual pace once work starts — see the Roadmap Review note below)
 
-**Dependencies**: v0.0.6 Phase 2 (compiler integration)
+**Dependencies**: v0.0.5 complete
 
-**Parallelization**: Can start during v0.0.6 phases 3-5
+**See**: `docs/planning/v0.0.6/README.md` for the scoping doc
+
+---
+
+### v0.0.7: LSP Foundation + Test Framework 🛡️
+
+> **Moved here from v0.0.6 on 2026-07-21** (roadmap review, done alongside the v0.0.5 release). Originally slated as the top-priority "v0.0.5: LSP Alpha" back in October 2025 planning, then renumbered to v0.0.6 during the July 2026 return-from-dormancy stabilization pass — but never re-examined for whether it should still be *next*. It shouldn't be: LSP tooling (red squiggles, hover, autocomplete) has no audience yet (zero known external users), and its own risk register flags the compiler-prerequisites refactor (spans/symbol-table/incremental-compilation touching all 543+ compiler tests) as "Very High" risk — the riskiest work on the entire roadmap, in service of a feature nobody is asking for. Language features (now v0.0.6) unblock more value at lower risk. See `docs/planning/technical/` or session notes for the full reasoning if reconstructing this decision later.
+
+**Goal**: Real-time diagnostics and node safety foundation
+
+**Why This Matters**:
+
+- 🔥 **Editor Support**: Makes type safety visible while coding (red squiggles)
+- 🔥 **Differentiation**: Positions FerrisScript vs GDScript on developer experience
+- 🔥 **Adoption**: Attracts Rust developers who expect great tooling
+- 🛡️ **Safety**: Prevents crashes from freed nodes
+
+**Philosophy**: LSP transforms type safety from "annoying batch errors" to "helpful real-time guidance"
+
+**Phases** (Updated with Option A decisions):
+
+0. **Compiler Prerequisites** (3 PRs) 🆕 BLOCKING
+   - **Phase 0.1**: Source spans in AST — ✅ **already done**, shipped in v0.0.5 (`crates/compiler/src/span.rs`, PR #59). Note: byte offsets are still placeholder/zero (`TODO(v0.0.5)` in `parser.rs` — missed its own target release; needs finishing before LSP hover/precise-range features can use spans for real).
+   - **Phase 0.2**: Symbol table extraction
+     - Extract symbol table from type checker
+     - Public API for LSP (go-to-definition, autocomplete)
+     - Scope chain tracking
+   - **Phase 0.3**: Incremental compilation
+     - AST caching with source hash invalidation
+     - Dependency graph for transitive invalidation
+     - Target: 5-10x speedup for LSP responsiveness
+
+1. **Test Framework Foundation** (3-4 PRs)
+   - Create `crates/test_harness` with metadata parsing — ✅ **already done**, shipped in v0.0.4
+   - Test discovery from `/examples` directory
+   - Rust test integration with filtering
+   - Cross-platform compatibility (Windows/Linux/macOS)
+   - Consider shipping this piece standalone/early — it has value independent of spans/symbol-table/incremental-compilation and fixes a real present pain point (test duplication between `/examples` and `/godot_test/scripts`)
+
+2. **LSP Server Foundation** (2-3 PRs)
+   - Create `ferrisscript_lsp` crate with tower-lsp
+   - Basic LSP protocol (initialize, shutdown, capabilities)
+   - Document manager with incremental compiler integration
+   - Text document synchronization (incremental updates)
+
+3. **LSP Test Integration** (2-3 PRs)
+   - Custom LSP protocol (`ferrisscript/documentTests`, `ferrisscript/runTest`)
+   - Test discovery API in LSP
+   - Test result cache for status tracking
+   - VS Code CodeLens provider ("Run Test" buttons)
+
+4. **Real-Time Diagnostics** (2-3 PRs)
+   - Integrate compiler with LSP (lexer → parser → type checker)
+   - Incremental compilation on each keystroke (using Phase 0.3 cache)
+   - Publish diagnostics (errors, warnings) to client
+   - Error recovery for partial syntax
+   - Performance target: <100ms for typical edits (cache hit)
+
+5. **Godot Test Runner** (2-3 PRs)
+   - Implement `test_runner.gd` with assertion validation
+   - Timeout mechanism and signal monitoring
+   - JSON output for CI integration
+   - Cross-platform filesystem access
+
+6. **VS Code Extension** (2-3 PRs)
+   - Extension scaffolding (package.json, activation) — partially exists (`extensions/vscode/`, currently v0.0.3, syntax highlighting stale relative to current language surface — missing `@export`/`signal`/`struct`/`Color`/`Rect2`/`Transform2D`)
+   - LSP client integration (vscode-languageclient)
+   - Enhanced syntax highlighting (TextMate grammar reuse) — grammar refresh needed regardless of LSP timing, could be pulled forward as cheap standalone work
+   - Marketplace publishing (extension ID, icon, README) — no publish pipeline exists yet
+
+**Deliverables**:
+
+- ✅ Compiler with source spans (done, v0.0.5), symbol table, and incremental compilation
+- ✅ Consolidated test framework (single source of truth in `/examples`)
+- ✅ Working LSP server with real-time error checking
+- ✅ LSP test integration (CodeLens "Run Test" buttons)
+- ✅ VS Code extension published to marketplace
+- ✅ Red squiggles for type errors (instant feedback)
+- ✅ Godot headless test runner with assertion validation
+- ✅ CI integration with JSON test results
+- ✅ Documentation and installation guide
+
+**What's NOT Included** (deferred to v0.1.0):
+
+- ❌ Hover tooltips (needs Phase 0.2 symbol table, but UI deferred)
+- ❌ Autocomplete (needs Phase 0.2 symbol table, but UI deferred)
+- ❌ Go-to-definition (needs Phase 0.1 spans, but UI deferred)
+- ❌ Find references (needs Phase 0.2 symbol table, but UI deferred)
+- ❌ Node invalidation Phase 1 (moved to v0.0.8)
+
+**Estimated effort**: unknown — re-baseline against actual v0.0.6 (language features) pace before committing to a number. Historical estimate for reference only: "6-7 weeks / 20-25 premium requests," which had already doubled from an original 3-4 week estimate before a single line of code was written — treat that growth pattern as a signal the estimation method itself was unreliable, not as a floor.
+
+**Dependencies**: v0.0.6 (language features) complete
+
+**Note**: Focus on **diagnostics only** (Minimum Viable LSP). Additional features come in v0.1.0.
+
+**See**: `docs/planning/v0.0.7/LSP_ARCHITECTURE_SUPPORT.md` for detailed architecture (content unchanged from its original v0.0.6-slot version, just moved)
+
+#### v0.0.7 Consistency Checklist
+
+**Purpose**: Ensure all v0.0.7 planning documents align with master roadmap decisions.
+
+**Critical Decisions Made** (Option A for all, from original October 2025 planning):
+
+1. ✅ Ship with compiler prerequisites (spans + symbol table)
+2. ✅ Full LSP test integration — no deferral
+3. ✅ Add incremental compilation
+
+**Scope Consistency Checklist**:
+
+- [x] **CONSOLIDATED_TEST_FRAMEWORK_IMPLEMENTATION.md**: Phase 0 (Compiler Prerequisites), Phase 2.5 (test discovery API + result cache), risk mitigation for compiler refactoring — all documented, content unchanged from original v0.0.6 slot
+- [x] **LSP_ARCHITECTURE_SUPPORT.md**: incremental compilation architecture, symbol table API, span tracking, decision log — all documented, content unchanged from original v0.0.6 slot
+- [ ] **ROADMAP_MASTER.md**: (this document) — estimate re-baselined to "unknown, re-baseline after v0.0.6 ships" per the 2026-07-21 review; phases/dependencies updated to reflect the swap with language features
+
+**Verification Steps** (before resuming this work):
+
+1. Confirm v0.0.6 (language features) has actually shipped
+2. Re-baseline the effort estimate using v0.0.6's actual session count as a calibration point
+3. Finish the parser byte-offset TODO (spans are currently zero-length placeholders) before relying on spans for real diagnostics ranges
+4. Re-confirm compiler-refactoring risk is still acceptable given the codebase has grown since October 2025
+
+**De-Scoping Plan** (if it turns out larger than expected):
+
+Priority 1 (Keep):
+
+- Symbol table extraction
+- Basic LSP diagnostics
+- Test framework foundation (or ship this piece earlier, standalone)
+
+Priority 2 (Defer further, to v0.1.0 if needed):
+
+- Incremental compilation (fallback: always recompile)
+- LSP test integration (ship test framework standalone)
+
+Priority 3 (Defer to v0.1.0):
+
+- Advanced caching strategies
+- Dependency graph optimizations
 
 ---
 
@@ -670,43 +681,53 @@ Priority 3 (Defer to v0.1.0):
 
 - `docs/planning/v0.1.0-release-plan.md` for execution plan
 - `docs/TYPE_SAFETY_ROADMAP_ANALYSIS.md` for type safety details
-- `docs/planning/v0.0.6/LSP_ARCHITECTURE_SUPPORT.md` for LSP architecture
+- `docs/planning/v0.0.7/LSP_ARCHITECTURE_SUPPORT.md` for LSP architecture
 
 ---
 
 ## 🔀 Parallelization Strategy
 
-### Timeline Overview
+> **⚠️ Superseded 2026-07-21**: the timeline and "Editor Experience First"
+> priority below reflect the pre-resequencing plan (LSP as the very next
+> release, October 2025 planning). The 2026-07-21 roadmap review reversed
+> this — language features (now v0.0.6) ship before LSP (now v0.0.7) — see
+> the v0.0.6/v0.0.7 sections above for the reasoning. Kept below for
+> historical record; do not use the week numbers or "LSP first" framing to
+> plan actual work.
+
+### Timeline Overview (historical, pre-2026-07-21 plan)
 
 | Week | Primary Track | Secondary Track | Deliverable |
 |------|---------------|-----------------|-------------|
 | 1-2 | v0.0.4 Phase 2 | - | Lifecycle callbacks ✅ |
-| 3-6 | v0.0.6 Phases 1-2 | - | LSP foundation + diagnostics |
-| 7-9 | v0.0.6 Phases 3-4 | v0.0.7 arrays start | Autocomplete + navigation |
-| 10-11 | v0.0.6 Phase 5 | v0.0.7 for/match | VS Code extension published |
-| 12-14 | v0.0.8 Godot API | v0.0.7 string interp | API expansion complete |
+| 3-6 | LSP Phases 1-2 | - | LSP foundation + diagnostics |
+| 7-9 | LSP Phases 3-4 | Language features start | Autocomplete + navigation |
+| 10-11 | LSP Phase 5 | for/match | VS Code extension published |
+| 12-14 | Godot API expansion | string interp | API expansion complete |
 | 15-16 | v0.1.0 polish | - | v0.1.0 release 🎉 |
 
-**Key Insight**: Different crates can be developed simultaneously (LSP + language features)
+**Key Insight**: Different crates can be developed simultaneously (LSP + language features) — this parallelization opportunity is still real even with the reversed sequencing; language features (v0.0.6) and LSP prep work aren't mutually exclusive if capacity allows both.
 
 ---
 
 ## 🎯 Strategic Priorities
 
-### 1. Editor Experience First
+### 1. Editor Experience First — ⚠️ superseded, see banner above
 
-**Decision**: LSP in v0.0.6 (not v0.2.0 as originally planned)
+**Original decision (October 2025, no longer current)**: LSP in the very next release (not v0.2.0 as originally planned).
 
-**Rationale**:
+**Original rationale** (kept for context — this reasoning wasn't wrong, just outdated by the fact that the language couldn't express a loop yet):
 
 - Developers need great tooling to be productive
 - Editor support is adoption-critical
 - Differentiates FerrisScript from GDScript
 - Attracts Rust developers to Godot
 
+**Current decision (2026-07-21)**: language features ship first (v0.0.6); LSP follows (v0.0.7). See that section for why.
+
 ### 2. Smaller, Faster Releases
 
-**Decision**: Split v0.1.0 into v0.0.6-7 + v0.1.0 polish
+**Decision**: Split v0.1.0 into v0.0.6+v0.0.7 + v0.1.0 polish
 
 **Rationale**:
 
@@ -807,7 +828,7 @@ Priority 3 (Defer to v0.1.0):
 
 - `docs/planning/v0.2.0-roadmap.md` for type system details
 - `docs/TYPE_SAFETY_ROADMAP_ANALYSIS.md` for validation details
-- `docs/planning/v0.0.6/LSP_ARCHITECTURE_SUPPORT.md` for LSP navigation
+- `docs/planning/v0.0.7/LSP_ARCHITECTURE_SUPPORT.md` for LSP navigation
 
 ---
 
@@ -882,7 +903,7 @@ Priority 3 (Defer to v0.1.0):
 **See**:
 
 - `docs/planning/v0.3.0-roadmap.md` for arithmetic safety details
-- `docs/planning/v0.0.6/LSP_ARCHITECTURE_SUPPORT.md` for LSP advanced features
+- `docs/planning/v0.0.7/LSP_ARCHITECTURE_SUPPORT.md` for LSP advanced features
 - `docs/TYPE_SAFETY_ROADMAP_ANALYSIS.md` for type safety advanced (community validation required)
 
 ---
@@ -1071,6 +1092,15 @@ See `planning/VISION.md` for aspirational multi-year goals including:
 
 ## 📚 Related Documentation
 
+> **Note (2026-07-21)**: several filenames below (e.g. `v0.0.6-roadmap.md`,
+> `v0.0.7-7-roadmap.md`, `v0.1.0-ROADMAP.md`) don't exist in the current tree
+> — they were either never created or lost in the docs/archive incident
+> (PR #53/#54, partially recovered in v0.0.5). The version numbers in this
+> list also predate the 2026-07-21 language-features/LSP swap and haven't
+> been updated to match. Real, current planning docs live at
+> `docs/planning/v0.0.6/README.md` (language features) and
+> `docs/planning/v0.0.7/README.md` (LSP, moved from the v0.0.6 slot).
+
 ### Decision & Analysis Documents (Historical Context)
 
 - **planning/ROADMAP_CONSOLIDATION_ANALYSIS.md** - Strategic analysis (Oct 2025)
@@ -1150,26 +1180,28 @@ See `planning/VISION.md` for aspirational multi-year goals including:
 
 ## 🚀 Next Actions
 
-### This Week
+> The list below (from October 2025 planning) was entirely historical —
+> it described "this week" as executing v0.0.4 Phase 2, which shipped long
+> ago. Replaced 2026-07-21 with the actual current state.
 
-1. ✅ Complete roadmap consolidation analysis
-2. ✅ Review and approve strategic direction
-3. 🔄 Execute v0.0.4 Phase 2 (`_ready()` callback first)
-4. ⏳ Begin v0.0.6 LSP research
+### Now (as of 2026-07-21, v0.0.5 just shipped)
 
-### Next 2-4 Weeks
+1. ✅ v0.0.5 stabilization + gdext 0.5.4/Godot 4.7 upgrade shipped
+2. ✅ Roadmap resequenced: language features (v0.0.6) now precede LSP (v0.0.7)
+3. ✅ v0.0.6 scoping doc written (`docs/planning/v0.0.6/README.md`)
+4. ⏳ Begin v0.0.6 implementation (arrays first, per the suggested order in that doc)
 
-1. ⏳ Complete v0.0.4 Phase 2 (all lifecycle callbacks)
-2. ⏳ Ship v0.0.4 release
-3. ⏳ Start v0.0.6 LSP implementation
-4. ⏳ Archive superseded planning docs
+### Next 1-3 sessions
 
-### Next 2-3 Months
+1. ⏳ Ship v0.0.6 (arrays, for-loops, match, string interpolation)
+2. ⏳ Re-baseline v0.0.7's (LSP) effort estimate using v0.0.6's actual pace
+3. ⏳ Write a real example script per new language feature exercising a gameplay pattern, not just syntax
 
-1. ⏳ Complete v0.0.6 (LSP alpha)
-2. ⏳ Complete v0.0.7 (language features)
-3. ⏳ Complete v0.0.8 (Godot API)
-4. ⏳ Ship v0.1.0 milestone 🎉
+### Further out
+
+1. ⏳ v0.0.7: LSP foundation + test framework (re-scoped estimate)
+2. ⏳ v0.0.8: Godot API + node safety
+3. ⏳ v0.1.0 milestone — consider whether it should be split further; it currently bundles metadata/manifest system + demo game + doc site + performance validation into one release with no dedicated scoping doc yet
 
 ---
 
